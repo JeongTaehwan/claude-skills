@@ -50,6 +50,21 @@ rm ~/.claude/CLAUDE.md
 rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library
 ```
 
+## 실제로 쓰이고 있는지 확인
+
+```bash
+python3 scripts/skill-usage.py                       # 전체 스킬 발동 횟수
+python3 scripts/skill-usage.py implementation-design # 상세 + 직전 요청
+python3 scripts/skill-usage.py implementation-design --days 7
+```
+
+세션 기록(`~/.claude/projects/*/*.jsonl`)에서 `Skill` 도구 호출과 `SKILL.md` 직접 읽기를 집계한다.
+'직전 요청'을 훑으면서 **발동한 건들이 발동할 만했는지**, 그리고 발동하지 않은 구현 요청 중에
+**발동했어야 할 게 있었는지**를 보면 된다.
+
+CLAUDE.md가 로드됐는지는 Claude에게 직접 물으면 된다 — "파일 읽지 말고 지금 컨텍스트에 있는
+CLAUDE.md 내용 말해봐". 읽지 않고 답하면 로드된 것이다.
+
 ## 스킬 편집할 때
 
 `implementation-design`은 **매번 발동하면 실패한 것**이다. 며칠 써보고 과하게 뜨거나 안 뜨는 패턴이 보이면 그때 description을 조정한다. 실제 오작동 사례 없이 미리 다듬으면 오히려 나빠진다.
