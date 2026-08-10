@@ -1,7 +1,7 @@
 {
   "name": "eng-toolkit",
-  "description": "구현 전 설계 판단 절차(implementation-design)와 링크 검증된 개발·기획·QA 레퍼런스 라이브러리(software-reference-library)",
-  "version": "0.1.0",
+  "description": "구현 전 설계 판단 절차(implementation-design), 링크 검증된 개발·기획·QA 레퍼런스 라이브러리(software-reference-library), 사람·검증 AI·구현 AI 역할 분리 파이프라인(role-isolation-pipeline)",
+  "version": "0.2.0",
   "author": {
     "name": "JeongTaehwan",
     "url": "https://github.com/JeongTaehwan"

@@ -19,6 +19,11 @@
 - `references/korean-resources.md` — 국내 테크블로그, 국내 맥락 주의사항
 - `scripts/check_links.py` — 링크 썩음 검사
 
+### `role-isolation-pipeline` (스킬)
+사람 판단 / 검증 AI(타 벤더) 질문·리뷰 / Claude Code 구현으로 역할을 나누는 10단계 협업 파이프라인. 구현과 검증이 같은 모델이면 틀리는 방식도 같아서 검증이 자기확인이 된다는 문제를 벤더 분리로 막는다.
+
+`templates/`에 프로젝트로 복사하는 골격이 들어 있다 — 검증 AI용 `AGENTS.md`, 프로젝트 CLAUDE.md에 붙이는 구현 역할 절, docs 5종(requirements / test-cases / open-questions / decisions / domain).
+
 ### `memory/CLAUDE.md`
 **플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 15줄짜리 게이트만 들어있고, 걸리면 스킬을 읽으라고 넘긴다.
 
@@ -41,13 +46,13 @@ git clone https://github.com/JeongTaehwan/claude-skills.git
 cd claude-skills && ./sync.sh
 ```
 
-또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 두 개가 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 세 개가 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
 
 ## 제거
 
 ```bash
 rm ~/.claude/CLAUDE.md
-rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library
+rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline
 ```
 
 ## 실제로 쓰이고 있는지 확인
