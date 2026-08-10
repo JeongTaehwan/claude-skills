@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "taehwan-skills",
+  "description": "개인 Claude Code 스킬 모음 — 구현 전 설계 판단, 개발·기획·QA 레퍼런스 라이브러리",
+  "owner": {
+    "name": "JeongTaehwan",
+    "url": "https://github.com/JeongTaehwan"
+  },
+  "plugins": [
+    {
+      "name": "eng-toolkit",
+      "description": "구현 요청에 설계 판단을 먼저 적용하는 implementation-design 스킬과, 링크 검증된 개발·기획·QA 레퍼런스 라이브러리",
+      "source": "./plugins/eng-toolkit",
+      "version": "0.1.0",
+      "category": "productivity",
+      "tags": ["engineering", "code-quality", "references", "korean"]
+    }
+  ]
+}
