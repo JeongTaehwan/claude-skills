@@ -31,11 +31,20 @@ glab api "projects/<slug>/merge_requests/<iid>" # has_conflicts 확인
 
 ### 2. `-dev` 브랜치 생성
 
+먼저 같은 티켓의 과거 `-dev` MR 이 있었는지 본다. 한 티켓이 이 사이클을 여러 번 도는 일이 흔하다.
+
 ```bash
-git checkout -b SOLU-XXXX-dev            # 이미 있으면: git branch -D SOLU-XXXX-dev 후 재시도
+glab api "projects/<slug>/merge_requests?source_branch=SOLU-XXXX-dev&state=all"
+git ls-remote --heads origin SOLU-XXXX-dev
 ```
 
-이미 원격에 `SOLU-XXXX-dev` 가 있고 그 MR 이 열려 있으면 삭제하지 말고 사용자에게 확인한다.
+- 과거 `-dev` MR 이 **머지되고 브랜치는 삭제됨** → 정상. 현재 원본 브랜치에서 새로 판다.
+- 원격에 `-dev` 가 남아 있고 **MR 이 열려 있음** → 지우지 말고 사용자에게 확인한다. 남의 작업일 수 있다.
+- 원격에 남아 있는데 MR 이 없음 → 오래된 잔재다. 재사용하지 말고 지운 뒤 새로 판다. 낡은 base 위에서 병합하면 엉킨다.
+
+```bash
+git checkout -b SOLU-XXXX-dev            # 로컬에 이미 있으면: git branch -D SOLU-XXXX-dev 후 재시도
+```
 
 ### 3. develop 병합
 
@@ -71,11 +80,17 @@ done
 
 ### 5. 보존 검증 — 반드시 한다
 
-해결 후 develop 쪽 변경이 살아있는지 **키워드 단위로 개별 확인**한다. "충돌 없어졌다"로 끝내지 않는다.
+해결 후 살아남아야 할 것이 **보통 세 갈래**다. 하나만 보고 끝내면 나머지가 조용히 사라진다.
+
+1. develop 에만 있던 변경 (다른 사람의 기능·수정)
+2. 이 브랜치가 과거 main 을 병합하며 받아온 변경
+3. 이번 작업 자체의 변경
+
+세 갈래를 **키워드 단위로 개별 확인**한다. "충돌 없어졌다"로 끝내지 않는다.
 
 ```bash
 grep -rn "^<<<<<<< \|^>>>>>>> " src/    # 마커 잔여 0건
-for k in <develop 변경의 핵심 식별자들>; do
+for k in <세 갈래의 핵심 식별자들>; do
   printf "%-30s %s\n" "$k" "$(grep -c "$k" <file>)"
 done
 ```
@@ -132,6 +147,27 @@ glab api --method POST "projects/<slug>/merge_requests/<old-iid>/notes" --field 
 glab api --method PUT  "projects/<slug>/merge_requests/<old-iid>?state_event=close"
 ```
 
+### 10. 브랜치 정리 기준
+
+**닫는 것은 MR 뿐이다. 원본 `SOLU-XXXX` 브랜치는 지우지 않는다.**
+
+이 저장소에서 원본과 `-dev` 는 **둘 다 develop 을 대상**으로 하고, 한 티켓이 이 사이클을 여러 번 도는 일이 흔하다. 실제 이력이 그렇다.
+
+| 티켓 | 원본 브랜치 MR | `-dev` 브랜치 MR |
+| --- | --- | --- |
+| SOLU-6568 | → develop (merged) | → develop (merged) |
+| SOLU-6450 | → develop (merged) | → develop (merged) |
+| SOLU-6585 | → develop (closed ×2) | → develop (merged ×2) |
+
+원본 브랜치는 다음 작업의 base 로 계속 쓰이고, 그 위에서 또 충돌이 나면 `-dev` 를 다시 판다. 원본을 지우면 그 흐름이 끊긴다.
+
+정리 순서는 이렇다.
+
+1. 새 `-dev` MR 이 `mergeable` 인지 확인
+2. 원본의 **develop 대상 MR** 만 닫고 대체 사유를 코멘트로 남긴다
+3. 브랜치 삭제는 하지 않는다. 머지된 `-dev` 브랜치는 GitLab 의 "Delete source branch" 설정이 처리한다
+4. 원본 브랜치를 지워야 하는 상황이면 사용자에게 확인받는다 — 판단 근거가 팀 관례에 있고 되돌리기 어렵다
+
 ## 충돌 원인 진단
 
 무엇 때문에 충돌했는지 MR 본문에 적으려면 원인을 찾아야 한다.
@@ -143,8 +179,12 @@ glab api "projects/<slug>/repository/commits?ref_name=develop&path=<경로>&per_
 
 자주 나오는 원인 두 가지다.
 
-1. **같은 작업의 develop 대응분이 이미 머지됨** — `SOLU-XXXX-dev` MR 이 과거에 develop 에 들어갔고 그 뒤 main 쪽에서 작업이 더 진행된 경우. 이때는 develop 쪽에 고유 변경이 없는 경우가 많아 `--ours` 로 끝난다.
-2. **다른 사람이 같은 파일에 기능을 넣음** — develop 에 실제 기능 코드가 있다. `--theirs` 기준으로 잡고 내 변경을 다시 얹어야 한다. 기능이 날아가지 않게 5단계 검증을 특히 꼼꼼히 한다.
+1. **같은 작업의 develop 대응분이 이미 머지됨** — `SOLU-XXXX-dev` MR 이 과거에 develop 에 들어갔고 그 뒤 main 쪽에서 작업이 더 진행된 경우.
+2. **다른 사람이 같은 파일에 기능을 넣음** — develop 에 실제 기능 코드가 있다.
+
+**원인이 1번이라고 해서 `--ours` 로 끝나지 않는다.** 과거 `-dev` 가 머지된 뒤 그 위에 기능이 더 얹혔을 수 있다. 실제로 develop 대응분이 이미 있던 파일에서, develop 쪽에만 비활성 항목 필터·조건 분기·입력 검증이 추가돼 있던 사례가 있다. 확인 없이 `--ours` 로 밀었으면 그대로 사라졌다.
+
+원인 분류는 MR 본문에 쓸 설명일 뿐이고, `--ours`/`--theirs` 판단은 언제나 4단계의 `diff base→dev` 결과로만 한다.
 
 ## 하지 말 것
 
@@ -153,3 +193,5 @@ glab api "projects/<slug>/repository/commits?ref_name=develop&path=<경로>&per_
 - `git stash` 를 비교 목적으로 쓰지 않는다. `git show <ref>:<path>` 로 임시 파일에 뽑아 비교한다.
 - 로컬 `origin/develop` 을 최신이라고 가정하지 않는다. `git ls-remote --heads origin develop` 로 대조하거나 fetch 한다.
 - 병합으로 들어온 다른 사람의 코드를 리팩토링하지 않는다. 새로 생긴 lint 위반이 있으면 보고만 한다.
+- 원본 `SOLU-XXXX` 브랜치를 지우지 않는다. 닫는 것은 그 브랜치의 develop 대상 MR 뿐이다.
+- develop 이 내 브랜치보다 뒤처져 있다고 단정하지 않는다. 같은 파일의 develop 대응분이 먼저 머지돼 기능이 더 얹혀 있는 경우가 있다. 확인 전에 `--ours` 로 밀면 그 기능이 사라진다.
