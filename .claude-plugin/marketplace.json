@@ -9,11 +9,16 @@
   "plugins": [
     {
       "name": "eng-toolkit",
-      "description": "구현 요청에 설계 판단을 먼저 적용하는 implementation-design, 링크 검증된 개발·기획·QA 레퍼런스 라이브러리 software-reference-library, 사람·검증 AI·구현 AI 역할 분리 파이프라인 role-isolation-pipeline",
+      "description": "구현 요청에 설계 판단을 먼저 적용하는 implementation-design, 링크 검증된 개발·기획·QA 레퍼런스 라이브러리 software-reference-library, 사람·검증 AI·구현 AI 역할 분리 파이프라인 role-isolation-pipeline, 느린 네트워크에서도 화면이 빠르게 보이게 하는 플레이북 slow-network-ux",
       "source": "./plugins/eng-toolkit",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "productivity",
-      "tags": ["engineering", "code-quality", "references", "korean"]
+      "tags": [
+        "engineering",
+        "code-quality",
+        "references",
+        "korean"
+      ]
     }
   ]
 }

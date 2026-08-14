@@ -24,6 +24,16 @@
 
 `templates/`에 프로젝트로 복사하는 골격이 들어 있다 — 검증 AI용 `AGENTS.md`, 프로젝트 CLAUDE.md에 붙이는 구현 역할 절, docs 5종(requirements / test-cases / open-questions / decisions / domain).
 
+### `slow-network-ux` (스킬)
+느린 인터넷(3G·고지연 모바일망)에서도 화면이 빠르게 보이게 만드는 플레이북 + 링크 검증 레퍼런스. "측정 → 병목 분류(TTFB/렌더 블로킹/무거운 콘텐츠/JS 과다) → 체감 성능 설계 → 적응형 로딩 → 재측정" 절차가 본문이고, 근거는 references에 있다.
+
+- `references/patterns.md` — 기법별 공식 문서 (적응형 로딩, Critical CSS, 리소스 힌트, 이미지, 캐싱/오프라인, 스트리밍, 측정)
+- `references/nextjs.md` — Next.js App Router 구체 적용법
+- `references/github.md` — 라이브러리·도구 (스타 수·유지보수 상태 API 실측)
+- `references/papers.md` — 논문 (페이지 로드 가속 시스템, 스켈레톤·진행률 실증 연구, 지연-매출 상관)
+- `references/books.md` — 서적(무료 공개 포함)·국내 자료
+- `scripts/check_links.py` — 링크 썩음 검사
+
 ### `memory/CLAUDE.md`
 **플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 15줄짜리 게이트만 들어있고, 걸리면 스킬을 읽으라고 넘긴다.
 
@@ -52,7 +62,7 @@ cd claude-skills && ./sync.sh
 
 ```bash
 rm ~/.claude/CLAUDE.md
-rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline
+rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux
 ```
 
 ## 실제로 쓰이고 있는지 확인
