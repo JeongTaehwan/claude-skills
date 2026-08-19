@@ -34,6 +34,12 @@
 - `references/books.md` — 서적(무료 공개 포함)·국내 자료
 - `scripts/check_links.py` — 링크 썩음 검사
 
+### `main-sync` (스킬)
+작업 브랜치(SOLU-XXXX)에 main 을 병합해 최신화하고 충돌을 해결하는 반복 루틴. 다른 세션이 체크아웃을 쓰고 있으면 워크트리로 분리하고, 충돌은 merge base 기준 양쪽 diff 로만 판단한다. 같은 기능이 브랜치와 main 에 중복 구현된 경우 auto-merge 가 충돌 없이 선언 중복을 남기는 함정을 감지하는 것이 핵심. stage·main 직접 push 금지, 커밋·푸시는 명시 요청 시에만.
+
+### `mr-conflict-resolve` (스킬)
+develop 대상 MR 충돌 시 `-dev` 브랜치를 만들어 develop 을 병합·해결하고 새 MR 을 올리는 절차. main 기준 브랜치를 develop 에 올릴 때 반복되는 상황용.
+
 ### `memory/CLAUDE.md`
 **플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 15줄짜리 게이트만 들어있고, 걸리면 스킬을 읽으라고 넘긴다.
 
@@ -62,7 +68,7 @@ cd claude-skills && ./sync.sh
 
 ```bash
 rm ~/.claude/CLAUDE.md
-rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux
+rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync
 ```
 
 ## 실제로 쓰이고 있는지 확인
