@@ -1,0 +1,39 @@
+---
+title: Atlassian PRD 템플릿
+url: https://www.atlassian.com/software/confluence/templates/product-requirements
+domain: planning
+type: 공식문서
+lang: en
+---
+
+# Atlassian PRD 템플릿
+
+https://www.atlassian.com/software/confluence/templates/product-requirements
+
+## 한 줄
+목표·배경·가정·사용자 스토리·**범위 밖(Out of scope)**·성공 지표로 구성된, 현업에서 가장 널리 복제된 PRD 골격 하나 — 템플릿 자체보다 "범위 밖" 칸이 강제로 만들어 내는 대화가 핵심이다.
+
+## 페르소나
+**기획 문서 없이 구두와 슬랙으로 요구사항을 받아 개발하다가, 릴리스 직전에 "이것도 당연히 되는 줄 알았는데요"를 반복해서 듣고 있는 백엔드 개발자.** 쿠폰 정책을 만들었더니 "중복 사용은요?", "취소 시 복원은요?"가 배포 전날 튀어나온다. 문서를 쓰자는 데는 동의했는데, 무엇을 적어야 이런 사고가 줄어드는지 형식을 모른다. 이 템플릿은 그 빈칸 목록을 준다.
+
+## 이럴 때 연다
+- 기능 개발 착수 전에 합의 문서를 처음 만들 때, 빈 페이지에서 시작하지 않으려고
+- "이건 이번 범위가 아니다"를 문서에 명시해서 나중에 근거로 삼고 싶을 때
+- 팀 표준 기획서 서식을 정하면서 참고 골격이 필요할 때
+- 기획자가 준 문서에 무엇이 빠졌는지 짚어 줘야 할 때 (가정, 범위 밖, 성공 지표는 거의 항상 빠져 있다)
+
+## 이럴 땐 아니다
+- 만들 것이 정해진 뒤 **어떻게 만들지**를 쓰는 문서라면 PRD가 아니라 설계 문서다 — `planning/design-docs-at-google.md`
+- 여러 대안을 놓고 조직 차원의 토론과 결정을 남겨야 한다면 — `planning/rfd-requests-for-discussion.md`, `architecture/architecture-decision-records.md`
+- 아직 무엇을 만들지 자체가 불확실하다면 문서보다 발견 활동이 먼저다 — `planning/teresa-torres-opportunity-solution-tree.md`, `planning/design-sprint.md`
+- 문서 대신 6주 베팅과 pitch 형식을 쓰는 대안 — `planning/shape-up.md`
+- 요구사항을 사용자 스토리로 쪼개는 법 자체는 — `planning/mountain-goat-software-user-stories.md`
+
+## 무엇이 들어있나
+Confluence 템플릿 페이지로, PRD의 표준 섹션 구성을 제시한다. 문서 상태·담당자·목표(왜 하는가), 배경과 전략적 맥락, 가정(assumptions), 사용자 스토리 또는 요구사항 목록, 사용자 상호작용·디자인 링크, **범위 밖(Out of scope)**, 그리고 성공을 판정할 지표와 미해결 질문(open questions)이 뼈대다.
+이 템플릿의 실질적 기여는 "가정"과 "범위 밖" 두 칸이다. 대부분의 요구사항 사고는 누락된 요구사항이 아니라 **암묵적으로 서로 다르게 가정한 것**에서 나오는데, 이 두 칸이 그 가정을 문서 표면으로 끌어올린다. 쿠폰·재고·주문 상태처럼 예외 케이스가 많은 도메인일수록 효과가 크다.
+반대로 이 템플릿을 통째로 채우려 들면 형식주의가 된다. 미해결 질문 칸을 살려 두고 PRD를 살아 있는 문서로 유지하라는 것이 원래 의도이며, 모든 칸이 채워진 완결된 PRD는 오히려 발견이 끝났다는 잘못된 신호를 준다.
+
+## 인용 포인트
+- "범위 밖(Out of scope)" 섹션 하나만 도입해도 릴리스 직전 스코프 논쟁이 크게 준다 — 문서 형식 도입을 최소 비용으로 설득할 때.
+- 가정(assumptions)을 명시적으로 적는 칸은, 예외 정책(중복 사용, 취소·환불 시 복원)을 착수 전에 질문하게 만드는 장치로 인용한다.

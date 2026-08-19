@@ -1,70 +1,71 @@
 ---
 name: software-reference-library
-description: A link-verified library of authoritative references, GitHub repos, and academic papers for software development, product planning (기획/PRD/discovery/metrics), and QA/testing. Use this whenever a question calls for an authoritative source rather than an opinion — writing or reviewing a PRD, spec, RFC, ADR, or test plan; deciding on architecture, code-review, release, or testing strategy; choosing metrics or designing an A/B test; setting team conventions; researching prior art; or any request like "레퍼런스 찾아줘", "논문 있어?", "best practice가 뭐야?", "관련 깃헙 레포", "근거 자료". Reach for it even when the user doesn't say the word "reference" — if the answer would be stronger with a citation, consult this library first before searching the web.
+description: 개발·기획·설계·디자인·QA·테스트 6개 도메인의 권위 있는 레퍼런스 312개를 항목별 파일로 정리한 라이브러리. 각 항목에 **누가 어떤 상황에서 드는지(페르소나)** 와 **이럴 땐 아니다**가 붙어 있어, 자료 이름을 몰라도 처한 상황으로 찾을 수 있다. 의견이 아니라 근거가 필요한 순간에 쓴다 — PRD·스펙·RFC·ADR·테스트 계획 작성이나 리뷰, 아키텍처·코드리뷰·릴리스·테스트 전략 결정, 지표 선정이나 A/B 설계, 팀 컨벤션 수립, 선행 사례 조사, 그리고 "레퍼런스 찾아줘", "논문 있어?", "best practice가 뭐야?", "관련 깃헙 레포", "근거 자료" 같은 요청. 사용자가 '레퍼런스'라는 단어를 쓰지 않아도, 인용이 붙으면 답이 강해지는 질문이면 웹 검색보다 먼저 이 라이브러리를 본다.
 ---
 
 # Software Reference Library
 
-A curated index of primary sources for the three disciplines that ship software: **개발 (development)**, **기획 (product planning)**, and **QA**. Every URL here was HTTP-verified when written.
+소프트웨어를 만드는 6개 도메인의 1차 자료 312개. 모든 URL은 등록 시점에 HTTP 검증했다.
 
-The point of this library is to make answers *citable*. An answer grounded in Google's code-review guide, the Raft paper, or Kohavi's experimentation work is worth more than a confident-sounding paragraph — and it lets the user go read the source and disagree with you.
+이 라이브러리의 목적은 답을 **인용 가능하게** 만드는 것이다. 구글 코드리뷰 가이드나 Raft 논문이나 Kohavi의 실험 연구에 근거한 답은 그럴듯한 문단보다 낫고, 무엇보다 사용자가 원문을 읽고 반박할 수 있다.
 
-## How to use it
+## 구조 — 항목마다 파일 하나
 
-1. **Route to the right file.** Read only the reference file(s) that match the question — they're long, and loading all of them wastes context.
-2. **Fetch before you quote.** These entries carry a one-line summary, not the content. If you're going to state what a source *says* — specific numbers, steps, definitions — fetch the URL first. Summaries here are enough to recommend a source, not enough to paraphrase it.
-3. **Cite with a link.** Give the user the URL so they can verify. Say which part matters and why, rather than dumping the whole list.
-4. **Say when it's not here.** This library is deliberately opinionated and finite. If nothing fits, search the web and tell the user the source came from outside the library — don't stretch a loosely related entry to cover the gap, and never invent a URL that looks plausible.
+```
+references/<도메인>/<slug>.md      ← 항목 하나
+references/<도메인>/_index.md      ← 그 도메인 전체 표
+INDEX.md                           ← 312개 전체 목록
+```
 
-## Routing table
+각 항목 파일에는 **한 줄 / 페르소나 / 이럴 때 연다 / 이럴 땐 아니다 / 무엇이 들어있나 / 인용 포인트**가 있다.
 
-| Question is about | Read |
-|---|---|
-| 아키텍처, 코드리뷰, 리팩터링, 언어/플랫폼 문서, 보안, 배포·SRE, 성능 | [references/development.md](references/development.md) |
-| PRD·RFC·디자인독, 디스커버리, 우선순위, OKR/지표, A/B 테스트, UX·접근성, 애자일 프로세스 | [references/planning.md](references/planning.md) |
-| 테스트 전략·피라미드, 자동화 도구, 탐색적 테스트, 플레이키 테스트, 성능/보안/접근성 테스트, 표준 | [references/qa.md](references/qa.md) |
-| "논문 있어?", 근본 원리, 실증 연구, 학술적 근거 | [references/papers.md](references/papers.md) |
-| 국내 사례, 한국어 자료, 국내 테크 블로그 | [references/korean-resources.md](references/korean-resources.md) |
+**페르소나가 이 라이브러리의 검색 키다.** 사용자는 대개 자료 이름을 모르고 상황만 안다 — "리뷰가 취향 싸움이 된다", "간헐적으로 깨지는 테스트 때문에 CI를 아무도 안 믿는다", "기획서 성공 지표 칸에 PV밖에 못 쓴다". 그 상태로 `_index.md`의 페르소나 열을 훑으면 걸린다.
 
-Questions often straddle two files. "테스트 커버리지 목표를 몇 %로 잡아야 하나?" needs `qa.md` for practice *and* `papers.md` for the evidence that coverage correlates weakly with effectiveness. Read both when the answer needs both.
+## 도메인
 
-## Answering well
+| 도메인 | 다루는 것 | 색인 |
+|---|---|---|
+| **기획** planning | 무엇을 왜 만들지 — 디스커버리, PRD, 우선순위, 지표, 실험 | `references/planning/_index.md` |
+| **설계** architecture | 시스템의 구조와 경계 — 패턴, 분산, DDD, 고전 논문 | `references/architecture/_index.md` |
+| **개발** development | 코드를 쓰고 굴린다 — 리뷰, 리팩터링, 언어, 보안, SRE | `references/development/_index.md` |
+| **디자인** design | 화면과 상호작용 — 디자인 시스템, 접근성, 타이포, UX 원칙 | `references/design/_index.md` |
+| **QA** qa | 품질을 어떻게 보증할지 — 전략, 탐색적 테스트, 표준, 프로세스 | `references/qa/_index.md` |
+| **테스트** testing | 실제로 검증한다 — 도구, 테스트 코드, 기법, 자동화 | `references/testing/_index.md` |
 
-**Lead with the recommendation, support it with the source.** The user asked a question, not for a bibliography. Two or three well-chosen references beat twelve.
+**QA와 테스트의 경계**: QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 검증하는 것*이다. "테스트 전략을 어떻게 세우나"는 QA, "Playwright에서 이 요소를 어떻게 잡나"는 테스트다.
 
-**Prefer primary over secondary.** The Shape Up webbook over a blog post about Shape Up. The Raft paper over a Medium explainer. Secondary sources are here when they genuinely explain better (Refactoring Guru's catalog, Martin Fowler's bliki).
+## 찾는 순서
 
-**Watch the age.** Foundational papers (Parnas 1972, Lamport 1978) don't expire — they're in the library precisely because they still hold. Tooling docs do expire. When you cite tooling, note that the specific API may have moved on.
+1. **도메인을 고른다.** 질문이 두 도메인에 걸치면 둘 다 본다 — "테스트 커버리지 목표를 몇 %로?"는 QA(관행)와 테스트(실증 연구) 양쪽이 필요하다.
+2. **`_index.md`를 읽는다.** 한 줄 요약과 페르소나가 표로 있다. 여기서 후보를 2~3개로 좁힌다. 도메인 전체 항목 파일을 다 열지 마라 — 색인이 그걸 막으려고 있다.
+3. **항목 파일을 연다.** "이럴 땐 아니다"를 반드시 읽어라. 인접한 다른 자료를 지목하고 있으면 그쪽이 맞는 경우가 많다.
+4. **인용 전에 원문을 가져온다.** 항목 파일은 요약이지 원문이 아니다. 자료가 *무엇을 말하는지* — 숫자, 절차, 정의 — 를 진술할 거면 WebFetch로 URL을 먼저 열어라. 파일의 요약은 자료를 **추천**하기엔 충분하지만 **인용**하기엔 부족하다.
 
-**Match the discipline's vocabulary.** A 기획자 asking about prioritization wants RICE/Kano/Opportunity Solution Tree framed in product terms, not a lecture on algorithmic complexity. A QA engineer asking the same thing wants risk-based test prioritization.
+## 답할 때
 
-**Nuance beats authority.** Several entries here disagree with each other on purpose — Testing Pyramid vs. Testing Trophy, Scrum vs. Shape Up, microservices vs. modular monolith. When a question lands on a genuine industry disagreement, say so and give both sides rather than presenting one as settled.
+**추천을 먼저, 근거는 그 다음.** 사용자는 질문을 했지 참고문헌 목록을 요청한 게 아니다. 잘 고른 두세 개가 열두 개보다 낫다.
 
-## Maintaining the library
+**1차 자료를 우선한다.** Shape Up 웹북 > Shape Up 소개 블로그. Raft 논문 > Raft 설명 글. 2차 자료는 그쪽이 정말 더 잘 설명할 때만 쓴다.
 
-Links rot. Before relying on the library after a long gap, or whenever an entry 404s:
+**연도를 함께 본다.** 원리를 다루는 고전(Parnas 1972, Lamport 1978)은 만료되지 않는다. 도구 문서는 만료된다. 도구를 인용할 땐 API가 바뀌었을 수 있다고 밝힌다.
+
+**의견이 갈리는 지점을 숨기지 않는다.** 이 라이브러리에는 서로 반대하는 자료가 일부러 들어 있다 — Test Pyramid vs Testing Trophy, Scrum vs Shape Up, 마이크로서비스 vs 모듈러 모놀리스. 업계가 실제로 갈리는 질문이면 한쪽을 정답처럼 말하지 말고 양쪽을 준다.
+
+**여기 없으면 없다고 한다.** 이 라이브러리는 의도적으로 유한하다. 맞는 게 없으면 웹을 검색하고 라이브러리 밖 출처라고 밝혀라. 느슨하게 관련된 항목을 억지로 끌어다 쓰거나, 그럴듯한 URL을 지어내지 마라.
+
+## 유지보수
 
 ```bash
-python3 scripts/check_links.py references/
+python3 scripts/check_links.py references/       # 링크 썩음만 빠르게
+python3 ../../../../scripts/audit.py --out reports  # 링크 + 저장소 건강 + 스킬 사용률
 ```
 
-It extracts every URL from the markdown files and reports non-200 responses. Two caveats before you delete anything:
+`audit.py`는 지난 실행을 `reports/state.json`에 기억하므로 **달라진 것만** 보고한다. `doi.org`, `dl.acm.org`, `w3.org`, `iso.org`, `medium.com` 등은 스크립트 요청에 403을 주지만 브라우저에서는 정상이라 `BLOCKED`로 분류된다. 반복 재현되는 `404`/`410`만 실제 썩음이다.
 
-- `doi.org`, `dl.acm.org`, `w3.org`, `iso.org`, `medium.com`, `queue.acm.org`, `techblog.woowahan.com` and similar return 403 to scripted requests while working fine in a browser. The script flags these `BLOCKED`, not dead — leave them alone.
-- A `DEAD 0` under a parallel run is often just rate limiting, not rot. Re-probe it alone before removing the entry:
-  ```bash
-  python3 -c "import sys; sys.path.insert(0,'scripts'); from check_links import probe; print(probe('<url>', 25))"
-  ```
+항목을 추가할 때는 기존 파일의 형식을 그대로 따르고, 커밋 전에 URL을 확인한다.
 
-Only a repeatable `404`/`410` is real rot.
-
-To add an entry, match the existing format so the file stays scannable:
-
-```markdown
-### Title of the source
-<URL>
-한 줄 설명 — 이게 무엇이고 왜 권위 있는지.
-**쓸 때:** 이 자료를 꺼내야 하는 구체적 상황.
+```bash
+curl -sSL -o /dev/null -w "%{http_code}" <url>
 ```
 
-Verify a new URL with `curl -sSL -o /dev/null -w "%{http_code}" <url>` before committing it. An unverified link is worse than no link — it teaches the user to distrust the whole file.
+검증 안 된 링크는 없는 링크보다 나쁘다. 파일 전체를 못 믿게 만든다.
