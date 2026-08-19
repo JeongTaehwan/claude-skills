@@ -1,0 +1,184 @@
+{
+ "findings": {
+  "repo:JaeYeopHan/Interview_Question_for_Beginner:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2024-08-09 · ★21656",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "JaeYeopHan/Interview_Question_for_Beginner",
+   "where": [
+    "software-reference-library/references/development/interview-question-for-beginner.md"
+   ]
+  },
+  "repo:ProductHired/open-product-management:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2024-07-01 · ★4434",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "ProductHired/open-product-management",
+   "where": [
+    "software-reference-library/references/planning/open-product-management.md"
+   ]
+  },
+  "repo:Team-Neighborhood/I-want-to-study-Data-Science:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2022-03-28 · ★1807",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "Team-Neighborhood/I-want-to-study-Data-Science",
+   "where": [
+    "software-reference-library/references/development/i-want-to-study-data-science.md"
+   ]
+  },
+  "repo:aFarkas/lazysizes:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2024-04-03 · ★17717",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "aFarkas/lazysizes",
+   "where": [
+    "slow-network-ux/references/github.md"
+   ]
+  },
+  "repo:dastergon/awesome-chaos-engineering:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2023-12-28 · ★6634",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "dastergon/awesome-chaos-engineering",
+   "where": [
+    "software-reference-library/references/qa/awesome-chaos-engineering.md"
+   ]
+  },
+  "repo:evanw/thumbhash:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2024-05-26 · ★4192",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "evanw/thumbhash",
+   "where": [
+    "slow-network-ux/references/github.md"
+   ]
+  },
+  "repo:goldbergyoni/javascript-testing-best-practices:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2024-06-27 · ★24624",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "goldbergyoni/javascript-testing-best-practices",
+   "where": [
+    "software-reference-library/references/testing/javascript-testing-best-practices.md"
+   ]
+  },
+  "repo:google/AFL:archived": {
+   "detail": "archived · 마지막 커밋 2021-07-05 · ★4208",
+   "first_seen": "2026-08-19",
+   "kind": "repo_archived",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "google/AFL",
+   "where": [
+    "software-reference-library/references/testing/afl.md"
+   ]
+  },
+  "repo:google/eng-practices:archived": {
+   "detail": "archived · 마지막 커밋 2024-09-19 · ★23308",
+   "first_seen": "2026-08-19",
+   "kind": "repo_archived",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "google/eng-practices",
+   "where": [
+    "software-reference-library/references/development/google-engineering-practices.md"
+   ]
+  },
+  "repo:joe-bell/plaiceholder:archived": {
+   "detail": "archived · 마지막 커밋 2023-05-24 · ★2318",
+   "first_seen": "2026-08-19",
+   "kind": "repo_archived",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "joe-bell/plaiceholder",
+   "where": [
+    "slow-network-ux/references/github.md"
+   ]
+  },
+  "repo:ligurio/awesome-software-quality:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2023-02-01 · ★2321",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "ligurio/awesome-software-quality",
+   "where": [
+    "software-reference-library/references/qa/awesome-software-quality.md"
+   ]
+  },
+  "repo:woltapp/blurhash:stale": {
+   "detail": "2년 이상 정체 · 마지막 커밋 2024-07-08 · ★17066",
+   "first_seen": "2026-08-19",
+   "kind": "repo_stale",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "woltapp/blurhash",
+   "where": [
+    "slow-network-ux/references/github.md"
+   ]
+  },
+  "skill:role-isolation-pipeline:unused": {
+   "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
+   "first_seen": "2026-08-19",
+   "kind": "skill_unused",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "role-isolation-pipeline",
+   "where": []
+  },
+  "skill:slow-network-ux:unused": {
+   "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
+   "first_seen": "2026-08-19",
+   "kind": "skill_unused",
+   "last_seen": "2026-08-19",
+   "note": "",
+   "runs_seen": 1,
+   "status": "open",
+   "subject": "slow-network-ux",
+   "where": []
+  }
+ },
+ "last_run": "2026-08-19",
+ "version": 1
+}
