@@ -1,0 +1,36 @@
+---
+title: Ministry of Testing
+url: https://www.ministryoftesting.com/
+domain: qa
+type: 공식문서
+lang: en
+---
+
+# Ministry of Testing
+
+https://www.ministryoftesting.com/
+
+## 한 줄
+소프트웨어 테스터 실무자들의 최대 규모 커뮤니티 허브로, 아티클·강좌·컨퍼런스(TestBash) 아카이브·토론 포럼이 한곳에 모여 있어 "이 상황을 남들은 어떻게 하나"를 찾을 때의 출발점이다.
+
+## 페르소나
+**팀에 QA가 자기 혼자여서 물어볼 사람이 없는 1인 QA, 또는 QA 없이 개발자가 테스트를 겸하는 팀에서 테스트 프로세스를 처음 세우는 사람.** 책은 원론적이고 블로그 글은 단편적인데, 지금 필요한 건 "규모 비슷한 팀이 실제로 어떻게 굴리는가"다. 리그레션 범위를 어떻게 정하는지, 릴리스 전에 무엇을 얼마나 보는지, 버그 리포트를 개발자가 무시할 때 어떻게 하는지 같은 것들.
+
+## 이럴 때 연다
+- 테스트 실무의 넓은 주제(리스크 기반 테스트, 테스트 리포팅, 자동화 도입, QA 채용)를 훑고 싶을 때
+- 특정 문제에 대한 다른 팀의 실전 경험담이 필요할 때 — 포럼(The Club)과 컨퍼런스 발표 아카이브
+- QA 커리어 경로나 팀 내 QA 역할 정의를 고민할 때
+- 테스트 관련 컨퍼런스 발표나 사내 공유 자료를 만들 때 참고 사례를 모을 때
+
+## 이럴 땐 아니다
+- 자동화 도구를 코드 수준에서 배우려는 것이면 커뮤니티 글보다 강좌 플랫폼인 `qa/test-automation-university.md` 나 도구 공식 문서(`testing/playwright-best-practices.md`, `testing/cypress-best-practices.md`)가 낫다.
+- 탐색적 테스트의 방법론적 뿌리를 제대로 잡으려면 `qa/rapid-software-testing.md` 와 `qa/context-driven-testing.md`.
+- 큐레이션된 링크 목록만 필요하면 `qa/awesome-testing.md` 나 `qa/awesome-software-quality.md` 가 더 빠르다.
+
+## 무엇이 들어있나
+아티클·블로그, 유료/무료 온라인 강좌(Masterclass, Bites), TestBash 컨퍼런스 발표 영상 아카이브, 실무자 포럼, 그리고 "99 Second Talks" 같은 짧은 형식의 경험 공유가 섞여 있다. 성격상 단일한 주장을 하는 자료가 아니라 여러 관점이 공존하는 장이며, 편집 방향은 대체로 Context-Driven / 탐색적 테스트 쪽에 가깝다 — 즉 "테스트 케이스 수를 늘리는 것이 품질"이라는 관점과는 거리를 둔다.
+
+일부 콘텐츠는 유료 멤버십이지만 아티클과 상당수 컨퍼런스 영상은 공개되어 있다.
+
+## 인용 포인트
+- 사내에 "QA는 릴리스 직전 검수 담당"이라는 인식이 있을 때, 이 커뮤니티의 대표적 논조인 "testing is an investigation, not a phase"를 근거로 역할 정의를 다시 제안할 수 있다.
