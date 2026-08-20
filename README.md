@@ -102,12 +102,38 @@ CLAUDE.md 내용 말해봐". 읽지 않고 답하면 로드된 것이다.
 
 ## 주간 점검
 
-```bash
-python3 scripts/audit.py --out reports    # 링크 + 저장소 건강 + 스킬 사용률
-python3 scripts/audit.py --list           # 현재 열린 항목
+**2층**으로 돈다.
+
+| 층 | 무엇이 | 언제 | 앱이 닫혀 있어도? |
+|---|---|---|---|
+| 기계 | launchd → `audit.py` | 월 09:17 | **돈다** |
+| 판단 | 앱 스케줄 작업 | 월 09:24 | 안 돈다 (다음에 열 때 이어받음) |
+
+기계 층은 링크 썩음·GitHub 저장소 archived/정체·스킬 발동 횟수를 본다.
+판단 층은 그 리포트를 읽고 새 모델·Claude Code 변경 같은 외부 변화를 확인한 뒤
+결과를 저장소로 보관한다.
+
+### 경로가 둘로 갈린 이유
+
+macOS 는 `~/Documents` 를 TCC 로 보호한다. **launchd 가 띄운 프로세스는 권한 요청
+대화상자조차 못 띄우고 그냥 EPERM 을 받는다** — 저장소를 직접 보게 두면 매주 조용히
+실패한다. 그래서 기계 층은 보호 대상이 아닌 `~/.claude` 쪽 사본만 본다.
+
+```
+~/.claude/skills/                 점검 대상        (sync.sh 가 복사)
+~/.claude/skill-audit/audit.py    점검 도구        (sync.sh 가 복사)
+~/.claude/skill-audit/reports/    리포트·state.json — 여기가 원본
+reports/                          보관용 사본 (판단 층이 옮겨 git 에 남김)
 ```
 
-`reports/state.json` 에 지난 실행을 기억하므로 **달라진 것만** 보고한다. 매주 같은 목록을
+### 직접 돌리기
+
+```bash
+python3 scripts/audit.py --out reports    # 저장소에서 (앱·터미널은 Documents 접근 가능)
+python3 ~/.claude/skill-audit/audit.py --state ~/.claude/skill-audit/state.json --list
+```
+
+`state.json` 에 지난 실행을 기억하므로 **달라진 것만** 보고한다. 매주 같은 목록을
 반복하지 않고, 4회 이상 결정 없이 방치된 항목은 따로 올라온다. 결정을 내리면 조용해진다.
 
 ```bash
@@ -115,12 +141,26 @@ python3 scripts/audit.py --wontfix <키> --note "안 고치는 이유"
 python3 scripts/audit.py --ack <키> --note "처리 중인 내용"
 ```
 
-스케줄러로 자동 실행하려면 `scheduled/weekly-audit.md` 를 본다. 등록된 프롬프트는 그 파일을
-읽으라는 한 줄뿐이라, 동작을 바꾸려면 재등록 없이 파일만 고치면 된다.
+같은 날 두 번 돌면 연속 횟수가 두 번 올라 '4회 방치' 판정이 앞당겨지므로, 오늘 리포트가
+이미 있으면 스크립트가 스스로 건너뛴다 (`--force` 로 무시).
 
-**자동으로 지우지 않는다.** 스킬 발동 0회는 '안 쓰였다'와 '안 떴다' 두 가지 뜻이고 이 둘은
-그 기간에 무슨 작업을 했는지 알아야 구분된다. archived 저장소도 마찬가지다 — 고전 논문과
-완결된 튜토리얼은 갱신될 이유가 없다. 제안만 하고 결정은 사람이 한다.
+### 자동으로 지우지 않는다
+
+스킬 발동 0회는 '안 쓰였다'와 '안 떴다' 두 가지 뜻이고 이 둘은 그 기간에 무슨 작업을
+했는지 알아야 구분된다. archived 저장소도 마찬가지다 — 고전 논문과 완결된 튜토리얼은
+갱신될 이유가 없다. 제안만 하고 결정은 사람이 한다.
+
+절차는 `scheduled/weekly-audit.md` 에 있다. 등록된 프롬프트는 그 파일을 읽으라는 한
+줄뿐이라, 동작을 바꾸려면 재등록 없이 파일만 고치면 된다.
+
+### 해제
+
+```bash
+launchctl bootout gui/$(id -u)/com.jeongtaehwan.claude-skills.weekly-audit
+rm ~/Library/LaunchAgents/com.jeongtaehwan.claude-skills.weekly-audit.plist
+```
+
+앱 스케줄 작업은 사이드바 "Scheduled" 에서 끈다.
 
 ## 스킬 편집할 때
 

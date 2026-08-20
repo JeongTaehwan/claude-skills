@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jeongtaehwan.claude-skills.weekly-audit</string>
+
+    <!-- 왜 저장소가 아니라 ~/.claude 를 보는가:
+         macOS 는 ~/Documents 를 TCC 로 보호한다. launchd 가 띄운 프로세스는
+         권한 요청 대화상자도 못 띄우고 그냥 EPERM 을 받는다 — 즉 매주 조용히
+         실패한다. ~/.claude 는 보호 대상이 아니므로 거기 설치된 사본을 쓴다.
+         (sync.sh 가 audit.py 와 스킬을 ~/.claude 로 복사한다) -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <!-- gh 는 /opt/homebrew/bin 에 있고 launchd 기본 PATH 에는 없다.
+             빼면 저장소 건강 검사만 조용히 실패한다. -->
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/jeongtaehwan/.claude/skill-audit</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/jeongtaehwan/.claude/skill-audit/audit.py</string>
+        <string>--skills-dir</string>
+        <string>/Users/jeongtaehwan/.claude/skills</string>
+        <string>--out</string>
+        <string>/Users/jeongtaehwan/.claude/skill-audit/reports</string>
+        <string>--state</string>
+        <string>/Users/jeongtaehwan/.claude/skill-audit/state.json</string>
+    </array>
+
+    <!-- 월요일 09:17. 앱 스케줄러(09:24)보다 먼저 돌아서, 앱이 열려 있으면
+         판단 층이 이 리포트를 이어받는다. 자고 있으면 깨어날 때 밀려서 실행된다. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key><integer>1</integer>
+        <key>Hour</key><integer>9</integer>
+        <key>Minute</key><integer>17</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/jeongtaehwan/Library/Logs/claude-skills-audit.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/jeongtaehwan/Library/Logs/claude-skills-audit.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+</dict>
+</plist>
