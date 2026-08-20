@@ -35,3 +35,37 @@ https://www.checklist.design/
 
 ## 인용 포인트
 - UI 리뷰가 매번 리뷰어 취향으로 흐를 때, 해당 컴포넌트 체크리스트를 팀의 최소 기준선으로 고정하면 논쟁이 줄어든다.
+
+## 코드 예시
+
+"판정 가능한 한 줄 문장"이라는 성질을 살려, 훑는 목록을 CI가 대신 훑게 만든 것 — 체크 항목이 그대로 테스트 이름이 된다.
+
+```js
+describe('Modal 체크리스트', () => {
+  it('Esc 키로 닫힌다', async () => {
+    render(<Modal open onClose={onClose} />);
+    await userEvent.keyboard('{Escape}');
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('열리면 포커스가 모달 안으로 들어간다', () => {
+    render(<Modal open onClose={onClose} />);
+    expect(screen.getByRole('dialog')).toContainElement(document.activeElement);
+  });
+
+  it('닫히면 포커스가 열었던 버튼으로 돌아간다', async () => {
+    render(<OrderRow />);
+    const trigger = screen.getByRole('button', { name: '주문 상세' });
+    await userEvent.click(trigger);
+    await userEvent.keyboard('{Escape}');
+    expect(trigger).toHaveFocus();
+  });
+
+  it('열려 있는 동안 배경이 스크롤되지 않는다', () => {
+    render(<Modal open onClose={onClose} />);
+    expect(document.body).toHaveStyle({ overflow: 'hidden' });
+  });
+});
+```
+
+이게 초록불이어도 접근성 준수의 근거는 못 된다 — 사이트 스스로 표준이 아니라 큐레이션이라고 밝히고 있다. jsdom이 포커스와 스크롤을 근사할 뿐이라는 것도 걸린다: 통과했다고 실제 브라우저·스크린리더에서 같게 동작한다는 보장은 없다.

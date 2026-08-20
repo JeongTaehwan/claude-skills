@@ -34,3 +34,27 @@ lab 데이터는 사전에 정의된 단일 조건(특정 기기·망·콜드 �
 ## 인용 포인트
 - "lab은 디버깅 도구, field가 성적표" — 개선 검증과 성공 판정의 데이터 소스를 분리하자는 제안의 근거.
 - 괴리는 측정 버그가 아니라 측정 대상이 다른 것이라는 해석 프레임.
+
+## 코드 예시
+
+"lab 은 디버깅 도구, field 가 성적표" — 같은 페이지의 두 숫자를 나란히 뽑아, 괴리를 버그가 아니라 해석 대상으로 놓는다.
+
+```bash
+# field: CrUX API 는 실사용자 분포의 p75 를 준다 (28일 이동 창)
+curl -s "https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=$CRUX_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"origin":"https://example.com","formFactor":"PHONE"}' \
+| jq '.record.metrics | {
+    lcp_p75: .largest_contentful_paint.percentiles.p75,
+    inp_p75: .interaction_to_next_paint.percentiles.p75,
+    cls_p75: .cumulative_layout_shift.percentiles.p75
+  }'
+
+# lab: 단일 조건·콜드 캐시의 재현 가능한 한 점
+npx lighthouse https://example.com --preset=perf --form-factor=mobile \
+  --output=json --quiet \
+| jq '{ lcp: .audits["largest-contentful-paint"].numericValue,
+        tbt: .audits["total-blocking-time"].numericValue }'
+```
+
+두 숫자는 애초에 다른 것을 재므로 일치할 이유가 없다 — CrUX 의 INP 에 대응하는 lab 지표는 TBT(대리 지표)이지 같은 값이 아니고, CrUX 는 오리진 단위·28일 창이라 오늘 배포한 개선이 여기 나타나려면 몇 주가 걸린다.

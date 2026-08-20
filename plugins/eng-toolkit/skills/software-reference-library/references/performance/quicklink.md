@@ -34,3 +34,28 @@ https://github.com/GoogleChromeLabs/quicklink
 ## 인용 포인트
 - "프리페치는 느린 회선에 해롭다"는 우려에 대해, 회선 신호로 자동 차단하는 설계가 이미 표준 구현에 들어 있다는 반례.
 - 프리페치 도입 제안 시 "보이는 링크만 + idle 시간만"이라는 안전한 기본 전략의 출처로.
+
+## 코드 예시
+
+"보이는 링크만, 한가할 때만"에 범위·상한까지 얹은 형태 — 2G·Save-Data 차단은 라이브러리가 알아서 한다.
+
+```js
+import { listen, prefetch } from "quicklink";
+
+listen({
+  el: document.querySelector("#article-list"), // 이 영역 안의 링크만 관찰
+  origins: [location.hostname],                // 외부 도메인은 프리페치하지 않는다
+  ignores: [
+    /\/logout/,                                // 부작용이 있는 경로 제외
+    (uri) => uri.includes("?utm_"),
+  ],
+  threshold: 0.5, // 절반 이상 보일 때만 — 스쳐 지나간 링크는 제외
+  limit: 20,      // 총 프리페치 개수 상한
+  timeout: 2000,  // idle 을 이만큼까지만 기다린다
+});
+
+// 확실히 갈 경로는 뷰포트와 무관하게 직접 예열
+prefetch("/checkout").catch(() => {});
+```
+
+내장 가드는 `navigator.connection` 을 읽으므로 Chromium 계열에서만 작동한다 — Safari·Firefox 사용자에게는 "느린 회선이면 알아서 끈다"가 성립하지 않고, 그대로 프리페치가 나간다.

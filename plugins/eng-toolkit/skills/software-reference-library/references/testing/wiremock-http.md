@@ -41,3 +41,36 @@ https://wiremock.org/docs/
 ## 인용 포인트
 - "목킹 경계를 코드가 아니라 네트워크에 둔다" — HTTP 클라이언트를 모킹하는 기존 테스트를 바꾸자고 설득할 때의 핵심 논지. 타임아웃·재시도 버그가 왜 안 잡혔는지가 이 한 문장으로 설명된다.
 - 결함·지연 주입 기능은 재시도·서킷 브레이커·폴백 로직에 대해 "테스트 불가"라는 변명을 없앤다. 주문·결제 연동의 장애 대응 코드에 테스트를 요구할 근거.
+
+## 코드 예시
+
+목 객체로는 검증할 수 없는 층 — 타임아웃 설정, 재시도, 그리고 재시도 때 멱등키가 유지되는지 — 을 지연 주입과 시나리오로 확인한다 (WireMock 3, JUnit 5).
+
+```java
+@WireMockTest
+class PaymentClientTest {
+
+    @Test
+    void 첫_호출이_타임아웃이면_같은_멱등키로_한_번_재시도한다(WireMockRuntimeInfo wm) {
+        // 1회차: 클라이언트 타임아웃(1초)보다 오래 끈다
+        stubFor(post("/v1/payments").inScenario("retry")
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(aResponse().withFixedDelay(3000))
+                .willSetStateTo("retried"));
+        // 2회차: 정상 승인
+        stubFor(post("/v1/payments").inScenario("retry")
+                .whenScenarioStateIs("retried")
+                .willReturn(okJson("{\"status\":\"APPROVED\"}")));
+
+        var client = new PaymentClient(wm.getHttpBaseUrl(), Duration.ofSeconds(1));
+
+        assertEquals("APPROVED", client.approve("ORD-1").status());
+
+        // 요청이 '어떻게' 나갔는지를 서버 쪽에서 단언 — 중복 승인 사고의 방지선
+        verify(2, postRequestedFor(urlEqualTo("/v1/payments"))
+                .withHeader("Idempotency-Key", equalTo("ORD-1")));
+    }
+}
+```
+
+스텁은 **우리가 믿고 있는 외부 API 의 모습**일 뿐이라, 상대가 응답 형식을 바꿔도 이 테스트는 계속 초록이다. 그 어긋남까지 잡으려면 실제 트래픽 녹화(record & playback)로 스텁을 갱신하거나 계약 테스트를 따로 둬야 한다. 그리고 `withFixedDelay(3000)` 은 실제로 3초를 소모하므로, 이런 테스트는 빠른 단위 스위트가 아니라 별도 태그로 분리하는 편이 낫다.

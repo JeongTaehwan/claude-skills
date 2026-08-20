@@ -34,3 +34,33 @@ private/shared 캐시 구분, ETag 재검증, 해시 파일명 + `Cache-Control:
 ## 인용 포인트
 - "가장 빠른 요청은 보내지 않은 요청" — 저속 대응에서 캐싱을 최우선 순위로 놓는 근거.
 - 해시 파일명 + `max-age=31536000, immutable`을 정적 자산 표준 정책으로 제안할 때의 출처.
+
+## 코드 예시
+
+"가장 빠른 요청은 보내지 않은 요청" — 해시 파일명 자산은 재검증조차 없애고, 진입점 HTML만 짧게 잡아 재검증시키는 정석 조합.
+
+```nginx
+# 내용이 바뀌면 파일명이 바뀐다 → 1년 캐시 + immutable 로 조건부 요청까지 제거
+location ~* "^/assets/.+\.[0-9a-f]{8,}\.(js|css|woff2|png|webp)$" {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+# 진입점: 캐시는 하되 쓰기 전에 반드시 서버에 물어본다(304 면 바이트 0)
+location = /index.html {
+    add_header Cache-Control "no-cache";   # no-store 가 아니다 — 저장은 하고 재검증만 강제
+    etag on;
+}
+
+# 사용자별 응답: 공유 캐시(CDN·프록시)에 절대 남기지 않는다
+location /api/me {
+    add_header Cache-Control "private, no-store";
+}
+```
+
+```
+# 재검증이 실제로 도는지 확인 — 두 번째 요청이 304 여야 한다
+$ curl -sI -H 'If-None-Match: "abc123"' https://example.com/index.html | head -1
+HTTP/2 304
+```
+
+`immutable` 은 파일명에 해시가 붙어 있다는 전제 위에서만 안전하다 — 같은 이름으로 내용을 갈아끼우는 배포가 한 번이라도 섞이면 사용자는 1년짜리 낡은 자산에 갇히고, 서버 설정으로는 되돌릴 방법이 없다.

@@ -33,3 +33,36 @@ https://web.dev/articles/fast-playback-with-preload
 ## 인용 포인트
 - "재생되지 않은 비디오의 선로드는 저속 사용자에게 순수 비용" — preload 기본값 재검토 제안의 근거.
 - `preload="none"` + poster라는 구체 권장 조합 — 비디오 임베드 컨벤션 수립 시 인용.
+
+## 코드 예시
+
+"자동재생이 아닌 비디오는 `preload="none"` + poster"라는 권장 조합과, 뷰포트에 들어왔을 때만 한 단계 올리는 절충.
+
+```html
+<video
+  poster="/media/product-poster.avif"
+  preload="none"
+  controls
+  playsinline
+  width="720"
+  height="405"
+>
+  <source src="/media/product.webm" type="video/webm" />
+  <source src="/media/product.mp4" type="video/mp4" />
+</video>
+
+<script>
+  // 화면에 들어오면 metadata 까지만 올려 재생 버튼의 첫 반응을 당긴다
+  const io = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.preload = "metadata";
+      io.unobserve(entry.target);
+    }
+  }, { rootMargin: "200px" });
+
+  document.querySelectorAll('video[preload="none"]').forEach((v) => io.observe(v));
+</script>
+```
+
+poster 역시 다운로드되는 이미지다 — 무거운 poster를 걸면 비디오에서 아낀 바이트를 그대로 되돌려준다. 그리고 `preload`는 명령이 아니라 **힌트**라서, 모바일 브라우저 중에는 값과 무관하게 항상 `none`처럼 동작하거나 반대로 메타데이터를 받아 가는 구현이 있다.

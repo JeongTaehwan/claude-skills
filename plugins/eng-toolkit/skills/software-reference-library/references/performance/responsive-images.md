@@ -33,3 +33,27 @@ https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images
 ## 인용 포인트
 - "이미지 최적화의 첫 단추는 압축이 아니라 애초에 맞는 크기를 내려보내는 것" — srcset 도입 제안의 근거.
 - 선언은 개발자, 선택은 브라우저라는 역할 분리 — 클라이언트 기기 감지 코드를 걷어내자는 논거.
+
+## 코드 예시
+
+"선언은 개발자, 선택은 브라우저"라는 역할 분리를 두 축 — 해상도 전환과 아트 디렉션 — 으로 각각 적은 마크업.
+
+```html
+<!-- 해상도 전환: 같은 그림, 다른 크기. w 서술자는 sizes 와 짝으로만 의미가 있다 -->
+<img
+  src="hero-800.jpg"
+  srcset="hero-400.jpg 400w, hero-800.jpg 800w, hero-1600.jpg 1600w"
+  sizes="(max-width: 600px) 100vw, 50vw"
+  width="800" height="450"
+  alt="봄 신상 기획전" />
+
+<!-- 아트 디렉션 + 포맷 폴백: source 는 위에서부터 평가되고 첫 매치가 이긴다 -->
+<picture>
+  <source media="(max-width: 600px)" type="image/avif" srcset="hero-crop.avif" />
+  <source media="(max-width: 600px)" srcset="hero-crop.jpg" />
+  <source type="image/avif" srcset="hero-wide.avif" />
+  <img src="hero-wide.jpg" width="1600" height="600" alt="봄 신상 기획전" />
+</picture>
+```
+
+`sizes`는 측정값이 아니라 개발자가 CSS 레이아웃에 대해 하는 **약속**이다 — 실제 그려지는 폭과 어긋나면 브라우저는 성실하게 잘못된 후보를 고르고, 그 오차는 콘솔에 아무 경고도 남기지 않는다.

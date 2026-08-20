@@ -41,3 +41,33 @@ https://testing-library.com/docs/
 - "The more your tests resemble the way your software is used, the more confidence they can give you." — 테스트 컨벤션 문서의 첫 문장으로 쓰기 좋은 원칙 선언.
 - 쿼리 우선순위에서 `getByTestId`가 최후 수단이라는 점은, `data-testid` 남발을 줄이자는 리뷰 코멘트의 공식 근거가 된다.
 - 접근 가능한 이름으로 요소를 못 찾으면 마크업이 잘못된 것 — 접근성 작업을 테스트 개선과 묶어 제안할 때 쓸 수 있는 논리.
+
+## 코드 예시
+
+쿼리 우선순위·`user-event`·`findBy*` 세 규칙을 before/after 한 쌍으로 — 같은 테스트가 무엇을 검증하는지가 달라진다.
+
+```tsx
+// before — testid 로 잡고, fireEvent 로 값만 밀어 넣고, 임의 대기로 버틴다
+test('쿠폰 적용', async () => {
+  render(<CouponForm />);
+  fireEvent.change(screen.getByTestId('coupon-input'), { target: { value: 'SAVE10' } });
+  fireEvent.click(screen.getByTestId('apply-btn'));
+  await new Promise((r) => setTimeout(r, 500));
+  expect(screen.getByTestId('result').textContent).toBe('1,000원 할인');
+});
+
+// after — 사용자가 화면을 쓰는 방식에 가깝게
+test('쿠폰 적용', async () => {
+  const user = userEvent.setup();
+  render(<CouponForm />);
+
+  // 역할 + 접근 가능한 이름 — 여기서 못 찾으면 마크업의 접근성 문제다
+  await user.type(screen.getByLabelText('쿠폰 코드'), 'SAVE10');
+  await user.click(screen.getByRole('button', { name: '적용' }));
+
+  // findBy* 는 나타날 때까지 기다린다 — sleep 이 필요 없다
+  expect(await screen.findByRole('status')).toHaveTextContent('1,000원 할인');
+});
+```
+
+`findBy*` 는 요소가 **나타나는** 것만 기다린다 — 사라지는 것을 확인하려면 `waitForElementToBeRemoved` 를, 처음부터 없어야 하는 것은 `queryBy*` + `toBeNull()` 을 써야 한다. 여기에 `getBy*` 를 쓰면 즉시 예외를 던져 테스트가 오해할 만한 실패로 끝난다.

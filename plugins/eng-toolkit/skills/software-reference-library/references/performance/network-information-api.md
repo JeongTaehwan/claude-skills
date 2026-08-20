@@ -35,3 +35,34 @@ https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
 ## 인용 포인트
 - "저속이면 무거운 리소스를 끈다"는 분기의 표준 신호원 — `effectiveType`·`saveData`가 그 조건이라는 근거로 인용.
 - Firefox·Safari 미지원이므로 이 API에 기능을 의존시키면 안 된다는 점 — 점진적 향상으로만 쓰자는 리뷰 코멘트의 근거.
+
+## 코드 예시
+
+feature detection 을 먼저 두고, API 가 없으면 풀 경험이 기본이 되는 점진적 향상 형태 — 저속일 때만 빼는 방향으로만 분기한다.
+
+```js
+function readConnection() {
+  const c = navigator.connection; // Chromium 계열에만 존재
+  if (!c) return { saveData: false, slow: false }; // 미지원 = 기본(풀) 경험
+  return {
+    saveData: c.saveData === true,
+    slow: c.effectiveType === "slow-2g" || c.effectiveType === "2g",
+    effectiveType: c.effectiveType,
+    rtt: c.rtt,
+  };
+}
+
+function applyPolicy() {
+  const { saveData, slow } = readConnection();
+  const lean = saveData || slow;
+  document.documentElement.dataset.lean = String(lean);
+  for (const v of document.querySelectorAll("video[data-autoplay]")) {
+    v.autoplay = !lean; // 저속·데이터 절약이면 자동재생을 끈다
+  }
+}
+
+navigator.connection?.addEventListener("change", applyPolicy);
+applyPolicy();
+```
+
+`effectiveType` 은 최근 실측을 뭉뚱그린 추정치라 셀룰러 순간 변동을 잘 못 따라간다 — Firefox·Safari 에서는 이 코드가 통째로 no-op 이므로, 여기에 기능의 정확성을 걸면 안 된다.

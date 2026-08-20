@@ -38,3 +38,24 @@ https://helloworld.kurly.com/
 
 ## 인용 포인트
 - 국내 커머스 도메인의 구체적 사례를 근거로 들 수 있어, 해외 사례로는 잘 설득되지 않는 논의(예: 물류 연동 구조)에서 유용하다.
+
+## 코드 예시
+
+이 블로그가 반복해서 다루는 문제 설정 — 외부(공급사·물류사)에서 들어오는 입고 이벤트가 중복으로 오거나 순서가 뒤바뀌어 도착하는 상황 — 을 한 트랜잭션으로 막은 형태.
+
+```sql
+WITH new_event AS (
+  INSERT INTO inbound_event (event_id, sku, qty, occurred_at)
+  VALUES ($1, $2, $3, $4)
+  ON CONFLICT (event_id) DO NOTHING     -- 중복 전송: 두 번째부터 0행
+  RETURNING event_id
+)
+UPDATE stock
+   SET on_hand       = on_hand + $3,
+       last_event_at = $4
+ WHERE sku = $2
+   AND last_event_at < $4               -- 지연 도착: 더 최신 반영이 있으면 건너뛴다
+   AND EXISTS (SELECT 1 FROM new_event);
+```
+
+두 가지가 남는다. 재고는 늘었는데 뒤이은 정산·알림이 실패하는 부분 실패는 이 트랜잭션 밖의 문제이고, 무엇보다 이 코드가 맞추는 것은 장부일 뿐이다 — 실물과 어긋난 수량은 결국 실사로만 맞춰진다는 것이 이 도메인의 전제다.

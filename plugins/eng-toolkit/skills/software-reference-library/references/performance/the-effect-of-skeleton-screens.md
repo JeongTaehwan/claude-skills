@@ -34,3 +34,31 @@ Thomas Mejtoft, Arvid Långström, Ulrik Söderström — ECCE '18. 가상 뉴�
 ## 인용 포인트
 - 스켈레톤 vs 스피너, 어떤 비교에서도 통계적 유의차 없음 — 스켈레톤 도입을 "체감 개선 확실"로 팔지 않기 위한 균형 근거.
 - 스켈레톤의 방어 가능한 이점은 레이아웃 사전 확정(CLS 방지) 쪽 — 도입 이유를 정확한 축으로 옮길 때.
+
+## 코드 예시
+
+이 논문이 지지하지 못한 축(체감 속도) 대신 방어 가능한 축(레이아웃 사전 확정)으로 스켈레톤을 만든 형태 — 로딩 상태와 완료 상태가 **같은 박스**를 쓰게 한다.
+
+```html
+<style>
+  /* 두 상태가 같은 그리드·같은 비율을 공유해야 레이아웃이 안 흔들린다 */
+  .card { display: grid; grid-template-columns: 96px 1fr; gap: 12px; }
+  .card__thumb { aspect-ratio: 1 / 1; }
+  .card__line { height: 1.25rem; margin-bottom: 8px; }
+  .skeleton { background: #e9e9ee; border-radius: 4px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton { animation: pulse 1.4s ease-in-out infinite; }
+  }
+  @keyframes pulse { 50% { opacity: 0.55; } }
+</style>
+
+<article class="card" aria-busy="true">
+  <div class="card__thumb skeleton"></div>
+  <div>
+    <div class="card__line skeleton" style="width: 70%"></div>
+    <div class="card__line skeleton" style="width: 40%"></div>
+  </div>
+</article>
+```
+
+CLS 이득은 스켈레톤 박스가 실제 콘텐츠 박스와 **정확히 같을 때만** 생긴다 — 제목이 두 줄로 접히는데 스켈레톤이 한 줄이면 스켈레톤 비용을 치르고 레이아웃 시프트도 그대로 받는다. 이 논문 기준으로는 체감 속도 개선을 도입 명분으로 내세울 수 없다는 점도 같이 기억해야 한다.

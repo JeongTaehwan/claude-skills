@@ -34,3 +34,43 @@ https://nextjs.org/docs/app/api-reference/components/link
 ## 인용 포인트
 - "저속에서 prefetch는 양날의 검" — 전부 켜기/전부 끄기 양극단 대신 경로별 선별이라는 합의안을 만들 때.
 - 대량 목록은 끄고 hover로 복원, 핵심 전환 경로는 예열 — 구체 적용 기준으로 인용.
+
+## 코드 예시
+
+양극단 대신 경로별 선별 — 스쳐 가는 목록 링크는 꺼 두고 hover 로만 복원, 결제 같은 핵심 경로는 그대로 예열한다.
+
+```jsx
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
+function HoverPrefetchLink({ href, children }) {
+  const [active, setActive] = useState(false);
+  return (
+    <Link
+      href={href}
+      // false = 안 함, null = 기본 동작(뷰포트 진입 시 자동)으로 복원
+      prefetch={active ? null : false}
+      onMouseEnter={() => setActive(true)}
+      onFocus={() => setActive(true)}
+    >
+      {children}
+    </Link>
+  );
+}
+
+export default function Feed({ items }) {
+  return (
+    <>
+      {items.map((it) => (
+        <HoverPrefetchLink key={it.id} href={`/p/${it.id}`}>{it.title}</HoverPrefetchLink>
+      ))}
+      {/* 핵심 전환 경로는 예열을 유지 */}
+      <Link href="/checkout" prefetch>결제하기</Link>
+    </>
+  );
+}
+```
+
+hover 트리거는 터치 기기에서 사실상 발동하지 않는다 — 모바일에서는 이 패턴이 "prefetch 전부 끄기"와 같아지므로, 모바일 전환율이 걸린 경로는 따로 켜 두어야 한다.

@@ -26,9 +26,9 @@ https://github.com/ossf/scorecard
 ## 이럴 땐 아니다
 - 알려진 CVE 가 우리 의존성 트리에 있는지 찾는 취약점 스캐너가 필요한 것이라면 Scorecard 가 아니다 — 이건 관행을 재는 도구다
 - 빌드·릴리스 무결성을 어느 수준까지 보장할 것인가의 **프레임워크**는 `development/slsa.md`
-- 조직 전체의 보안 개발 프로세스 요구사항은 `development/nist-secure-software-development-framework.md`
-- 우리 애플리케이션 코드 자체의 취약점 유형은 `development/owasp-top-10.md` 와 `development/cwe-top-25-most-dangerous-software-weaknesses.md`
-- 설계 단계에서 공격 표면을 짚는 일은 `development/owasp-threat-modeling.md`
+- 조직 전체의 보안 개발 프로세스 요구사항은 `security/nist-secure-software-development-framework.md`
+- 우리 애플리케이션 코드 자체의 취약점 유형은 `security/owasp-top-10.md` 와 `development/cwe-top-25-most-dangerous-software-weaknesses.md`
+- 설계 단계에서 공격 표면을 짚는 일은 `security/owasp-threat-modeling.md`
 
 ## 무엇이 들어있나
 체크 목록이 본체다 — 브랜치 보호, 코드 리뷰 여부, 유지보수 활성도(Maintained), 의존성 업데이트 도구 사용, 의존성 핀 고정(Pinned-Dependencies), CI 토큰 권한(Token-Permissions), 위험한 워크플로 패턴(Dangerous-Workflow), SAST 적용, 릴리스 서명(Signed-Releases), 퍼징, 알려진 취약점 등. 각 체크는 0~10 점과 함께 **왜 그 점수인지의 근거와 개선 방법**을 함께 낸다.
@@ -40,3 +40,28 @@ CLI, GitHub Action, 그리고 주요 프로젝트의 점수를 조회할 수 있
 - 의존성 도입 심사 기준을 문서화할 때, Scorecard 의 체크 목록을 그대로 사내 체크리스트의 초안으로 쓸 수 있다.
 - "스타가 많으니 안전하다"는 판단을 반박할 때, 인기와 점수가 자주 어긋난다는 점이 실증적 근거가 된다.
 - 종합 점수가 아니라 체크별 결과를 보라는 프로젝트 자체의 권고는, 점수를 KPI 로 만들려는 시도를 막는 데 인용할 수 있다.
+
+## 코드 예시
+
+"종합 점수 하나로 판단하지 말고 어떤 체크에서 깎였는지를 보라"는 프로젝트 자체의 권고를 그대로 실행한 형태.
+
+```bash
+export GITHUB_AUTH_TOKEN=ghp_...   # 공개 저장소도 API 레이트리밋 때문에 토큰이 필요하다
+
+# 도입 심사에서 실제로 볼 체크만 지정한다
+scorecard --repo=github.com/expressjs/express \
+  --checks=Branch-Protection,Code-Review,Maintained,Pinned-Dependencies,Token-Permissions,Dangerous-Workflow,Signed-Releases \
+  --format=json > express.json
+
+# 깎인 체크만 근거(reason)와 함께 꺼낸다 — 이 목록이 심사 기록이 된다
+jq -r '.checks[] | select(.score >= 0 and .score < 7)
+       | "\(.score)/10  \(.name) — \(.reason)"' express.json
+
+# 후보들을 같은 기준으로 나란히 비교
+for repo in expressjs/express fastify/fastify koajs/koa; do
+  printf '%s\t' "$repo"
+  scorecard --repo="github.com/$repo" --format=json | jq '.score'
+done
+```
+
+체크 점수는 `-1`(판정 불가)이 나올 수 있어서 `< 7` 필터에 그대로 섞인다 — 위처럼 걸러내지 않으면 "점검 못 한 것"과 "점검해서 나쁜 것"이 같은 줄에 놓인다. 그리고 이 결과는 실행 시점 스냅샷이라, 심사 통과 후에도 점수는 얼마든지 내려간다.

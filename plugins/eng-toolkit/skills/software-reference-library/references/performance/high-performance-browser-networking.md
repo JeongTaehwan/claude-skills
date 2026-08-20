@@ -40,3 +40,36 @@ Ilya Grigorik(당시 Google)이 네트워크 물리 계층부터 TCP·TLS·모�
 - "대역폭을 늘려도 로드가 빨라지지 않는 지점이 온다 — 병목은 지연(RTT)이다"(Ch.1): 저속 대응에서 왕복 횟수 줄이기가 압축보다 앞서는 이유의 정본 출처.
 - 모바일 라디오는 유휴에서 깨어나는 데 제어 평면 지연을 치른다(Ch.7): 폴링 금지·요청 묶어보내기 컨벤션을 취향이 아니라 원리로 만들어 준다.
 - 2013년 저작임을 함께 밝히고 인용할 것 — 프로토콜 각론(HTTP/2 이후)은 최신 문서로 보강해야 한다.
+
+## 코드 예시
+
+Ch.7~8의 귀결 — 라디오를 깨우는 산발적 요청을 없애고 한 번에 묶어 보낸다. 폴링 금지 컨벤션을 취향이 아니라 코드로 만든 형태.
+
+```js
+// 나쁜 쪽: 30초 폴링. 모바일에서는 매번 라디오가 유휴에서 깨어나며 제어 평면 지연을 문다
+// setInterval(() => fetch('/api/events'), 30_000);
+
+const queue = [];
+let timer = null;
+
+export function track(event) {
+  queue.push({ ...event, t: Date.now() });   // 즉시 보내지 않는다
+  timer ??= setTimeout(flush, 10_000);       // 최대 10초까지 모아서 한 번에
+  if (queue.length >= 20) flush();
+}
+
+function flush() {
+  clearTimeout(timer); timer = null;
+  if (!queue.length) return;
+  const body = JSON.stringify(queue.splice(0));
+  // 페이지가 사라져도 전송되는 경로. 별도 연결을 새로 세우지 않는다
+  navigator.sendBeacon('/api/events', new Blob([body], { type: 'application/json' }));
+}
+
+// 백그라운드로 갈 때 남은 걸 비운다 — 여기서 안 비우면 유실된다
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flush();
+});
+```
+
+배칭은 왕복 횟수와 라디오 기상 횟수를 줄이는 대신 데이터의 최신성을 최대 10초 늦추므로, 실시간이 요구 조건인 화면(주문 상태, 채팅)에는 이 창을 그대로 쓰면 안 된다.

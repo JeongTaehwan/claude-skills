@@ -33,3 +33,24 @@ Akamai — Spring 2017 벤더 리포트(상관관계 기반 RUM 데이터, 논�
 ## 인용 포인트
 - 100ms 지연 → 전환율 최대 -7% (상관관계 기반임을 명시) — 커머스 성능 예산 설정의 비즈니스 근거.
 - 모바일이 데스크톱보다 지연에 민감 — 모바일 우선 성능 작업의 우선순위 논거.
+
+## 코드 예시
+
+리포트 수치를 그대로 인용하는 대신, 같은 모양의 분석(로딩 시간 버킷 × 전환율, 기기별 분리)을 자사 RUM 테이블에서 재현하는 질의.
+
+```sql
+-- rum: 세션당 1행, lcp_ms 는 web-vitals 로 수집, converted 는 주문 완료 여부
+SELECT
+  device_type,
+  FLOOR(lcp_ms / 100) * 100                    AS lcp_bucket_ms,
+  COUNT(*)                                     AS sessions,
+  AVG(CASE WHEN converted THEN 1.0 ELSE 0 END) AS conversion_rate
+FROM rum
+WHERE event_date >= CURRENT_DATE - INTERVAL '28' DAY
+  AND lcp_ms BETWEEN 500 AND 8000              -- 봇·이상치 절단
+GROUP BY device_type, lcp_bucket_ms
+HAVING COUNT(*) >= 1000                        -- 표본 적은 버킷은 노이즈
+ORDER BY device_type, lcp_bucket_ms;
+```
+
+이 질의가 내놓는 것도 상관관계일 뿐이다 — 느린 세션은 구형 기기·저속 망·장바구니가 큰 사용자에 몰려 있어, "100ms 줄이면 전환율이 오른다"는 인과 주장을 하려면 A/B로 지연을 주입한 실험이 따로 필요하다.

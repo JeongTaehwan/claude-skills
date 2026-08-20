@@ -36,3 +36,35 @@ https://nextjs.org/docs/app/api-reference/components/image
 ## 인용 포인트
 - 지연 로딩이 기본값이라 뷰포트 밖 이미지는 아예 받지 않는다는 점 — "이미지 최적화를 나중에"라는 주장에 대한 반박 근거.
 - 이미지가 LCP인 화면에서는 선택이 아니라 기본값으로 강제할 컴포넌트라는 포지션.
+
+## 코드 예시
+
+"LCP 하나만 `priority`, 나머지는 기본 lazy" 라는 기준을 목록 화면에 그대로 적용하고, `sizes` 로 실제 렌더 폭만큼만 받게 한다.
+
+```jsx
+import Image from "next/image";
+
+export default function ProductGrid({ products }) {
+  return (
+    <ul className="grid">
+      {products.map((p, i) => (
+        <li key={p.id}>
+          <Image
+            src={p.imageUrl}
+            alt={p.name}
+            width={600}
+            height={600}
+            // 모바일 1열·태블릿 2열·데스크톱 4열 → 그 폭에 맞는 소스만 내려온다
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            priority={i === 0}   // 첫 카드만 프리로드
+            placeholder="blur"
+            blurDataURL={p.blurDataURL}
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+`sizes` 는 실제 CSS 레이아웃과 어긋나도 조용히 동작한다 — 값이 틀리면 브라우저는 필요보다 큰 소스를 고르고, 최적화했다고 믿는 상태로 바이트만 그대로 나간다. `priority` 를 여러 장에 붙이는 것도 프리로드 경쟁을 만들어 역효과다.

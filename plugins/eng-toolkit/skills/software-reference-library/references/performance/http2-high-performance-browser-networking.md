@@ -36,3 +36,32 @@ HTTP/2의 핵심 설계 — 하나의 TCP 연결 위에서 여러 요청·응답
 ## 인용 포인트
 - "HTTP/2에서 연결은 출처당 하나면 충분하다 — 샤딩은 제거 대상" — 레거시 최적화 철거 PR의 근거.
 - HTTP/1.1 관행이 HTTP/2에서 역효과가 되는 메커니즘(캐시 파편화, 압축 문맥 상실) 인용.
+
+## 코드 예시
+
+"출처당 연결 하나면 충분 — 샤딩은 제거 대상" — 레거시 최적화를 걷어내는 PR 이 실제로 무엇을 바꾸는지, 그리고 걷어내도 되는지 확인하는 법.
+
+```diff
+- <!-- HTTP/1.1 시대: 연결 6개 제한을 우회하려고 호스트를 쪼갰다 -->
+- <img src="https://img1.example.com/a.webp">
+- <img src="https://img2.example.com/b.webp">
+- <img src="https://img3.example.com/c.webp">
++ <!-- HTTP/2: 호스트마다 DNS+TCP+TLS 를 새로 물고, HPACK 압축 문맥도 따로 논다 -->
++ <img src="https://img.example.com/a.webp">
++ <img src="https://img.example.com/b.webp">
++ <img src="https://img.example.com/c.webp">
+```
+
+```js
+// 요청 수를 아끼려던 번들 병합도 되돌린다 — 잘게 나눠야 바뀐 청크만 다시 받는다
+optimization: {
+  splitChunks: { chunks: 'all', maxInitialRequests: 25, minSize: 20000 },
+}
+```
+
+```bash
+# 전제 확인: 정말 h2 로 서빙되고 있는가
+curl -sI --http2 https://img.example.com/a.webp | head -1   # → HTTP/2 200
+```
+
+멀티플렉싱이 없애는 건 HTTP 계층의 순서 직렬화뿐이라, 패킷이 유실되면 TCP 계층에서 그 단일 연결 전체가 멈춘다 — 손실이 잦은 모바일 망에서는 연결을 하나로 모은 것이 오히려 불리해질 수 있고, 그 지점이 HTTP/3 를 검토할 자리다.

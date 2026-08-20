@@ -32,3 +32,36 @@ Preload(핵심 리소스 사전 로드) · Render(초기 라우트 최우선 렌
 ## 인용 포인트
 - "지금 라우트만 빠르면 된다, 나머지는 백그라운드" — 초기 번들에서 타 라우트 코드를 빼자는 제안의 근거.
 - 개별 최적화들을 하나의 전략으로 묶는 공용 어휘로 인용 — 리뷰·설계 문서에서 P/R/P/L 네 글자로 소통.
+
+## 코드 예시
+
+네 글자가 한 문서 안에서 어떤 순서로 배치되는지 — 각 줄이 P·R·P·L 중 하나에 대응한다.
+
+```html
+<head>
+  <!-- P: 지금 라우트에 필요한 것만 앞당긴다 -->
+  <link rel="modulepreload" href="/chunks/home.js" />
+  <link rel="preload" href="/fonts/brand.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/critical.css" />
+</head>
+<body>
+  <!-- R: 초기 라우트는 서버 마크업으로 즉시 그려져 있다 -->
+  <div id="root"><h1>홈</h1><!-- ... --></div>
+
+  <script type="module">
+    import { hydrate } from "/chunks/home.js";
+    hydrate(document.getElementById("root"));
+
+    // P(re-cache): 나머지 라우트 청크는 서비스 워커가 백그라운드로 받아 둔다
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+
+    // L: 그 밖의 것은 필요해지는 순간까지 미룬다
+    document.querySelector("#open-chat")?.addEventListener("click", async () => {
+      const { openChat } = await import("/chunks/chat.js");
+      openChat();
+    }, { once: true });
+  </script>
+</body>
+```
+
+세 번째 P(프리캐시)는 지금 안 쓸 바이트를 지금 받는 일이다 — 좁은 회선에서는 현재 화면의 리소스와 대역폭을 다투므로, 첫 방문에는 손해이고 재방문에서만 회수된다.

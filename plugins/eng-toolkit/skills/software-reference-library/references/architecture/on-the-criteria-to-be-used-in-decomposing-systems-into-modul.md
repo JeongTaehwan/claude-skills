@@ -41,3 +41,33 @@ https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.
 - 레이어 기반 패키지 구조를 도메인 기반으로 바꾸자고 제안할 때: 흐름도 기반 분해가 변경에 취약하다는 것을 1972년에 실증한 원전이라는 무게가 있다.
 - 코드 리뷰에서 "이 필드를 public으로 열지 말자"를 취향이 아닌 원칙으로 말할 때: 인터페이스는 가정의 집합이며, 노출한 가정은 전부 나중에 바꿀 수 없게 된다는 논지를 쓴다.
 - 모듈 경계 후보를 평가하는 한 문장 체크: "이 결정이 바뀌면 몇 개 모듈을 열어야 하는가."
+
+## 코드 예시
+
+논문의 KWIC 비교를 최소 형태로 옮긴 것 — 위는 "저장 방식"이라는 결정이 호출자에게 새어 나간 인터페이스, 아래는 그 결정을 숨긴 인터페이스다.
+
+```python
+# 흐름 기반: 자료구조가 곧 인터페이스다.
+# lines 가 list[list[str]] 라는 가정을 호출자 전원이 공유하게 된다.
+def circular_shift(lines: list[list[str]]) -> list[list[str]]:
+    return [w[i:] + w[:i] for w in lines for i in range(len(w))]
+
+# 정보 은닉 기반: 저장 방식도 정렬 시점도 드러내지 않는다.
+class LineStorage:
+    def __init__(self) -> None:
+        self._lines: list[list[str]] = []   # 이 표현이 바뀌어도 밖은 모른다
+
+    def add_line(self, words: list[str]) -> None:
+        self._lines.append(words)
+
+    def line_count(self) -> int:
+        return len(self._lines)
+
+    def word(self, line: int, index: int) -> str:
+        return self._lines[line][index]
+
+    def words_in(self, line: int) -> int:
+        return len(self._lines[line])
+```
+
+시그니처만 좁혀도 가정은 샐 수 있다 — `add_line` 을 반드시 정렬 전에 호출해야 한다거나 `line` 번호가 삽입 순서와 같다는 규칙은 타입에 안 드러나지만 이미 인터페이스의 일부이고, 그래서 나중에 바꿀 수 없다.

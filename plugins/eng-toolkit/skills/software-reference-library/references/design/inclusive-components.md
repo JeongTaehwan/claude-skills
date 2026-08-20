@@ -35,3 +35,31 @@ Heydon Pickering이 카드·탭·툴팁·메뉴 버튼 같은 UI 컴포넌트를
 ## 인용 포인트
 - "패턴 라이브러리가 되려고 하는 블로그"라는 자기 규정은, 컴포넌트 문서를 정답 카탈로그가 아니라 판단 근거로 쓰자고 팀을 설득할 때 인용하기 좋다.
 - 툴팁 vs 토글팁 구분은 "이건 hover로 띄우면 되나요"라는 반복 질문에 대한 정리된 답으로 디자인 시스템 문서에 그대로 옮길 만하다.
+
+## 코드 예시
+
+툴팁과 토글팁은 생김새가 같아도 다른 물건이라는 주장 — 하나는 컨트롤의 '설명'이고, 다른 하나는 정보를 '띄우는' 버튼이다.
+
+```html
+<!-- 툴팁: 이미 이름이 있는 컨트롤에 설명을 덧붙인다. hover/focus로 나타난다 -->
+<button type="button" aria-describedby="tip-refund">환불</button>
+<div role="tooltip" id="tip-refund" hidden>결제일로부터 7일 이내만 가능</div>
+
+<!-- 토글팁: 버튼 자체가 정보를 여는 것이 목적이라 클릭으로 열고, live region으로 전달한다 -->
+<span class="toggletip">
+  <button type="button" aria-label="배송비 안내" data-toggletip="3만원 이상 무료">i</button>
+  <span role="status"></span>
+</span>
+```
+
+```js
+document.querySelectorAll('[data-toggletip]').forEach((btn) => {
+  const live = btn.nextElementSibling; // role="status"
+  btn.addEventListener('click', () => {
+    live.textContent = ''; // 비웠다 다시 채워야 스크린리더가 재차 읽는다
+    setTimeout(() => { live.textContent = btn.dataset.toggletip; }, 100);
+  });
+});
+```
+
+`role="tooltip"`은 사실상 아무 일도 하지 않는다 — 실제 연결은 `aria-describedby`가 한다. 그리고 이 코드에는 WCAG 1.4.13이 요구하는 것들(Esc로 닫기, 툴팁 위로 포인터를 옮겨도 유지되기)과 토글팁의 바깥 클릭 닫기가 빠져 있다.

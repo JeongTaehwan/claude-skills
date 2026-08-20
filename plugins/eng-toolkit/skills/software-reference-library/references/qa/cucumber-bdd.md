@@ -36,3 +36,33 @@ Gherkin 문법, 시나리오 작성 시 흔한 안티패턴(UI 조작을 그대�
 ## 인용 포인트
 - "BDD는 테스트 기법이 아니라 협업 기법"이라는 공식 출처가 필요할 때. Cucumber 자체 문서가 그렇게 말한다는 점이 설득력을 만든다.
 - Discovery 없이 Automation부터 시작하는 도입안에 반대할 때, 세 단계 순서를 근거로 들 수 있다.
+
+## 코드 예시
+
+"쿠폰은 중복 사용 불가" 한 문장이 세 사람에게 다르게 읽힌 것을, Formulation 단계에서 예시로 갈라 놓은 결과물 — UI 조작이 아니라 규칙만 서술한다.
+
+```gherkin
+# features/coupon_stacking.feature
+Feature: 쿠폰 병용 규칙
+
+  Rule: 동일 쿠폰은 한 주문에 한 번만 적용된다
+
+    Example: 같은 쿠폰을 두 번 넣으면 두 번째는 거절된다
+      Given 주문에 쿠폰 "WELCOME10" 이 적용돼 있다
+      When 쿠폰 "WELCOME10" 을 다시 적용한다
+      Then 적용이 거절되고 사유는 "이미 적용된 쿠폰"이다
+
+  Rule: 서로 다른 쿠폰은 할인 유형이 다를 때만 병용된다
+
+    Scenario Outline: <first> + <second> 병용
+      Given 주문에 쿠폰 "<first>" 이 적용돼 있다
+      When 쿠폰 "<second>" 을 적용한다
+      Then 결과는 "<result>" 이다
+
+      Examples:
+        | first     | second   | result |
+        | WELCOME10 | SHIPFREE | 적용   |
+        | WELCOME10 | SALE20   | 거절   |
+```
+
+시나리오가 늘어난 것이 합의가 생겼다는 증거는 아니다 — 이 표를 개발자 혼자 채웠다면 Discovery 를 건너뛴 것이고, 그때 파일은 오해를 기록해 자동화한 것에 지나지 않는다.

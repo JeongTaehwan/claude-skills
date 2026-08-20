@@ -35,3 +35,35 @@ ES 모듈의 정적 구조를 이용해 import되지 않은 export를 번들에�
 ## 인용 포인트
 - "트리 셰이킹은 켜는 옵션이 아니라 성립 조건을 지켜야 작동하는 성질" — 설정만 믿고 방치된 번들을 재점검하자는 제안의 근거.
 - named import 컨벤션을 린트 규칙으로 강제하자는 제안의 인용처.
+
+## 코드 예시
+
+"트리 셰이킹은 켜는 옵션이 아니라 성립 조건"을 세 조건 — 정적 ESM 보존, 부수효과 선언, 구체적 import — 을 각각 강제하는 설정으로 옮긴 것.
+
+```js
+// package.json — 부수효과가 있는 파일만 열거한다(나머지는 걷어내도 안전하다는 선언)
+// {
+//   "sideEffects": ["*.css", "./src/polyfills.js"]
+// }
+
+// babel.config.json — ESM 을 CJS 로 바꾸면 정적 분석이 죽어 셰이킹이 통째로 무력화된다
+// {
+//   "presets": [["@babel/preset-env", { "modules": false }]]
+// }
+
+// eslint.config.js — 통짜 import 를 린트로 막아 컨벤션을 사람 기억에서 뺀다
+export default [
+  {
+    rules: {
+      "no-restricted-imports": ["error", {
+        paths: [
+          { name: "lodash", message: "lodash-es 에서 named import 로 가져오세요" },
+          { name: "@mui/icons-material", message: "아이콘은 개별 경로로 import 하세요" },
+        ],
+      }],
+    },
+  },
+];
+```
+
+`sideEffects` 목록은 검증되지 않는 **약속**이다 — import 만으로 전역을 건드리는 모듈(폴리필, 분석 스크립트 초기화, CSS 주입)을 빠뜨리면 번들러가 조용히 지워 버리고, 그 버그는 개발 서버가 아니라 프로덕션 빌드에서만 나타난다.

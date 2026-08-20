@@ -37,3 +37,37 @@ https://web.dev/articles/performance-budgets-101
 ## 인용 포인트
 - "예산 없는 성능 개선은 다음 분기에 되돌아간다" — 개선 작업의 마무리로 CI 가드레일을 요구하는 근거.
 - 예산 초과를 코드리뷰 논쟁이 아니라 빌드 실패로 처리하자는 제안의 인용처.
+
+## 코드 예시
+
+"이 기능 추가로 얼마나 늘어도 되나"를 합의된 수치로 바꾼 `budget.json` — 수량 예산과 시간 예산을 경로별로 따로 건다.
+
+```json
+[
+  {
+    "path": "/*",
+    "resourceSizes": [
+      { "resourceType": "script", "budget": 170 },
+      { "resourceType": "image", "budget": 300 },
+      { "resourceType": "total", "budget": 600 }
+    ],
+    "resourceCounts": [
+      { "resourceType": "third-party", "budget": 10 }
+    ],
+    "timings": [
+      { "metric": "largest-contentful-paint", "budget": 2500 },
+      { "metric": "total-blocking-time", "budget": 300 }
+    ]
+  },
+  {
+    "path": "/checkout*",
+    "resourceSizes": [{ "resourceType": "script", "budget": 120 }]
+  }
+]
+```
+
+```bash
+npx lighthouse https://example.com --budget-path=./budget.json --output=json --output-path=./lhr.json
+```
+
+`resourceSizes` 단위는 KiB 이고 압축 후 전송 크기 기준이라, 소스 코드 라인 수나 원본 파일 크기와는 다르게 움직인다 — Lighthouse 단독 실행은 초과를 리포트할 뿐 종료 코드로 실패시키지 않으므로, 게이트로 쓰려면 CI 쪽에서 결과를 읽어 판정해야 한다.

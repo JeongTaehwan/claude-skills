@@ -35,3 +35,33 @@ Xiao Sophia Wang, Arvind Krishnamurthy, David Wetherall — USENIX NSDI '16. "�
 ## 인용 포인트
 - 초기 로드에 쓰이지 않는 CSS가 3/4 — "CSS 전부를 렌더링 차단으로 내려보내는 현재 구조가 낭비"라는 주장의 실측 근거.
 - 초기 상태 우선 전송으로 PLT 절반 이하 단축 — 크리티컬 CSS·스트리밍 SSR 도입 제안서에 다는 1차 문헌.
+
+## 코드 예시
+
+"초기 로드에 쓰이지 않는 CSS가 3/4"라는 논문의 출발 측정을, 자사 페이지에서 그대로 재현해 크리티컬 CSS 제안의 근거 숫자를 만드는 스크립트.
+
+```js
+import puppeteer from "puppeteer";
+
+const browser = await puppeteer.launch();
+const page = await browser.newPage();
+
+await page.coverage.startCSSCoverage();
+await page.goto("https://example.com/", { waitUntil: "networkidle0" });
+const entries = await page.coverage.stopCSSCoverage();
+
+let total = 0;
+let used = 0;
+for (const entry of entries) {
+  total += entry.text.length;
+  // ranges = 이번 로드에서 실제로 매칭된 바이트 구간
+  for (const r of entry.ranges) used += r.end - r.start;
+}
+
+console.log(`총 CSS ${(total / 1024).toFixed(1)}KB 중 사용 ${((used / total) * 100).toFixed(1)}%`);
+console.log(`미사용 ${((total - used) / 1024).toFixed(1)}KB 가 렌더링을 막고 있다`);
+
+await browser.close();
+```
+
+커버리지가 말하는 "미사용"은 **이번 로드에서 매칭되지 않았다**는 뜻이지 필요 없다는 뜻이 아니다 — 호버·모달·다른 뷰포트 전용 규칙이 전부 미사용으로 잡히므로, 이 숫자는 나중으로 미룰(defer) 근거로는 쓰되 지울 근거로 쓰면 페이지가 조용히 깨진다.

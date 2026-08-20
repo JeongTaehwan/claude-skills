@@ -24,7 +24,7 @@ https://www.nngroup.com/articles/discount-usability-20-years/
 
 ## 이럴 땐 아니다
 - 정량적 실험의 표본 크기·유의성 판단이 필요하면 `planning/online-controlled-experiments-at-large-scale.md`, `planning/trustworthy-online-controlled-experiments.md`
-- 지표 해석 함정 전반은 `planning/a-dirty-dozen-12.md`
+- 지표 해석 함정 전반은 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 사용자 테스트 없이 전문가가 화면을 훑는 방법은 `design/nn-g-10-usability-heuristics.md`
 - UX를 대규모로 계측하는 지표 프레임은 `planning/heart.md`
 
@@ -34,3 +34,27 @@ discount usability의 세 축은 단순화된 사용자 테스트, 종이 프로
 ## 인용 포인트
 - "적은 인원으로 자주"라는 원칙은, 스프린트마다 리서치를 끼워 넣자는 프로세스 제안의 근거 문장으로 쓸 수 있다.
 - 5명 규칙의 적용 범위 한계는, 정량 지표 판단에 소수 인터뷰를 근거로 들이미는 회의를 정리할 때 유용하다.
+
+## 코드 예시
+
+"5명"이 상수가 아니라 특정 가정에서 나온 곡선의 한 점이라는 걸 직접 확인하는 것 — 오용을 말릴 때 이 숫자들이 논쟁을 대체한다.
+
+```js
+// Nielsen–Landauer: n명으로 발견되는 문제 비율 = 1 - (1 - L)^n
+// L = 참가자 1명이 평균적으로 발견하는 문제의 비율
+const found = (n, L = 0.31) => 1 - (1 - L) ** n;
+
+for (const n of [1, 3, 5, 10, 15]) {
+  console.log(n, `${(found(n) * 100).toFixed(0)}%`);
+}
+// 1 31% / 3 67% / 5 84% / 10 98% / 15 100%
+
+// '5명'은 L=0.31 을 가정했을 때의 결과다. 발견률이 낮으면 절반을 겨우 넘는다
+console.log(found(5, 0.15).toFixed(2)); // 0.56
+
+// 사용자 그룹이 섞이면 그룹별로 따로 센다 — 합쳐서 5명이 아니다
+const groups = ['신규 구매자', '판매자', 'CS 상담원'];
+console.log(groups.length * 4, '명'); // 12명
+```
+
+이 곡선은 정성 조사에서 "문제가 발견되는가"에만 해당한다 — 전환율이 올랐는지 같은 정량 판단에는 아무 말도 하지 않고, 그 오용이 원문이 직접 지적하는 지점이다. `L = 0.31`도 관측된 평균이지 우리 제품의 값이 아니다.

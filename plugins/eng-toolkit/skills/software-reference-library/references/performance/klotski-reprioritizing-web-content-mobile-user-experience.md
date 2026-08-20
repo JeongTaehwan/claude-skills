@@ -34,3 +34,35 @@ Michael Butkiewicz, Daimeng Wang, Zhe Wu, Harsha V. Madhyastha, Vyas Sekar — U
 ## 인용 포인트
 - "PLT는 앞으로도 사용자 인내 한계보다 길 것" — 전체 최적화의 한계를 인정하고 우선순위 기반 전략으로 전환하자는 제안의 출발점 인용.
 - 시간 예산(예: 2초) 안에 중요 콘텐츠 우선 배달 — 성능 예산을 "전체 완료 시간"이 아니라 "핵심 콘텐츠 도착 시간"으로 정의하자는 근거.
+
+## 코드 예시
+
+목표를 "전체 완료 시간"에서 "핵심 콘텐츠 도착 시간"으로 바꾸면 서버 코드가 이렇게 바뀐다 — 중요한 부분만 먼저 흘려보내고 나머지는 뒤에 붙인다.
+
+```jsx
+// 위: 시간 예산 안에 반드시 도착해야 하는 것. 아래: 늦어도 되는 것
+function ProductPage({ id }) {
+  return (
+    <Layout>
+      <ProductSummary id={id} />                {/* 서버에서 즉시 렌더 — 예산 안에 나간다 */}
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <Reviews id={id} />                     {/* 느린 쿼리. 준비되면 뒤이어 스트리밍 */}
+      </Suspense>
+      <Suspense fallback={null}>
+        <Recommendations id={id} />             {/* 서드파티 호출. 실패해도 페이지는 산다 */}
+      </Suspense>
+    </Layout>
+  );
+}
+
+// 핵심 셸을 먼저 flush 하고, 나머지 청크는 준비되는 대로 같은 응답에 이어 보낸다
+const { pipe } = renderToPipeableStream(<ProductPage id={id} />, {
+  onShellReady() {              // 여기까지가 "시간 예산 안에 배달할 것"
+    res.setHeader('Content-Type', 'text/html');
+    pipe(res);
+  },
+  onShellError(err) { res.status(500).send('<h1>다시 시도해 주세요</h1>'); },
+});
+```
+
+우선순위 재조정은 전체 로드를 빠르게 만들지 않는다 — 뒤로 미룬 콘텐츠는 오히려 더 늦게 도착하고, 무엇이 "핵심"인지 판단이 틀리면 사용자가 기다리는 바로 그 부분을 뒤로 보낸 셈이 된다.

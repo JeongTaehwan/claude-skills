@@ -36,3 +36,31 @@ README에 무엇이 어떤 순서로 들어가야 하는지를 명세로 고정�
 
 ## 인용 포인트
 - README 리뷰가 취향 싸움이 될 때, "코드를 안 보고 쓸 수 있어야 문서가 끝난 것"이라는 기준 하나로 논점을 옮길 수 있다.
+
+## 코드 예시
+
+"읽는 것보다 린터를 CI 에 거는 순간 가치가 나온다" — 명세가 섹션의 **순서**까지 규정한다는 점을 그대로 검사로 옮긴 것.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+required=(Background Install Usage Contributing License)
+headings=$(grep '^## ' README.md | sed 's/^## //')
+
+i=0
+while read -r h; do
+  [ "${required[$i]:-}" = "$h" ] && i=$((i + 1))
+done <<< "$headings"
+
+if [ "$i" -ne "${#required[@]}" ]; then
+  echo "README 표준 위반 — 필요한 순서: ${required[*]}"
+  echo "현재 순서: $(echo "$headings" | tr '\n' ' ')"
+  exit 1
+fi
+
+# 새 저장소는 손으로 쓰지 않고 뼈대를 찍어낸다
+#   npx -p yo -p generator-standard-readme yo standard-readme
+```
+
+이 검사가 보장하는 건 하한선뿐이다 — 섹션이 제자리에 있어도 "코드를 한 번도 안 열어보고 이 모듈을 쓸 수 있는가"라는 명세의 진짜 완료 조건은 여전히 사람이 판정한다. 린터는 취향 싸움을 없애 주고, 판정을 없애 주지는 않는다.

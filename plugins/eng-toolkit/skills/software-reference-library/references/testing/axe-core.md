@@ -37,3 +37,35 @@ axe-core는 DOM을 순회하며 규칙 집합을 평가하고, 결과를 violati
 ## 인용 포인트
 - incomplete 범주의 존재 자체 — "자동 검사 통과 = 접근성 확보"라는 보고를 되돌릴 때 쓸 수 있는 도구 자신의 근거.
 - 여러 상용/오픈소스 도구가 같은 엔진을 공유한다는 점 — 도구 선정 논의를 "무엇을 쓸까"에서 "어떤 규칙 집합을 차단 기준으로 삼을까"로 옮기는 프레임.
+
+## 코드 예시
+
+violations 만 차단 기준으로 삼고, incomplete 는 실패가 아니라 "사람이 볼 목록"으로 따로 뽑아 두는 형태.
+
+```js
+import axe from 'axe-core';
+
+test('결제 폼에 접근성 위반이 없다', async () => {
+  document.body.innerHTML = renderCheckoutForm();
+
+  const results = await axe.run(document.body, {
+    // 차단 기준을 태그로 못 박는다 — best-practice 까지 넣을지가 팀의 결정 지점
+    runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
+  });
+
+  // 자동으로 판정 불가한 항목은 실패시키지 않고 로그로 남긴다
+  if (results.incomplete.length > 0) {
+    console.warn(
+      '수동 확인 필요:',
+      results.incomplete.map((r) => r.id).join(', ')
+    );
+  }
+
+  const summary = results.violations.map(
+    (v) => `${v.id} (${v.impact}) × ${v.nodes.length}`
+  );
+  expect(summary).toEqual([]);
+});
+```
+
+이 테스트가 초록이어도 접근성이 확보된 건 아니다 — `incomplete` 로 빠진 항목과 포커스 순서·스크린리더 흐름처럼 엔진 범위 밖인 것들은 여전히 사람이 확인해야 한다.

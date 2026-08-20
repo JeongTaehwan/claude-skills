@@ -39,3 +39,32 @@ Fowler 자신은 classic 진영으로, sociable을 기본값으로 둔다고 밝
 - 단위의 크기는 팀이 정한다는 입장 — 정의 논쟁을 "우리 팀 컨벤션을 문서에 적자"로 전환시키는 프레임.
 - solitary / sociable — 두 진영에 이름을 붙여 리뷰 코멘트를 "틀렸다"가 아니라 "여긴 sociable로 가자"로 바꿀 수 있는 어휘.
 - Fowler가 sociable을 기본값으로 쓴다는 사실은, 무조건적인 목 사용을 요구하는 컨벤션에 대한 반론 근거가 된다.
+
+## 코드 예시
+
+"단위의 정의는 팀이 정한다"를 문서 대신 린트 규칙으로 적은 것 — 기본값은 sociable 이고, 고립이 필요하면 디렉터리를 옮기는 것이 곧 선언이 된다.
+
+```javascript
+// eslint.config.js — 팀 컨벤션을 리뷰 코멘트가 아니라 규칙으로
+export default [
+  {
+    files: ['test/**/*.test.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        // 기본값 sociable: 협력 객체는 실제 구현을 쓴다
+        selector: "CallExpression[callee.object.name='vi'][callee.property.name='mock']",
+        message:
+          '기본값은 sociable 이다. 협력 객체를 더블로 막아야 하면 test/solitary/ 로 옮기고 ' +
+          '파일 상단에 이유를 적어라 (느림·비결정적·외부 자원).',
+      }],
+    },
+  },
+  {
+    // 고립이 정당한 곳: 외부 결제사·시계·파일시스템 등
+    files: ['test/solitary/**/*.test.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
+]
+```
+
+규칙은 `vi.mock` 호출만 센다 — 생성자에 손으로 만든 스텁을 주입하면 그대로 통과하므로, 이 설정이 막는 것은 무의식적인 목 사용이지 고립 자체가 아니다.

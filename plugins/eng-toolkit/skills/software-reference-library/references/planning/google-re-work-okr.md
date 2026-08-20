@@ -26,7 +26,7 @@ https://rework.withgoogle.com/en/guides/set-goals-with-okrs
 - OKR 의 배경 철학과 사례를 더 길게 읽고 싶으면 `planning/what-matters-okr.md`
 - 제품 성공을 하나의 지표로 정의하는 문제라면 `planning/north-star-metric.md`
 - UX 품질을 다차원으로 측정하는 지표 체계가 필요하면 `planning/heart.md`
-- 지표 해석의 함정(신규 지표가 올랐는데 실제로는 개선이 아닌 경우 등)은 `planning/a-dirty-dozen-12.md`
+- 지표 해석의 함정(신규 지표가 올랐는데 실제로는 개선이 아닌 경우 등)은 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 
 ## 무엇이 들어있나
 가이드의 뼈대는 세 가지다 — Objective 는 정성적이고 방향을 주는 문장, Key Result 는 측정 가능한 결과, 그리고 둘 다 짧게 유지할 것.
@@ -37,3 +37,35 @@ https://rework.withgoogle.com/en/guides/set-goals-with-okrs
 ## 인용 포인트
 - "모든 OKR 을 100% 달성했다"가 자랑이 아니라 경고 신호라는 프레임은, 목표 수준 논쟁을 한 문장으로 정리한다.
 - OKR 을 평가와 분리하자고 설득할 때 구글 공식 문서를 근거로 들 수 있다.
+
+## 코드 예시
+
+"이건 할 일이지 결과가 아니다"를 판정하는 기준을, Key Result 를 baseline → target 구조로 강제하는 형태로 옮긴 것.
+
+```yaml
+# 분기 OKR — KR 은 문장이 아니라 측정값의 이동이어야 한다
+objective: 신규 사용자가 도움 없이 첫 결제까지 도달한다
+
+key_results:
+  - metric: 가입 후 7일 내 첫 결제 비율
+    baseline: 0.12          # 지난 분기 실적
+    target: 0.18
+    actual: 0.156
+    score: 0.6              # (0.156 - 0.12) / (0.18 - 0.12)
+  - metric: 결제 화면 이탈률
+    baseline: 0.41
+    target: 0.30
+    actual: 0.38
+    score: 0.27
+
+# 아래는 KR 자리에 올 수 없다 — 결과가 아니라 활동이다
+# - 결제 모듈 리팩터링 완료
+# - 쿠폰 API 배포
+
+grading:
+  scale: [0, 1]
+  healthy_average: [0.6, 0.7]        # 평균 1.0 은 목표를 안전하게 잡았다는 신호
+  used_in_performance_review: false  # 평가와 붙는 순간 도전적인 목표가 사라진다
+```
+
+`score`의 선형 보간식은 구글 가이드가 규정한 것이 아니라 팀이 정하는 관례다 — 지표가 비선형이거나 상한이 있으면 이 숫자는 달성도를 왜곡한다. 그리고 `used_in_performance_review: false`는 파일에 적는다고 지켜지지 않는, 조직이 매 분기 다시 지켜야 하는 약속이다.

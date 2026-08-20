@@ -37,3 +37,23 @@ https://github.com/kamranahmedse/developer-roadmap
 
 ## 인용 포인트
 - 채용 요구사항이 비대해질 때, "이 로드맵에서도 권장 표시인 항목"이라는 근거로 필수에서 빼는 협상을 할 수 있다.
+
+## 코드 예시
+
+이 자료의 형식이 목록이 아니라 **의존 관계 + 필수/권장 구분**이라는 점을 그대로 가져와, 우리 팀 버전으로 잘라낸 것. JD 나 온보딩 계획에 붙는 산출물은 결국 이 모양이다.
+
+```mermaid
+flowchart LR
+  %% 실선 = 필수, 점선 테두리 = 권장(협상 가능)
+  http[HTTP / REST] --> auth[인증·인가]
+  sql[SQL·인덱스] --> tx[트랜잭션 격리]
+  auth --> api[우리 서비스 API]
+  tx --> api
+  api --> queue[메시지 큐]:::nice
+  api --> k8s[Kubernetes]:::nice
+  api --> obs[로그·메트릭]:::nice
+
+  classDef nice stroke-dasharray: 4 3;
+```
+
+점선 노드가 협상 대상이라는 것 외에, 이 그림이 말해 주지 않는 게 하나 있다 — 노드는 기술 이름이지 역량이 아니다. 다 채운 사람이 좋은 엔지니어라는 보장은 없고, 원본을 그대로 JD 로 옮기면 지원자를 거르는 게 아니라 쫓아내게 된다.

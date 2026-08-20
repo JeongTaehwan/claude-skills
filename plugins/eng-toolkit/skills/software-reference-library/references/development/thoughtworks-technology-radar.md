@@ -39,3 +39,28 @@ Radar 는 "우리가 직접 써 본 것만 싣는다"는 원칙으로 만들어�
 - "Hold 에 올라와 있다"는 도입 반대 의견에 붙일 수 있는 가장 짧은 외부 근거다.
 - 네 링의 정의 자체가 팀 내 기술 도입 프로세스 등급 체계로 그대로 차용할 만하다 — 사내 레이더를 만드는 조직이 실제로 많다.
 - 특정 기술의 등급 변화 이력은 "이건 유행이 아니라 몇 년째 자리 잡은 것"을 보여줄 때 쓸 수 있다.
+
+## 코드 예시
+
+"네 링의 정의를 사내 도입 프로세스 등급 체계로 차용한다"를 실제 파일과 게이트로 옮긴 것.
+
+```bash
+# 사내 레이더를 저장소에 둔다 (Build Your Own Radar 가 그대로 읽는 CSV 형식)
+#   name,ring,quadrant,isNew,description
+#   Trunk-based development,Adopt,techniques,FALSE,새 저장소의 기본값
+#   Prisma,Trial,tools,TRUE,주문 서비스에서만 시범 적용
+#   장기 실행 피처 브랜치,Hold,techniques,FALSE,새로 시작하지 않는다
+
+# PR 이 새로 추가한 의존성이 Hold 링에 있으면 사람 승인 라벨을 요구한다
+hold=$(awk -F, 'NR>1 && $2=="Hold" {print tolower($1)}' radar.csv)
+added=$(git diff origin/main...HEAD -- package.json | grep '^+ *"' | tr -d ' ",' | cut -d: -f1)
+
+for a in $added; do
+  if echo "$hold" | grep -qx "$(echo "$a" | tr 'A-Z' 'a-z')"; then
+    echo "Hold 링 항목을 새로 추가함: $a — radar.csv 의 사유를 읽고 예외 승인을 받으세요"
+    exit 1
+  fi
+done
+```
+
+Hold 는 "나쁘다"가 아니라 "새 프로젝트에서 기본 선택지로 삼지 말라"는 뜻이다 — 그래서 이 스크립트는 하드 블록보다 승인 요구로 두는 편이 링의 정의에 맞는다. 그리고 ThoughtWorks 의 판정 근거는 그들의 고객 프로젝트 경험이지 우리 맥락이 아니므로, 사내 레이더로 옮길 때 `description` 칸에 **우리 근거**를 다시 적지 않으면 등급만 베낀 문서가 된다.

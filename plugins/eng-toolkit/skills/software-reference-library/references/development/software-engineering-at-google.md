@@ -27,7 +27,7 @@ https://abseil.io/resources/swe-book
 - 리뷰어가 당장 오늘 리뷰에서 뭘 봐야 하는지 실무 지침만 필요하면 `development/google-code-review-developer-guide.md` 또는 `development/google-engineering-practices.md`
 - 언어별 코딩 컨벤션 논쟁이면 `development/google-style-guides.md`
 - 테스트 관련 장(11~14장)만 필요하다면 QA 도메인에 장별로 나뉘어 있다 — `qa/software-engineering-at-google-ch-11-testing-overview.md`, `qa/software-engineering-at-google-ch-12-unit-testing.md`, `qa/software-engineering-at-google-ch-13-test-doubles.md`, `qa/software-engineering-at-google-ch-14-larger-testing.md`
-- 장애 대응·SLO·온콜 같은 운영 영역은 `development/google-sre-books.md`
+- 장애 대응·SLO·온콜 같은 운영 영역은 `infrastructure/google-sre-books.md`
 
 ## 무엇이 들어있나
 가장 반박적인 주장은 제목의 정의 자체다. 이 책은 "좋은 코드"에 관한 책이 아니라 **시간과 규모가 코드에 무엇을 하는가**에 관한 책이라고 선을 긋는다. 그래서 판단 기준이 "이게 깔끔한가"가 아니라 "예상 수명 동안 변경 가능한가"로 바뀐다.
@@ -39,3 +39,29 @@ https://abseil.io/resources/swe-book
 - 하위호환 논쟁에서 하이럼의 법칙을 들면, "우린 그 필드를 공개 계약에 안 넣었다"는 방어가 실무적으로 왜 부족한지 설명하기 쉽다.
 - 테스트를 늘리자는 제안에 "지켜야 할 불변식은 사람 리뷰가 아니라 테스트로 고정한다"는 원칙을 붙이면 논의가 개인 성실성 문제에서 벗어난다.
 - 기술부채 정리를 정당화할 때, "엔지니어링은 코드의 수명 전체에 대한 비용"이라는 프레임이 단기 일정 논쟁을 되돌린다.
+
+## 코드 예시
+
+하이럼의 법칙과 베이온세 규칙을 "주의하자"가 아니라 저장소에 남는 물건으로 옮기면 이렇게 된다.
+
+```js
+// 하이럼의 법칙 — 계약에 안 적었어도 사용자가 충분히 많으면 누군가는 의존한다.
+// "그건 공개 계약이 아니다"라고 말하는 대신, 지킬 동작을 테스트로 승격시켜 놓는다
+test("주문 목록은 생성 역순이다 (문서엔 없지만 두 클라이언트가 이 순서에 의존 중)", () => {
+  const ids = listOrders({ userId: 1 }).map((o) => o.id);
+  expect(ids).toEqual([...ids].sort((a, b) => b - a));
+});
+
+// 베이온세 규칙 — 깨지면 안 되는 것은 리뷰어의 주의력이 아니라 테스트로 고정한다
+test("응답 어디에도 카드번호 원문이 실리지 않는다", () => {
+  expect(JSON.stringify(getPayment(42))).not.toMatch(/\d{13,16}/);
+});
+
+// 폐기(deprecation)는 선언이 아니라 계측이다. 남은 호출자를 세지 않고 지우면 반드시 누군가 깨진다
+export function legacyPriceOf(sku) {
+  metrics.increment("deprecated.legacyPriceOf", { caller: currentService() });
+  return priceOf(sku);
+}
+```
+
+첫 번째 테스트는 하이럼의 법칙을 해결하는 게 아니라 **항복하는** 코드다 — 우연한 동작 하나를 영구 계약으로 승격시키는 비용을 치른 것이므로, 지킬 것과 버릴 것을 고르는 판단이 테스트를 쓰기 전에 와야 한다. 전부 고정해 버리면 그 다음부터는 아무것도 못 바꾼다.

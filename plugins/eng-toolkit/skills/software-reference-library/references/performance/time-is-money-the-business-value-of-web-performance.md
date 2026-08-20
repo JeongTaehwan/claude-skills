@@ -35,3 +35,32 @@ Tammy Everts가 로드 지연과 전환율·이탈률·매출의 상관을 보�
 ## 인용 포인트
 - "로드 지연은 전환·이탈·매출로 계량 가능하다"는 명제의 단행본 출처 — 성능 작업을 백로그의 '기술 개선'이 아니라 매출 항목으로 옮기는 근거.
 - 저속 네트워크 사용자 대응을 "일부 사용자 배려"가 아니라 "버려지는 매출 회수"로 프레이밍할 때.
+
+## 코드 예시
+
+"로드 지연은 전환·이탈·매출로 계량 가능하다"를 자사 데이터로 옮기는 질의 — 이 책의 사례 수치를 인용하는 대신 같은 형태의 표를 우리 숫자로 만든다.
+
+```sql
+-- RUM 세션을 LCP 버킷으로 나눠 전환율·세션당 매출을 비교한다
+WITH sessions AS (
+  SELECT
+    session_id,
+    CASE WHEN lcp_ms < 2500 THEN 'good'
+         WHEN lcp_ms < 4000 THEN 'needs_improvement'
+         ELSE 'poor' END AS lcp_bucket,
+    converted,
+    revenue
+  FROM rum_sessions
+  WHERE occurred_at >= now() - interval '28 days'
+)
+SELECT
+  lcp_bucket,
+  count(*)                                AS sessions,
+  round(avg(converted::int)::numeric, 4)  AS conversion_rate,
+  round(sum(revenue) / count(*), 0)       AS revenue_per_session
+FROM sessions
+GROUP BY lcp_bucket
+ORDER BY lcp_bucket;
+```
+
+이 표가 주는 것은 상관이지 인과가 아니다 — `poor` 버킷에는 구형 기기·저속 회선·다른 국가 사용자가 몰려 있고 그 요인들이 독립적으로 전환율을 떨어뜨린다. 여기서 나온 차이를 "개선하면 회수되는 금액"으로 그대로 발표하면 과대 추정이고, 인과 수치가 필요하면 `performance/speed-matters-for-google-web-search.md` 식의 지연 주입 실험이 따로 있어야 한다.

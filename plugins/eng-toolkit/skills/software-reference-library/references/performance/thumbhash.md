@@ -34,3 +34,36 @@ BlurHash의 개선판 — 비슷한 크기의 문자열로 알파 채널을 지�
 ## 인용 포인트
 - 플레이스홀더 알고리즘 선정 논의에서 "신규는 ThumbHash, 기존 BlurHash는 유지"라는 실용적 결론의 근거.
 - "정체된 저장소 = 죽은 프로젝트"가 아니라는 예 — 완성형 알고리즘은 push 날짜가 아니라 알고리즘 자체로 평가한다.
+
+## 코드 예시
+
+"서버에서 인코딩 → 응답에 실어 보냄 → 클라이언트에서 즉시 렌더"라는 사용 구조를, 알파를 살린 채로 옮긴 것.
+
+```js
+// 서버: 원본 → 100px 이하 RGBA → 해시(수십 바이트) → DB 저장
+import sharp from "sharp";
+import { rgbaToThumbHash } from "thumbhash";
+
+const { data, info } = await sharp(input)
+  .resize(100, 100, { fit: "inside" }) // ThumbHash 입력은 100x100 이하여야 한다
+  .ensureAlpha()                       // 투명 배경을 그대로 해시에 담는다
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+
+const hash = rgbaToThumbHash(info.width, info.height, data);
+await db.image.update({ where: { id }, data: { thumbhash: Buffer.from(hash).toString("base64") } });
+
+// 클라이언트: 해시를 즉시 data URL 로 펴서 배경에 깐다 (추가 요청 0회)
+import { thumbHashToDataURL } from "thumbhash";
+
+const bytes = Uint8Array.from(atob(row.thumbhash), (c) => c.charCodeAt(0));
+const preview = thumbHashToDataURL(bytes);
+
+<img
+  src={row.url}
+  loading="lazy"
+  style={{ backgroundImage: `url(${preview})`, backgroundSize: "cover" }}
+/>;
+```
+
+해시는 수십 바이트지만 공짜는 아니다 — 디코딩은 이미지마다 메인 스레드에서 도는 계산이라 목록 화면에서 수백 개를 한 번에 펴면 그 자체가 끊김이 된다. 그리고 흐릿한 미리보기는 "콘텐츠가 도착했다"처럼 보이므로, 로딩 상태를 스크린 리더에도 알리려면 별도 표시가 필요하다.

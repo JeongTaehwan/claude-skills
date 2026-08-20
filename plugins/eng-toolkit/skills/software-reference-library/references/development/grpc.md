@@ -29,7 +29,7 @@ https://grpc.io/docs/
 - 클라이언트가 필요한 필드만 골라 받는 문제를 풀고 싶다면 `development/graphql-specification.md`
 - 동기 호출 자체를 줄이고 비동기 이벤트로 분리하려는 거라면 `development/apache-kafka.md`
 - HTTP 자체의 의미론(상태 코드, 캐시)은 `development/rfc-9110-http-semantics.md`
-- 분산 호출의 지연 추적은 `development/opentelemetry-docs.md`
+- 분산 호출의 지연 추적은 `infrastructure/opentelemetry-docs.md`
 - "원격 호출을 로컬 호출처럼 다루면 왜 위험한가"라는 근본 논의는 `architecture/a-note-on-distributed-computing.md`
 
 ## 무엇이 들어있나
@@ -42,3 +42,32 @@ https://grpc.io/docs/
 ## 인용 포인트
 - 데드라인이 호출 체인을 따라 전파된다는 점 — 서비스 간 타임아웃을 각자 상수로 박아 두는 관행을 바꾸자고 설득할 때.
 - 스키마에서 코드를 생성하므로 계약 위반이 런타임이 아니라 빌드에서 잡힌다는 것.
+
+## 코드 예시
+
+문서가 정리한 네 가지 메서드 종류를 하나의 서비스 정의에 담고, 하위 호환을 깨는 지점을 표시한 것.
+
+```proto
+syntax = "proto3";
+package order.v1;
+
+service OrderService {
+  rpc GetOrder(GetOrderRequest) returns (Order);                // 단항
+  rpc ListOrders(ListOrdersRequest) returns (stream Order);     // 서버 스트리밍
+  rpc ImportOrders(stream Order) returns (ImportSummary);       // 클라이언트 스트리밍
+  rpc Watch(stream WatchRequest) returns (stream OrderEvent);   // 양방향
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message Order {
+  string order_id = 1;
+  int64 total_amount_krw = 2;
+  reserved 3;                  // 삭제한 필드 번호는 재사용 금지 — 호환을 깨는 대표 실수
+  reserved "coupon_code";
+}
+```
+
+데드라인은 이 파일에 없다 — 호출부가 준다. Go 라면 `context.WithTimeout` 으로 준 값이 호출 체인을 따라 전파되고, 초과하면 `DEADLINE_EXCEEDED` 로 끊긴다.

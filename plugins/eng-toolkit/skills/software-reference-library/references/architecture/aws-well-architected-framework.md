@@ -36,3 +36,36 @@ https://aws.amazon.com/architecture/well-architected/
 ## 인용 포인트
 - 리뷰를 "6축을 매번 같은 순서로 훑는다"로 규격화하면, 리뷰어 취향에 따라 지적 범위가 달라지는 문제를 줄일 수 있다.
 - 비용·지속가능성을 별도 축으로 둔 구성은, "비용은 인프라팀 일"이라는 분업 주장에 대한 반론 근거가 된다.
+
+## 코드 예시
+
+"리뷰어 취향이 아니라 6축을 매번 같은 순서로" — 질문지를 저장소 안 파일로 만들어 리뷰 결과를 diff 로 남기는 형태.
+
+```yaml
+# review/settlement-batch-2026-05.yaml
+system: settlement-batch
+reviewed_at: 2026-05-14
+pillars:
+  - id: operational-excellence
+    question: 롤백 절차가 문서화돼 있고 최근 90일 안에 실제로 실행된 적 있는가
+    status: pass          # runbook/rollback.md, 2026-04-02 실행 기록
+  - id: security
+    question: 정산 파일 접근 권한이 개인 계정이 아니라 역할에 붙어 있는가
+    status: gap
+    owner: "@plat-kim"
+    due: 2026-05-28
+  - id: reliability
+    question: PG 가 30분 응답하지 않을 때 무엇이 멈추고 무엇이 계속되는가
+    status: pass          # dr-test/2026-03.md
+  - id: performance-efficiency
+    question: 06:00 마감 초과를 사람보다 먼저 감지하는 경보가 있는가
+    status: gap
+  - id: cost-optimization
+    question: 이 워크로드의 월 비용 추정치를 팀이 말할 수 있는가
+    status: gap           # 3회 연속 비어 있음 — "인프라팀 일"로 밀림
+  - id: sustainability
+    question: 배치 시간대를 옮겨 유휴 자원을 줄일 여지가 있는가
+    status: not-applicable
+```
+
+`status: pass` 는 답변이지 검증이 아니다 — 증거 링크와 마지막 실행 날짜가 없으면 이 파일은 리뷰를 통과했다는 기록이 아니라 통과했다고 말한 기록이다. 같은 항목이 3회 연속 gap 이면 그건 리뷰가 아니라 우선순위 문제이므로 리뷰 밖으로 올려야 한다.

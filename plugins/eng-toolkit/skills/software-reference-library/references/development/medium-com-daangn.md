@@ -36,3 +36,30 @@ https://medium.com/daangn
 
 ## 인용 포인트
 - 서비스 분리 제안서에서 "한 번에 자르지 않고 단계적으로 공존시킨다"는 방침을 정당화할 때, 국내 동일 규모의 선례로 인용할 수 있다.
+
+## 코드 예시
+
+"한 번에 자르지 않고 단계적으로 공존시킨다" — 떼어낸 경로만 비율로 넘기고, 되돌리기는 숫자 한 줄로 남긴다.
+
+```nginx
+# 이관 대상 경로만 신규 서비스로 조금씩 보낸다. 나머지는 모놀리스 그대로.
+resolver 127.0.0.11 valid=10s;   # proxy_pass에 변수를 쓰면 요청 시점에 DNS를 다시 푼다
+
+split_clients "${remote_addr}${http_user_agent}" $ads_upstream {
+    5%   "ads-service:8080";     # 신규. 되돌릴 땐 이 비율만 0%로 내린다
+    *    "monolith:8080";
+}
+
+server {
+  location /api/ads/ {
+    proxy_pass http://$ads_upstream;
+    proxy_set_header X-Route-Target $ads_upstream;  # 접근 로그에서 어느 쪽이 처리했는지 구분
+  }
+
+  location / {
+    proxy_pass http://monolith:8080;   # 아직 안 뗀 경로는 건드리지 않는다
+  }
+}
+```
+
+이 코드가 감추는 것: 이 방식은 **읽기 경로에서만 안전하다.** 쓰기까지 비율로 나눠 보내는 순간 두 저장소 사이의 정합성 문제가 따로 생기고, 그때는 비율을 되돌려도 이미 갈라진 데이터가 남는다.

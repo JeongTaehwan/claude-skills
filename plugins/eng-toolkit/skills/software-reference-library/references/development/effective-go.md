@@ -37,3 +37,33 @@ https://go.dev/doc/effective_go
 ## 인용 포인트
 - "인터페이스는 사용하는 쪽이 정의한다"는 원칙은, 미리 거대한 인터페이스를 만들어 두는 설계에 대한 반론으로 그대로 쓸 수 있다.
 - gofmt 사례는 "포매팅은 합의 대상이 아니라 도구로 제거할 문제"라는 주장의 대표 근거다 (`development/prettier.md` 와 같은 논리).
+
+## 코드 예시
+
+"인터페이스는 구현하는 쪽이 아니라 쓰는 쪽에서 작게 정의한다"와 "정리 코드는 여는 지점 옆에 붙인다"를 한 파일에 놓은 것 — 리뷰에서 "Go 스타일이 아니다"가 나오는 두 자리다.
+
+```go
+// 소비자 쪽 패키지에 선언한다. 메서드 하나면 하나만 적는다.
+type OrderFinder interface {
+    FindOrder(ctx context.Context, id string) (*Order, error)
+}
+
+func Summarize(ctx context.Context, f OrderFinder, id string) (string, error) {
+    o, err := f.FindOrder(ctx, id)
+    if err != nil {
+        return "", err // 에러는 던지는 게 아니라 값으로 돌려보낸다
+    }
+    return o.Title, nil
+}
+
+func Load(name string) ([]byte, error) {
+    file, err := os.Open(name)
+    if err != nil {
+        return nil, err
+    }
+    defer file.Close() // 닫는 코드를 여는 줄 바로 옆에 붙여 둔다
+    return io.ReadAll(file)
+}
+```
+
+이 문서의 시점 그대로 쓴 코드다 — 지금이라면 `fmt.Errorf("...: %w", err)` 로 감싸 `errors.Is`/`As` 가 통하게 하는 쪽이 표준이다. 제네릭·모듈도 이 문서에는 없으니, 관용구는 여기서 가져오되 API 는 go.dev 최신 문서로 확인해야 한다.

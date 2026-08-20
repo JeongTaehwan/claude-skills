@@ -38,3 +38,30 @@ Atlassian 시스템의 특징은 컴포넌트 낱개보다 **패턴과 콘텐츠
 ## 인용 포인트
 - "관리자 화면은 예쁠 필요 없다"는 주장에 반대할 때, 밀도 높은 제품도 시스템으로 일관성을 유지할 수 있다는 실증 사례로 든다.
 - 에러 문구·버튼 라벨을 개발자가 그때그때 짓는 관행을 바꿀 때, Content 가이드를 사내 규칙의 출발점으로 삼을 수 있다.
+
+## 코드 예시
+
+파괴적 액션 패턴과 Content 가이드를 한 화면에 겹친 것 — 색은 값이 아니라 의미 토큰으로, 버튼 라벨은 "확인"이 아니라 동사로.
+
+```tsx
+import { token } from '@atlaskit/tokens';
+
+<ModalDialog>
+  {/* 무엇이 사라지는지 제목에서 이름으로 말한다 */}
+  <ModalTitle appearance="danger">주문 12건을 삭제할까요?</ModalTitle>
+
+  <ModalBody>
+    <p style={{ color: token('color.text.subtle', '#44546F') }}>
+      삭제하면 되돌릴 수 없습니다. 정산 기록은 그대로 남습니다.
+    </p>
+  </ModalBody>
+
+  <ModalFooter>
+    <Button appearance="subtle" onClick={close}>취소</Button>
+    {/* '확인'이 아니라 무엇을 하는지 */}
+    <Button appearance="danger" onClick={deleteOrders}>주문 삭제</Button>
+  </ModalFooter>
+</ModalDialog>
+```
+
+`token()`의 두 번째 인자는 테마가 로드되기 전에 쓰이는 폴백인데, 이게 하드코딩 색을 그대로 남겨 두는 우회로가 되기 쉬워서 Atlassian은 `@atlaskit/eslint-plugin-design-system`으로 직접 색 사용을 따로 막는다. 그리고 이 모달은 문구 규범만 지킬 뿐 "되돌릴 수 없습니다"가 참인지는 서버가 보장해야 한다.

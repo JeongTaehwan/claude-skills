@@ -41,3 +41,33 @@ JS/TS 테스트 실무 원칙 50여 개를 "이렇게 쓰면 이렇게 읽힌다
 - 테스트 이름 3부 구조(대상 / 상황 / 기대)는 컨벤션 문서에 그대로 옮겨 쓸 수 있는 규칙이다.
 - "테스트 안에 로직을 넣지 말라"는 원칙은 조건 분기로 비대해진 헬퍼 테스트를 리뷰에서 반려할 때 인용하기 좋다.
 - 구현 세부가 아니라 외부 결과를 검증하라는 원칙은, 리팩터링마다 테스트가 무더기로 깨지는 비용을 팀에 설명하는 근거가 된다.
+
+## 코드 예시
+
+이름 3부 구조, AAA 분리, "테스트 안에 로직 금지" 세 원칙을 한 테스트에 동시에 적용한 before/after.
+
+```js
+// before — 실패해도 무엇이 깨졌는지 알 수 없고, 기대값을 테스트가 다시 계산한다
+test('works', () => {
+  const items = [{ price: 12000, qty: 2 }, { price: 3000, qty: 1 }];
+  let expected = 0;
+  for (const it of items) expected += it.price * it.qty; // 검증할 수 없는 로직
+  expect(calcTotal(items)).toBe(expected);
+});
+
+// after — 대상 / 상황 / 기대가 이름에 들어가고, 기대값은 상수로 못 박는다
+describe('calcTotal', () => {
+  test('쿠폰이 없으면 항목 금액의 단순 합을 반환한다', () => {
+    // Arrange
+    const items = [{ price: 12000, qty: 2 }, { price: 3000, qty: 1 }];
+
+    // Act
+    const total = calcTotal(items);
+
+    // Assert
+    expect(total).toBe(27000);
+  });
+});
+```
+
+기대값을 상수로 박으면 케이스마다 사람이 계산해 넣어야 한다 — 이 비용이 싫어서 루프를 되살리는 순간 구현과 같은 실수를 테스트가 그대로 복제하게 된다.

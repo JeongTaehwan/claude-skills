@@ -35,3 +35,25 @@ Ravi Netravali, Ameesh Goyal, James Mickens, Hari Balakrishnan — USENIX NSDI '
 ## 인용 포인트
 - 기존 의존성 분석기는 중앙값 30%, 95분위 118%의 간선을 놓친다 — HTML 구조만 보는 정적 분석으로 로드 순서를 정하는 접근의 한계를 지적할 때.
 - 로드 순서 스케줄링만으로 PLT 중앙값 34% 단축, RTT가 클수록 효과가 커진다 — 저속 네트워크 타깃에서 "무엇을 먼저 받을지"에 투자할 근거.
+
+## 코드 예시
+
+논문이 자동으로 알아낸 "숨은 간선"을, 실무에서는 사람이 손으로 선언해 브라우저의 보수적 순서를 앞당긴다.
+
+```html
+<head>
+  <!-- CSS 안에서 참조되는 폰트 — HTML 만 보는 프리로드 스캐너에는 안 보인다 -->
+  <link rel="preload" href="/fonts/pretendard.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- JS 가 런타임에 조립하는 LCP 이미지 URL — 역시 정적 분석으로는 안 보인다 -->
+  <link rel="preload" href="/hero-1200.avif" as="image" fetchpriority="high" />
+
+  <!-- 모듈 그래프의 다음 홉을 미리 알려 준다 (import 를 파싱해야 알 수 있는 간선) -->
+  <link rel="modulepreload" href="/chunks/product-detail.js" />
+
+  <link rel="stylesheet" href="/app.css" />
+  <script type="module" src="/app.js"></script>
+</head>
+```
+
+이 힌트들은 코드가 바뀌어도 자동으로 갱신되지 않는다 — 파일명이 바뀌면 조용히 낡은 리소스를 우선순위 높게 받고, 안 쓰는 것을 preload 하면 좁은 회선에서 정작 필요한 리소스와 대역폭을 다툰다.

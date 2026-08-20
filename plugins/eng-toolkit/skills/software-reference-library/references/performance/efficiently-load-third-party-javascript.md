@@ -34,3 +34,36 @@ https://web.dev/articles/efficiently-load-third-party-javascript
 ## 인용 포인트
 - "스크립트를 뺄 수 없다면 로드 시점이라도 소유하라" — 서드파티 정리 제안이 정치적으로 막힐 때의 절충안 프레임.
 - 임베드는 사용자가 상호작용하기 전까지 진짜일 필요가 없다 — 파사드 도입 근거.
+
+## 코드 예시
+
+"임베드는 사용자가 상호작용하기 전까지 진짜일 필요가 없다" — 유튜브 임베드를 정적 파사드로 대체하고 클릭 시점에만 진짜를 로드한다.
+
+```html
+<!-- 진짜 iframe 대신: 썸네일 한 장 + 재생 버튼. 서드파티 JS 0바이트 -->
+<div class="yt-facade" data-id="dQw4w9WgXcQ" style="aspect-ratio:16/9">
+  <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" alt="" loading="lazy" width="480" height="360">
+  <button aria-label="영상 재생">▶</button>
+</div>
+
+<script>
+document.querySelectorAll('.yt-facade').forEach(el => {
+  // 마우스가 닿으면 연결만 미리 세워 둔다 — 클릭 후 왕복을 앞당긴다
+  el.addEventListener('pointerenter', () => {
+    const l = document.createElement('link');
+    l.rel = 'preconnect'; l.href = 'https://www.youtube-nocookie.com';
+    document.head.append(l);
+  }, { once: true });
+
+  el.addEventListener('click', () => {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${el.dataset.id}?autoplay=1`;
+    f.allow = 'autoplay; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true; f.width = '100%'; f.height = '100%';
+    el.replaceChildren(f);   // 여기서 처음으로 서드파티 코드가 들어온다
+  }, { once: true });
+});
+</script>
+```
+
+파사드는 임베드가 제공하던 것들을 조용히 없앤다 — 자동 재생 카운트, 조회수 집계, 위젯이 노출만으로 보내던 이벤트가 클릭 전까지 발생하지 않으므로, 그 수치를 KPI 로 쓰는 팀에게는 미리 알려야 한다.

@@ -41,3 +41,34 @@ Spotlight는 접근성 실무자 인터뷰로, 급할 때 읽을 섹션은 아�
 - 접근성 착수 시점에 "무엇부터?"를 정할 때, 이 체크리스트를 그대로 백로그로 변환하면 논의 없이 첫 스프린트가 채워진다.
 - 리뷰에서 불필요한 ARIA를 걷어낼 때, "시맨틱 HTML이 먼저"라는 이 사이트의 입장을 근거로 쓴다.
 - 단, 인증·계약 문맥에서는 이 문서가 스스로 커버리지를 한정하고 있다는 점을 반드시 함께 밝혀야 한다.
+
+## 코드 예시
+
+체크리스트 항목을 티켓이 아니라 마크업 결정으로 바로 옮긴 것 — 여기 ARIA로 덮은 자리가 한 곳도 없다는 게 요점이다.
+
+```html
+<form action="/orders/coupon" method="post">
+  <!-- "제목은 구조를 나타낸다" — 글자 크기가 아니라 계층으로 고른다 -->
+  <h2>쿠폰 적용</h2>
+
+  <!-- "모든 입력에 라벨이 있다" — placeholder는 라벨이 아니다 -->
+  <label for="coupon">쿠폰 코드</label>
+  <input
+    id="coupon"
+    name="coupon"
+    type="text"
+    autocomplete="off"
+    aria-describedby="coupon-hint coupon-error"
+    aria-invalid="true"
+  />
+  <p id="coupon-hint">대소문자를 구분합니다</p>
+
+  <!-- "오류는 텍스트로 식별된다" — 빨간 테두리만으로 알리지 않는다 -->
+  <p id="coupon-error" role="alert">이미 사용된 쿠폰입니다</p>
+
+  <!-- "버튼은 button이다" — div에 onClick을 얹지 않는다 -->
+  <button type="submit">적용</button>
+</form>
+```
+
+`aria-invalid`와 오류 문단은 정적으로 박혀 있어서, 검증 결과에 맞춰 JS가 켜고 끄지 않으면 늘 "오류"라고 읽힌다. 그리고 이 항목들을 다 통과해도 A/AA 전체를 덮은 게 아니다 — 체크리스트 스스로 커버리지를 한정하고 있다.

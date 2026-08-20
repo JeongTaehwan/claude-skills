@@ -28,7 +28,7 @@ Martin Kleppmann이 복제·파티셔닝·트랜잭션·합의를 **논문 수�
 - 사이트에는 요약·목차·참고문헌이 있고 **본문은 유료 서적**이다. 지금 당장 무료로 읽을 것이 필요하면 논문 항목으로 직행하는 편이 낫다
 - 특정 DB의 인덱스 튜닝, 쿼리 플랜 문제면 `development/use-the-index-luke.md` 나 `development/postgresql.md`
 - 서비스 분해·통신 패턴이 문제의 축이면 `architecture/microservices-io.md`
-- 운영 신뢰성(SLO, 온콜, 장애 대응)이면 `development/google-sre-books.md`
+- 운영 신뢰성(SLO, 온콜, 장애 대응)이면 `infrastructure/google-sre-books.md`
 - 한 가지 정리(CAP)만 정확히 확인하고 싶으면 `architecture/brewer-s-conjecture-and-the-feasibility-of-consistent-availa.md`
 
 ## 무엇이 들어있나
@@ -40,3 +40,30 @@ Martin Kleppmann이 복제·파티셔닝·트랜잭션·합의를 **논문 수�
 - 쓰기 스큐와 스냅샷 격리의 한계는, "트랜잭션으로 감쌌으니 안전하다"는 리뷰 코멘트를 반박할 때 가장 자주 쓰이는 근거다. 재고·쿠폰 수량 차감 설계 문서에 그대로 인용 가능.
 - CAP에 대한 저자의 비판은, 설계 문서에서 CAP을 근거로 든 주장을 되돌릴 때 쓸 수 있다.
 - 각 장 말미의 참고문헌 목록이 공개되어 있어, 특정 주제의 1차 논문을 찾는 색인으로 책을 안 사도 활용 가치가 있다.
+
+## 코드 예시
+
+"많은 DB 의 Repeatable Read 는 실제로는 스냅샷 격리이고 쓰기 스큐를 막지 못한다" — 쿠폰 발급 한도가 조용히 뚫리는 경로와 두 가지 고침(PostgreSQL).
+
+```sql
+-- 캠페인당 100장 한도. 현재 99장 발급된 상태에서 두 세션이 동시에 들어온다.
+-- 세션 A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT count(*) FROM coupon_issue WHERE campaign_id = 7;  -- 99
+-- 세션 B (자기 스냅샷을 본다)
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT count(*) FROM coupon_issue WHERE campaign_id = 7;  -- 99
+-- 각자 INSERT
+INSERT INTO coupon_issue (campaign_id, user_id) VALUES (7, 'u-1');
+INSERT INTO coupon_issue (campaign_id, user_id) VALUES (7, 'u-2');
+COMMIT;  -- 둘 다 성공. 같은 행을 건드리지 않았으므로 충돌도 없다 → 101장
+
+-- 고침 1) 충돌을 한 행으로 물질화해 잠근다
+UPDATE campaign SET issued = issued + 1
+ WHERE id = 7 AND issued < 100;   -- 영향 행 0 이면 한도 초과로 처리
+
+-- 고침 2) 격리 수준을 올린다 (SSI 가 술어 충돌을 잡는다)
+BEGIN ISOLATION LEVEL SERIALIZABLE;  -- 40001 발생 시 재시도 루프가 필수
+```
+
+"트랜잭션으로 감쌌으니 안전하다"가 틀리는 자리가 정확히 여기다. 고침 1 은 그 한 행이 직렬화 지점이 되어 캠페인 단위 처리량 상한을 만들고, 고침 2 는 재시도 코드가 없으면 사고를 실패로 바꿔 놓을 뿐이다. 격리 수준 이름이 같아도 보장은 제품마다 다르므로 — MySQL InnoDB 의 REPEATABLE READ 는 PostgreSQL 의 그것과 다르게 동작한다 — 이 코드는 쓰는 DB 에서 직접 재현해 보고 채택해야 한다.

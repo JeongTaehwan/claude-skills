@@ -31,3 +31,36 @@ Clojure로 작성된 라이브러리로, 테스트는 (1) DB 라이프사이클(
 
 ## 인용 포인트
 - "장애를 주입하지 않은 테스트는 분산 정확성에 대해 아무것도 증명하지 않는다"는 주장을, 도구가 존재한다는 사실로 뒷받침할 수 있다.
+
+## 코드 예시
+
+테스트가 DB·클라이언트·nemesis·checker·generator 다섯 조각의 맵이라는 구조 — 장애 주입과 판정이 테스트 정의 안에 같이 들어온다.
+
+```clojure
+(ns lock.test
+  (:require [jepsen [cli :as cli] [checker :as checker]
+                    [generator :as gen] [nemesis :as nemesis] [tests :as tests]]
+            [knossos.model :as model]))
+
+(defn r [_ _] {:type :invoke, :f :read,  :value nil})
+(defn w [_ _] {:type :invoke, :f :write, :value (rand-int 5)})
+
+(defn lock-test [opts]
+  (merge tests/noop-test opts
+         {:name      "lock"
+          :client    (->Client nil)          ; :invoke! 로 실제 연산 수행
+          :nemesis   (nemesis/partition-random-halves)
+          ;; 눈으로 보지 않는다 — 히스토리를 선형화 가능성 모델과 대조한다
+          :checker   (checker/linearizable {:model     (model/cas-register)
+                                            :algorithm :linear})
+          :generator (->> (gen/mix [r w])
+                          (gen/stagger 1/10)
+                          (gen/nemesis (cycle [(gen/sleep 5) {:type :info, :f :start}
+                                               (gen/sleep 5) {:type :info, :f :stop}]))
+                          (gen/time-limit 60))}))
+
+(defn -main [& args]
+  (cli/run! (cli/single-test-cmd {:test-fn lock-test}) args))
+```
+
+여기 없는 것이 진짜 비용이다 — `->Client` 구현과 SSH 접속 가능한 노드 다섯 대의 프로비저닝, 그리고 타임아웃을 `:fail` 이 아니라 `:info`(미확정)로 올바로 기록하는 일. 미확정을 실패로 적으면 checker 가 없는 위반을 만들어낸다.

@@ -37,3 +37,35 @@ Effort는 인·월 단위로 단순하게 두는 것을 권한다. 정밀한 추
 ## 인용 포인트
 - "Confidence가 없으면 RICE가 아니다" — 사내에서 RICE를 간소화하자는 제안이 나올 때 방어 논거.
 - 점수는 답이 아니라 이견의 위치를 찾는 장치라는 프레이밍 — 스코어링 도입 반대를 누그러뜨리는 데 쓸 수 있다.
+
+## 코드 예시
+
+원문이 정한 척도를 상수로 못 박은 계산 — 항목을 자유 숫자로 두면 "확실히 큰 임팩트"가 그대로 100이 되어 공식이 무력해진다.
+
+```python
+from dataclasses import dataclass
+
+IMPACT = {"massive": 3.0, "high": 2.0, "medium": 1.0, "low": 0.5, "minimal": 0.25}
+CONFIDENCE = {"high": 1.0, "medium": 0.8, "low": 0.5}   # 근거 없으면 low
+
+@dataclass
+class Item:
+    name: str
+    reach: int          # 분기 1회 동안 닿는 사람 수 — 기간을 먼저 합의한다
+    impact: str         # IMPACT 키만 허용
+    confidence: str     # CONFIDENCE 키만 허용
+    effort: float       # 인·월. 정밀 추정 금지, 0.5 단위 정도로
+
+    def score(self) -> float:
+        return self.reach * IMPACT[self.impact] * CONFIDENCE[self.confidence] / self.effort
+
+backlog = [
+    Item("결제 실패 재시도 유도", 12_000, "high", "medium", 1.0),
+    Item("VIP 고객 전용 배송", 300, "massive", "low", 2.0),
+    Item("결제 로그 스키마 정리", 12_000, "low", "high", 0.5),
+]
+for i in sorted(backlog, key=lambda x: x.score(), reverse=True):
+    print(f"{i.score():8.0f}  {i.name}  (R={i.reach} I={i.impact} C={i.confidence} E={i.effort})")
+```
+
+정렬 결과를 그대로 로드맵으로 쓰면 안 된다 — 이 점수가 하는 일은 두 사람의 순위가 갈릴 때 R·I·C·E 중 어느 칸에서 갈렸는지 지목하는 것까지다.

@@ -25,7 +25,7 @@ https://github.com/dwmkerr/hacker-laws
 
 ## 이럴 땐 아니다
 - 조직 구조와 아키텍처의 관계를 실제 설계 결정 수준에서 다루려면 `architecture/martin-fowler-bliki.md`, `architecture/martin-fowler-software-architecture-guide.md`
-- 지표 설계에서 실제로 빠지는 함정의 사례 목록은 `planning/a-dirty-dozen-12.md`
+- 지표 설계에서 실제로 빠지는 함정의 사례 목록은 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 소프트웨어 일정·복잡도 논의의 원전은 `architecture/no-silver-bullet-essence-and-accidents-of-software-engineeri.md`
 - 모듈 경계를 어떻게 그을지의 원전은 `architecture/on-the-criteria-to-be-used-in-decomposing-systems-into-modul.md`
 

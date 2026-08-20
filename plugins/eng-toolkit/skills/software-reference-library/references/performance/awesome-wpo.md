@@ -31,3 +31,26 @@ https://github.com/davidsonfellipe/awesome-wpo
 ## 인용 포인트
 - "이 분야의 표준 도구 지도"로서, 기술 조사 문서의 출발점 각주로 걸기 좋다.
 - awesome 리스트는 후보군 수집용이지 채택 근거가 아니라는 사용 규율과 함께 인용한다.
+
+## 코드 예시
+
+"awesome 리스트는 후보군 수집용이지 채택 근거가 아니다" — 목록에서 고른 후보를 채택 전에 저장소 활동으로 걸러내는 확인 절차.
+
+```bash
+# 목록에서 뽑은 후보들
+CANDIDATES="GoogleChrome/lighthouse GoogleChromeLabs/psi davidsonfellipe/awesome-wpo"
+
+for repo in $CANDIDATES; do
+  gh api "repos/$repo" \
+    --jq '[.full_name, (.stargazers_count|tostring), .pushed_at, .archived|tostring,
+           (.license.spdx_id // "NONE")] | @tsv'
+done | column -t
+
+# 마지막 릴리스가 언제였는지 — push 는 README 수정만으로도 갱신된다
+for repo in $CANDIDATES; do
+  gh api "repos/$repo/releases/latest" --jq '"\(.tag_name)\t\(.published_at)"' \
+    2>/dev/null || echo "$repo: 릴리스 없음"
+done
+```
+
+별 개수와 최근 push 는 유지보수의 대리 지표일 뿐이다 — 스타 9k짜리 큐레이션 목록에도 이미 아카이브된 도구가 그대로 남아 있으므로, `archived` 와 최신 릴리스 날짜를 함께 봐야 걸러진다.

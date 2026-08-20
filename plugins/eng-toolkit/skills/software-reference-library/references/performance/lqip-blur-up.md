@@ -33,3 +33,32 @@ blur-up의 구현 계약 — 이미지가 로드되는 동안 `blurDataURL`의 �
 ## 인용 포인트
 - "이미지 체감 문제의 절반은 로드 속도가 아니라 로드 전 빈자리" — blur-up 도입 제안의 프레임.
 - LQIP는 표준이 아니라 관용 패턴이며 Next.js 문서가 사실상의 참조 구현이라는 지형 정리.
+
+## 코드 예시
+
+정적 import 는 속성 하나로 끝나지만 원격 이미지는 `blurDataURL` 을 직접 줘야 한다 — 이 계약 차이가 실무에서 가장 자주 걸리는 지점.
+
+```jsx
+import Image from "next/image";
+import hero from "./hero.jpg"; // 정적 import: 블러 플레이스홀더 자동 생성
+
+export default function Page({ product }) {
+  return (
+    <>
+      <Image src={hero} alt="히어로" placeholder="blur" priority />
+
+      {/* 원격 URL: blurDataURL 없이 placeholder="blur" 만 쓰면 에러 */}
+      <Image
+        src={product.imageUrl}
+        alt={product.name}
+        width={800}
+        height={600}
+        placeholder="blur"
+        blurDataURL={product.blurDataURL} // 서버에서 미리 만들어 둔 초저해상도 데이터 URI
+      />
+    </>
+  );
+}
+```
+
+`blurDataURL` 은 HTML에 인라인으로 박히므로 크면 문서 자체가 무거워진다 — 수백 바이트 수준을 넘기면 빈자리를 없애려다 첫 응답을 늦추는 맞바꿈이 된다.

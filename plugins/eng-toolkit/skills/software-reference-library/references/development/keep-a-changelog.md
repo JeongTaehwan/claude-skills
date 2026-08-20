@@ -37,3 +37,32 @@ https://keepachangelog.com/en/1.1.0/
 ## 인용 포인트
 - "커밋 로그는 changelog가 아니다"라는 문장 하나로, 자동 생성 릴리스 노트를 그대로 내보내던 관행을 바꾸는 논거가 된다.
 - 여섯 개 섹션 이름을 그대로 팀 템플릿에 박아 두면 "이 변경을 어디에 적지"라는 논쟁 자체가 사라진다.
+
+## 코드 예시
+
+문서가 규정한 형식 그대로의 `CHANGELOG.md` — 여섯 섹션 이름, `Unreleased` 누적, ISO 8601 날짜, 최신 버전 위.
+
+```markdown
+# Changelog
+
+모든 주요 변경을 이 파일에 기록한다.
+형식은 Keep a Changelog, 버전은 Semantic Versioning 을 따른다.
+
+## [Unreleased]
+### Added
+- 주문 취소 API 에 부분 취소 옵션
+
+## [2.1.0] - 2026-08-14
+### Changed
+- `POST /orders` 응답의 `status` 에 `PARTIALLY_CANCELED` 값 추가
+### Deprecated
+- `GET /orders/{id}/legacy-status` — 3.0.0 에서 제거 예정
+### Removed
+- `X-Legacy-Client` 헤더 지원
+### Fixed
+- 쿠폰 중복 적용 시 할인액이 음수가 되던 문제
+### Security
+- 세션 토큰 만료 검증 누락 수정
+```
+
+형식보다 중요한 규칙은 릴리스 직전에 몰아 쓰지 않고 `Unreleased` 에 계속 쌓는 것이다 — 이 습관이 없으면 섹션 이름만 맞은 커밋 로그 덤프가 된다.

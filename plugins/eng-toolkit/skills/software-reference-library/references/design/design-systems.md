@@ -37,3 +37,34 @@ Figma가 운영하지만 도구 홍보물은 아니고 외부 필자 기고가 �
 ## 인용 포인트
 - "디자인 시스템은 만들면 끝"이라는 전제로 인력을 빼려는 논의에, 시스템을 내부 제품으로 보고 지속 투자해야 한다는 논거로 쓴다.
 - 기여 절차 없이 아무나 컴포넌트를 추가하는 상황을 정리할 때, 거버넌스 모델 사례를 근거로 제시할 수 있다.
+
+## 코드 예시
+
+"시스템 팀의 성과를 뭘로 증명하는가"에 답하려면 채택률부터 숫자로 만들어야 한다 — 제품 코드가 시스템을 쓰는지, 옆에서 다시 만드는지를 센다.
+
+```js
+import { globSync } from 'glob';
+import { readFileSync } from 'node:fs';
+
+const SYSTEM_PKG = '@acme/design-system';
+const files = globSync('apps/**/*.{tsx,jsx}');
+
+let systemImports = 0;
+let reimplemented = 0;
+
+for (const file of files) {
+  const src = readFileSync(file, 'utf8');
+  systemImports += (src.match(new RegExp(`from '${SYSTEM_PKG}`, 'g')) ?? []).length;
+  // 시스템에 이미 있는 것을 옆에서 다시 만든 흔적
+  reimplemented += (src.match(/(?:function|const)\s+(Button|Modal|Toast|Badge)\b/g) ?? []).length;
+}
+
+console.log({
+  files: files.length,
+  systemImports,
+  reimplemented,
+  adoption: (systemImports / (systemImports + reimplemented)).toFixed(2),
+});
+```
+
+세는 건 import 문이지 실제 렌더 횟수가 아니고, 시스템 컴포넌트를 포크해서 쓰는 가장 흔한 우회는 아예 안 잡힌다. 더 중요한 건 이 숫자가 "제품팀이 왜 우회하는가"에 답하지 않는다는 것 — 지표는 거버넌스 대화의 시작점이지 성과 자체가 아니다.

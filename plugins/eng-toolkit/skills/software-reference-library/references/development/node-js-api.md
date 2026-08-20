@@ -39,3 +39,32 @@ Deprecation 은 별도의 `DEP0xxx` 코드 체계로 관리되며, Documentation
 ## 인용 포인트
 - "이 API 써도 되나요"라는 리뷰 논쟁은 Stability Index 를 근거로 끊을 수 있다 — Experimental 이면 "마이너 업그레이드에서 깨질 수 있음"이 공식 입장이다.
 - 런타임 업그레이드 리스크를 산정할 때 `DEP` 코드 목록과 단계(Documentation-only vs Runtime)를 그대로 표로 옮기면 근거 있는 영향도 문서가 된다.
+
+## 코드 예시
+
+문서가 다루는 `process` 이벤트와 keep-alive 타임아웃을 조합한 graceful shutdown — 각 API 옆에 `Added in:` 버전을 남겨 런타임 의존성을 드러낸다.
+
+```js
+import { createServer } from 'node:http';
+import { setTimeout as delay } from 'node:timers/promises'; // Stable, v15.0.0+
+
+const server = createServer((req, res) => res.end('ok'));
+server.keepAliveTimeout = 5_000;   // LB 의 idle timeout 보다 짧게 잡는다
+server.listen(3000);
+
+let closing = false;
+process.on('SIGTERM', async () => {
+  if (closing) return;
+  closing = true;
+  server.close();                  // 새 연결만 거절, 처리 중 요청은 마저 끝낸다
+  server.closeIdleConnections();   // Added in v18.2.0 — 유휴 keep-alive 연결 정리
+  await delay(10_000);             // 유예 시간
+  process.exit(0);
+});
+
+process.on('unhandledRejection', (reason) => {
+  throw reason;                    // 삼키면 프로그래머 에러가 조용히 남는다
+});
+```
+
+이 코드가 감추는 것은 버전 의존성이다 — `closeIdleConnections()` 처럼 `Added in:` 이 붙은 API 는 `latest` 가 아니라 우리 런타임 라인의 문서(`/docs/latest-v20.x/` 등)에서 존재를 확인해야 한다.

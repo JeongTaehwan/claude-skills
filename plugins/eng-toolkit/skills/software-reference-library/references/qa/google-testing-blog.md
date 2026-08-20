@@ -23,7 +23,6 @@ https://testing.googleblog.com/
 - 큰 조직이 실제로 어떻게 굴리는지 사례가 필요할 때
 
 ## 이럴 땐 아니다
-- 같은 블로그를 QA 정책·커버리지 논쟁의 출처로 쓰려는 맥락이면 `qa/google-testing-blog-2.md`
 - 정리된 체계로 한 번에 읽고 싶으면 블로그보다 책 쪽 — `qa/software-engineering-at-google-ch-11-testing-overview.md` 이하 장들
 - 도구 사용법이 필요한 것이라면 `testing/` 도메인의 해당 도구 문서
 
@@ -35,3 +34,35 @@ https://testing.googleblog.com/
 ## 인용 포인트
 - 사내 테스트 가이드를 쓸 때, 특정 규칙에 대한 외부 근거 링크로 붙이기 좋은 형태(짧고 주제 단위)다.
 - 조직 규모에서 검증됐다는 사실 자체가 "우리 팀엔 과하다/부족하다" 논쟁의 기준선이 된다.
+
+## 코드 예시
+
+"단위냐 통합이냐"를 취향 논쟁에서 빼내는 이 블로그의 대표 장치 — 테스트를 계층 이름이 아니라 **크기**(자원 접근 범위)로 분류하고, 빌드 도구가 그 선언을 강제하게 만든다.
+
+```python
+# BUILD.bazel — size 는 Bazel 이 자원 제약과 타임아웃으로 강제하는 속성
+java_test(
+    name = "coupon_policy_test",
+    size = "small",        # 네트워크·외부 프로세스 금지, 기본 타임아웃 1분
+    srcs = ["CouponPolicyTest.java"],
+    deps = [":coupon"],
+)
+
+java_test(
+    name = "checkout_flow_test",
+    size = "medium",       # 로컬호스트만 허용, 기본 5분
+    srcs = ["CheckoutFlowTest.java"],
+    deps = [":checkout", "//testing:fake_pg"],
+)
+
+java_test(
+    name = "pg_sandbox_test",
+    size = "large",        # 외부 의존 있음 — 프리서브밋에서 제외
+    srcs = ["PgSandboxTest.java"],
+    tags = ["manual"],
+    deps = [":checkout"],
+)
+# 프리서브밋: bazel test --test_size_filters=small,medium //...
+```
+
+크기는 자원 경계를 강제할 뿐 설계 품질을 강제하지 않는다 — `size = "small"` 로 선언된 테스트도 목을 열 개 세워 구현 세부에 못을 박아 두면 리팩터링마다 깨진다.

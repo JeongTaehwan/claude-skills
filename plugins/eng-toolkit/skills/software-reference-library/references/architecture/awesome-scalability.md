@@ -25,7 +25,7 @@ Netflix·Uber·LinkedIn·Airbnb 등이 자사 엔지니어링 블로그에 공�
 ## 이럴 땐 아니다
 - 원리와 이론을 순서대로 배우고 싶으면 `architecture/designing-data-intensive-applications.md`
 - 패턴의 정의와 적용 조건이 필요하면 `architecture/azure-architecture-cloud-design-patterns.md` 또는 `architecture/microservices-io.md`
-- 운영 조직·SLO·온콜 체계가 주제라면 `development/google-sre-books.md`
+- 운영 조직·SLO·온콜 체계가 주제라면 `infrastructure/google-sre-books.md`
 - 한국 회사들의 사례를 찾는 것이라면 `development/techblog-woowahan-com.md`, `development/toss-tech.md`, `development/tech-kakao-com.md` 쪽이 가깝다
 
 ## 무엇이 들어있나
@@ -35,3 +35,27 @@ Netflix·Uber·LinkedIn·Airbnb 등이 자사 엔지니어링 블로그에 공�
 
 ## 인용 포인트
 - 설계 제안서에 "선례" 근거를 붙일 때, 벤더 문서보다 당사자 회고 글이 반박에 강하다.
+
+## 코드 예시
+
+"사례는 선택지 목록으로 쓰고 판단은 우리 규모에서 다시 한다"를 설계 문서의 선례 절 양식으로 고정한 것 — 당시 규모 칸이 비면 그 행은 근거로 쓰지 않는다.
+
+```markdown
+## 선례 조사 — 주문 이벤트를 큐로 흘릴 것인가
+
+| 출처 | 당시 규모 | 택한 해법 | 대가로 적힌 것 | 우리 조건과 다른 점 |
+|---|---|---|---|---|
+| A사 엔지니어링 블로그 (2019) | 주문 12k/s | Kafka 팬아웃 + 컨슈머별 오프셋 | 순서 보장은 파티션 키 범위 안에서만 | 우리는 40/s — 두 자릿수 차이 |
+| B사 회고 (2021) | 주문 800/s | 아웃박스 테이블 + 폴링 | 폴링 지연 1~2초 상시 | 유사 규모, 단일 DB 도 동일 |
+| C사 발표 (2016) | 미공개 | 이중 쓰기(DB + 큐) | 유실 사고 후 폐기했다고 기술 | 실패 사례로만 인용 |
+
+### 우리 규모에서의 판단
+40/s 에서는 파티션 운영·컨슈머 재처리 비용이 이득보다 크다.
+B사 방식(아웃박스 + 폴링)으로 시작하고, 주문 1k/s 를 넘길 때 재검토한다.
+
+### 재검토 트리거
+- 피크 주문이 1k/s 를 3개월 연속 초과
+- 아웃박스 폴링 지연 p99 가 5초 초과
+```
+
+표를 채우는 것과 판단하는 것은 다른 일이다 — 회고 글은 성공한 최종 구조만 쓰고 그 앞의 실패와 조직 규모(전담 팀 유무)는 대개 빠진다. 규모 칸이 두 자릿수 차이인 행은 근거가 아니라 반례로 읽는 편이 정확하다.

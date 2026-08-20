@@ -34,3 +34,33 @@ web-vitals 라이브러리의 App Router 내장 통합 훅. 실사용자(느린 
 ## 인용 포인트
 - "느린 네트워크 사용자는 field 데이터에만 나타난다" — Lighthouse 점수만으로 성능을 판정하는 관행에 대한 반박 근거.
 - 별도 SaaS 도입 전 프레임워크 내장 수집 지점이 있다는 점 — RUM 도입 장벽을 낮추는 제안 근거.
+
+## 코드 예시
+
+수집만으로는 부족하다 — 연결 종류를 함께 실어 보내야 "느린 네트워크 사용자"를 field 데이터에서 따로 끊어 볼 수 있다.
+
+```jsx
+// app/web-vitals.jsx
+"use client";
+
+import { useReportWebVitals } from "next/web-vitals";
+
+export function WebVitals() {
+  useReportWebVitals((metric) => {
+    const body = JSON.stringify({
+      id: metric.id,
+      name: metric.name,             // LCP · INP · CLS · FCP · TTFB
+      value: metric.value,
+      rating: metric.rating,         // good | needs-improvement | poor
+      navigationType: metric.navigationType,
+      path: window.location.pathname,
+      // 저속 사용자 세그먼트를 나누는 열쇠 (Chromium 계열에만 존재)
+      effectiveType: navigator.connection?.effectiveType ?? null,
+    });
+    navigator.sendBeacon("/api/vitals", body);
+  });
+  return null;
+}
+```
+
+`sendBeacon` 은 전송 실패를 알려주지 않고 CLS 는 페이지를 떠날 때 확정되므로, 이탈이 빠른 저속 사용자일수록 표본에서 조용히 빠진다 — 정작 보고 싶은 집단이 과소 대표되는 방향의 편향이다.

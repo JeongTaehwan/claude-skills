@@ -36,3 +36,35 @@ https://nextjs.org/docs/app/api-reference/file-conventions/loading
 ## 인용 포인트
 - 스트리밍의 효과를 한 문장으로: 체감(FCP)이 서버 데이터 속도와 분리된다 — "백엔드가 느려서 어쩔 수 없다"는 주장에 대한 반박.
 - PPR이 실험 플래그에서 `cacheComponents`의 기본 동작으로 편입됐다는 지위 변화 — 도입 논의 때 낡은 정보로 반대하는 경우의 교정 근거.
+
+## 코드 예시
+
+느린 API 하나가 페이지 전체를 인질로 잡지 못하게 — 셸과 빠른 부분은 먼저 흘려보내고, 느린 구멍만 Suspense 뒤로 미룬다.
+
+```jsx
+// app/products/[id]/page.jsx
+import { Suspense } from "react";
+
+async function Reviews({ id }) {
+  const res = await fetch(`https://api.example.com/reviews/${id}`); // 느린 API
+  const reviews = await res.json();
+  return <ReviewList reviews={reviews} />;
+}
+
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id); // 빠른 데이터는 셸과 함께 나간다
+
+  return (
+    <main>
+      <ProductHeader product={product} />
+      {/* 레이아웃 치수가 실제 목록과 같아야 도착 시 화면이 안 튄다 */}
+      <Suspense fallback={<ReviewsSkeleton rows={5} />}>
+        <Reviews id={id} />
+      </Suspense>
+    </main>
+  );
+}
+```
+
+스트리밍은 데이터가 빨라지는 게 아니라 먼저 보이는 것만 바꾼다 — 리뷰 실제 도착 시각은 그대로이고, `fallback` 높이가 실물과 다르면 FCP를 벌고 CLS를 잃는다.

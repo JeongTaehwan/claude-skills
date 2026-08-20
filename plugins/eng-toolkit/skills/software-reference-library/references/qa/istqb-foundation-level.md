@@ -37,3 +37,38 @@ v4.0에서는 이전 판보다 애자일·시프트레프트 맥락이 강화되
 ## 인용 포인트
 - "테스팅은 결함의 부재가 아니라 존재를 보인다" — 커버리지 100%를 품질 보증으로 오해하는 논의에 쓸 수 있는 표준 문구.
 - "결함 집합(defect clustering)" 원칙은, 리스크 기반으로 테스트를 특정 모듈(예: 쿠폰 적용, 정산 배치)에 집중시키자고 설득할 때 근거가 된다.
+
+## 코드 예시
+
+실러버스가 구분해 둔 어휘를 결함 리포트 양식의 필드로 못 박은 형태 — 심각도(제품 영향)와 우선순위(수정 순서)를 같은 칸에 섞지 않는다.
+
+```yaml
+# .github/ISSUE_TEMPLATE/defect.yml — GitHub 이슈 폼 형식
+name: 결함 리포트
+description: 관측된 실패(failure)를 기록한다. 원인 추정은 본문에 분리해 적는다
+labels: ["defect"]
+body:
+  - type: input
+    id: environment
+    attributes: { label: 환경, placeholder: "staging / iOS 17.4 / build 2431" }
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 절차
+      description: 번호로. 마지막 줄에 기대 결과와 실제 결과를 나눠 적는다
+    validations: { required: true }
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 심각도 — 제품에 미치는 영향 (보고자가 정함)
+      options: ["1 데이터 손실·결제 오류", "2 주요 기능 불가", "3 우회 가능", "4 사소"]
+    validations: { required: true }
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위 — 수정 순서 (담당 조직이 정함)
+      options: ["즉시", "이번 스프린트", "백로그"]
+```
+
+두 칸을 나눠도 판단은 나뉘지 않는다 — 심각도 1 에 우선순위 백로그를 붙인 티켓이 쌓이기 시작하면, 양식이 아니라 그 조합을 정기적으로 들여다보는 자리가 필요하다는 신호다.

@@ -36,3 +36,30 @@ https://engineering.linecorp.com/ko/blog
 
 ## 인용 포인트
 - 대규모 트래픽 설계 제안에서 "순서 보장을 어디까지 포기할 것인가"를 명시적 결정 항목으로 올릴 때, 같은 결정을 먼저 한 사례로 인용할 수 있다.
+
+## 코드 예시
+
+"순서·중복·지연을 어디까지 포기했는가"가 코드에서 실제로 결정되는 두 지점 — 발행 측의 키 선택과, 소비 측의 시퀀스 검사.
+
+```java
+// 순서 보장 범위를 키로 선언한다: 같은 방 안에서만 순서를 지킨다.
+// 방 사이의 전역 순서는 여기서 포기했고, 그 대가로 파티션을 늘려 처리량을 얻는다.
+producer.send(new ProducerRecord<>("chat-message", roomId, payload));
+
+// 소비 측은 포기한 것(방 간 순서)이 아니라 지킨 것만 검사한다
+void onMessage(String roomId, Message msg) {
+    long last = lastSeq.getOrDefault(roomId, 0L);
+    if (msg.seq() <= last) {
+        return;                        // 중복·재전송 → 버린다
+    }
+    if (msg.seq() > last + 1) {
+        buffer.hold(roomId, msg);      // 앞선 메시지가 아직 안 왔다 → 붙잡아 둔다
+        return;
+    }
+    apply(msg);
+    lastSeq.put(roomId, msg.seq());
+    buffer.drain(roomId, this::onMessage);
+}
+```
+
+붙잡아 두는 버퍼에는 만료가 반드시 필요하다 — 앞선 메시지가 영영 오지 않으면 그 방 하나가 통째로 멈춘다. 그리고 파티션 수를 바꾸는 순간 키→파티션 매핑이 달라져, 이행 구간에서는 위 보장이 성립하지 않는다.

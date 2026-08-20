@@ -35,3 +35,25 @@ https://www.selenium.dev/documentation/
 
 ## 인용 포인트
 - 공식 문서가 성능 테스트·CAPTCHA 우회 등을 권장하지 않는다고 못 박은 대목은, "E2E로 그것까지 하자"는 요구를 되돌릴 때 그대로 인용할 수 있다.
+
+## 코드 예시
+
+문서가 권하는 대기 전략을 before/after 로 — 암묵적 대기 + `sleep` 조합을 걷어내고, 기다리는 조건을 명시한다 (Selenium 4, Java).
+
+```java
+// before — 전역 암묵적 대기에 sleep 을 덧대는 흔한 형태
+driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+driver.findElement(By.id("pay")).click();
+Thread.sleep(3000);                       // 느리고, 그래도 가끔 깨진다
+assertEquals("결제 완료", driver.findElement(By.id("result")).getText());
+
+// after — 암묵적 대기는 끄고(0), 기다릴 조건을 매번 적는다
+driver.manage().timeouts().implicitlyWait(Duration.ZERO);
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+wait.until(ExpectedConditions.elementToBeClickable(By.id("pay"))).click();
+wait.until(ExpectedConditions.textToBePresentInElementLocated(
+        By.id("result"), "결제 완료"));
+```
+
+암묵적 대기와 명시적 대기를 **섞으면** 대기 시간이 예측 불가능하게 늘어난다 — 그래서 after 에서 `implicitlyWait` 을 0 으로 되돌린 것이다. 그리고 `elementToBeClickable` 이 참이어도 그 순간 화면이 다시 그려지면 클릭이 빗나갈 수 있어, 애니메이션이 있는 UI 에서는 조건을 하나 더 좁혀야 한다.

@@ -38,3 +38,39 @@ https://k6.io/docs/
 ## 인용 포인트
 - "성능 기준은 문서가 아니라 threshold 로 적는다" — 성능 SLO 를 파이프라인 게이트로 만들자는 제안의 표준 근거.
 - check 실패가 테스트 실패가 아니라는 사실은, 초록불 리포트를 신뢰하기 전에 threshold 설정 여부를 먼저 확인해야 하는 이유다.
+
+## 코드 예시
+
+성능 기준을 문서가 아니라 `thresholds` 로 적어, 넘으면 k6 가 비정상 종료하고 파이프라인이 멈추게 만든 형태.
+
+```js
+import http from 'k6/http';
+import { check } from 'k6';
+
+export const options = {
+  scenarios: {
+    checkout: {
+      executor: 'ramping-arrival-rate', // 도착률 기반
+      startRate: 10,
+      timeUnit: '1s',
+      preAllocatedVUs: 200,
+      stages: [{ target: 150, duration: '1m' }, { target: 150, duration: '3m' }],
+    },
+  },
+  // 여기가 합격/불합격을 정하는 유일한 곳
+  thresholds: {
+    'http_req_duration{scenario:checkout}': ['p(95)<500'],
+    http_req_failed: ['rate<0.01'],
+  },
+};
+
+export default function () {
+  const res = http.post(`${__ENV.BASE_URL}/api/orders`,
+    JSON.stringify({ sku: 'A-1', quantity: 1 }),
+    { headers: { 'Content-Type': 'application/json' } });
+
+  check(res, { 'status is 201': (r) => r.status === 201 }); // 실패해도 빌드는 안 깨진다
+}
+```
+
+`preAllocatedVUs` 가 모자라면 목표 도착률에 도달하지 못한 채 테스트가 끝난다 — 그러면 p95 는 낮게 나오고 threshold 도 통과하지만, 실제로는 부하를 걸지 못한 것이다. 실행 로그의 dropped iterations 를 함께 봐야 한다.

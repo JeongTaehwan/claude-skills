@@ -37,3 +37,38 @@ RST는 "테스팅은 제품에 대해 배우기 위한 탐구이며, 그 질은 
 ## 인용 포인트
 - "testing vs checking" 구분은, 자동화 커버리지를 올렸는데 왜 여전히 사람이 봐야 하냐는 질문에 대한 가장 깔끔한 답이다.
 - 세션 리포트 형식(차터 / 소요 시간 / 테스트 설계·조사·셋업 비율 / 발견 / 이슈)은 그대로 사내 템플릿으로 옮겨 쓸 수 있다.
+
+## 코드 예시
+
+"몇 건 중 몇 건 통과"를 대신하는 SBTM 세션 시트 — 섹션 이름이 고정돼 있어 파싱과 집계가 가능하고, 커버리지는 소진율이 아니라 서술로 적힌다.
+
+```text
+CHARTER
+쿠폰 병용 규칙을 만료·부분환불과 교차 탐색하고, 정산 금액이 어긋나는 조건을 찾는다
+
+#AREAS
+Product | 결제, 정산배치
+Strategy | 상태 전이, 도메인 테스트
+Env | staging / build 2431
+
+START      2026-08-20 14:00
+TESTER     정태환
+
+TASK BREAKDOWN
+#DURATION                          normal (90m)
+#TEST DESIGN AND EXECUTION         65
+#BUG INVESTIGATION AND REPORTING   25
+#SESSION SETUP                     10
+#CHARTER/OPPORTUNITY               90/10
+
+#TEST NOTES
+정률 쿠폰 + 부분환불에서 재계산은 정상. 자정 경계는 못 봄(다음 차터)
+
+#BUGS
+BUG-812 부분환불 후 최소주문금액 미달인데 쿠폰이 유지됨
+
+#ISSUES
+PG 샌드박스 15:00~15:30 점검으로 환불 시나리오 3건 중단
+```
+
+세 비율의 합이 100 이라는 것 말고 이 시트가 보증하는 건 없다 — `#TEST NOTES` 를 "이상 없음"으로 채우면 세션 개수만 집계되고, 무엇을 탐색했는지는 여전히 아무도 모른다.

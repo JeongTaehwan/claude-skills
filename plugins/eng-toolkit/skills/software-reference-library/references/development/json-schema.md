@@ -35,3 +35,37 @@ Learn 섹션은 "What is a schema?"에서 시작해 JSON Schema basics, Create y
 
 ## 인용 포인트
 - "검증 규칙을 코드가 아니라 데이터로 둔다"는 것이 도입 명분의 전부다. 같은 스키마 하나로 API 문서·런타임 검증·계약 테스트를 덮을 수 있다는 점을 근거로 쓴다.
+
+## 코드 예시
+
+"quantity 가 0 을 허용하는가" 같은 논쟁을 코드가 아니라 데이터로 못 박고, `$ref` 로 재사용하는 형태.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/order.json",
+  "type": "object",
+  "required": ["currency", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "currency": { "enum": ["KRW", "USD"] },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/lineItem" }
+    }
+  },
+  "$defs": {
+    "lineItem": {
+      "type": "object",
+      "required": ["sku", "quantity"],
+      "properties": {
+        "sku": { "type": "string", "pattern": "^[A-Z0-9-]+$" },
+        "quantity": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}
+```
+
+`$defs` 와 `$schema` 값은 드래프트 2020-12 기준이다 — 쓰는 검증 라이브러리가 이 드래프트를 지원하는지 먼저 확인해야 키워드가 조용히 무시되지 않는다.

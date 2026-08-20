@@ -38,3 +38,28 @@ HTTP뿐 아니라 JDBC·JMS·FTP·LDAP까지 부하를 걸 수 있는 자바 기
 
 ## 인용 포인트
 - non-GUI 모드로 측정하라는 공식 권고 — "JMeter GUI에서 잰 수치"를 근거로 쓰는 보고서를 되돌릴 때 인용할 수 있다.
+
+## 코드 예시
+
+"GUI는 플랜을 만드는 도구, 측정은 non-GUI 모드"라는 공식 권고를 그대로 옮긴 실행 형태.
+
+```bash
+# GUI 는 .jmx 를 편집할 때만 연다
+jmeter -t plans/order-api.jmx
+
+# 측정은 non-GUI(-n) 로. -l 은 원시 결과(jtl), -e -o 는 HTML 리포트 생성
+jmeter -n \
+  -t plans/order-api.jmx \
+  -l results/run-$(date +%Y%m%d-%H%M).jtl \
+  -e -o results/report
+
+# 플랜을 고치지 않고 부하 크기만 바꾸려면 -J 로 프로퍼티를 주입한다
+# (.jmx 안에서 ${__P(threads,50)} 로 받도록 만들어 둔 경우)
+jmeter -n -t plans/order-api.jmx -Jthreads=200 -Jrampup=60 \
+  -l results/peak.jtl -e -o results/report-peak
+
+# 한 대로 부하가 모자라면 워커들에 jmeter-server 를 띄우고 -R 로 분산 실행
+jmeter -n -t plans/order-api.jmx -R 10.0.1.11,10.0.1.12 -l results/dist.jtl
+```
+
+`-e -o` 는 대상 디렉터리가 비어 있어야 하고, 이렇게 측정해도 부하 생성기 자체가 병목이면 숫자는 서버가 아니라 JMeter 의 한계를 잰 것이 된다 — 생성기 쪽 CPU·네트워크를 함께 봐야 한다.

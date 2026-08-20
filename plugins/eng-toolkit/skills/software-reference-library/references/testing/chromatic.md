@@ -37,3 +37,32 @@ TurboSnap은 Git 히스토리와 번들러 의존성 그래프를 분석해 변�
 ## 인용 포인트
 - "story가 곧 테스트"라는 전제 — Storybook 유지 비용을 정당화하거나, 반대로 story 작성 규약을 강제할 때 쓰는 논거.
 - 승인 기반 베이스라인 갱신 — 자체 구현 이미지 diff가 왜 팀에서 사장되는지(판정 주체가 없어서)를 설명하는 대비점.
+
+## 코드 예시
+
+"바뀌었다"를 PR 게이트로 걸되 승인 주체를 사람으로 두고, TurboSnap 으로 스냅샷 수를 줄이는 CI 형태.
+
+```yaml
+# .github/workflows/chromatic.yml
+name: Chromatic
+on: push
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # TurboSnap 이 베이스라인 커밋을 찾으려면 전체 히스토리가 필요
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+
+      - run: npx chromatic
+             --project-token=${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+             --only-changed          # 변경 영향 컴포넌트만 스냅샷
+             --exit-zero-on-changes  # 변경은 실패가 아니라 "리뷰 대기"
+```
+
+`--exit-zero-on-changes` 는 시각 변경을 CI 실패로 만들지 않는다 — 승인 절차가 실제로 굴러가야 의미가 있고, 아무도 안 보면 베이스라인만 조용히 밀린다. 반대로 이 플래그를 빼면 의도된 디자인 변경마다 빨간불이 뜬다.

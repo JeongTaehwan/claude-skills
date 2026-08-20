@@ -34,3 +34,30 @@ HTML→DOM, CSS→CSSOM, 렌더 트리, 레이아웃, 페인트로 이어지는 
 ## 인용 포인트
 - "CSSOM 완성 전에는 렌더 트리가 없다" — CSS 최적화(인라인·분리)가 첫 페인트에 직결된다는 근거.
 - 동기 JS가 파서와 CSS 양쪽에 묶이는 구조 — script 위치·async/defer 리뷰 코멘트의 원리 인용.
+
+## 코드 예시
+
+"무엇이 첫 페인트를 막는가"를 추측이 아니라 브라우저에게 직접 묻는다 — 렌더 차단 리소스를 목록으로 뽑아 리뷰 근거로 쓰는 형태.
+
+```js
+// Chromium 계열: PerformanceResourceTiming.renderBlockingStatus
+const blocking = performance.getEntriesByType('resource')
+  .filter(r => r.renderBlockingStatus === 'blocking')
+  .map(r => ({
+    url: r.name.split('/').pop(),
+    type: r.initiatorType,              // 'link'(CSS) / 'script'
+    ms: Math.round(r.responseEnd - r.startTime),
+  }))
+  .sort((a, b) => b.ms - a.ms);
+
+console.table(blocking);
+// CSS 가 여기 있는 건 정상이다 — CSSOM 없이는 렌더 트리를 못 만든다.
+// script 가 여기 있으면 파서가 멈춘 것이고, 대개 defer 한 줄로 사라진다.
+```
+
+```html
+<script src="/js/app.js" defer></script>   <!-- 파싱과 병렬 다운로드, DOM 완성 후 순서대로 실행 -->
+<script src="/js/analytics.js" async></script> <!-- 순서 무관·독립 스크립트에만 -->
+```
+
+목록에서 사라졌다고 비용이 사라진 건 아니다 — `defer` 는 실행을 파싱 이후로 미룰 뿐이라 JS 실행 시간은 그대로 남고, 그 비용은 첫 페인트가 아니라 상호작용 가능 시점에 나타난다.

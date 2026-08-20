@@ -42,3 +42,33 @@ StrictMode 에서 개발 중 컴포넌트와 Effect 가 두 번 실행되는 것
 - "props/state 로부터 계산 가능한 값은 상태가 아니다"는 문서의 권장은, 리뷰에서 파생 상태를 지적할 때 취향 논쟁을 끝내는 근거가 된다.
 - Effect 의 용도를 "외부 시스템과의 동기화"로 좁힌 정의는, 팀의 훅 사용 규약을 한 문장으로 쓰는 데 그대로 쓰인다.
 - StrictMode 의 이중 실행이 의도된 검출 장치라는 설명은, 이를 끄자는 제안에 대한 반론 근거다.
+
+## 코드 예시
+
+"props/state 로부터 계산 가능한 값은 상태가 아니다" — 장바구니 금액이 한 박자 늦게 갱신되는 버그의 정확한 모양.
+
+```jsx
+// 안티패턴: 계산 가능한 값을 또 상태로 두고 Effect 로 동기화한다
+function Cart({ items, coupon }) {
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    setTotal(items.reduce((s, i) => s + i.price * i.qty, 0) - coupon.amount);
+  }, [items, coupon]);
+  // 렌더 → Effect → setState → 재렌더. 그 사이 한 프레임 동안 옛 금액이 화면에 남는다
+  return <b>{total}</b>;
+}
+
+// 권장: 렌더 중에 계산한다. 상태가 하나 줄면 모순 가능한 상태 조합도 하나 준다
+function Cart({ items, coupon }) {
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0) - coupon.amount;
+  return <b>{total}</b>;
+}
+
+// 사용자 이벤트에 대한 반응은 Effect 가 아니라 핸들러에 둔다
+function ApplyCoupon({ onApply }) {
+  const handleClick = () => { onApply(); logEvent("coupon_applied"); };
+  return <button onClick={handleClick}>적용</button>;
+}
+```
+
+계산이 정말 무거우면 `useMemo` 로 감싸는 선택지가 있지만, 그건 최적화지 위 문제의 해법이 아니다 — Effect + setState 를 `useMemo` 로 바꾸는 게 요점이 아니라 **상태를 없애는 것**이 요점이다. Effect 는 문서가 좁혀 둔 대로 외부 시스템과 동기화할 때만 남긴다.

@@ -34,3 +34,29 @@ GA·GTM·마케팅 픽셀 같은 서드파티 스크립트를 메인 스레드�
 ## 인용 포인트
 - "서드파티 스크립트를 빼지 않고도 메인 스레드를 비울 수 있다"는 구조적 대안의 존재 증명 — 사업팀과의 협상 카드.
 - INP/TBT 악화의 원인이 서드파티일 때, 로딩 시점 조절 다음 단계의 표준 선택지로.
+
+## 코드 예시
+
+GA 를 빼지 않고 메인 스레드에서만 치우는 형태 — `type="text/partytown"` 한 글자가 실행 위치를 워커로 옮긴다.
+
+```html
+<head>
+  <script>
+    // 워커 → 메인 스레드로 넘겨야 하는 전역 호출을 명시
+    partytown = { forward: ["dataLayer.push", "gtag"] };
+  </script>
+  <!-- partytown copylib 로 public/~partytown 에 복사해 둔 런타임 -->
+  <script src="/~partytown/partytown.js"></script>
+
+  <!-- type 이 text/partytown 이면 브라우저는 실행하지 않고 Partytown 이 워커에서 돌린다 -->
+  <script type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-XXXX"></script>
+  <script type="text/partytown">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-XXXX");
+  </script>
+</head>
+```
+
+`forward` 에 적지 않은 전역 호출은 조용히 유실되고, 워커의 DOM 접근은 전부 프록시 왕복이라 동기 DOM API에 의존하는 스크립트는 깨지거나 느려진다 — 다운로드 바이트도 그대로다.

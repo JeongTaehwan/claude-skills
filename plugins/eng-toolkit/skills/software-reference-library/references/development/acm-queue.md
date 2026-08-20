@@ -35,3 +35,26 @@ Queue의 편집 방침 자체가 "practitioner-oriented" — 저자가 대개 �
 
 ## 인용 포인트
 - 기술 제안서의 참고문헌에 "ACM Queue" 표기가 들어가면 블로그 링크와 무게가 완전히 다르다. 근거의 격을 올려야 할 때 쓴다.
+
+## 코드 예시
+
+"정식 참고문헌 형식을 갖출 수 있다"는 이 매체의 장점을 실제로 쓰는 자리 — ADR·기술 제안서 뒤에 붙는 참고문헌 항목.
+
+```bibtex
+% ADR 참고문헌: URL 목록 대신 이 형태로 남긴다
+@article{bailis2014network,
+  author  = {Bailis, Peter and Kingsbury, Kyle},
+  title   = {The Network Is Reliable},
+  journal = {ACM Queue},
+  year    = {2014}
+}
+
+@article{cavage2013distributed,
+  author  = {Cavage, Mark},
+  title   = {There's Just No Getting Around It: You're Building a Distributed System},
+  journal = {ACM Queue},
+  year    = {2013}
+}
+```
+
+volume·number·DOI 는 원문 페이지에서 확인해 채워야 한다. 그리고 형식이 근거를 만들어 주지는 않는다 — 그 글이 우리와 같은 제약을 다뤘는지가 인용의 실제 무게다.

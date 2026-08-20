@@ -36,3 +36,27 @@ Addy Osmani와 Lydia Hallie가 렌더링 패턴(SSR/SSG/ISR/스트리밍/RSC)과
 ## 인용 포인트
 - 렌더링 전략 결정 문서에서 "출처: patterns.dev의 해당 패턴 항목" 한 줄이면 근거가 선다 — 패턴마다 URL이 따로 있어 인용 단위가 깔끔하다.
 - "보이면 로드, 만지면 로드"(import on visibility/interaction) 같은 패턴 이름 자체를 팀 어휘로 수입하는 출처 — 이름이 생기면 리뷰에서 지적이 된다.
+
+## 코드 예시
+
+/vanilla/import-on-visibility 패턴 — 뷰포트에 들어오기 전까지 무거운 모듈을 내려받지 않는다.
+
+```js
+const slot = document.querySelector("#comments");
+
+const io = new IntersectionObserver(
+  async (entries, observer) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      observer.unobserve(entry.target); // 한 번만 로드
+      const { renderComments } = await import("./comments.js");
+      renderComments(entry.target);
+    }
+  },
+  { rootMargin: "200px" } // 화면에 닿기 전 미리 시작
+);
+
+io.observe(slot);
+```
+
+`rootMargin` 을 0으로 두면 "보인 뒤에 받기 시작"이라 사용자는 빈 자리를 보게 된다 — 저속 회선일수록 이 여유값이 패턴의 성패를 가른다.

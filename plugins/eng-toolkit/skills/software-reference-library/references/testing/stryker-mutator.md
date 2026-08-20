@@ -35,3 +35,30 @@ JS/TS·C#·Scala용 뮤테이션 테스트 도구. 소스에 의도적인 변형
 
 ## 인용 포인트
 - "커버리지는 테스트가 코드를 지나갔다는 뜻이고, 뮤테이션 점수는 테스트가 변화를 알아챈다는 뜻"이라는 구분. 커버리지 목표치 논쟁을 끝내는 데 가장 짧은 문장이다.
+
+## 코드 예시
+
+"전체에 매번 돌리지 말고 핵심 도메인부터 좁혀 시작하라"는 권고를 설정으로 못 박은 것 — 대상 디렉터리를 한정하고, 게이트는 `break` 하나로만 건다.
+
+```json
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "reporters": ["html", "clear-text", "progress"],
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/domain/pricing/**/*.ts",
+    "!src/**/*.spec.ts"
+  ],
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 55
+  },
+  "incremental": true,
+  "concurrency": 4
+}
+```
+
+`coverageAnalysis: "perTest"` 는 각 뮤턴트에 관련된 테스트만 골라 돌려 실행 시간을 크게 줄이지만, **테스트가 서로 상태를 공유하면 결과가 틀어진다** — 전역 캐시나 모듈 레벨 변수를 쓰는 스위트에서는 `all` 로 낮춰야 한다. `break` 값은 현재 점수보다 조금 낮게 잡아 회귀만 막는 용도로 쓰는 편이 안전하다. 동치 뮤턴트가 섞여 있어 100%는 원리적으로 도달할 수 없고, 무리하게 올리면 뮤턴트를 죽이기 위한 단언이 늘어난다.

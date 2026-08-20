@@ -26,7 +26,7 @@ Google Ventures가 정리한 "5일 안에 중요한 비즈니스 질문에 답�
 - 검증이 아니라 **지속적인 발견 활동**을 팀 루틴으로 만들려면 — `planning/product-trio.md`, `planning/teresa-torres-opportunity-solution-tree.md`
 - 문제 정의와 해결 탐색의 큰 흐름(발산–수렴)을 설명하려면 — `planning/double-diamond.md`
 - 만들 것이 정해진 뒤 개발 사이클을 어떻게 끊을지의 문제라면 — `planning/shape-up.md`
-- 이미 라이브인 기능의 효과를 측정하려면 — `planning/a-b-testing.md`, `planning/a-dirty-dozen-12.md`
+- 이미 라이브인 기능의 효과를 측정하려면 — `planning/a-b-testing.md`, `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 무엇을 먼저 할지 우선순위 문제라면 — `planning/rice.md`
 
 ## 무엇이 들어있나
@@ -39,3 +39,31 @@ Google Ventures가 정리한 "5일 안에 중요한 비즈니스 질문에 답�
 - "5일 안에 중요한 질문에 답한다" — 결론 없는 회의를 반복하는 대신 기간을 못 박은 검증 절차를 제안할 때의 프레이밍.
 - 집단 브레인스토밍 대신 개인 스케치 후 투표 — 아이디어 회의가 목소리 큰 사람에게 수렴하는 문제를 절차로 고치자고 할 때.
 - 금요일에 테스트하는 것은 완성품이 아니라 프로토타입 — "검증하려면 일단 제대로 만들어야 한다"는 반론에 답할 때.
+
+## 코드 예시
+
+"회의를 더 하는 대신 기간과 산출물을 못 박는다"를, 스프린트 시작 전에 합의해 두는 계획 파일로 옮긴 것.
+
+```yaml
+# 디자인 스프린트 계획 — 월요일 아침이 아니라 그 전에 확정한다
+sprint_question: 기존 사용자가 새 구독 상품을 스스로 이해하고 결제까지 도달하는가?
+success_signal: 인터뷰 5명 중 4명이 도움 없이 결제 화면까지 간다
+
+schedule:
+  mon: { output: 문제 지도와 집중할 한 지점, decider: "@head-of-product" }
+  tue: { output: 개인 스케치, rule: no_group_brainstorm }  # 함께 떠올리지 않는다
+  wed: { output: 투표로 고른 1안과 스토리보드 }
+  thu: { output: 파사드 프로토타입 }                        # 작동하는 제품이 아니다
+  fri: { output: 고객 인터뷰 5건과 패턴 정리 }
+
+participants:
+  n: 5
+  recruit_starts: mon      # 금요일 인터뷰 대상자 모집은 월요일에 이미 시작한다
+  screener: 최근 3개월 내 결제 이력이 있는 기존 사용자
+
+out_of_scope:
+  - 실제 결제 연동
+  - 디자인 시스템 반영
+```
+
+계획표는 5일을 실제로 비워 냈을 때만 성립한다 — `decider`가 금요일에 자리에 없으면 스프린트 결과는 결정이 아니라 또 하나의 회의 안건으로 돌아간다. 그리고 인터뷰 5명은 방향의 큰 오류를 잡는 표본이지, 선호도나 전환율을 측정하는 표본이 아니다.

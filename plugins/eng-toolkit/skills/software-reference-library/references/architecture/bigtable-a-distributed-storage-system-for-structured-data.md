@@ -38,3 +38,29 @@ https://static.googleusercontent.com/media/research.google.com/en//archive/bigta
 ## 인용 포인트
 - "값은 해석되지 않는 바이트열, 스키마는 컬럼 패밀리 수준" — 스키마리스가 스키마 없음이 아니라 스키마 책임이 애플리케이션으로 옮겨간 것임을 설명할 때.
 - 단일 로우 원자성 제약은, NoSQL 전환 시 주문·결제처럼 다중 엔티티 일관성이 필요한 영역을 함부로 옮기면 안 된다는 주장의 1차 근거가 된다.
+
+## 코드 예시
+
+"로우키 설계가 곧 데이터 배치 설계"를 그대로 옮긴 키 생성기 — 순차 증가 키가 한 태블릿에 쓰기를 몰아넣는 걸 막고, 조회는 사전순 연속 구간 하나로 끝내는 형태.
+
+```python
+import hashlib
+
+SHARDS = 16
+
+def _salt(user_id: str) -> str:
+    # 프로세스마다 값이 바뀌는 내장 hash() 대신 안정 해시를 쓴다
+    digest = int(hashlib.md5(user_id.encode()).hexdigest(), 16)
+    return f"{digest % SHARDS:02d}"
+
+def row_key(user_id: str, event_ts_ms: int) -> str:
+    # 타임스탬프를 역순으로 넣어 최신 이벤트가 사전순 앞에 오게 한다
+    inverted = 9_999_999_999_999 - event_ts_ms
+    return f"{_salt(user_id)}#{user_id}#{inverted:013d}"
+
+def scan_range(user_id: str) -> tuple[str, str]:
+    prefix = f"{_salt(user_id)}#{user_id}#"
+    return prefix, prefix + "~"  # 한 태블릿 안에서 끝나는 연속 구간
+```
+
+이 키가 싸게 만드는 조회는 "사용자 한 명의 최신순 이벤트" 하나뿐이다 — 상품별·기간별로 찾으려면 전체 스캔이거나 색인 테이블을 애플리케이션이 직접 만들어 유지해야 하고, 그 색인은 다른 로우이므로 원본과 원자적으로 갱신되지 않는다. 샤드 수 16 도 나중에 바꾸면 기존 키의 배치가 전부 어긋난다.

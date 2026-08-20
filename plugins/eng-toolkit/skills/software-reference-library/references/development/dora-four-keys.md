@@ -27,7 +27,7 @@ https://dora.dev/guides/dora-metrics-four-keys/
 - 왜 이 지표를 써야 하는지, 조직을 설득할 근거와 연구 배경은 `development/dora.md`
 - 배포 빈도를 실제로 올리기 위한 브랜치·머지 전략은 `development/trunk-based-development.md`
 - 복구 시간을 줄이기 위한 장애 대응·사후 분석 체계는 `development/postmortem-culture-learning-from-failure.md`
-- 신뢰성 목표를 숫자로 정하는 SLI/SLO 설계는 `development/sre-workbook.md`
+- 신뢰성 목표를 숫자로 정하는 SLI/SLO 설계는 `infrastructure/sre-workbook.md`
 
 ## 무엇이 들어있나
 네 지표를 처리량(배포 빈도, 변경 리드타임)과 안정성(변경 실패율, 복구 시간) 두 축으로 묶고, 각각에 대해 무엇을 측정 대상으로 삼는지와 흔한 오측정 패턴을 설명한다.
@@ -38,3 +38,30 @@ https://dora.dev/guides/dora-metrics-four-keys/
 ## 인용 포인트
 - 지표 도입 논의를 "무엇을 셀까"가 아니라 "무엇을 실패로 정의할까"에서 시작하게 만드는 근거로 쓸 수 있다.
 - 처리량 지표와 안정성 지표를 반드시 함께 본다는 원칙은, 배포 횟수만 올려 보고하는 게이밍을 사전에 막는 규칙으로 인용하기 좋다.
+
+## 코드 예시
+
+"배포 하나를 어디서부터 세는가"를 쿼리로 못 박은 것 — 정의가 SQL 안에 적혀 있으면 몇 달 뒤 숫자를 두고 다시 다투지 않는다.
+
+```sql
+-- 변경 리드타임: 커밋 시각 → 프로덕션 반영 시각 (기획·대기 시간은 넣지 않는다)
+SELECT
+  date_trunc('week', d.deployed_at) AS week,
+  percentile_cont(0.5) WITHIN GROUP (
+    ORDER BY EXTRACT(EPOCH FROM (d.deployed_at - c.committed_at)) / 3600
+  ) AS lead_time_hours_p50
+FROM deployments d
+JOIN commits c ON c.deployment_id = d.id
+WHERE d.env = 'production'
+GROUP BY 1;
+
+-- 변경 실패율: 분모는 프로덕션 배포 전체,
+-- 분자는 "배포로 서비스 저하가 생겨 즉시 조치가 필요했던" 건만 (계획된 재배포는 제외)
+SELECT
+  count(*) FILTER (WHERE d.caused_degradation)::numeric / count(*) AS change_failure_rate
+FROM deployments d
+WHERE d.env = 'production'
+  AND d.deployed_at >= now() - interval '90 days';
+```
+
+`caused_degradation` 을 누가 언제 채우는지가 이 쿼리의 급소다 — 사람이 나중에 수기로 채우기 시작하면 지표는 개선 신호가 아니라 보고용 숫자가 된다. 위 두 쿼리는 항상 같이 봐야 하며, 리드타임만 떼어 보고하면 그 순간부터 게이밍이 시작된다.

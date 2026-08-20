@@ -34,3 +34,38 @@ Workbox에서 포크해 현대화한 서비스 워커 툴킷과 프레임워크 
 ## 인용 포인트
 - "next-pwa는 방치됐다, 후계는 serwist"라는 마이그레이션 제안의 근거.
 - Next.js App Router PWA 기술 선정에서 ⭐ 수 대신 공식 지원 범위로 고르는 판단의 실례.
+
+## 코드 예시
+
+"Next.js App Router라면 next-pwa 대신 `@serwist/next`"를 실제 설정 두 파일로 옮긴 것.
+
+```ts
+// next.config.mjs — 빌드 시 프리캐시 매니페스트를 만들어 sw 에 주입한다
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
+
+export default withSerwist({ reactStrictMode: true });
+
+// app/sw.ts — 주입된 매니페스트를 받아 서비스 워커를 구성한다
+import { defaultCache } from "@serwist/next/worker";
+import { Serwist } from "serwist";
+
+declare const self: ServiceWorkerGlobalScope & { __SW_MANIFEST: unknown[] };
+
+const serwist = new Serwist({
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: true,
+  runtimeCaching: defaultCache, // Workbox 계열 전략 프리셋
+});
+
+serwist.addEventListeners();
+```
+
+서비스 워커는 **재방문**부터 효과가 있다 — 첫 방문자에게는 이 설정이 아무것도 해주지 않고, `skipWaiting: true`는 새 워커를 즉시 활성화하므로 이전 빌드의 청크를 참조하던 열린 탭이 배포 직후 깨질 수 있다.

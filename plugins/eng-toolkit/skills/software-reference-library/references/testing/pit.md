@@ -39,3 +39,32 @@ PIT 의 전제는 단순하다 — 테스트 스위트가 좋은지 알고 싶�
 ## 인용 포인트
 - 커버리지는 코드가 실행됐다는 사실만 측정하고, 뮤테이션 스코어는 그 실행에 대한 단언이 존재하는지를 측정한다 — 커버리지 목표치 논쟁을 끝내는 프레임.
 - "살아남은 뮤턴트" 목록 자체가 테스트 백로그가 된다 — 어디에 테스트를 더 써야 하는지 우선순위를 사람 감이 아니라 도구가 뽑아 준다.
+
+## 코드 예시
+
+"실행되었다"가 아니라 "검증되었다"를 CI 게이트로 삼는 형태 — 커버리지 임계치 자리에 뮤테이션 임계치를 놓는다.
+
+```xml
+<!-- pom.xml — 커버리지 목표 대신 뮤테이션 스코어를 게이트로 건다 -->
+<plugin>
+  <groupId>org.pitest</groupId>
+  <artifactId>pitest-maven</artifactId>
+  <version>1.15.8</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-junit5-plugin</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+  </dependencies>
+  <configuration>
+    <!-- 전체가 아니라 분기가 몰린 계산 로직에만 건다 -->
+    <targetClasses><param>com.example.pricing.*</param></targetClasses>
+    <targetTests><param>com.example.pricing.*Test</param></targetTests>
+    <mutationThreshold>80</mutationThreshold>
+    <withHistory>true</withHistory>   <!-- 증분 분석: 변경분 위주로 재실행 -->
+  </configuration>
+</plugin>
+```
+
+`mvn test-compile org.pitest:pitest-maven:mutationCoverage` 로 돌리면 살아남은 뮤턴트가 HTML 리포트에 남는다. 다만 스코어 100%가 목표는 아니다 — 로그 문자열처럼 검증할 가치가 없는 변형과, 의미가 같아 원리적으로 죽일 수 없는 **동등 뮤턴트**가 섞여 있어, 임계치를 무리하게 올리면 팀이 뮤턴트를 죽이기 위한 단언을 쓰기 시작한다.

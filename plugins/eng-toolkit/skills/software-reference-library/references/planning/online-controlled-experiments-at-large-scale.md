@@ -25,9 +25,8 @@ Bing이 실험 플랫폼을 실제로 운영하며 겪은 것을 정리한 논�
 - 커머스에서 배너·정렬·문구 같은 작은 변경의 영향력을 과소평가하는 분위기를 뒤집어야 할 때
 
 ## 이럴 땐 아니다
-- 이 파일과 `planning/online-controlled-experiments-at-large-scale-2.md` 는 같은 PDF다. 라이브러리에 중복 등재된 상태이므로 둘 중 하나만 보면 된다
 - 실험 설계·분석의 체계적 교재가 필요하면 `planning/trustworthy-online-controlled-experiments.md` (같은 저자의 책)
-- 결과 해석의 함정 목록이 필요하면 `planning/a-dirty-dozen-12.md`
+- 결과 해석의 함정 목록이 필요하면 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - A/B 테스트 용어와 기본 개념부터라면 `planning/a-b-testing.md`
 - Kohavi의 다른 논문·자료 전반은 `planning/exp-platform.md`
 
@@ -41,3 +40,28 @@ Bing이 실험 플랫폼을 실제로 운영하며 겪은 것을 정리한 논�
 - "대부분의 아이디어는 지표를 개선하지 못한다"는 실측은, 검증 없이 로드맵을 확정하는 관행에 대한 가장 인용하기 좋은 반증이다. 개인 의견이 아니라 KDD 게재 논문의 데이터라는 점이 설득에서 결정적으로 작동한다.
 - 작은 UI 변경이 큰 매출 차이를 만든 사례는, "이 정도 변경은 실험 안 해도 된다"는 판단을 재고하게 만든다.
 - A/A 테스트로 실험 플랫폼 자체를 먼저 검증한다는 관행은, 사내 실험 도구를 도입할 때 첫 마일스톤으로 그대로 제안할 수 있다.
+
+## 코드 예시
+
+"작은 변경은 실험할 가치가 없다"를 숫자로 되받는 자리 — 저자들이 쓰는 경험식으로 필요한 표본을 먼저 계산하면, 실험을 건너뛸지 말지가 취향이 아니라 트래픽 문제로 바뀐다.
+
+```python
+import math
+
+def sample_size_per_arm(baseline_rate: float, mde_relative: float) -> int:
+    """Kohavi 계열에서 쓰는 경험식: 팔당 n ≈ 16 * σ² / Δ²
+    (유의수준 5%, 검정력 80% 기준. 이진 지표면 σ² = p(1-p))"""
+    p = baseline_rate
+    delta = p * mde_relative          # 상대 개선폭을 절대 폭으로
+    return math.ceil(16 * p * (1 - p) / delta ** 2)
+
+# 결제 버튼 전환율 3%에서 상대 5% 개선을 잡고 싶다면
+n = sample_size_per_arm(0.03, 0.05)   # 팔당 약 206,000명
+days = math.ceil(n * 2 / 40_000)      # 일 4만 방문이면 약 11일
+
+# 잡고 싶은 효과가 작을수록 표본은 제곱으로 커진다
+for mde in (0.20, 0.10, 0.05, 0.02):
+    print(mde, sample_size_per_arm(0.03, mde))
+```
+
+이 식은 고정된 관측 기간을 전제한다 — 매일 결과를 들여다보다 유의해지는 순간 멈추면 계산한 5%보다 훨씬 자주 거짓 양성이 나온다.

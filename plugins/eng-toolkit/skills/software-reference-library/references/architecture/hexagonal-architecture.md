@@ -34,3 +34,34 @@ Alistair Cockburn이 직접 쓴 포트&어댑터 패턴 원문 — 애플리케�
 ## 인용 포인트
 - Intent 원문 한 문장 — "Allow an application to equally be driven by users, programs, automated test or batch scripts" — 은 "테스트를 위해 구조를 바꾸는 건 오버엔지니어링"이라는 반론에 대한 직접적인 답이다.
 - 육각형의 변 개수에 의미가 없다는 저자의 명시는, 팀에서 도형 해석을 두고 벌어지는 소모적 논쟁을 끊는 데 쓸 수 있다.
+
+## 코드 예시
+
+"애플리케이션을 사용자와 자동 테스트가 동등하게 구동한다"를 코드로 옮기면, 포트 인터페이스를 도메인이 소유하고 어댑터가 구현하는 방향이 된다.
+
+```typescript
+// Secondary port — 도메인이 소유한다. 인프라 타입이 등장하지 않는다.
+export interface PaymentGateway {
+  authorize(orderId: string, amountKrw: number): Promise<{ approved: boolean }>;
+}
+
+// 애플리케이션 코어 — DB도 HTTP도 모른다.
+export class ApproveOrder {
+  constructor(private readonly gateway: PaymentGateway) {}
+
+  async run(orderId: string, amountKrw: number): Promise<"APPROVED" | "REJECTED"> {
+    if (amountKrw <= 0) throw new Error("amount must be positive");
+    const { approved } = await this.gateway.authorize(orderId, amountKrw);
+    return approved ? "APPROVED" : "REJECTED";
+  }
+}
+
+// 테스트 어댑터 — PG 어댑터와 같은 자리에 꽂힌다.
+class AlwaysApprove implements PaymentGateway {
+  async authorize() { return { approved: true }; }
+}
+
+const result = await new ApproveOrder(new AlwaysApprove()).run("ord-1", 12000);
+```
+
+인터페이스 하나를 뽑았다고 격리가 끝나지는 않는다 — 반환 타입에 PG사 응답 코드나 ORM 엔티티가 새어 들어오는 순간 포트는 이름만 포트가 된다.

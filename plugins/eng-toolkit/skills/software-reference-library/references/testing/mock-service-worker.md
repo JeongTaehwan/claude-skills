@@ -39,3 +39,38 @@ https://mswjs.io/docs/
 ## 인용 포인트
 - "API 목킹을 테스트 전용이 아니라 재사용 가능한 독립 계층으로 다룬다" — 개발·테스트·Storybook 의 가짜 데이터를 한 곳으로 모으자는 제안의 근거.
 - 모듈 패칭 대신 네트워크 경계에서 가로챈다는 점은, 구현 결합형 목 어서션을 줄이자는 리뷰 의견의 뒷받침이 된다.
+
+## 코드 예시
+
+핸들러를 테스트 밖의 독립 계층으로 두고(개발 서버·Storybook 과 공유), 특정 테스트만 응답을 덮어써 비정상 경로를 재현하는 형태.
+
+```js
+// mocks/handlers.js — 테스트 전용이 아니라 공용 목 계층
+import { http, HttpResponse } from 'msw';
+
+export const handlers = [
+  http.post('/api/orders', () =>
+    HttpResponse.json({ id: 'o-1', status: 'PENDING' }, { status: 201 })
+  ),
+];
+
+// setup.test.js
+import { setupServer } from 'msw/node';
+const server = setupServer(...handlers);
+
+// 정의되지 않은 요청은 조용히 통과시키지 말고 에러로 드러낸다
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers()); // 테스트 간 격리
+afterAll(() => server.close());
+
+test('재고 부족(409)이면 에러 배너가 보인다', async () => {
+  server.use(http.post('/api/orders', () => new HttpResponse(null, { status: 409 })));
+
+  renderCheckout();
+  await userEvent.click(screen.getByRole('button', { name: '결제하기' }));
+
+  expect(await screen.findByText('재고가 부족합니다')).toBeInTheDocument();
+});
+```
+
+핸들러가 실제 API 와 어긋나면 이 테스트는 계속 초록불이다 — 목을 한 곳에 모으는 것과 그 목이 진짜 계약과 같은지는 별개 문제이고, 후자는 계약 테스트가 맡아야 한다.

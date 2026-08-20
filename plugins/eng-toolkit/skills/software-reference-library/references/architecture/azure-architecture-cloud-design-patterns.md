@@ -39,3 +39,36 @@ Retry, Circuit Breaker, Bulkhead, Transactional Outbox, Saga, CQRS, Cache-Aside,
 - 설계 리뷰에서 패턴 이름이 사람마다 다른 뜻으로 쓰일 때, 이 카탈로그를 팀의 공통 정의 출처로 지정해 두면 논쟁이 줄어든다.
 - "재시도만 넣고 서킷브레이커는 나중에" 같은 절반짜리 도입에 대한 반론 근거로 쓰기 좋다.
 - Outbox를 써도 exactly-once가 아니라 at-least-once라는 점 — 소비자 멱등성 설계를 요구하는 근거.
+
+## 코드 예시
+
+Transactional Outbox — "DB 커밋과 메시지 발행을 분산 트랜잭션 없이 원자적으로"를 한 트랜잭션 안의 INSERT 두 개로 옮긴 것(PostgreSQL).
+
+```sql
+CREATE TABLE outbox (
+  id           BIGSERIAL PRIMARY KEY,
+  event_type   TEXT        NOT NULL,
+  payload      JSONB       NOT NULL,
+  published_at TIMESTAMPTZ
+);
+-- 미발행 행만 인덱싱: 발행 완료분이 쌓여도 워커 조회는 느려지지 않는다
+CREATE INDEX outbox_unpublished ON outbox (id) WHERE published_at IS NULL;
+
+BEGIN;
+  UPDATE orders SET status = 'PAID' WHERE id = 'o-1024';
+  INSERT INTO outbox (event_type, payload)
+  VALUES ('OrderPaid', '{"eventId":"e-77","orderId":"o-1024","amount":39000}');
+COMMIT;
+
+-- 발행 워커: 같은 행을 두 워커가 집지 않게 잠그고 읽는다
+BEGIN;
+  SELECT id, payload FROM outbox
+   WHERE published_at IS NULL
+   ORDER BY id LIMIT 100
+   FOR UPDATE SKIP LOCKED;
+  -- ... 브로커 전송 후 ...
+  UPDATE outbox SET published_at = now() WHERE id = ANY($1);
+COMMIT;
+```
+
+전송에 성공하고 `published_at` 을 쓰기 전에 워커가 죽으면 같은 이벤트가 다시 나간다 — Outbox 로 얻는 건 exactly-once 가 아니라 at-least-once 다. 소비자가 `eventId` 로 중복을 걸러내지 않으면 절반만 도입한 것이고, 발행 순서도 `ORDER BY id` 로 읽을 뿐 브로커 도착 순서까지 보장되진 않는다.

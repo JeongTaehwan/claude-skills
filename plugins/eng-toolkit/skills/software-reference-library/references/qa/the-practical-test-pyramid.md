@@ -43,3 +43,40 @@ https://martinfowler.com/articles/practical-test-pyramid.html
 - "Write lots of small and fast unit tests. Write some more coarse-grained tests and very few high-level tests." — 전략 문서 첫 줄로 그대로 쓸 수 있는 요약.
 - 상위 테스트가 하위 테스트 대비 추가 확신을 주지 않으면 삭제하라는 규칙 — E2E 스펙을 줄이자는 제안에 붙일 표준 근거.
 - 핵심 사용자 여정당 E2E 하나 — 주문·결제 플로우 E2E 개수 상한을 정할 때 인용 가능.
+
+## 코드 예시
+
+같은 기능을 세 층에서 각각 어디까지만 검증하는지 — 층 이름을 논쟁하는 대신, 로드하는 범위를 애너테이션으로 고정해 중복을 구조적으로 막는다.
+
+```java
+// 1) 웹 계층만 로드. 서비스는 대역 — 여기서 DB 는 검증하지 않는다
+@WebMvcTest(OrderController.class)
+class OrderControllerTest {
+    @Autowired MockMvc mvc;
+    @MockitoBean OrderService orderService;   // Spring Boot 3.4+ (이전엔 @MockBean)
+
+    @Test
+    void returns404WhenOrderMissing() throws Exception {
+        given(orderService.find("o-1")).willReturn(Optional.empty());
+        mvc.perform(get("/orders/o-1")).andExpect(status().isNotFound());
+    }
+}
+
+// 2) 영속화 경계만. 쿼리와 매핑이 실제 DB 에서 도는지만 본다
+@DataJpaTest
+class OrderRepositoryTest {
+    @Autowired OrderRepository repository;
+
+    @Test
+    void findsByStatus() {
+        repository.save(new OrderEntity("o-1", PAID));
+        assertThat(repository.findByStatus(PAID)).hasSize(1);
+    }
+}
+
+// 3) 전체 기동은 핵심 여정 하나로 제한. 위 두 층이 덮은 것은 다시 단언하지 않는다
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class CheckoutJourneyTest { /* 장바구니 → 결제 → 주문확정 */ }
+```
+
+애너테이션이 범위를 좁혀도 중복은 사람이 막아야 한다 — `CheckoutJourneyTest` 안에서 404 응답이나 쿼리 결과를 다시 단언하기 시작하면, 위층을 굶기라는 규칙은 그 순간 무효가 된다.

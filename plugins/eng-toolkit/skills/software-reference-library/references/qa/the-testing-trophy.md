@@ -40,3 +40,34 @@ Static을 넣은 이유가 이 글에서 명시적으로 나온다. 타입 체�
 - "The more your tests resemble the way your software is used, the more confidence they can give you." — 목 사용을 줄이자는 리뷰 코멘트의 표준 근거.
 - 층을 확신/비용 비율로 정렬한다는 관점 — "커버리지 몇 %" 목표를 "어느 층에 투자할까"로 바꾸는 프레임.
 - Static 층을 넣은 이유가 JS 생태계 특수성이라는 저자 본인의 단서 — 다른 스택 팀이 트로피를 그대로 베끼려 할 때 제시할 반론.
+
+## 코드 예시
+
+"사용 방식과 닮을수록 확신이 커진다"를 그대로 옮긴 통합 테스트 — 컴포넌트 내부가 아니라 화면에 보이는 것과 사용자의 동작으로만 단언하고, 목은 네트워크 경계 한 곳에만 둔다.
+
+```tsx
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
+import { setupServer } from 'msw/node'
+
+// 목은 네트워크 경계 하나뿐 — 컴포넌트·훅은 실제 구현을 그대로 쓴다
+const server = setupServer(
+  http.post('/api/checkout', () =>
+    HttpResponse.json({ orderId: 'o-1' }, { status: 201 })),
+)
+beforeAll(() => server.listen())
+afterAll(() => server.close())
+
+test('카드 정보를 채우고 결제하면 주문번호가 표시된다', async () => {
+  const user = userEvent.setup()
+  render(<CheckoutPage />)
+
+  await user.type(screen.getByLabelText('카드번호'), '4111111111111111')
+  await user.click(screen.getByRole('button', { name: '결제하기' }))
+
+  expect(await screen.findByText(/주문번호 o-1/)).toBeVisible()
+})
+```
+
+닮았다는 건 브라우저 안에서만 성립한다 — `msw` 가 돌려주는 201 이 실제 결제 API 의 응답 형태와 어긋나면 이 테스트는 계속 초록이고, 그 간격은 계약 테스트나 E2E 가 아니면 메워지지 않는다.

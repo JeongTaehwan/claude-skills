@@ -26,9 +26,9 @@ https://sre.google/sre-book/postmortem-culture/
 ## 이럴 땐 아니다
 - 장애를 회고하는 문화가 아니라 **장애를 덜 내는 릴리스 방식**이 문제라면 `development/canary-release.md`, `development/feature-toggles.md`, `development/trunk-based-development.md`
 - 배포 안정성을 지표로 측정해 개선하려는 거라면 `development/dora.md`, `development/dora-four-keys.md`
-- SLO·에러 예산·온콜 운영 전반은 `development/sre-workbook.md` 가 실무 절차를 더 준다
-- 장애를 일부러 일으켜 학습하는 쪽이라면 `development/principles-of-chaos-engineering.md`
-- SRE 전체 맥락이 필요하면 `development/google-sre-books.md`, `development/sre-book.md`
+- SLO·에러 예산·온콜 운영 전반은 `infrastructure/sre-workbook.md` 가 실무 절차를 더 준다
+- 장애를 일부러 일으켜 학습하는 쪽이라면 `infrastructure/principles-of-chaos-engineering.md`
+- SRE 전체 맥락이 필요하면 `infrastructure/google-sre-books.md`, `infrastructure/sre-book.md`
 
 ## 무엇이 들어있나
 핵심 주장은 단순하다. 포스트모템의 목적은 **재발 방지이지 책임 배분이 아니며**, 이 둘은 양립하지 않는다. 처벌이 예상되는 자리에서 사람은 자신이 본 것을 온전히 말하지 않고, 그러면 진짜 원인은 문서에 남지 않는다. 그래서 "비난 없음"은 관대함이 아니라 정보 수집을 위한 기술적 요구사항이다.
@@ -41,3 +41,36 @@ https://sre.google/sre-book/postmortem-culture/
 - "비난 없는 회고는 온정주의가 아니라 정보 수집 전략"이라는 프레이밍은, 회고 규칙 변경을 제안할 때 감정 논쟁을 피하게 해 준다.
 - 회고 트리거 조건을 사전에 문서화하자는 제안의 근거로 그대로 쓸 수 있다.
 - "포스트모템도 리뷰를 거치고 공개된다"는 규칙은, 회고 문서 품질이 들쭉날쭉한 팀에 도입할 첫 번째 변경으로 인용하기 좋다.
+
+## 코드 예시
+
+"회고 트리거를 사전에 정하라"와 "포스트모템도 리뷰를 거친다"를 협상 불가능한 형태로 굳힌 것.
+
+```yaml
+# .github/ISSUE_TEMPLATE/postmortem.yml
+name: 포스트모템
+description: 사전에 정한 트리거를 넘긴 장애의 회고
+labels: ["postmortem"]
+body:
+  - type: dropdown
+    id: trigger
+    attributes:
+      label: 회고 트리거 — 사후에 "이게 회고할 만큼 큰가"를 협상하지 않는다
+      options: ["사용자 영향 30분 초과", "결제·정산 정합성 훼손", "롤백 15분 초과"]
+    validations: { required: true }
+  - type: textarea
+    id: contributing
+    attributes:
+      label: 기여 요인 — 그 시점에 그 판단이 합리적이게 만든 것
+      description: 개인 이름 대신 역할로 적는다. 원인이 사람 이름에서 멈추면 이 회고는 실패다.
+    validations: { required: true }
+  - type: checkboxes
+    id: gate
+    attributes:
+      label: 공개 전
+      options:
+        - label: 동료 리뷰 1인 이상 완료
+        - label: 액션 아이템마다 담당 이슈 링크가 붙음
+```
+
+템플릿은 빈칸을 강제할 뿐, 그 빈칸에 비난이 들어오는 것은 막지 못한다. 챕터가 말한 지속적 개입 — 회고 자리에서 튀어나온 비난 발언을 그 자리에서 교정하고 잘 쓴 회고를 눈에 띄게 보상하는 일 — 은 도구로 옮길 수 없는 나머지 절반이다.

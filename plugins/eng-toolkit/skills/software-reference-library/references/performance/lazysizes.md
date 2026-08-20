@@ -31,3 +31,28 @@ https://github.com/aFarkas/lazysizes
 ## 인용 포인트
 - "스타 17k짜리 유명 라이브러리도 플랫폼이 기능을 흡수하면 걷어낸다"는 의존성 축소 제안의 실례.
 - lazy loading 도입 논의에서 라이브러리 검토를 건너뛰고 네이티브 속성으로 직행하는 근거.
+
+## 코드 예시
+
+"플랫폼이 기능을 흡수하면 스타 17k 라이브러리도 걷어낸다" — 의존성 제거 PR 이 실제로 바꾸는 마크업과, 잔재를 찾아내는 명령.
+
+```diff
+- <script src="/vendor/lazysizes.min.js" async></script>
+-
+- <img class="lazyload" data-src="/p/640.webp"
+-      data-srcset="/p/320.webp 320w, /p/640.webp 640w"
+-      data-sizes="auto" width="640" height="640" alt="상품">
++ <img src="/p/640.webp"
++      srcset="/p/320.webp 320w, /p/640.webp 640w"
++      sizes="(min-width: 768px) 50vw, 100vw"
++      loading="lazy" decoding="async"
++      width="640" height="640" alt="상품">
+```
+
+```bash
+# 남은 잔재 훑기 — CSS(.lazyloaded 셀렉터)와 테스트 코드에 특히 잘 숨는다
+rg -n 'lazysizes|lazyload|data-(src|srcset|sizes)' --glob '!node_modules' .
+npm uninstall lazysizes
+```
+
+`data-sizes="auto"` 는 lazysizes 가 실제 렌더 폭을 재서 채워주던 기능이라 네이티브에 대응물이 없다 — 이전할 때 `sizes` 를 직접 써야 하고, 여기서 손을 놓으면 지연 로딩은 살아나도 필요보다 큰 파일을 받는 상태가 조용히 남는다.

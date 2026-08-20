@@ -38,3 +38,39 @@ Chris Richardson이 정리한 마이크로서비스 패턴 지도. 각 패턴을
 ## 인용 포인트
 - 서비스 분리 제안서에 붙일 근거: "Database per Service를 택하면 Saga가 따라오고, Saga는 격리성을 포기한다"는 인과를 그대로 인용해 비용을 미리 드러낼 수 있다.
 - 이벤트 발행 신뢰성 논의에서 Transactional Outbox는 이름 있는 표준 해법이라 설계 리뷰에서 논쟁을 짧게 끝낸다.
+
+## 코드 예시
+
+Transactional Outbox — "로컬 트랜잭션과 메시지 발행의 원자성"을 브로커 없이 DB 한 곳에서 얻는 방법. 상태 변경과 발행할 이벤트를 같은 커밋에 넣는다.
+
+```sql
+CREATE TABLE outbox (
+  id           BIGSERIAL PRIMARY KEY,
+  aggregate_id TEXT        NOT NULL,   -- 파티션 키로 쓴다 (주문별 순서 보존)
+  event_type   TEXT        NOT NULL,
+  payload      JSONB       NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  published_at TIMESTAMPTZ
+);
+
+-- 애플리케이션: 상태 변경과 이벤트를 한 트랜잭션에
+BEGIN;
+UPDATE orders SET status = 'PAID' WHERE id = 'ord-1042' AND status = 'PENDING';
+INSERT INTO outbox (aggregate_id, event_type, payload)
+VALUES ('ord-1042', 'OrderPaid', '{"orderId":"ord-1042","amount":12000}');
+COMMIT;   -- 둘 다 남거나 둘 다 없다
+
+-- 릴레이: 여러 워커가 같은 행을 집지 않도록 건너뛰며 잠근다
+BEGIN;
+SELECT id, aggregate_id, event_type, payload
+  FROM outbox
+ WHERE published_at IS NULL
+ ORDER BY id
+ LIMIT 100
+   FOR UPDATE SKIP LOCKED;
+-- ... 브로커로 발행한 뒤 ...
+UPDATE outbox SET published_at = now() WHERE id = ANY($1);
+COMMIT;
+```
+
+발행 후 `published_at` 갱신 전에 릴레이가 죽으면 같은 이벤트가 다시 나간다 — 아웃박스는 at-least-once까지만 주고, 소비자 멱등은 여전히 소비자 몫이다.

@@ -23,7 +23,7 @@ https://github.com/dastergon/awesome-chaos-engineering
 - 회복력 테스트 관련 논문·학술 자료의 출발점이 필요할 때
 
 ## 이럴 땐 아니다
-- 카오스 엔지니어링이 무엇이고 어떤 원칙 위에서 실험을 설계하는지를 알고 싶다면 목록이 아니라 원칙 문서다 → `development/principles-of-chaos-engineering.md`, `testing/principles-of-chaos-engineering.md`
+- 카오스 엔지니어링이 무엇이고 어떤 원칙 위에서 실험을 설계하는지를 알고 싶다면 목록이 아니라 원칙 문서다 → `infrastructure/principles-of-chaos-engineering.md`, `infrastructure/principles-of-chaos-engineering.md`
 - Netflix Chaos Monkey 하나를 실제로 붙이는 방법이 필요하면 → `testing/chaos-monkey.md`
 - 분산 시스템의 일관성 보장이 실제로 깨지는지를 검증하는 쪽이라면 장애 주입보다 정합성 분석이다 → `architecture/jepsen.md`
 - 설계 관점에서 회복력 패턴 자체를 정리하려면 → `architecture/chaos-engineering.md`
@@ -34,3 +34,31 @@ Awesome 시리즈의 전형적인 형식이다. 즉 이 저장소 자체는 주�
 
 ## 인용 포인트
 - 도구 선정 문서에서 "검토한 후보군" 절의 출처로 쓰기 좋다. 특정 도구 하나만 보고 결정한 게 아니라는 근거가 된다.
+
+## 코드 예시
+
+"목록의 분류가 곧 내용"이라는 성격을 그대로 옮겨, 후보군을 주입 레이어·플랫폼·라이선스 축으로 세워 둔 선정 문서용 비교표.
+
+```yaml
+# docs/adr/chaos-tool-candidates.yaml — ADR 첨부용 후보군 표
+criteria: [injection_layer, platform, license, last_commit]
+candidates:
+  - name: Chaos Mesh
+    injection_layer: [pod, network, io, kernel]
+    platform: kubernetes
+    license: Apache-2.0
+    verdict: shortlist
+  - name: Chaos Monkey
+    injection_layer: [instance]
+    platform: spinnaker
+    license: Apache-2.0
+    verdict: reject           # 인스턴스 종료만 가능, PG 지연 재현 불가
+  - name: Toxiproxy
+    injection_layer: [network]
+    platform: any-tcp
+    license: MIT
+    verdict: shortlist        # PG 응답 지연 재현에 사용
+decision: Toxiproxy(스테이징 PG 지연) + Chaos Mesh(클러스터 레벨)
+```
+
+목록은 폭만 보증한다 — `last_commit` 칸을 비워 두면 표가 완성돼 보이지만 유지보수가 끊긴 도구가 그대로 통과한다. 각 저장소를 직접 열어 채워야 의미가 있다.

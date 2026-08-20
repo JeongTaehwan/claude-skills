@@ -36,3 +36,40 @@ https://web.dev/articles/offline-cookbook
 ## 인용 포인트
 - "오프라인 우선은 비행기 모드 기능이 아니라 불안정 네트워크 대응의 일반해" — 오프라인 작업의 우선순위를 방어하는 프레임.
 - cache & network race, offline fallback 같은 레시피 이름을 설계 논의의 공용어로 인용.
+
+## 코드 예시
+
+레시피 두 개 — cache & network race와 제네릭 오프라인 폴백 — 를 한 fetch 핸들러에 올린 것.
+
+```js
+// 캐시 미스는 resolve(undefined) 로 오기 때문에, 경주가 성립하려면 reject 로 바꿔야 한다
+async function fromCache(request) {
+  const hit = await caches.match(request);
+  if (!hit) throw new Error("cache miss");
+  return hit;
+}
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+
+  // 문서: 네트워크 우선 → 캐시 → 제네릭 오프라인 페이지
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .catch(() => caches.match(request))
+        .then((res) => res || caches.match("/offline.html"))
+    );
+    return;
+  }
+
+  // 이미지: 느린 디스크와 느린 네트워크를 경주시키고, 둘 다 실패하면 폴백 이미지
+  if (request.destination === "image") {
+    event.respondWith(
+      Promise.any([fromCache(request), fetch(request)])
+        .catch(() => caches.match("/img/placeholder.svg"))
+    );
+  }
+});
+```
+
+경주는 캐시가 이겨도 네트워크 요청이 이미 나간 뒤라, 종량제 회선에서 데이터를 두 번 쓴다 — 그리고 뒤늦게 도착한 네트워크 응답을 캐시에 넣으려면 `event.waitUntil()`로 따로 붙잡아야 한다. 응답을 이미 돌려줬다고 해서 핸들러의 일이 끝난 게 아니다.

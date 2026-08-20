@@ -34,3 +34,39 @@ Rohail Asim 외 5인 — ICTD '24 (arXiv:2412.14178). 신흥 지역 모바일 �
 ## 인용 포인트
 - 페이지 명세 단순화가 2G/3G에서 유효 — 라이트 버전을 "기존 페이지 다이어트"가 아니라 별도 명세로 만들자는 제안의 근거.
 - 인도·방글라데시·케냐 실배포 사례 — 신흥 시장 대응 전략 문서의 최신 레퍼런스.
+
+## 코드 예시
+
+"라이트 버전을 기존 페이지 다이어트가 아니라 별도 명세로 만든다"를 최소 형태로 옮긴 것 — 페이지를 HTML 문서가 아니라 콘텐츠 명세로 저장하고, 엣지에서 JS 0바이트 HTML로 굽는다.
+
+```js
+// 저작 단위는 마크업이 아니라 명세다
+const page = {
+  lang: "bn",
+  title: "আজকের বাজার",
+  blocks: [
+    { type: "heading", text: "오늘의 시세" },
+    { type: "list", items: ["쌀 20kg — 52,000", "밀가루 1kg — 1,900"] },
+    { type: "link", href: "/market/2", text: "다음 장" },
+  ],
+};
+
+const esc = (s) =>
+  String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const render = (b) =>
+  ({
+    heading: () => `<h1>${esc(b.text)}</h1>`,
+    list: () => `<ul>${b.items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`,
+    link: () => `<a href="${esc(b.href)}">${esc(b.text)}</a>`,
+  }[b.type]());
+
+// 외부 요청 0회, 스크립트 0바이트 — 2G에서 왕복이 한 번으로 끝난다
+const html = `<!doctype html><html lang="${page.lang}"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(page.title)}</title>
+<style>body{font:16px/1.6 system-ui;margin:1rem}</style>
+${page.blocks.map(render).join("")}`;
+```
+
+별도 명세는 곧 **진실의 원본이 둘**이 된다는 뜻이다 — 본 사이트에 기능이 추가될 때마다 라이트 쪽이 조용히 뒤처지고, 결국 아무도 안 쓰는 화석이 된다. 논문의 배포가 유지된 이유는 이 단순 명세가 다운스트림 복사본이 아니라 저작의 1차 포맷이었기 때문이다.

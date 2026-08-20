@@ -36,3 +36,27 @@ Addy Osmani(Chrome 팀)가 페이지 바이트의 최대 비중인 이미지 하
 ## 인용 포인트
 - 이미지가 웹 페이지 바이트의 최대 비중이라는 전제 — "성능 개선의 1순위 표적은 이미지"라는 우선순위 주장의 근거로 쓴다.
 - 포맷·반응형·지연 로딩·CDN을 개별 팁이 아니라 하나의 파이프라인으로 다루는 구성 — 이미지 최적화 체크리스트를 만들 때 목차가 그대로 뼈대가 된다.
+
+## 코드 예시
+
+책이 개별 팁이 아니라 하나의 파이프라인으로 묶는 것들 — 포맷 폴백, 실제 렌더 폭에 맞춘 소스 선택, 치수 고정, 우선순위 — 을 한 마크업에 모은 형태.
+
+```html
+<picture>
+  <!-- 위에서부터 지원되는 첫 소스를 쓴다. AVIF → WebP → JPEG 순 -->
+  <source type="image/avif" sizes="(min-width: 768px) 50vw, 100vw"
+          srcset="/p/320.avif 320w, /p/640.avif 640w, /p/1280.avif 1280w">
+  <source type="image/webp" sizes="(min-width: 768px) 50vw, 100vw"
+          srcset="/p/320.webp 320w, /p/640.webp 640w, /p/1280.webp 1280w">
+  <!-- width/height 는 비율 계산용. 없으면 로드 순간 레이아웃이 밀린다(CLS) -->
+  <img src="/p/640.jpg" width="640" height="640" alt="상품명"
+       fetchpriority="high" decoding="async">
+</picture>
+```
+
+```
+<!-- 이미지 CDN 에 맡기는 쪽: 변환 파라미터로 같은 일을 한다 -->
+https://cdn.example.com/p/123.jpg?w=640&format=auto&quality=75
+```
+
+`sizes` 가 틀리면 나머지가 다 맞아도 소용없다 — 브라우저는 레이아웃 전에 `sizes` 만 보고 소스를 고르므로, CSS 로 실제 폭을 바꿔 놓고 `sizes` 를 `100vw` 로 둔 채 두면 필요보다 두 배 큰 파일을 받는다.

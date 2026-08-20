@@ -40,3 +40,38 @@ Jonas Bonér, Dave Farley, Roland Kuhn, Martin Thompson — v2.0 (2014-09-16)
 - responsive 를 "rapid and consistent response times, establishing reliable upper bounds" 로 정의한 대목 — SLO 논의에서 평균이 아니라 상한으로 이야기하자고 설득할 때 인용하기 좋다.
 - 복원력의 수단을 "replication, containment, isolation and delegation" 네 가지로 못 박은 문장 — 장애 설계 리뷰 체크리스트로 그대로 옮길 수 있다.
 - event-driven 이 아니라 message-driven 이라는 용어 선택 — "이벤트 쓰면 되는 거 아니냐"는 반문에 경계와 위임의 차이를 짚어 답할 때 쓸 수 있다.
+
+## 코드 예시
+
+"메시지 큐가 명시적으로 드러나므로 배압을 걸 지점이 생긴다" — 큐에 상한을 두는 한 줄이 배압의 전부다.
+
+```python
+import asyncio
+
+# maxsize=0(무한)이면 배압이 없다. 상한이 있어야 생산자가 느려진다.
+queue: asyncio.Queue = asyncio.Queue(maxsize=100)
+
+async def producer(source):
+    async for msg in source:
+        await queue.put(msg)      # 큐가 차면 여기서 대기 = 배압이 상류로 전달된다
+
+async def worker(name: str):
+    while True:
+        msg = await queue.get()
+        try:
+            await handle(msg)
+        except Exception:
+            # 격리와 위임 — 실패를 워커 안에서 삼키지 않고 감독자에게 넘긴다
+            await dead_letters.put((name, msg))
+        finally:
+            queue.task_done()
+
+async def main(source):
+    workers = [asyncio.create_task(worker(f"w{i}")) for i in range(4)]
+    await producer(source)
+    await queue.join()            # 남은 메시지 처리 완료까지 기다린다
+    for w in workers:
+        w.cancel()
+```
+
+배압은 문제를 없애지 않고 상류로 밀어 올린다 — `source` 가 HTTP 요청이면 결국 어딘가에서 요청을 거절해야 하고, 그 거절 지점을 정하지 않으면 상한 있는 응답 시간이라는 목표는 지켜지지 않는다.

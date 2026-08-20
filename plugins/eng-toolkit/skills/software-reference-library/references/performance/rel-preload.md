@@ -32,3 +32,30 @@ https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/prelo
 ## 인용 포인트
 - "preload는 발견 지연을 없애는 도구이지 우선순위 만능 스위치가 아니다" — 남용 리뷰의 근거.
 - 폰트 preload의 `crossorigin` 함정 — 적용했는데 효과가 없다는 사례의 단골 원인으로 인용.
+
+## 코드 예시
+
+"브라우저가 늦게 발견하는" 세 종류만 골라 앞당긴 형태 — `as` 와 `crossorigin` 이 빠지면 효과가 없는 정도가 아니라 두 번 받는다.
+
+```html
+<head>
+  <!-- 폰트: CSS 를 파싱해야 발견된다. 동일 출처라도 crossorigin 이 없으면 사본을 재사용하지 못한다 -->
+  <link rel="preload" href="/fonts/pretendard.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- JS 가 만들어 붙이는 LCP 이미지: 반응형이면 img 와 같은 후보를 고르도록 srcset 을 함께 준다 -->
+  <link
+    rel="preload"
+    as="image"
+    href="/hero-800.avif"
+    imagesrcset="/hero-400.avif 400w, /hero-800.avif 800w, /hero-1600.avif 1600w"
+    imagesizes="100vw"
+  />
+
+  <!-- 초기 렌더에 필요한 JSON: as 를 빼면 우선순위·CSP·중복 판정이 전부 어긋난다 -->
+  <link rel="preload" href="/api/bootstrap.json" as="fetch" crossorigin />
+
+  <link rel="stylesheet" href="/app.css" />
+</head>
+```
+
+`imagesizes` 가 실제 `<img sizes>` 와 다르면 브라우저는 다른 후보를 preload 해 놓고 또 받는다 — 그리고 여기 적힌 리소스는 전부 크리티컬 리소스와 같은 대역폭을 나눠 쓰므로, 목록이 길어지는 순간 preload 는 최적화가 아니라 지연 요인이 된다.

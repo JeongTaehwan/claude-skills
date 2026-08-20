@@ -38,3 +38,30 @@ Playwright 는 브라우저 자동화 라이브러리와 테스트 러너를 한
 
 ## 인용 포인트
 - 브라우저 빌드가 패키지 버전에 고정되어 있다는 구조는, E2E 실패를 조사할 때 "우리 코드 / 우리 앱 / 도구 버전" 세 축을 분리해야 하는 이유가 된다.
+
+## 코드 예시
+
+"엔진 차이인지 우리 코드 문제인지"를 조사 가능하게 만드는 최소 구성 — 엔진을 프로젝트로 갈라 어느 쪽만 깨지는지 드러내고, 재시도 때 트레이스를 남긴다.
+
+```ts
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  forbidOnly: !!process.env.CI,          // .only 가 CI 에 섞여 들어가는 것을 막는다
+  retries: process.env.CI ? 2 : 0,
+  reporter: [['html'], ['list']],
+  use: {
+    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
+    trace: 'on-first-retry',             // 실패 재현 근거를 남긴다
+  },
+  projects: [
+    // 엔진별로 분리해야 "WebKit 에서만 깨진다"가 리포트에 보인다
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox',  use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit',   use: { ...devices['Desktop Safari'] } },
+  ],
+});
+```
+
+브라우저 빌드는 `@playwright/test` 패키지 버전에 묶여 있어 이 파일만으로는 재현이 고정되지 않는다 — CI 는 같은 버전의 공식 이미지(`mcr.microsoft.com/playwright:v<패키지와 동일한 버전>`)로 돌려야 로컬과 CI 의 실패 차이가 도구 버전 때문인지 배제할 수 있다.

@@ -32,3 +32,24 @@ https://web.dev/articles/preconnect-and-dns-prefetch
 ## 인용 포인트
 - "저속 네트워크에서는 연결 수립 왕복이 리소스 전송보다 비쌀 수 있다" — 서드파티 워터폴 개선 제안의 근거.
 - preconnect 남용 금지(소수 출처 원칙) — 모든 외부 도메인에 걸어둔 마크업을 걷어낼 때 인용.
+
+## 코드 예시
+
+"확실히 곧 쓰는 중요 출처 소수"에만 연결을 예열하고, 나머지는 DNS 만 미리 하는 저비용 폴백으로 내린다.
+
+```html
+<head>
+  <!-- 첫 화면 이미지가 반드시 오는 CDN — 연결 3단계를 미리 끝낸다 -->
+  <link rel="preconnect" href="https://cdn.example.com" />
+  <!-- preconnect 미지원 환경용 폴백. 지원 브라우저에서는 preconnect 가 이긴다 -->
+  <link rel="dns-prefetch" href="https://cdn.example.com" />
+
+  <!-- 폰트는 익명 CORS 로 받으므로 crossorigin 이 없으면 커넥션이 재사용되지 않는다 -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- 나중에 한 번 부를지 모르는 서드파티: DNS 만 -->
+  <link rel="dns-prefetch" href="https://analytics.example.com" />
+</head>
+```
+
+`crossorigin` 유무가 다른 커넥션으로 갈리므로, 폰트에 이 속성을 빠뜨리면 예열해 놓고 새 연결을 다시 여는 셈이 된다 — 그리고 열린 연결은 잠깐 뒤 닫히므로, 곧 쓰지 않을 출처에 거는 preconnect 는 순수 낭비다.

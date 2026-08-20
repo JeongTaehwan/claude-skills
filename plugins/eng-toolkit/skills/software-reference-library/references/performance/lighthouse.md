@@ -36,3 +36,35 @@ https://github.com/GoogleChrome/lighthouse
 ## 인용 포인트
 - 성능 이슈 재현이 안 될 때 "스로틀링 시뮬레이션으로 재현 조건을 표준화하자"는 제안의 근거.
 - 개선 작업의 전후 비교를 같은 조건(동일 스로틀링 프리셋)에서 찍어야 한다는 측정 규율의 출처.
+
+## 코드 예시
+
+"내 장비에선 빠른데요"를 걷어내는 재현 조건을 코드로 고정해, 전후 비교를 같은 눈금에서 찍는다.
+
+```js
+import fs from "node:fs";
+import lighthouse from "lighthouse";
+import * as chromeLauncher from "chrome-launcher";
+
+const chrome = await chromeLauncher.launch({ chromeFlags: ["--headless"] });
+
+const result = await lighthouse("https://example.com", {
+  port: chrome.port,
+  output: "json",
+  onlyCategories: ["performance"],
+  formFactor: "mobile", // 저사양 모바일 가정
+  screenEmulation: { mobile: true, width: 360, height: 640, deviceScaleFactor: 2, disabled: false },
+});
+
+const { categories, audits } = result.lhr;
+console.log("performance:", categories.performance.score);
+// 병목을 종류별로 분류: 이미지 / JS / 렌더 블로킹
+for (const id of ["largest-contentful-paint", "render-blocking-resources", "unused-javascript"]) {
+  console.log(id, audits[id].displayValue ?? audits[id].score);
+}
+
+fs.writeFileSync("./lhr.json", result.report);
+await chrome.kill();
+```
+
+기본 스로틀링은 실제 회선을 거는 게 아니라 시뮬레이션이다 — 이 숫자는 "저속에서 뭐가 문제인지"의 분류에는 쓸 수 있어도, 실사용자 체감값으로 인용하면 안 된다.

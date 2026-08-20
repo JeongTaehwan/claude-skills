@@ -34,3 +34,25 @@ https://github.com/sitespeedio/sitespeed.io
 ## 인용 포인트
 - 성능을 스냅숏이 아니라 시계열로 관리하자는 운영 제안의 대표 오픈소스 구현.
 - 데이터 주권·비용 제약으로 SaaS 모니터링을 못 쓰는 환경의 현실적 대안으로.
+
+## 코드 예시
+
+"성능을 스냅숏이 아니라 시계열로" — 핵심 페이지들을 고정된 회선 조건으로 반복 측정해 Graphite/Grafana에 쌓는 실행 형태.
+
+```bash
+# urls.txt 에 모니터링할 핵심 페이지를 한 줄에 하나씩 적어 둔다
+docker run --rm -v "$PWD:/sitespeed.io" \
+  sitespeedio/sitespeed.io:latest \
+  urls.txt \
+  --browser chrome \
+  --iterations 5 \
+  --mobile \
+  --connectivity.profile 3g \
+  --graphite.host graphite.internal \
+  --graphite.namespace prod.web
+
+# 크론에 걸어 두면 Grafana 대시보드에 추이가 쌓인다
+# 0 */6 * * * /opt/perf/run-sitespeed.sh >> /var/log/sitespeed.log 2>&1
+```
+
+합성 측정이라 이 숫자는 "이 컨테이너가 이 회선 프로파일에서 낸 값"이지 실사용자 분포가 아니다 — 게다가 러너 호스트나 브라우저 버전이 바뀌면 코드가 그대로여도 추이선이 계단처럼 움직이므로, 인프라 변경 시점을 대시보드에 같이 표시해 두지 않으면 회귀로 오독한다.

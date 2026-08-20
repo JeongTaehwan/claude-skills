@@ -37,3 +37,31 @@ http://crest.cs.ucl.ac.uk/fileadmin/crest/sebasepaper/JiaH10.pdf
 ## 인용 포인트
 - 등가 뮤턴트 판별이 일반적으로 결정 불가능하다는 점 — 뮤테이션 점수를 100%로 몰아붙이는 목표 설정이 왜 잘못된 KPI인지 설명하는 근거.
 - 비용 절감 연구가 "do fewer / do faster" 방향으로 축적되어 왔다는 지형 — 전면 도입 대신 고위험 모듈 한정 적용을 제안할 때의 논거.
+
+## 코드 예시
+
+"뮤테이션 점수 100%"가 왜 잘못된 KPI인지를, 죽일 수 있는 뮤턴트와 죽일 수 없는 등가 뮤턴트를 나란히 놓아 보인 것.
+
+```js
+// 원본
+function shippingFee(total) {
+  if (total >= 50000) return 0;
+  return 3000;
+}
+
+// 뮤턴트 A: >= 를 > 로 바꿈 — 경계값 테스트가 있으면 죽는다
+//   shippingFee(50000) 이 0 대신 3000 을 반환하므로 잡힌다
+function shippingFeeMutantA(total) {
+  if (total > 50000) return 0;
+  return 3000;
+}
+
+// 뮤턴트 B: >= 를 > 로 바꾸고 경계를 49999 로 옮김 — 의미가 원본과 같다
+//   어떤 입력으로도 원본과 다른 값을 낼 수 없으므로 "등가 뮤턴트"
+function shippingFeeMutantB(total) {
+  if (total > 49999) return 0; // total 이 정수라면 원본과 동치
+  return 3000;
+}
+```
+
+뮤턴트 B가 등가라는 판정은 "total 은 정수"라는 도메인 지식이 있어야 가능하고, 일반적으로는 자동 판별이 결정 불가능하다 — 남은 뮤턴트가 버그인지 등가인지는 결국 사람이 봐야 한다.

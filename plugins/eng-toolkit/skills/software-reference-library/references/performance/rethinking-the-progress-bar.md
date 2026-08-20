@@ -35,3 +35,31 @@ Chris Harrison, Brian Amento, Stacey Kuznetsov, Robert Bell — ACM UIST '07. �
 - 마지막에 빨라지는 진행 바가 더 빠르게 느껴진다 — 진행률 매핑을 "끝에서 가속"으로 설계하자는 제안의 근거.
 - 중간 멈춤이 가장 나쁘게 평가된다 — 불가피한 지연 구간은 초반에 배치하라는 규칙의 근거.
 - 인간의 시간 지각은 비선형(duration neglect, peak-and-end) — 체감 성능 작업 전반의 이론적 배경 인용.
+
+## 코드 예시
+
+"마지막에 빨라지게, 멈춤은 초반에"를 진행률 매핑 함수와 단계 배치로 옮긴 것.
+
+```ts
+const ACCEL = 2.2; // 1보다 크면 후반이 가팔라진다 — 끝에서 가속하는 곡선
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+function createProgressBar(render: (ratio: number) => void) {
+  let shown = 0;
+  return (actual: number) => {
+    const mapped = Math.pow(clamp01(actual), ACCEL);
+    shown = Math.max(shown, mapped); // 한 번 그린 값보다 뒤로 가지 않게 고정
+    render(shown);
+  };
+}
+
+// 소요 시간의 편차가 큰(=멈칫거릴) 단계를 앞쪽에 배치한다
+const steps = [
+  { name: "인코딩", weight: 0.45, run: encode },  // 편차 큼 → 초반
+  { name: "업로드", weight: 0.45, run: upload },
+  { name: "게시",   weight: 0.10, run: publish }, // 짧고 예측 가능 → 마지막
+];
+```
+
+이 매핑은 체감만 바꾸고 실제 시간은 1ms도 줄이지 않는다 — 게다가 후반 가속 곡선은 전체 소요를 대충이라도 안다는 전제 위에서만 성립해서, 작업이 예상보다 훨씬 빨리 끝나면 바가 0.3에서 1로 튀며 오히려 눈에 띄는 거짓말이 된다.

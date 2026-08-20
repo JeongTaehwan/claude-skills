@@ -34,3 +34,37 @@ NN/g가 사용성 연구를 근거로 개별 UI 패턴(드롭다운, 폼, 컨텍
 ## 인용 포인트
 - 드롭다운·인포팁 관련 아티클은 "일단 넣고 보자"는 요구를 반려할 때 인용할 외부 근거로 쓰기 좋다.
 - 버튼 상태 가이드는 디자인 시스템의 상태 정의 문서에 근거 링크로 붙일 수 있다.
+
+## 코드 예시
+
+"드롭다운으로 할까요 라디오로 할까요"를 스프린트마다 다시 논쟁하지 않으려면, 판정을 컴포넌트 안으로 옮겨야 한다.
+
+```tsx
+/** NN/g: 옵션이 적으면 드롭다운을 쓰지 마라 — 한 번에 다 보이는 쪽이 빠르다 */
+const RADIO_MAX = 5;   // 이하: 전부 노출
+const SELECT_MAX = 15; // 이하: 네이티브 select / 초과: 검색형 combobox
+
+export function ChoiceField({ label, options, value, onChange }: Props) {
+  if (options.length <= RADIO_MAX) {
+    return (
+      <fieldset>
+        <legend>{label}</legend>
+        {options.map((o) => (
+          <label key={o.value}>
+            <input
+              type="radio" name={label} value={o.value}
+              checked={value === o.value}
+              onChange={() => onChange(o.value)}
+            />
+            {o.label}
+          </label>
+        ))}
+      </fieldset>
+    );
+  }
+  if (options.length <= SELECT_MAX) return <NativeSelect {...{ label, options, value, onChange }} />;
+  return <SearchableCombobox {...{ label, options, value, onChange }} />;
+}
+```
+
+5와 15는 연구가 준 상수가 아니라 팀이 고른 값이다 — NN/g가 주는 건 방향이지 숫자가 아니고, 실제로는 개수보다 옵션이 익숙한지(월, 국가처럼)가 더 크게 작용한다. 그리고 이 분기는 컨트롤만 고를 뿐 에러 표시·키보드 동작은 하위 컴포넌트가 따로 져야 한다.

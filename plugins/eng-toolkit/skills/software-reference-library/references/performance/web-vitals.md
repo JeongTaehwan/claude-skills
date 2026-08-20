@@ -35,3 +35,36 @@ Core Web Vitals(LCP·INP·CLS)와 보조 지표를 브라우저 API로 정확히
 ## 인용 포인트
 - "랩 점수 말고 실사용자 p75로 이야기하자"는 성능 논의 기준 전환의 도구적 근거.
 - 성능 개선 과제의 성공 지표를 정의할 때, 공식 정의와 일치하는 측정 수단이 존재한다는 점.
+
+## 코드 예시
+
+"랩 점수 말고 실사용자 p75로 이야기하자"를 실제 RUM 수집으로 옮긴 것 — 지표에 회선 정보를 같이 실어 느린 사용자 분포를 분리할 수 있게 한다.
+
+```js
+import { onCLS, onINP, onLCP } from "web-vitals";
+// 원인까지 필요하면: import { onLCP } from "web-vitals/attribution";
+
+function send(metric) {
+  const body = JSON.stringify({
+    name: metric.name,              // "LCP" | "INP" | "CLS"
+    value: metric.value,
+    rating: metric.rating,          // "good" | "needs-improvement" | "poor"
+    id: metric.id,                  // 같은 페이지 로드의 이벤트를 묶는 키
+    navigationType: metric.navigationType,
+    // 느린 회선 사용자를 따로 볼 수 있게 조건을 함께 남긴다
+    ect: navigator.connection?.effectiveType,
+    saveData: navigator.connection?.saveData ?? false,
+    path: location.pathname,
+  });
+
+  // 페이지가 사라지는 순간에도 살아남는 전송 수단이어야 한다
+  navigator.sendBeacon?.("/rum", body) ||
+    fetch("/rum", { method: "POST", body, keepalive: true });
+}
+
+onLCP(send);
+onINP(send);
+onCLS(send);
+```
+
+INP·CLS는 페이지가 숨겨지는 시점에 확정되므로 전송이 가장 불안정한 순간에 나간다 — `fetch` 폴백은 여기서 자주 유실된다. 그리고 이렇게 모은 값을 대시보드에서 평균 내면 이 라이브러리를 쓴 의미가 사라진다: 원시 값을 저장하고 p75로 봐야 느린 꼬리가 보인다.

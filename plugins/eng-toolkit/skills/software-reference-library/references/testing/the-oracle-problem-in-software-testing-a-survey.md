@@ -43,3 +43,30 @@ Barr·Harman·McMinn·Shahbaz·Yoo (IEEE TSE 2015) — 테스트 자동화 논�
 - 테스트 자동화의 절반은 입력 생성이고 나머지 절반은 판정이며, 후자가 오래 방치돼 왔다는 문제 제기 — 자동화 계획서에 "판정 전략" 절을 신설할 근거.
 - "암묵 오라클은 보편적이지 않다" — 크래시 없음을 통과 조건으로 쓰는 테스트에 반대할 때 인용할 수 있다.
 - 메타모픽 테스트를 파생 오라클의 한 갈래로 위치시킨 분류는, 정답을 모르는 대상에도 테스트를 쓸 수 있다는 설득의 출발점이 된다.
+
+## 코드 예시
+
+파생 오라클의 대표 갈래인 메타모픽 테스트 — 기대값을 적을 수 없는 대상에도, 입력을 규칙대로 바꿨을 때 출력이 만족해야 할 **관계**는 적을 수 있다.
+
+```python
+from hypothesis import given, strategies as st
+
+@given(
+    items=st.lists(st.integers(min_value=1, max_value=1_000_000),
+                   min_size=1, max_size=20),
+    rate=st.integers(min_value=0, max_value=50),   # 할인율(%)
+)
+def test_결제금액의_메타모픽_관계(items, rate):
+    base = checkout_total(items, rate)   # 이 값이 '맞는지'는 여기서 판정하지 않는다
+
+    # 관계 1(순열): 담은 순서는 합계를 바꾸지 못한다
+    assert checkout_total(list(reversed(items)), rate) == base
+
+    # 관계 2(단조): 항목을 더하면 결제 금액은 줄지 않는다
+    assert checkout_total(items + [1000], rate) >= base
+
+    # 관계 3(반단조): 할인율이 오르면 결제 금액은 오르지 않는다
+    assert checkout_total(items, min(rate + 10, 50)) <= base
+```
+
+이 세 관계가 모두 참이어도 구현이 옳다는 뜻은 아니다 — 항상 0을 돌려주는 함수도 전부 통과한다. 메타모픽 오라클은 **명세 기반 오라클을 대체하는 것이 아니라 보완**하는 것이므로, 손으로 계산한 앵커 케이스 한두 개를 반드시 함께 둬야 한다. 그리고 관계 1의 등호는 정수·Decimal 처럼 정확한 산술일 때만 성립한다. 부동소수점 합산이면 덧셈 순서만으로 깨진다.

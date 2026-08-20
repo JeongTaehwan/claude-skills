@@ -40,3 +40,34 @@ Sanjay Ghemawat, Howard Gobioff, Shun-Tak Leung, SOSP 2003
 - "component failures are the norm rather than the exception" — 대수의 평범한 장비를 쓰는 순간 고장은 이벤트가 아니라 배경이 된다는 이 문장은, 복구를 부가 기능이 아니라 기본 경로로 넣자고 설득할 때 그대로 쓸 수 있다.
 - 파일은 덮어쓰기보다 append 로 커진다는 워크로드 관측이 설계 전체를 이끌었다는 점 — "우리 워크로드를 먼저 측정하자"는 주장의 표준 사례.
 - 중복 제거 책임을 저장소가 아니라 소비자에게 둔 선택 — 중복 처리 로직을 소비자에 두는 설계를 방어할 때 인용할 수 있는 선례.
+
+## 코드 예시
+
+record append 가 "적어도 한 번"만 보장하므로, 중복과 깨진 구간을 거르는 일은 읽는 쪽 코드가 된다 — 논문이 응용에 넘긴 책임의 실제 모양.
+
+```python
+import json, uuid, zlib
+
+def append_record(f, payload: dict) -> None:
+    # 레코드마다 유일 ID — 재시도로 같은 레코드가 두 번 남아도 식별된다
+    body = json.dumps({"rid": str(uuid.uuid4()), **payload}).encode()
+    # 체크섬 — 패딩·부분 기록된 꼬리를 읽는 쪽이 알아채게 한다
+    f.write(len(body).to_bytes(4, "big") + zlib.crc32(body).to_bytes(4, "big") + body)
+
+def read_records(f):
+    seen: set[str] = set()
+    while header := f.read(8):
+        if len(header) < 8:
+            break                                   # 잘린 꼬리 — 여기서 멈춘다
+        length, crc = int.from_bytes(header[:4], "big"), int.from_bytes(header[4:], "big")
+        body = f.read(length)
+        if len(body) < length or zlib.crc32(body) != crc:
+            continue                                # 깨진 구간은 건너뛴다
+        rec = json.loads(body)
+        if rec["rid"] in seen:
+            continue                                # 중복 제거는 소비자 몫
+        seen.add(rec["rid"])
+        yield rec
+```
+
+`seen` 은 메모리에 무한히 쌓인다 — 실제로는 시간 창이나 체크포인트로 잘라야 하고, 그 창을 넘어 도착한 중복은 걸러지지 않는다. 저장소를 단순하게 둔 대가가 여기 있다.

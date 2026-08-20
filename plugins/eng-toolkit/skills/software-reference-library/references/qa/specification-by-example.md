@@ -39,3 +39,33 @@ https://gojko.net/books/specification-by-example/
 - 50개 이상의 실제 프로젝트 사례에 기반했다는 점 자체가, BDD 도입 제안에서 "이론일 뿐"이라는 반론을 막는 근거가 된다.
 - "자동화된 예시는 목적이 아니라 대화의 부산물" — Gherkin 파일 수를 성과 지표로 삼으려는 시도를 되돌릴 때.
 - "살아있는 문서" 개념은, 기획 문서를 따로 갱신하는 비용 대신 테스트가 문서 역할을 하게 만드는 제안의 표준 용어로 쓸 수 있다.
+
+## 코드 예시
+
+수수료 규칙 표를 명세와 테스트 입력 양쪽으로 쓰는 최소 결선 — 표는 기획·재무가 읽고 고치고, 코드는 그 표를 실행할 뿐이다.
+
+```python
+# docs/specs/settlement-fee.csv  (기획·재무·개발이 함께 채우는 표 = 명세)
+# 설명,채널,결제수단,월거래액,수수료율
+# 기본 카드 수수료,web,card,1000000,0.032
+# 대량 판매자 할인,web,card,60000000,0.026
+# 간편결제는 채널 무관 동일,app,easypay,1000000,0.028
+import csv
+from decimal import Decimal
+import pytest
+from settlement import fee_rate
+
+with open("docs/specs/settlement-fee.csv", encoding="utf-8", newline="") as f:
+    CASES = list(csv.DictReader(f))
+
+@pytest.mark.parametrize("case", CASES, ids=[c["설명"] for c in CASES])
+def test_settlement_fee(case):
+    actual = fee_rate(
+        channel=case["채널"],
+        method=case["결제수단"],
+        monthly_volume=int(case["월거래액"]),
+    )
+    assert actual == Decimal(case["수수료율"])
+```
+
+표가 실행된다고 해서 살아 있는 문서가 되는 건 아니다 — 예시를 줄이는 정제 단계를 건너뛰면 행이 200 개로 불어나고, 그때 이 파일은 아무도 읽지 않는 회귀 스위트로 돌아간다.

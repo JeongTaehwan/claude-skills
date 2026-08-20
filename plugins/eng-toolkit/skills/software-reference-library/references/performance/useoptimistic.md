@@ -32,3 +32,38 @@ https://react.dev/reference/react/useOptimistic
 ## 인용 포인트
 - 낙관적 UI를 라이브러리·수제 상태 복사 없이 프레임워크 공식 계약으로 구현할 수 있다는 근거.
 - "실패 시 자동 복원"이 계약에 포함돼 있어 수동 롤백 로직이 오히려 버그 표면이라는 리뷰 논거.
+
+## 코드 예시
+
+"실패 시 자동 복원이 계약에 포함돼 있어 수동 롤백 로직이 오히려 버그 표면"이라는 논거를 그대로 코드로 옮긴 것.
+
+```jsx
+import { useOptimistic, useTransition } from "react";
+
+function LikeButton({ postId, likes }) {
+  const [isPending, startTransition] = useTransition();
+  const [optimisticLikes, addOptimisticLike] = useOptimistic(
+    likes,
+    (current, delta) => current + delta
+  );
+
+  function handleClick() {
+    startTransition(async () => {
+      addOptimisticLike(1);        // 트랜지션 안에서 불러야 계약이 성립한다
+      try {
+        await likePost(postId);    // 성공하면 서버 값으로 수렴
+      } catch (e) {
+        toast.error("좋아요를 저장하지 못했어요"); // 되돌리기는 React 가 한다
+      }
+    });                            // 액션이 끝나면 실제 likes 로 자동 복원
+  }
+
+  return (
+    <button onClick={handleClick} disabled={isPending} aria-live="polite">
+      좋아요 {optimisticLikes}
+    </button>
+  );
+}
+```
+
+자동 복원은 실패가 **아무 일도 없던 것처럼** 보인다는 뜻이기도 하다 — 숫자가 조용히 되돌아갈 뿐이라 사용자에게 알리는 코드는 여전히 내 몫이다. 그리고 낙관적 값은 화면용이지 진실이 아니므로, 잔액·재고처럼 이 값을 입력 삼아 다음 계산을 하는 자리에 흘려보내면 안 된다.

@@ -34,3 +34,37 @@ https://github.com/GoogleChromeLabs/react-adaptive-hooks
 ## 인용 포인트
 - "모두에게 같은 번들"이 아니라 회선·기기 신호로 서빙을 분기하는 적응형 로딩 패턴의 원조 구현이라는 점 — 패턴 제안의 출처로.
 - Save-Data·effectiveType 존중을 제안할 때, 브라우저가 실제로 노출하는 감지 신호가 무엇인지의 근거로.
+
+## 코드 예시
+
+저장소 자체는 정체 상태이니 의존성으로 넣지 말고, `useNetworkStatus` 패턴만 베껴 자체 훅으로 둔다.
+
+```jsx
+import { useSyncExternalStore } from "react";
+
+function subscribe(onChange) {
+  navigator.connection?.addEventListener("change", onChange);
+  return () => navigator.connection?.removeEventListener("change", onChange);
+}
+
+function getSnapshot() {
+  const c = navigator.connection;
+  if (!c) return "unknown";                          // 미지원 = 풀 경험
+  return c.saveData ? "save-data" : c.effectiveType; // 4g | 3g | 2g | slow-2g
+}
+
+export function useNetworkStatus() {
+  return useSyncExternalStore(subscribe, getSnapshot, () => "unknown"); // 세 번째는 서버 스냅샷
+}
+
+export function ProductHero({ product }) {
+  const net = useNetworkStatus();
+  const lean = net === "save-data" || net === "2g" || net === "slow-2g";
+
+  return lean
+    ? <img src={product.stillUrl} alt={product.name} width={360} height={360} />
+    : <video src={product.clipUrl} width={720} height={720} autoPlay muted loop playsInline />;
+}
+```
+
+서버 스냅샷이 `unknown` 이라 첫 렌더는 항상 풀 경험이다 — 저속 사용자는 하이드레이션 후에야 가벼운 버전으로 바뀌고, 그 시점엔 무거운 리소스 요청이 이미 나갔을 수 있다. 진짜로 안 보내려면 `Save-Data` 헤더로 서버에서 갈라야 한다.

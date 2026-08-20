@@ -41,3 +41,32 @@ DDD·이벤트 기반 전환 글들이 유용한 이유는 성공담이 아니�
 ## 인용 포인트
 - 주문 도메인 분리를 제안할 때, 같은 도메인에서 실제로 경계를 그은 사례를 붙이면 "이론일 뿐"이라는 반론을 정면으로 막는다.
 - 최종 일관성을 받아들이자고 설득할 때, 그 대가와 보정 장치까지 함께 서술한 글을 인용하면 리스크 논의가 구체화된다.
+
+## 코드 예시
+
+"어디까지 강한 일관성이고 어디부터 최종 일관성인가" — 그 경계선이 코드에서는 COMMIT 한 줄로 보인다 (Transactional Outbox).
+
+```sql
+-- 주문 저장과 이벤트 발행 의사를 한 트랜잭션에 묶는다. 브로커 호출은 여기 들어오지 않는다
+BEGIN;
+INSERT INTO orders (id, user_id, status, amount)
+VALUES (1042, 7, 'CREATED', 23000);
+INSERT INTO outbox (aggregate_id, type, payload)
+VALUES (1042, 'OrderCreated', '{"orderId":1042,"amount":23000}'::jsonb);
+COMMIT;
+-- 여기까지가 강한 일관성 구간. 이 아래부터는 전부 최종 일관성이다
+
+-- 릴레이 워커: 미발행분을 집어 브로커로 보낸다
+BEGIN;
+SELECT id, type, payload
+  FROM outbox
+ WHERE published_at IS NULL
+ ORDER BY id
+   FOR UPDATE SKIP LOCKED     -- 워커를 늘려도 같은 행을 두 번 집지 않는다
+ LIMIT 100;
+-- 브로커 전송에 성공한 것만 표시
+UPDATE outbox SET published_at = now() WHERE id = ANY($1);
+COMMIT;
+```
+
+이 구조가 주는 보장은 "적어도 한 번(at-least-once)"이다 — 전송 후 `UPDATE` 전에 워커가 죽으면 같은 이벤트가 다시 나간다. 그래서 소비자 쪽 멱등 처리가 옵션이 아니라 짝으로 따라와야 하고, 보상(취소·환불) 설계는 그 위에서 시작한다. 최종 일관성을 받아들인다는 건 이 두 가지를 같이 떠안는다는 뜻이다.

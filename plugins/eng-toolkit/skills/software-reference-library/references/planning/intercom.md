@@ -37,3 +37,26 @@ Intercom 은 "Intercom on Product Management" 등 자사 제품팀의 사고방�
 ## 인용 포인트
 - RICE 를 팀에 도입할 때 "이걸 만든 팀은 이런 맥락에서 썼다"는 출처를 함께 붙이면 공식의 한계도 같이 전달된다.
 - AI 기능 요구가 내려왔을 때, 선별적 적용을 주장하는 근거로 벤더 자신의 블로그를 인용하면 설득력이 있다.
+
+## 코드 예시
+
+"누가 점수를 매기고 얼마나 자주 갱신하는가"라는 운영 디테일을, RICE 항목 자체에 붙여 둔 형태.
+
+```yaml
+# 백로그 항목 — 점수보다 '누가 언제 무엇을 근거로' 가 오래 간다
+- id: PROD-812
+  title: 만료 임박 쿠폰 배너
+  rice:
+    reach: 42000        # 분기당 영향받는 사용자 수. 단위가 항목마다 다르면 순위가 깨진다
+    impact: 1.0         # 3 / 2 / 1 / 0.5 / 0.25 중 하나
+    confidence: 0.8     # 근거가 없으면 이 값을 올리지 않는다
+    effort: 1.5         # person-month
+    score: 22400        # reach * impact * confidence / effort
+  provenance:
+    scored_by: ["@pm", "@eng-lead"]   # 혼자 매기지 않는다
+    scored_at: 2026-08-12
+    confidence_basis: 유사 배너 A/B 결과(2026-03), 전환 +0.9%p
+    recheck_after: 2026-09-30         # 갱신 주기를 항목에 박아 둔다
+```
+
+점수는 항목 간 서열을 만들 뿐 절대적 가치가 아니다 — `reach` 의 기간·단위가 항목마다 어긋나면 정렬 결과 전체가 의미를 잃는다. 그리고 `confidence` 는 구조적으로 낙관 쪽으로 치우치므로, `confidence_basis` 가 비어 있는 항목의 0.8 은 0.8 이 아니다.

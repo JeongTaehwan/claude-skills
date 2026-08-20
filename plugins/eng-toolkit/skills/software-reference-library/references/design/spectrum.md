@@ -41,3 +41,33 @@ Spectrum을 다른 시스템과 구분 짓는 첫 번째 지점은 **스케일 �
 ## 인용 포인트
 - 터치 대응을 "모바일 브레이크포인트"로만 처리하려는 설계에 반론이 필요할 때, 입력 장치별 스케일을 별도로 정의하는 Spectrum의 접근을 근거로 든다.
 - 컴포넌트 라이브러리에서 스타일과 동작(접근성 포함)을 분리하자는 제안의 실증 사례로 쓸 수 있다.
+
+## 코드 예시
+
+두 주장이 한 컴포넌트에서 만나는 지점 — 동작은 훅이 맡고 시각은 클래스가 맡으며, 터치 대응은 브레이크포인트가 아니라 입력 장치로 갈린다.
+
+```jsx
+import { useRef } from 'react';
+import { useButton } from 'react-aria';
+
+function ToolbarButton({ onPress, isDisabled, children }) {
+  const ref = useRef(null);
+  // 키보드 처리·포커스·ARIA는 전부 훅 안에 있다. 여기엔 스타일이 없다
+  const { buttonProps, isPressed } = useButton({ onPress, isDisabled }, ref);
+
+  return (
+    <button {...buttonProps} ref={ref}
+            className="spectrum-ActionButton"
+            data-pressed={isPressed || undefined}>
+      {children}
+    </button>
+  );
+}
+
+// 스케일은 화면 폭이 아니라 손가락이냐 마우스냐로 정한다
+const scale = matchMedia('(pointer: coarse)').matches
+  ? 'spectrum--large'
+  : 'spectrum--medium';
+```
+
+`matchMedia`를 한 번 읽고 고정했기 때문에 태블릿에 키보드를 붙였다 떼는 변화는 못 따라간다 — 실제로는 `MediaQueryList`의 `change`를 구독해야 한다. 그리고 react-aria가 주는 건 동작뿐이라 hover·focus-visible·pressed의 시각 표현은 여전히 우리가 쓰고, Spectrum의 시각 언어는 Adobe 정체성이 강해 클래스만 빌려와도 중립적이지 않다.

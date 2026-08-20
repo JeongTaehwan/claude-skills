@@ -33,3 +33,33 @@ https://lawsofux.com/
 ## 인용 포인트
 - 야콥의 법칙은 "업계 관습을 따르자"는 주장에 이름을 붙여 준다 — 장바구니 아이콘 위치, 결제 단계 순서 논쟁에서 특히 유용하다.
 - 도허티 임계값(약 400ms)은 응답 속도 개선의 UX 근거로 성능 작업 티켓에 붙일 수 있다.
+
+## 코드 예시
+
+도허티 임계값을 "성능 티켓의 근거"에서 멈추지 않고 대기 UI 규칙으로 못 박은 것 — 400ms 안에 끝나면 아무것도 띄우지 않는 쪽이 더 빠르게 느껴진다.
+
+```js
+const SPINNER_DELAY_MS = 400; // 이 안에 끝나면 로딩 표시 자체를 생략
+const SPINNER_MIN_MS = 500;   // 한 번 떴으면 깜빡이지 않게 최소 노출
+
+async function withPendingUI(task, ui) {
+  let shownAt = 0;
+  const timer = setTimeout(() => {
+    shownAt = performance.now();
+    ui.showSpinner();
+  }, SPINNER_DELAY_MS);
+
+  try {
+    return await task();
+  } finally {
+    clearTimeout(timer);
+    if (shownAt) {
+      const remaining = SPINNER_MIN_MS - (performance.now() - shownAt);
+      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
+      ui.hideSpinner();
+    }
+  }
+}
+```
+
+이건 체감만 손보는 코드다 — 실제 응답이 3초면 3초 그대로다. 400ms도 물리 상수가 아니라 경험칙이라 자동완성과 결제 제출에 같은 값을 쓰는 건 오용에 가깝고, 사이트 자체가 경고하는 "법칙의 기계적 적용"이 정확히 이 지점이다.

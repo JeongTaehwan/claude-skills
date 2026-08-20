@@ -33,3 +33,34 @@ https://tech.kakao.com/posts/586 · 2부 https://tech.kakao.com/posts/587
 ## 인용 포인트
 - 측정→식별→개선→재측정 사이클을 실서비스에서 돌린 국내 공개 사례 — 성능 개선 계획서에 "선행 사례" 절을 채우는 용도.
 - 주문/폼이라는 도메인 특정성 — 일반론이 아니라 같은 화면 유형의 사례라는 점이 설득에서 값을 한다.
+
+## 코드 예시
+
+이 글의 구조 자체인 사이클 — 측정 → 개선 → 재측정 — 을 착수·완료 보고에 붙일 수 있는 수치로 만드는 스크립트.
+
+```bash
+#!/usr/bin/env bash
+# 주문 플로우의 각 화면을 같은 조건으로 5회 측정하고 중앙값을 남긴다
+URL_BASE="https://staging.example.com"
+LABEL=$1                       # before | after
+mkdir -p "runs/$LABEL"
+
+for path in / /cart /checkout /checkout/payment; do
+  name=$(echo "$path" | tr '/' '_')
+  for i in $(seq 1 5); do      # 1회 측정은 편차가 커서 보고 근거가 못 된다
+    npx lighthouse "$URL_BASE$path" \
+      --preset=desktop --throttling-method=simulate \
+      --only-categories=performance --quiet \
+      --output=json --output-path="runs/$LABEL/$name-$i.json"
+  done
+done
+
+# LCP·TBT·CLS 중앙값 뽑기
+jq -s '{
+  lcp: (map(.audits["largest-contentful-paint"].numericValue) | sort | .[2]),
+  tbt: (map(.audits["total-blocking-time"].numericValue)      | sort | .[2]),
+  cls: (map(.audits["cumulative-layout-shift"].numericValue)  | sort | .[2])
+}' runs/$LABEL/_checkout-*.json
+```
+
+이건 랩 측정이라 실사용자 분포가 아니다 — 같은 스테이징·같은 스로틀링에서 비교했을 때만 before/after 대조가 성립하고, 완료 보고에 쓸 최종 근거는 배포 후 필드 데이터로 한 번 더 확인해야 한다.

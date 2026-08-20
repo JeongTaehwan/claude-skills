@@ -39,3 +39,26 @@ https://github.com/google/eng-practices
 ## 인용 포인트
 - "완벽함이 아니라 개선" — 리뷰가 무한 왕복될 때 승인 기준을 되돌리는 근거.
 - 설계·정확성 → 테스트 → 명명·주석 → 스타일 순의 우선순위. 스타일 지적으로 리뷰가 채워지는 팀에 바로 들이댈 수 있다.
+
+## 코드 예시
+
+규범을 포크해 우리 저장소에 심을 때 가장 먼저 생기는 파일 — "설계와 정확성을 볼 사람"을 경로로 고정해 둔 것.
+
+```
+# .github/CODEOWNERS
+*                      @org/backend
+
+# 정확성이 걸리는 영역은 도메인 오너가 반드시 본다
+/src/payment/          @org/payment
+/src/coupon/           @org/promotion
+/migrations/           @org/dba
+
+# 계약이 깨지면 다른 팀이 죽는 곳
+/api/openapi.yaml      @org/backend @org/mobile
+
+# 스타일은 사람이 보지 않는다 — 포매터 설정 파일만 오너를 둔다
+/.prettierrc           @org/platform
+/.editorconfig         @org/platform
+```
+
+이 파일이 정하는 것은 "누가 보는가"뿐이고, "무엇부터 보는가"(설계 → 테스트 → 명명 → 스타일)는 여전히 문서와 습관의 몫이다. 오너를 촘촘히 걸수록 승인 대기가 길어지는 것도 감안해야 한다 — 지연이 PR 을 키우고 큰 PR 이 리뷰를 무디게 만든다는, 이 저장소가 경고한 바로 그 악순환이 여기서 시작된다.

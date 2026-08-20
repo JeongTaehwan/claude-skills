@@ -34,3 +34,27 @@ Lighthouse 점수의 전제가 되는 스로틀링 세 방식 — 시뮬레이�
 ## 인용 포인트
 - "Lighthouse 기본 점수는 실측이 아니라 시뮬레이션 위의 수치" — 점수 공유 시 측정 조건 병기를 요구하는 근거.
 - 기본 조건 명세(Slow 4G ≈ 1.6Mbps/150ms RTT, 4x CPU) — 저속 대응 테스트 계획서에 인용할 기준값.
+
+## 코드 예시
+
+같은 페이지를 시뮬레이트(기본)와 실제 적용(devtools) 두 방식으로 돌려, 점수 차이가 코드 탓인지 측정 방식 탓인지 가른다.
+
+```bash
+# 1) 기본값: 관측 후 저속 조건을 모델로 재계산 (빠름, 시뮬레이션)
+npx lighthouse https://example.com \
+  --throttling-method=simulate \
+  --output=json --output-path=./sim.json
+
+# 2) DevTools 방식: 요청 레벨에서 지연·대역폭을 실제로 건다 (느림, 더 실제에 가까움)
+npx lighthouse https://example.com \
+  --throttling-method=devtools \
+  --throttling.rttMs=150 \
+  --throttling.throughputKbps=1638 \
+  --throttling.cpuSlowdownMultiplier=4 \
+  --output=json --output-path=./devtools.json
+
+# LCP 값만 뽑아 비교
+npx -y node-jq -r '.audits["largest-contentful-paint"].numericValue' sim.json devtools.json
+```
+
+두 수치가 갈리는 건 버그가 아니라 눈금이 다른 것이다 — 어느 쪽도 실기기 실측은 아니므로, 점수를 공유할 땐 `--throttling-method` 값을 함께 적어야 한다.

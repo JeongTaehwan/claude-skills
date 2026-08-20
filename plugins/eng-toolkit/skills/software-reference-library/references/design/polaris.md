@@ -34,3 +34,32 @@ Shopify의 디자인 시스템 — 마케팅 사이트가 아니라 상품·주�
 
 ## 인용 포인트
 - 콘텐츠 가이드라인은 "에러 문구를 개발자가 즉흥으로 쓰지 말자"는 팀 규칙을 세울 때 그대로 참고할 만한 드문 공개 사례다.
+
+## 코드 예시
+
+"에러 문구를 즉흥으로 쓰지 말자"를 규칙 문서가 아니라 타입으로 강제한 것 — 콘텐츠 가이드의 슬롯 구조를 그대로 옮겼다.
+
+```ts
+type AdminMessage = {
+  /** 무엇이 일어났는지. 사용자 잘못으로 몰지 않는다 */
+  title: string;
+  /** 다음에 무엇을 하면 되는지. 원인만 말하고 끝내지 않는다 */
+  description?: string;
+  /** 버튼 라벨은 동사로 시작한다 */
+  action?: { label: string; to: string };
+};
+
+export const orderMessages = {
+  bulkFulfillFailed: {
+    title: '주문 12건 중 3건을 처리하지 못했습니다',
+    description: '재고가 부족한 상품이 있습니다. 재고를 확인한 뒤 다시 시도하세요.',
+    action: { label: '재고 확인', to: '/inventory' },
+  },
+  ordersEmpty: {
+    title: '아직 주문이 없습니다',
+    description: '첫 주문이 들어오면 여기에 표시됩니다.',
+  },
+} satisfies Record<string, AdminMessage>;
+```
+
+타입은 슬롯이 비었는지만 본다 — 어조는 검사하지 못해서 "고객님이 잘못 입력하셨습니다"를 넣어도 그대로 컴파일된다. 그리고 Polaris 자체가 웹 컴포넌트 기반 프레임워크로 재편 중이라, 예전 React 컴포넌트 예제를 기대하고 문서를 열면 구조가 달라져 있다.

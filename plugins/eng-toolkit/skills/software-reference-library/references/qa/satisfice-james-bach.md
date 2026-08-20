@@ -35,3 +35,27 @@ James Bach의 회사이자 개인 자료실 — Rapid Software Testing 방법론
 
 ## 인용 포인트
 - Context-Driven Testing 관련 주장을 인용할 때, 2차 블로그가 아니라 이 사이트의 원문을 출처로 다는 편이 논쟁에서 훨씬 강하다.
+
+## 코드 예시
+
+"2차 블로그 말고 원문을 출처로 달라"를 실제 참고문헌 항목으로 옮긴 형태 — 버전과 접근일을 함께 박아 두어야 나중에 문서가 바뀌어도 인용이 무너지지 않는다.
+
+```bibtex
+@book{kaner2001lessons,
+  author    = {Kaner, Cem and Bach, James and Pettichord, Bret},
+  title     = {Lessons Learned in Software Testing: A Context-Driven Approach},
+  publisher = {Wiley},
+  year      = {2001}
+}
+
+@misc{bach_htsm,
+  author  = {Bach, James},
+  title   = {Heuristic Test Strategy Model},
+  version = {6.3},
+  howpublished = {\url{https://www.satisfice.com/download/heuristic-test-strategy-model}},
+  urldate = {2026-08-20},
+  note    = {웹 문서 — 버전이 올라가면 인용 문구도 다시 확인할 것}
+}
+```
+
+출처를 원문으로 바꿔도 편향은 그대로 따라온다 — 이 자료실은 표준화 반대라는 입장이 뚜렷한 쪽이므로, 표준 도입 논의에 인용할 때는 반대편 출처를 나란히 다는 편이 논거를 더 강하게 만든다.

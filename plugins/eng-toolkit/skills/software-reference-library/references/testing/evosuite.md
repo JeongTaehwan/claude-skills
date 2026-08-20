@@ -39,3 +39,26 @@ EvoSuite 는 대상 클래스에 대해 진화 알고리즘으로 테스트 케�
 - 검색 기반 테스트 생성의 대표 구현으로, 자동 생성 도입 논의에서 "실제로 되는 도구가 존재한다"는 근거로 인용 가능하다.
 - DSE 가 Java 8 에 묶여 있고 최신 릴리스가 2021년이라는 점은, 최신 JDK 기반 서비스에 도입할 때 사전에 검증해야 할 리스크로 그대로 적어 둘 수 있다.
 - 생성된 테스트가 현재 동작을 정답으로 굳힌다는 성질은, 도입 목적을 "품질 향상"이 아니라 "리팩터링 안전망"으로 한정해야 하는 이유가 된다.
+
+## 코드 예시
+
+"리팩터링 전에 현재 동작을 그물로 덮는다"를 실행으로 옮긴 형태 — 손대기 직전의 정산 클래스 하나에만 건다.
+
+```bash
+# 대상 클래스 하나에 대해 분기 커버리지를 목표로 테스트를 탐색한다
+java -jar evosuite-1.2.0.jar \
+  -class com.example.settlement.SettlementCalculator \
+  -projectCP target/classes:$(cat cp.txt) \
+  -criterion branch \
+  -Dsearch_budget=120        # 초 단위. 늘릴수록 더 깊은 분기까지 들어간다
+
+# 산출물은 evosuite-tests/ 아래에 JUnit 소스로 떨어진다
+#   → 리팩터링 전에 커밋해 두고, 리팩터링 후 그대로 돌려 차이를 본다
+cp -r evosuite-tests/com src/test/java/
+mvn -Dtest='SettlementCalculator*ESTest' test
+
+# 패키지 전체에 한꺼번에 걸 수도 있지만, 안전망이 필요한 클래스에만 거는 편이 관리된다
+# java -jar evosuite-1.2.0.jar -prefix com.example.settlement -projectCP target/classes
+```
+
+여기서 초록불은 "옳다"가 아니라 "리팩터링 전과 동작이 같다"는 뜻이다 — 기존 버그까지 단언으로 굳어지므로, 생성된 테스트가 깨졌을 때 고칠 대상이 코드인지 테스트인지는 사람이 판단해야 한다.

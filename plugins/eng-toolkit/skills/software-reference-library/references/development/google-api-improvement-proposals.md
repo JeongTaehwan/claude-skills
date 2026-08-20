@@ -40,3 +40,27 @@ AIP 자체가 "구글 밖에서도 쓰라고 만든 프레임워크"라고 선�
 ## 인용 포인트
 - "새 엔드포인트를 만들기 전에, 표준 메서드로 표현 가능한지 먼저 확인한다" — 커스텀 엔드포인트가 무한 증식하는 팀에서 바로 쓸 수 있는 게이트.
 - 논쟁 하나에 문서 하나가 대응하므로, 리뷰 코멘트에 "AIP-158 참고" 처럼 좁게 인용할 수 있다. 가이드 전체를 읽으라고 던지는 것보다 실제로 읽힌다.
+
+## 코드 예시
+
+리뷰에서 매번 다시 싸우는 두 지점 — 목록 페이지네이션(AIP-158)과 부분 수정(AIP-134/161) — 을 번호가 정한 대로 적어 둔 요청·응답.
+
+```http
+### AIP-158 페이지네이션 + AIP-160 필터
+GET /v1/orders?pageSize=50&pageToken=Cg9vcmRlcnMvMTIzNA&filter=status="PAID"
+
+200 OK
+{
+  "orders": [ { "name": "orders/1234", "status": "PAID" } ],
+  "nextPageToken": "Cg9vcmRlcnMvMTI5OQ"
+}
+
+### AIP-134 Update + AIP-161 field mask — 보낸 필드만 바꾼다
+PATCH /v1/orders/1234?updateMask=note,shippingAddress
+{
+  "note": "문 앞에 두세요",
+  "shippingAddress": { "zipCode": "06236" }
+}
+```
+
+`pageToken` 은 불투명 문자열이어야 한다 — offset 숫자를 그대로 노출하면 규약만 흉내 낸 것이고, 나중에 정렬 키를 바꿀 자유를 잃는다. `updateMask` 를 생략한 PATCH 도 위험하다: 마스크가 없으면 전체 치환으로 해석되어 안 보낸 필드가 지워질 수 있고, AIP-161 이 마스크를 요구하는 이유가 정확히 그것이다.

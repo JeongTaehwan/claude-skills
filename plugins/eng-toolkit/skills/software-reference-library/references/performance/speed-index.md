@@ -34,3 +34,33 @@ Speed Index의 정의 원문이다. 뷰포트의 시각적 완성도를 시간�
 ## 인용 포인트
 - Speed Index = 뷰포트 시각 완성도의 시간 적분 — 점수의 의미를 정확히 설명할 때 원 출처로.
 - 진행 곡선 전체 평가라는 발상 — "onload 한 점만 보지 말자"는 주장에 족보를 달 때.
+
+## 코드 예시
+
+"Speed Index = 뷰포트 시각 완성도의 시간 적분"이라는 정의를 그대로 코드로 옮겨, 같은 완료 시각이라도 점수가 갈리는 이유를 보인 것.
+
+```js
+// frames: [{ t: ms, visuallyComplete: 0~1 }] — 시간 오름차순
+// SI = ∫(1 - 시각완성도) dt, 즉 "화면이 덜 채워진 채 흐른 시간"의 누적
+function speedIndex(frames) {
+  let si = 0;
+  for (let i = 1; i < frames.length; i++) {
+    const dt = frames[i].t - frames[i - 1].t;
+    si += (1 - frames[i - 1].visuallyComplete) * dt; // 왼쪽 리만합
+  }
+  return si; // ms
+}
+
+// 두 페이지 모두 2001ms 에 완성된다 — 단일 시점 지표로는 동점
+const stepwise = [{ t: 0, visuallyComplete: 0 },
+                  { t: 2000, visuallyComplete: 0 },
+                  { t: 2001, visuallyComplete: 1 }];
+const gradual  = [{ t: 0, visuallyComplete: 0 },
+                  { t: 500, visuallyComplete: 0.6 },
+                  { t: 2001, visuallyComplete: 1 }];
+
+speedIndex(stepwise); // 2001
+speedIndex(gradual);  // 약 1100 — 진행 곡선을 보면 두 배 가까이 갈린다
+```
+
+`visuallyComplete`는 캡처한 영상 프레임의 픽셀 분포를 최종 화면과 비교해 얻는 값이다 — 즉 **픽셀을 세지 의미를 세지 않는다**. 전면 스켈레톤이나 큼직한 회색 플레이스홀더는 내용이 하나도 안 왔는데도 이 곡선을 빠르게 밀어 올려 점수를 좋게 만든다.

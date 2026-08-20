@@ -38,3 +38,32 @@ https://toss.tech/
 ## 인용 포인트
 - 국내 금융/커머스 맥락에서 "이 정도 규모에서도 이렇게 한다"를 보여주는 근거로 사내 제안서에 인용하기 좋다.
 - 장애 회고를 공개하는 형식 자체가, 사내 포스트모템을 비난 없는(blameless) 문서로 만들자고 설득할 때의 실물 사례가 된다.
+
+## 코드 예시
+
+"중복 처리가 곧 금전 사고"라는 제약이 코드에서는 재시도를 어떻게 다루느냐로 나타난다.
+
+```js
+// 같은 Idempotency-Key 로 온 재시도는 '다시 처리'가 아니라 '지난 결과 재생'이다
+async function pay(req) {
+  const key = req.headers["idempotency-key"];
+  if (!key) throw new HttpError(400, "Idempotency-Key 필수");
+
+  const saved = await db.idempotency.findUnique({ where: { key } });
+  if (saved) {
+    // 같은 키에 다른 본문이 오면 클라이언트 버그다. 조용히 처리하면 사고가 숨는다
+    if (saved.requestHash !== hash(req.body)) {
+      throw new HttpError(422, "Idempotency-Key 재사용");
+    }
+    return saved.response;      // 금액이 두 번 빠지지 않는다
+  }
+
+  const res = await pg.approve(req.body);
+  await db.idempotency.create({
+    data: { key, requestHash: hash(req.body), response: res },
+  });
+  return res;
+}
+```
+
+PG 승인은 성공했는데 그 아래 `create` 전에 프로세스가 죽는 창이 그대로 남아 있다 — 재시도가 오면 승인을 한 번 더 태운다. 그래서 실무에서는 요청 접수 시점에 `PENDING` 을 먼저 쓰고 승인 결과로 갱신하는 2단계와, 그래도 새는 건을 잡는 대사 배치가 짝으로 따라붙는다. 이 블로그의 글들이 성공담보다 실패 사례를 길게 쓰는 이유가 정확히 이 창 때문이다.

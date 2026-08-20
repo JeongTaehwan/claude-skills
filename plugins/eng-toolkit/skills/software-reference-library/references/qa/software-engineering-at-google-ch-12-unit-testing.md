@@ -40,3 +40,31 @@ https://abseil.io/resources/swe-book/html/ch12.html
 - "테스트는 프로덕션 코드가 변할 때 함께 변하지 않아야 한다" — 리팩터링마다 테스트가 깨지는 상황을 개인의 실수가 아니라 테스트 설계 결함으로 재정의하는 문장.
 - "테스트 코드에서는 DRY보다 DAMP" — 테스트 헬퍼 추상화를 밀어붙이는 리뷰 의견에 대한 표준 반론.
 - 테스트 안에 로직을 넣지 말라는 규칙은, 코드 리뷰 체크리스트에 그대로 옮길 수 있는 형태다.
+
+## 코드 예시
+
+같은 규칙을 검증하는 두 테스트 — 위는 DRY 로 감싸 읽어도 규칙을 알 수 없고, 아래는 DAMP 로 풀어 테스트 본문이 곧 명세가 된다.
+
+```typescript
+// DRY: 헬퍼가 입력과 기대값을 둘 다 숨긴다. 헬퍼가 바뀌면 조용히 의미가 변한다
+test('할인 적용', () => {
+  const order = buildOrder({ coupon: 'PCT10' })
+  expect(applyDiscount(order)).toEqual(expectedResultFor('PCT10'))
+})
+
+// DAMP: 값이 본문에 있고, 이름이 검증하는 동작을 문장으로 말한다
+test('정률 쿠폰은 배송비를 제외한 상품 금액에만 적용된다', () => {
+  const order = {
+    items: [{ sku: 'A-1', price: 30_000, qty: 1 }],
+    shippingFee: 3_000,
+    coupon: { type: 'percent' as const, value: 10 },
+  }
+
+  const result = applyDiscount(order)
+
+  expect(result.discount).toBe(3_000)   // 30,000 의 10% — 배송비는 대상 아님
+  expect(result.payable).toBe(30_000)   // 27,000 + 배송비 3,000
+})
+```
+
+DAMP 는 중복을 감수하는 선택이지 중복이 공짜라는 뜻이 아니다 — 같은 리터럴이 40 곳에 퍼진 뒤 규칙이 바뀌면 40 곳을 고쳐야 하고, 그때 헬퍼로 되돌리고 싶어지는 유혹이 다시 온다.

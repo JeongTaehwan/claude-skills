@@ -34,3 +34,31 @@ Matteo Varvello, Jeremy Blackburn, David Naylor, Konstantina Papagiannaki — AC
 ## 인용 포인트
 - 신형 메트릭조차 인간 지각 로드 시점을 제대로 대표하지 못한다 — 단일 메트릭 KPI의 한계를 말할 때.
 - HTTP/2 이득도 상황에 따라 지각되지 않았다 — 인프라 업그레이드를 체감 개선으로 자동 환산해 보고하지 않기 위한 근거.
+
+## 코드 예시
+
+논문이 그라운드트루스로 삼은 것 — 숫자가 아니라 로드 영상 — 을 배포 전후로 남겨, "메트릭은 좋아졌는데 눈에 보이나"를 사람이 판정할 수 있게 만든다.
+
+```js
+// 로드 과정을 프레임으로 캡처한다. DevTools 필름스트립과 같은 CDP 명령
+const client = await page.createCDPSession();
+const frames = [];
+
+client.on('Page.screencastFrame', async ({ data, sessionId, metadata }) => {
+  frames.push({ ms: Math.round(metadata.timestamp * 1000), data });
+  await client.send('Page.screencastFrameAck', { sessionId });
+});
+
+await client.send('Page.enable');
+await client.send('Page.startScreencast', { format: 'jpeg', quality: 70, everyNthFrame: 1 });
+await page.goto(url, { waitUntil: 'load' });
+await client.send('Page.stopScreencast');
+
+// 프레임을 시각 기준 시각과 함께 저장 — 이 파일을 before/after 로 나란히 놓고 사람이 고른다
+const t0 = frames[0].ms;
+for (const f of frames) {
+  fs.writeFileSync(`shots/${label}-${f.ms - t0}ms.jpg`, Buffer.from(f.data, 'base64'));
+}
+```
+
+프레임 타임스탬프를 그대로 "로드 완료"로 환산하면 이 논문이 지적한 실수를 그대로 반복하는 것이다 — 캡처는 판정 재료일 뿐이고, 사람이 언제 로드됐다고 느끼는지는 여전히 사람에게 물어야 나온다.

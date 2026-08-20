@@ -35,3 +35,26 @@ https://toss.tech/article/smart-web-service-cache
 ## 인용 포인트
 - HTML `max-age=0, s-maxage=31536000` + 해시 자산 1년 — 캐시 정책 제안 문서에 그대로 옮겨 쓸 수 있는 구체 설정값과 그 논리.
 - "캐시는 끄는 게 아니라 계층별로 다르게 켜는 것" — 캐시 사고 이후 전면 no-cache로 후퇴하려는 논의를 되돌리는 근거.
+
+## 코드 예시
+
+"캐시는 끄는 게 아니라 계층별로 다르게 켠다" — HTML과 해시 자산에 서로 다른 수명을 주는 설정을 그대로 옮긴 것.
+
+```nginx
+# HTML: 브라우저는 매번 재검증(max-age=0), 공유 캐시(CDN)는 사실상 영구 보관
+location = /index.html {
+    add_header Cache-Control "public, max-age=0, s-maxage=31536000, must-revalidate";
+}
+
+# 해시가 파일명에 붙은 정적 자산: 내용이 바뀌면 URL 이 바뀌므로 1년 불변
+location ~* "^/assets/.+\.[0-9a-f]{8,}\.(js|css|woff2)$" {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+# 배포 파이프라인에서 HTML 만 퍼지한다 — 이 단계가 정책의 나머지 절반이다
+#   curl -X POST "$CDN_PURGE_ENDPOINT" \
+#     -H "Authorization: Bearer $CDN_TOKEN" \
+#     -d '{"files":["https://example.com/index.html"]}'
+```
+
+`s-maxage=31536000`은 배포 시 퍼지가 반드시 돈다는 전제 위에서만 성립한다 — 퍼지가 한 번 실패하면 CDN이 옛 HTML을 1년 들고 있게 되고, 그 HTML이 가리키는 해시 자산은 `immutable`이라 되돌릴 방법이 배포가 아니라 수동 무효화뿐이다. nginx의 `add_header`는 하위 `location`이 자기 `add_header`를 가지면 상속되지 않는다는 것도 같이 확인해야 한다.

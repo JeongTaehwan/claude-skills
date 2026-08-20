@@ -39,3 +39,26 @@ DEVIEW 발표 아카이브가 붙어 있어, 글보다 슬라이드가 빠른 �
 ## 인용 포인트
 - 성능 문제 분석 리포트에서 "무엇을 측정했고 왜 그 지표를 봤는가"를 설명할 때, 국내 한국어 근거로 인용하기 좋다.
 - 한국어 형태소 분석·검색 품질 이슈는 영어 문헌으로 대체가 안 되므로, 이 아카이브가 사실상 1차 출처 역할을 한다.
+
+## 코드 예시
+
+"무엇을 측정했고 왜 그 지표를 봤는가"를 리포트에 쓰려면, 문제가 터진 뒤가 아니라 기동 시점에 근거가 남아 있어야 한다.
+
+```bash
+# GC 로그를 파일로 남긴다 (JDK 9+ 통합 로깅). 재현 안 되는 문제는 로그가 없으면 분석 자체가 불가능하다
+java -Xlog:gc*,gc+heap=debug:file=/var/log/app/gc.log:time,uptime,level,tags:filecount=10,filesize=20M \
+     -XX:+HeapDumpOnOutOfMemoryError \
+     -XX:HeapDumpPath=/var/log/app/heap.hprof \
+     -XX:NativeMemoryTracking=summary \
+     -jar app.jar
+
+# 살아 있는 프로세스에서 지표만 확인 — 덤프 없이
+jcmd <pid> GC.heap_info             # 세대별 사용량·용량
+jcmd <pid> Thread.print             # 스레드 덤프 (jstack 과 동일)
+jcmd <pid> VM.native_memory summary # NativeMemoryTracking 켠 경우에만
+
+# 힙 덤프는 마지막 수단
+jcmd <pid> GC.heap_dump /var/log/app/manual.hprof
+```
+
+`GC.heap_dump` 는 전체 GC 와 stop-the-world 를 동반하고 힙 크기만 한 파일을 만든다 — 운영 중 무심코 뜨면 그 자체가 장애다. JVM 옵션 문법은 버전 의존적이니 D2 글의 작성 시점을 확인하고 해당 JDK 문서로 교차 검증할 것.

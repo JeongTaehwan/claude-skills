@@ -39,3 +39,27 @@ RFC 2119 키워드(MUST/SHOULD)로 쓰여 있어 도구 구현자가 정확히 �
 ## 인용 포인트
 - "커밋 규칙은 형식주의 아니냐"는 반론에, 이 규약의 목적이 미관이 아니라 버전 계산의 입력이라는 점을 명세에서 직접 인용해 반박할 수 있다.
 - 타입 목록을 팀이 정해도 된다는 근거가 명세에 있으므로, 불필요한 타입 논쟁을 "표준이 열어 둔 부분"으로 정리할 수 있다.
+
+## 코드 예시
+
+명세가 강제하는 부분(`feat`/`fix`/`BREAKING CHANGE`)과 팀이 정하는 부분(그 밖의 타입, 스코프)을 설정 파일에서 분리해 둔 형태.
+
+```js
+// commitlint.config.js
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    // 명세가 열어 둔 자리 — 여기서 정한 목록이 우리 팀 규칙이다
+    'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'refactor', 'test', 'chore']],
+    'scope-enum': [2, 'always', ['order', 'payment', 'catalog']],
+  },
+};
+```
+
+```
+feat(order)!: 주문 취소 응답에서 legacy_status 제거
+
+BREAKING CHANGE: legacy_status 를 읽던 클라이언트는 status 로 옮겨야 한다.
+```
+
+`!` 와 `BREAKING CHANGE:` 는 같은 뜻이고, 이 커밋 하나가 MAJOR 를 올린다. commitlint 가 검사하는 것은 형식뿐이라는 점은 남는다 — 파괴적 변경을 `fix:` 로 적어도 통과하며, 그 판단은 여전히 사람과 리뷰의 몫이다.

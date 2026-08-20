@@ -30,3 +30,32 @@ https://github.com/joe-bell/plaiceholder
 ## 인용 포인트
 - 의존성 정리 PR에서 "아카이브된 래퍼 제거, sharp 직접 호출로 대체"의 근거.
 - 래퍼 라이브러리의 수명은 짧고 그 아래 엔진(sharp)은 남는다는, 의존성 선택 시 층위 판단의 실례.
+
+## 코드 예시
+
+아카이브된 래퍼가 하던 일의 본질 — 저해상도 축소 → base64 — 을 sharp 직접 호출로 대체한 형태.
+
+```js
+// scripts/gen-blur.mjs — 빌드 전에 한 번 돌려 blurDataURL 맵을 만든다
+import fs from "node:fs/promises";
+import path from "node:path";
+import sharp from "sharp";
+
+const dir = "public/products";
+const out = {};
+
+for (const file of await fs.readdir(dir)) {
+  if (!/\.(jpe?g|png|webp)$/i.test(file)) continue;
+
+  const buf = await sharp(path.join(dir, file))
+    .resize(10) // 가로 10px — 어차피 블러로 확대된다
+    .webp({ quality: 20 })
+    .toBuffer();
+
+  out[file] = `data:image/webp;base64,${buf.toString("base64")}`;
+}
+
+await fs.writeFile("src/blur-map.json", JSON.stringify(out, null, 2));
+```
+
+`resize(10)` 결과라도 base64 는 원본 바이트의 약 1.33배로 부풀고 HTML에 인라인되므로, 카드가 수십 개인 목록에서는 문서 자체가 눈에 띄게 무거워진다.

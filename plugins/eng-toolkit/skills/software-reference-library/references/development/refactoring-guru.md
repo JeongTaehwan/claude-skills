@@ -39,3 +39,35 @@ https://refactoring.guru/refactoring/catalog
 ## 인용 포인트
 - 스멜 페이지의 "언제 무시해도 되는가" 절은, 리팩터링 제안이 과할 때 브레이크를 거는 근거로 쓸 수 있다 — 스멜 지적이 항상 옳다는 전제를 사이트 자신이 부정한다.
 - 한국어 번역이 있다는 점 때문에, 신규 입사자 온보딩 자료 목록에 넣기 좋은 몇 안 되는 항목이다.
+
+## 코드 예시
+
+"결제 상태 분기가 여덟 갈래"라는 불편함의 이름은 Switch Statements 스멜이고, 대응 기법은 Replace Conditional with Polymorphism 이다.
+
+```js
+// 스멜: 같은 모양의 분기가 수수료·정산·환불 코드에 각각 흩어져 있다.
+// 결제 수단이 하나 늘면 그 전부를 찾아 고쳐야 한다 (산탄총 수술로 이어진다)
+function fee(payment) {
+  switch (payment.method) {
+    case "card":     return payment.amount * 0.028;
+    case "transfer": return 300;
+    case "point":    return 0;
+    default: throw new Error(`unknown method: ${payment.method}`);
+  }
+}
+
+// 기법 적용 후: 수단별 지식이 한 곳에 모이고, 추가는 표에 한 줄 넣는 일이 된다
+const METHODS = {
+  card:     { fee: (p) => p.amount * 0.028 },
+  transfer: { fee: () => 300 },
+  point:    { fee: () => 0 },
+};
+
+function fee(payment) {
+  const m = METHODS[payment.method];
+  if (!m) throw new Error(`unknown method: ${payment.method}`);
+  return m.fee(payment);
+}
+```
+
+사이트가 스멜마다 "언제 무시해도 되는가"를 붙여 둔 이유가 여기 있다 — 이 분기가 정말 이 한 곳뿐이고 수단이 늘 계획도 없다면 위쪽 `switch` 가 더 읽기 쉽다. 아래 형태는 로직을 한 단계 간접화하므로, 흩어진 분기가 실제로 여러 곳에 있을 때만 이득이 비용을 넘는다.

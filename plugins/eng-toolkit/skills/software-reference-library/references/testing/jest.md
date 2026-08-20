@@ -40,3 +40,34 @@ Jest 의 성격을 한마디로 말하면 "배터리 포함"이다. 단언, 모�
 ## 인용 포인트
 - 공식 문서가 TypeScript 경로로 Babel 과 ts-jest 두 갈래를 모두 제시한다는 점은, 타입 검사 수행 여부라는 트레이드오프를 팀에 설명할 때 근거로 쓸 수 있다.
 - 비동기 테스트가 별도 챕터로 분리되어 있다는 사실 자체가, 비동기 단언 누락이 이 생태계의 대표적 함정임을 보여 준다.
+
+## 코드 예시
+
+문서가 별도 챕터로 떼어 놓은 함정 — 비동기 단언이 조용히 통과하는 경우 — 를 매처로 못 박은 before/after.
+
+```js
+// before — Promise 를 반환하지도 await 하지도 않는다.
+// 단언이 실행되기 전에 테스트가 끝나므로 항상 초록불이다.
+test('결제 실패 시 예외', () => {
+  approvePayment({ amount: -1 }).catch((e) => {
+    expect(e.message).toBe('INVALID_AMOUNT');
+  });
+});
+
+// after — 거부(rejection) 자체를 매처로 단언하고 await 한다
+test('금액이 음수면 INVALID_AMOUNT 로 거부된다', async () => {
+  await expect(approvePayment({ amount: -1 })).rejects.toThrow('INVALID_AMOUNT');
+});
+
+// try/catch 를 써야 한다면 단언이 실제로 몇 번 실행됐는지 못 박는다
+test('거부 에러의 code 를 확인한다', async () => {
+  expect.assertions(1); // catch 로 안 들어가면 여기서 실패한다
+  try {
+    await approvePayment({ amount: -1 });
+  } catch (e) {
+    expect(e.code).toBe('INVALID_AMOUNT');
+  }
+});
+```
+
+`expect.assertions(n)` 이 보장하는 것은 단언의 개수뿐이다 — 엉뚱한 단언이 n번 실행돼도 통과하므로, 실행 여부의 안전장치이지 검증 내용의 보증은 아니다.

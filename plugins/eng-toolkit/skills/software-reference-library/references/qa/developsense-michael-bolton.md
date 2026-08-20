@@ -38,3 +38,30 @@ Rapid Software Testing의 공동 저자가 "테스팅(testing)과 체킹(checkin
 ## 인용 포인트
 - testing/checking 구분은 "자동화가 QA를 대체한다"는 주장에 대한 표준 반론으로 그대로 인용된다.
 - AI 생성 결과물을 검증 없이 신뢰하는 워크플로에 제동을 걸 때, "옳은 답이 아니라 답을 만들도록 설계되었다"는 표현이 회의에서 잘 먹힌다.
+
+## 코드 예시
+
+"테스트했다"는 한 줄 보고를 checking 과 testing 으로 쪼개는 릴리스 리포트 형식 — 자동 통과 건수와 사람이 무엇을 배웠는지를 같은 칸에 넣지 않는다.
+
+```yaml
+# reports/release-2026-08-20.yaml
+release: 2026.08.20
+checking:                    # 이미 아는 것을 기계가 확인 — 숫자로 보고
+  suites:
+    - name: unit
+      passed: 1842
+      failed: 0
+    - name: e2e-checkout
+      passed: 37
+      failed: 0
+      skipped: 4             # 스킵은 통과가 아니다, 사유 필수
+      skip_reason: PG 샌드박스 점검
+testing:                     # 아직 모르는 것을 사람이 탐색 — 서술로 보고
+  - charter: 쿠폰 병용 규칙을 만료·환불과 교차해 탐색
+    duration_min: 90
+    coverage: 만료 직전 쿠폰, 부분 환불 후 재사용
+    learned: 환불 후 쿠폰 복구 여부가 명세에 없음
+    risks_open: 부분 환불 시 복구 금액 기준 미정
+```
+
+`checking` 이 전부 초록이어도 `risks_open` 이 비어 있다는 뜻은 아니다 — 이 형식의 목적은 통과 숫자가 미탐색 영역을 가리지 못하게 두 칸을 분리해 두는 것뿐이다.

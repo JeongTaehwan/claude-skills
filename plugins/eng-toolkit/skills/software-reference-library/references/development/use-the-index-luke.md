@@ -41,3 +41,35 @@ SQL 성능을 DBA 가 아니라 **개발자가 쓰는 쿼리와 인덱스 설계
 - "인덱스 설계는 개발자의 일"이라는 도입부 주장은, 쿼리 리뷰를 코드 리뷰 항목에 넣자고 제안할 때 근거가 된다.
 - 복합 인덱스 컬럼 순서 규칙(등호 조건 → 범위 조건 → 정렬)은 인덱스 리뷰 체크리스트로 바로 옮길 수 있다.
 - OFFSET 페이징의 비용 설명은, 목록 API 를 키셋 기반으로 바꾸자는 제안의 표준 근거다.
+
+## 코드 예시
+
+컬럼 순서 규칙(등호 → 범위 → 정렬)과 OFFSET 페이징 비용 — 이 책의 두 결론을 한 화면에 놓으면 이렇게 된다.
+
+```sql
+-- 등호 조건이 앞, 정렬 키가 뒤. 순서를 바꾸면 정렬을 인덱스로 흡수하지 못한다
+CREATE INDEX idx_orders_user_created
+    ON orders (user_id, created_at DESC, id DESC);
+
+-- 실행계획에서 Sort 노드가 사라지는지로 확인한다
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id, created_at, amount
+  FROM orders
+ WHERE user_id = 7
+ ORDER BY created_at DESC, id DESC
+ LIMIT 20;
+
+-- OFFSET 페이징: 100,020 행을 읽고 100,000 행을 버린다. 뒤로 갈수록 선형으로 느려진다
+SELECT id, created_at FROM orders
+ WHERE user_id = 7 ORDER BY created_at DESC LIMIT 20 OFFSET 100000;
+
+-- 키셋 페이지네이션: 직전 페이지의 마지막 행을 기준점으로 준다. 몇 페이지든 비용이 같다
+SELECT id, created_at, amount
+  FROM orders
+ WHERE user_id = 7
+   AND (created_at, id) < ($1, $2)
+ ORDER BY created_at DESC, id DESC
+ LIMIT 20;
+```
+
+인덱스에 `id` 를 넣은 것은 장식이 아니다 — `created_at` 에 동률이 있으면 tie-breaker 없이는 키셋이 행을 건너뛰거나 중복시킨다. 그리고 키셋은 "5페이지로 점프"를 포기하는 대가로 얻는 것이고, `amount` 가 인덱스에 없는 한 찾은 행마다 테이블 접근이 한 번씩 남는다 — 이 책이 느림의 원인을 인덱스 유무가 아니라 **테이블 접근 횟수**로 다시 정의한 지점이다.

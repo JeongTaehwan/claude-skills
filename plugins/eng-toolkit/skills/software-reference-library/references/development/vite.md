@@ -40,3 +40,36 @@ https://vite.dev/guide/
 ## 인용 포인트
 - "개발 중 번들링을 하지 않는다"는 설계 선택은, 번들러 교체 제안서에서 "설정만 바꾸는 게 아니라 개발 모델이 다르다"를 설명하는 근거로 쓸 수 있다.
 - 의존성 사전 번들링과 소스 변환을 분리한다는 설명은, 캐시 무효화 문제나 `optimizeDeps` 관련 이슈를 팀에 설명할 때의 기준이 된다.
+
+## 코드 예시
+
+"소스와 의존성을 다르게 다룬다"는 설계가 설정 파일에서는 서로 다른 손잡이 두 개로 나타난다.
+
+```ts
+import { defineConfig } from "vite";
+
+// .env.production 에서 VITE_ 접두사가 붙은 값만 클라이언트 번들로 들어간다
+//   VITE_API_BASE=https://api.acme.io
+//   DB_PASSWORD=...        ← 접두사가 없으므로 번들에 포함되지 않는다
+
+export default defineConfig({
+  server: {
+    // 개발 서버가 백엔드로 프록시한다 — CORS 우회가 아니라 같은 오리진처럼 보이게 만드는 것
+    proxy: {
+      "/api": { target: "http://localhost:8080", changeOrigin: true },
+    },
+  },
+  // 의존성 쪽 손잡이. 워크스페이스 링크 패키지는 사전 번들링에서 빠지기 쉬워 명시한다
+  optimizeDeps: {
+    include: ["@acme/ui"],
+    exclude: ["@acme/wasm"],
+  },
+  build: {
+    rollupOptions: {
+      output: { manualChunks: { vendor: ["react", "react-dom"] } },
+    },
+  },
+});
+```
+
+`server.proxy` 는 개발 서버에만 있는 기능이라 프로덕션에는 존재하지 않는다 — 배포 환경의 리버스 프록시를 따로 맞춰 두지 않으면 로컬에서만 되는 구성이 된다. 개발과 빌드가 서로 다른 경로를 탄다는 점이 여기서 함정이 되고, "dev 에선 되는데 build 하면 깨진다"는 문제는 대개 `optimizeDeps` 와 CJS/ESM 상호운용에서 시작한다.

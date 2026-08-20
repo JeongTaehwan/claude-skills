@@ -33,3 +33,39 @@ react-virtualized의 제작자가 만든 경량 후속작. 고정/가변 크기�
 ## 인용 포인트
 - 가상화 라이브러리 양대 선택지(헤드리스 TanStack Virtual vs 컴포넌트형 react-window)의 비교 축 — 통제력 vs 조립 편의.
 - 2025년 v2 리라이트로 유지보수가 재개됐다는 사실 — "방치된 라이브러리"라는 낡은 인식에 대한 교정 근거.
+
+## 코드 예시
+
+"리스트 컴포넌트에 행 렌더러만 꽂는" 조립형 가상화 — 수만 행이어도 실제 DOM 에는 보이는 행 몇 개만 남는다. (v1 `FixedSizeList` API)
+
+```jsx
+import { FixedSizeList as List } from "react-window";
+
+// style 을 반드시 그대로 붙인다 — 절대 위치와 높이가 여기로 들어온다
+function Row({ index, style, data }) {
+  const order = data[index];
+  return (
+    <div style={style} className="row">
+      <span>{order.id}</span>
+      <span>{order.customerName}</span>
+    </div>
+  );
+}
+
+export default function OrderList({ orders }) {
+  return (
+    <List
+      height={600}
+      width="100%"
+      itemCount={orders.length}
+      itemSize={48}        // 고정 행 높이 — 가변이면 VariableSizeList
+      itemData={orders}    // Row 의 data 로 전달 (렌더러 재생성 방지)
+      overscanCount={4}    // 스크롤 시 빈 칸이 보이지 않게 여분 렌더
+    >
+      {Row}
+    </List>
+  );
+}
+```
+
+가상화는 렌더 비용만 줄인다 — 목록 데이터를 한 번에 다 받아 오는 구조라면 저속 회선에서의 대기는 그대로다. 그리고 2025년 v2 리라이트에서 API 가 바뀌었으니 설치된 버전의 문서를 확인해야 한다.

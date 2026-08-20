@@ -35,3 +35,38 @@ Java에서 HTTP API를 `given().when().get(...).then().statusCode(200).body("lot
 
 ## 인용 포인트
 - "테스트가 명세처럼 읽힌다"는 주장을 근거로 삼기 좋은 예제가 첫 화면에 그대로 있다. API 테스트 컨벤션을 정할 때 그 예제를 팀 표준 형태로 제시하면 논쟁이 짧아진다.
+
+## 코드 예시
+
+"응답을 객체로 매핑하지 않고 경로로 바로 단언한다"가 보일러플레이트를 줄이는 지점 — 공통 요청 스펙을 한 번 만들고, 앞 응답에서 뽑은 값을 다음 요청으로 넘긴다.
+
+```java
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+// 공통 스펙은 한 번만 — 각 테스트는 다른 부분만 적는다
+static final RequestSpecification SPEC = new RequestSpecBuilder()
+        .setBaseUri("http://localhost:8080")
+        .setContentType(ContentType.JSON)
+        .addHeader("Authorization", "Bearer " + token)
+        .build();
+
+@Test
+void 주문_생성_후_결제_승인() {
+    // 역직렬화 없이 GPath 경로로 바로 단언
+    String orderId = given().spec(SPEC)
+            .body("""
+                  {"sku":"A-1","quantity":2}""")
+        .when().post("/orders")
+        .then().statusCode(201)
+            .body("status", equalTo("CREATED"))
+            .body("items.sku", hasItems("A-1"))
+        .extract().path("id");           // 다음 요청으로 넘길 값만 꺼낸다
+
+    given().spec(SPEC)
+        .when().post("/orders/{id}/pay", orderId)
+        .then().statusCode(200).body("status", equalTo("PAID"));
+}
+```
+
+경로 단언은 타입 검사를 받지 않는다 — 응답 필드 이름이 바뀌면 컴파일이 아니라 실행 시점에야 깨지고, `body("items.sku", ...)` 같은 GPath 문자열은 IDE 리팩터링에도 따라오지 않는다. 그리고 위처럼 두 요청을 이어 붙인 테스트는 실패했을 때 어느 쪽이 원인인지 바로 드러나지 않으므로, 시나리오로 묶을 값어치가 있을 때만 붙인다.

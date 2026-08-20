@@ -24,8 +24,8 @@ https://static.googleusercontent.com/media/research.google.com/en//archive/paper
 - OpenTelemetry의 개념(span, context propagation)이 왜 그런 모양인지 뿌리를 이해하고 싶을 때
 
 ## 이럴 땐 아니다
-- 실제 계측 코드를 짜고 SDK·규약을 익히는 단계면 `development/opentelemetry-docs.md`
-- 트레이싱이 아니라 로그·메트릭까지 포함한 운영 관측 체계 전반이면 `development/google-sre-books.md`
+- 실제 계측 코드를 짜고 SDK·규약을 익히는 단계면 `infrastructure/opentelemetry-docs.md`
+- 트레이싱이 아니라 로그·메트릭까지 포함한 운영 관측 체계 전반이면 `infrastructure/google-sre-books.md`
 - 지연의 원인이 시스템 구조가 아니라 프론트엔드 렌더링·네트워크라면 `development/web-vitals.md`
 
 ## 무엇이 들어있나
@@ -39,3 +39,35 @@ https://static.googleusercontent.com/media/research.google.com/en//archive/paper
 - 100% 수집이 아니라 샘플링을 택한 근거는, "전수 추적이 아니면 의미 없다"는 반론에 대한 표준 답변으로 그대로 쓸 수 있다.
 - "애플리케이션 수준 투명성" 요구사항은, 계측을 각 팀 숙제로 넘기지 말고 공통 라이브러리·미들웨어에 넣자는 주장의 근거가 된다.
 - 트레이싱의 부수 효과로 서비스 간 실제 의존 관계가 드러났다는 보고는, 아키텍처 문서와 현실의 괴리를 점검하자는 제안의 뒷받침으로 좋다.
+
+## 코드 예시
+
+"샘플링 결정은 루트에서 한 번, 그 뒤로는 전파만" — Dapper 의 표본 관점과 컨텍스트 전파를 W3C traceparent 형식으로 옮긴 공통 미들웨어 조각.
+
+```python
+import os, random
+
+SAMPLE_RATE = 0.001  # 전수 기록이 아니라 시스템 거동의 표본
+
+def parse_traceparent(header: str):
+    # 00-<trace-id 32hex>-<parent-id 16hex>-<flags 2hex>
+    parts = header.split("-")
+    if len(parts) != 4 or parts[0] != "00":
+        return None
+    return {"trace_id": parts[1], "parent_id": parts[2],
+            "sampled": int(parts[3], 16) & 1 == 1}
+
+def on_request(headers: dict):
+    ctx = parse_traceparent(headers.get("traceparent", ""))
+    if ctx is None:  # 경계의 첫 서비스에서만 표본 여부를 정한다
+        ctx = {"trace_id": os.urandom(16).hex(), "parent_id": None,
+               "sampled": random.random() < SAMPLE_RATE}
+    return ctx
+
+def on_outgoing_call(ctx: dict, span_id: str) -> dict:
+    # 중간에서 다시 뽑으면 한 요청의 트레이스가 반쪽만 남는다
+    flags = "01" if ctx["sampled"] else "00"
+    return {"traceparent": f"00-{ctx['trace_id']}-{span_id}-{flags}"}
+```
+
+이 방식은 "느렸던 바로 그 요청"을 대개 놓친다 — 그걸 잡으려면 다 보내고 나서 고르는 꼬리 기반 샘플링이 필요하고, 그건 논문이 피하려던 오버헤드를 되돌려 놓는다. 그리고 여기 덮이는 건 HTTP 경계뿐이라, 큐·배치·스레드풀을 건널 때 컨텍스트를 손으로 옮기지 않으면 트레이스는 조용히 그 지점에서 끊긴다.

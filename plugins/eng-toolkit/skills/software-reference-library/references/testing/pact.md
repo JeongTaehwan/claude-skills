@@ -42,3 +42,33 @@ https://docs.pact.io/
 - "계약은 소비자가 실제로 쓰는 것만 기술한다" — 공급자 주도 스펙 문서와 계약 테스트를 혼동하는 논의를 정리하는 문장.
 - can-i-deploy 로 배포 가부를 판정한다는 구조는, E2E 통합 환경을 배포 게이트로 쓰는 관행을 대체하자는 제안의 핵심 근거.
 - Pact 가 호환성만 보증하고 기능 정확성은 다루지 않는다는 문서의 명시는, 계약 테스트가 E2E 를 전부 대체한다는 과잉 주장을 막는 데 쓸 수 있다.
+
+## 코드 예시
+
+"계약 테스트의 산출물은 테스트 통과가 아니라 배포 가부 판정"을 파이프라인으로 옮긴 형태 — 통합 환경 E2E 대신 Broker 질의가 배포 게이트가 된다.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+export PACT_BROKER_BASE_URL PACT_BROKER_TOKEN
+
+# 1) 이번 커밋이 만든 계약/검증 결과를 브랜치와 함께 올린다
+pact-broker publish ./pacts \
+  --consumer-app-version "$GIT_SHA" \
+  --branch "$GIT_BRANCH"
+
+# 2) 배포 직전 질의 — 상대편들의 검증 결과가 다 모였고 호환되는가
+pact-broker can-i-deploy \
+  --pacticipant order-api \
+  --version "$GIT_SHA" \
+  --to-environment production \
+  --retry-while-unknown 12 --retry-interval 10   # 상대 검증이 아직 안 끝났으면 대기
+
+./deploy.sh production
+
+# 3) 배포 사실을 기록해야 다음 질의의 기준점이 생긴다
+pact-broker record-deployment \
+  --pacticipant order-api --version "$GIT_SHA" --environment production
+```
+
+`--retry-while-unknown` 이 필요하다는 사실 자체가 이 게이트의 전제를 드러낸다 — 판정은 **상대 서비스들이 이미 검증을 돌려 결과를 올려 뒀을 때만** 의미가 있다. 그리고 초록불이 뜻하는 건 요청·응답 호환뿐이라, 금액 계산이 맞는지 같은 기능 정확성은 여전히 다른 테스트의 몫이다.

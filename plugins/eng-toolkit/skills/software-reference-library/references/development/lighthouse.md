@@ -36,3 +36,32 @@ Lighthouse는 페이지를 정해진 시뮬레이션 조건(모바일 스로틀�
 ## 인용 포인트
 - "Lighthouse 점수는 랩 데이터이고 필드 지표와 다르다"는 구분은, 점수 90을 목표로 삼자는 요구를 지표 중심 목표로 되돌리는 데 쓸 수 있다.
 - 성능 예산(budget)을 CI에 넣자는 제안의 공식 근거로 이 문서를 그대로 링크하면 된다.
+
+## 코드 예시
+
+"단일 점수 임계값 대신 여러 회 실행 + 예산"이라는 문서의 권고를 Lighthouse CI 설정으로 옮긴 것.
+
+```json
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://example.com/products",
+        "https://example.com/checkout"
+      ],
+      "numberOfRuns": 5
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.9 }],
+        "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "total-byte-weight": ["error", { "maxNumericValue": 1600000 }]
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}
+```
+
+`numberOfRuns` 를 올리면 중앙값을 쓰므로 흔들림이 줄지만, 이 값은 여전히 랩 데이터다 — 통과했다고 실사용자 지표가 좋아졌다는 뜻은 아니다.

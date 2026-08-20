@@ -38,3 +38,30 @@ Fowler 의 bliki 항목이라 분량이 짧고 정의에 집중한다. 핵심은
 ## 인용 포인트
 - "카나리 하자"는 제안에 대해 "그러려면 트래픽 비율 제어, 버전별 지표 분리, 자동 롤백이 먼저 있어야 한다"를 정의에서 직접 끌어낼 수 있다. 인프라 선행 작업의 근거로 쓰인다.
 - 스키마 변경을 배포와 분리해야 하는 이유(하위 호환 마이그레이션)를 이 글로 뒷받침할 수 있다.
+
+## 코드 예시
+
+"카나리는 배포 방식이 아니라 관측과 롤백이 붙어야 성립한다"를 선언으로 옮긴 것 — 비율 제어, 버전별 지표, 실패 시 자동 중단이 한 스펙 안에 같이 있어야 한다.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: payment-api
+spec:
+  strategy:
+    canary:
+      # (1) 트래픽 비율 제어
+      steps:
+        - setWeight: 10
+        - pause: { duration: 5m }
+        - setWeight: 50
+        - pause: { duration: 10m }
+      # (2) 카나리 버전만 따로 본다 (3) 기준 미달이면 자동 롤백
+      analysis:
+        startingStep: 1
+        templates:
+          - templateName: error-rate
+```
+
+`error-rate` AnalysisTemplate 은 별도로 정의해야 하고, 그 안의 임계값이 실제 판단 전부다. 이 스펙이 못 막는 것도 분명하다 — 두 버전이 같이 도는 동안 DB 스키마는 양쪽과 호환돼야 하고, 사용자가 요청마다 버전을 오가지 않도록 세션 고정이 따로 필요하다.

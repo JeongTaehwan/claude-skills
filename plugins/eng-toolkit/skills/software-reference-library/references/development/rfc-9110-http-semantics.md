@@ -37,3 +37,34 @@ HTTP의 "의미"만 버전 독립적으로 떼어낸 현행 표준 — 메서드
 ## 인용 포인트
 - 멱등성 논쟁에서 "safe와 idempotent는 다른 성질"이라는 표준의 구분을 그대로 들이대면 재시도 정책 토론이 짧아진다.
 - 상태 코드 선택을 ADR에 적을 때, 블로그 대신 RFC 9110의 해당 절 번호를 각주로 다는 것만으로 문서의 격이 달라진다.
+
+## 코드 예시
+
+"409냐 422냐"와 "동시 수정을 어떻게 막나"를 표준이 정의한 대로 배선한 모습.
+
+```http
+GET /orders/1042 HTTP/1.1
+Host: api.example.com
+
+HTTP/1.1 200 OK
+ETag: "v7"
+
+# 클라이언트는 자기가 본 표현 위에서만 쓴다 — 무조건 덮어쓰기가 아니다
+PUT /orders/1042 HTTP/1.1
+If-Match: "v7"
+Content-Type: application/json
+
+{"status": "paid"}
+
+# 그 사이 누가 고쳤으면 서버는 쓰지 않는다
+HTTP/1.1 412 Precondition Failed
+
+# 리소스의 현재 상태와 충돌하는 요청은 409, 문법은 맞지만 값이 처리 불가면 422
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+
+{"type": "https://api.example.com/probs/out-of-stock",
+ "title": "재고 부족", "status": 409}
+```
+
+`PUT` 은 표준상 멱등이지만 `If-Match` 를 붙이면 두 번째 시도가 412 로 떨어진다 — 재시도 로직이 이 412 를 "실패"로 볼지 "이미 반영됨"으로 볼지 먼저 정해야 한다. 409 와 422 의 경계는 RFC 가 정의는 주되 케이스별 판정까지 주지는 않으므로, 팀 규약으로 한 번 고정하고 그 문서에서 절 번호를 각주로 다는 편이 실용적이다.

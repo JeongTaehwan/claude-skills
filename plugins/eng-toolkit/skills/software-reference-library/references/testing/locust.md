@@ -36,3 +36,38 @@ https://locust.io/
 
 ## 인용 포인트
 - "시나리오가 코드면 리뷰·재사용·버전 관리가 된다" — 부하 스크립트를 별도 도구 자산이 아니라 저장소 코드로 옮기자는 제안의 근거.
+
+## 코드 예시
+
+앞 응답에 따라 다음 요청이 갈리는 흐름 — 선언형 스크립트로는 안 되고 코드라서 되는 부분.
+
+```python
+from locust import HttpUser, task, between
+
+class Buyer(HttpUser):
+    wait_time = between(1, 3)  # 사용자의 생각 시간
+
+    def on_start(self):
+        res = self.client.post("/api/login",
+                               json={"email": "a@example.com", "password": "pw"})
+        # 토큰을 사용자 인스턴스가 그대로 들고 다닌다
+        self.client.headers.update({"Authorization": f"Bearer {res.json()['accessToken']}"})
+
+    @task(9)  # 조회 9 : 구매 1 의 행동 분포
+    def browse(self):
+        self.client.get("/api/products?page=1", name="/api/products")  # 통계 라벨 고정
+
+    @task(1)
+    def checkout(self):
+        cart = self.client.post("/api/cart", json={"sku": "A-1", "quantity": 1}).json()
+
+        coupon = self.client.post("/api/coupons/apply",
+                                  json={"cartId": cart["id"], "code": "WELCOME"})
+        if coupon.status_code == 409:  # 이미 소진 → 다른 쿠폰으로 재시도
+            self.client.post("/api/coupons/apply",
+                             json={"cartId": cart["id"], "code": "FALLBACK"})
+
+        self.client.post("/api/orders", json={"cartId": cart["id"]})
+```
+
+`self.client` 는 4xx·5xx 를 자동으로 실패로 집계한다 — 위의 409 는 시나리오상 정상 분기인데도 실패율을 부풀리므로, 기대된 응답은 `catch_response=True` 로 감싸 성공 처리해 줘야 숫자가 맞는다.

@@ -37,3 +37,31 @@ Dijkstra 의 논지는 인간의 능력에 대한 관찰에서 출발한다. 우
 ## 인용 포인트
 - "정적인 코드와 동적인 실행 사이의 개념적 거리를 줄여야 한다"는 문장은, 복잡한 제어 흐름을 반대하는 리뷰 코멘트의 원리적 근거로 그대로 쓸 수 있다.
 - goto 가 아니라 "추론 가능성"이 논점이라는 재해석은, 예외 남용이나 콜백 지옥을 지적할 때 논쟁을 취향에서 원리로 옮긴다.
+
+## 코드 예시
+
+"지금 어디까지 왔는가"를 한 값으로 말할 수 있는가 — 원문의 기준을 오늘날의 코드(플래그 변수 + 흐름 제어용 예외)에 그대로 적용한 before/after.
+
+```python
+# before: 진행 상태가 status, done, 예외 경로 세 군데에 흩어져 있다
+def pay(order):
+    done = False
+    try:
+        if order.status == "NEW":
+            charge(order)
+            done = True
+        if not done:
+            raise Retry()
+    except Retry:
+        return pay(order)   # 여기 도달했을 때의 상태를 텍스트로 짚을 수 없다
+
+# after: 허용된 전이를 표로 두고, 진행 상태는 order.status 한 값으로 읽는다
+ALLOWED = {"NEW": {"PAID", "CANCELED"}, "PAID": {"REFUNDED"}}
+
+def transition(order, to):
+    if to not in ALLOWED.get(order.status, set()):
+        raise ValueError(f"{order.status} -> {to} 는 허용되지 않는 전이")
+    order.status = to
+```
+
+after 가 좋아진 것은 읽는 사람의 추론 가능성까지다. 두 요청이 같은 주문에 동시에 `transition` 을 부르면 표가 있어도 둘 다 통과하므로, 조건부 갱신이나 잠금은 따로 필요하다 — 이 글이 다루는 범위 밖이다.

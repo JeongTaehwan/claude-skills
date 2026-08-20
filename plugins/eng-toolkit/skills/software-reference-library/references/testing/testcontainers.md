@@ -39,3 +39,37 @@ https://testcontainers.com/
 ## 인용 포인트
 - "인메모리 DB는 다른 제품이다" — H2로 통과한 테스트가 MySQL 운영에서 실패하는 사례를 근거로, 리포지토리 테스트 대상 전환을 제안할 때 쓸 수 있다.
 - 컨테이너 수명을 테스트 코드가 소유한다는 설계는, CI 설정 파일에 흩어져 있던 환경 준비 로직을 코드로 회수하는 근거가 된다.
+
+## 코드 예시
+
+"의존성의 수명을 테스트가 소유한다"를 코드로 옮긴 형태 — 버전이 소스에 박히고, 접속 정보는 실행 시점에 컨테이너가 알려주며, `docker-compose up 하세요` 라는 구두 규약이 사라진다 (Java, JUnit 5).
+
+```java
+@Testcontainers
+@SpringBootTest
+class OrderRepositoryTest {
+
+    // static 이라 클래스 전체에서 하나만 뜬다 — 테스트마다 띄우면 스위트가 못 견딘다
+    @Container
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:16-alpine")   // 운영과 같은 엔진·버전
+                    .withInitScript("schema.sql");
+
+    // "떴다"가 아니라 "쓸 준비가 됐다" 이후에 채워진 실제 포트를 주입받는다
+    @DynamicPropertySource
+    static void datasource(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+    }
+
+    @Test
+    void 같은_주문번호는_유니크_제약에_걸린다() {   // H2 로는 검증되지 않던 지점
+        repository.save(new Order("ORD-1"));
+        assertThrows(DataIntegrityViolationException.class,
+                     () -> repository.save(new Order("ORD-1")));
+    }
+}
+```
+
+`static` 컨테이너는 속도를 사는 대신 **격리를 판다** — 앞 테스트가 남긴 행이 다음 테스트에 보이므로, 트랜잭션 롤백이나 테이블 truncate 같은 정리를 따로 걸어야 한다. 그리고 이 테스트는 실행 환경에 Docker 데몬이 있어야만 돌아가므로, CI 러너와 개발자 머신 양쪽의 전제 조건이 하나 늘어난다.

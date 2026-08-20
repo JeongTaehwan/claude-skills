@@ -1,138 +1,153 @@
 # 성능 (performance) — 108개
 
-느린 네트워크·저사양 환경에서도 화면이 빠르게 보이고 쓸 만하게 만든다. 진단→기법 선택→검증 절차는 `slow-network-ux` 스킬의 플레이북이 담당하고, 여기는 그 근거 자료다.
+느린 네트워크·저사양에서도 화면이 빠르게 보이게 한다
 
-각 줄의 파일을 열면 페르소나·사용 상황·핵심 주장이 있다. 링크만 필요하면 이 표로 충분하다.
+각 줄의 파일을 열면 페르소나·사용 상황·핵심 주장·코드 예시가 있다. 링크만 필요하면 이 표로 충분하다.
 
-## 패턴·공식문서 (39)
-
-| 자료 | 한 줄 | 이런 사람이 든다 |
-|---|---|---|
-| [Network Information API](network-information-api.md) | navigator.connection으로 연결 품질(effectiveType·rtt·saveData) 읽기 — Chromium 전용, feature detection 필수 | 저속 사용자 분기 신호가 필요한 프론트엔드 |
-| [Save-Data 요청 헤더](save-data-header.md) | 데이터 절약 사용자의 Save-Data: on 힌트로 서버가 JS 없이 경량 응답 분기, Vary 필수 | 서버·엣지에서 경량 변형을 내리려는 엔지니어 |
-| [prefers-reduced-data 미디어 쿼리](prefers-reduced-data.md) | CSS만으로 데이터 절약 선호 감지 — Experimental, 기본 활성 브라우저 없음, 병기용 | CSS 리소스를 절약 사용자에게 빼고 싶은 사람 |
-| [Adaptive Loading — 적응형 로딩 패턴](adaptive-loading.md) | 빠른 쪽엔 풀 경험, 느린 쪽엔 코어 경험 — 신호별 분기 전략의 원전(Osmani, CDS 2019) | 저사양·저속 구간 이탈에 전략 프레임이 없는 사람 |
-| [Perceived Performance — 체감 성능](perceived-performance.md) | 객관 시간과 별개인 체감 속도 — 스켈레톤·즉각 피드백·점진 표시가 통하는 원리 | 스켈레톤 도입 근거 문서가 필요한 프론트엔드 |
-| [App Shell 아키텍처](app-shell-architecture.md) | UI 뼈대를 SW로 캐시해 재방문 시 즉시 그리고 콘텐츠만 네트워크에서 채우는 원전(2015) | 재방문도 흰 화면부터인 SPA를 맡은 엔지니어 |
-| [PRPL 패턴](prpl-pattern.md) | Preload·Render·Pre-cache·Lazy load — 라우트 단위 로딩 우선순위 전략 한 장 정리 | 라우트 수십 개의 우선순위 지도가 없는 사람 |
-| [RAIL 모델](rail-model.md) | Response 100ms·프레임 10ms·Load 5초의 고전 예산 — 수치는 CWV로 대체됐다는 주의 포함 | 인터랙션 예산의 고전적 출처가 필요한 사람 |
-| [useOptimistic — React 낙관적 UI 훅](useoptimistic.md) | 서버 응답 전 결과를 미리 반영하고 완료·실패 시 자동 복원되는 낙관적 UI 공식 훅 | 고지연에서 좋아요·담기가 굳는 React 엔지니어 |
-| [Critical Rendering Path](critical-rendering-path.md) | DOM→CSSOM→렌더 트리→레이아웃→페인트 파이프라인과 CSS·동기 JS가 렌더를 막는 원리 | "왜 첫 페인트가 막히나"를 설명 못 하는 사람 |
-| [Critical CSS 추출·인라인](critical-css.md) | above-the-fold CSS만 head에 인라인, 나머지는 비동기 — CSS 왕복 없이 첫 페인트 | 렌더 차단 CSS 진단 후 실행법이 필요한 사람 |
-| [rel="preload" — 리소스 사전 로드](rel-preload.md) | 늦게 발견되는 폰트·LCP 이미지를 미리 받는 선언 — as 의무·crossorigin 함정·남용 부작용 | 발견 지연으로 리소스가 늦게 뜨는 걸 본 사람 |
-| [preconnect · dns-prefetch — 연결 사전 수립](preconnect-dns-prefetch.md) | 교차 출처 DNS+TCP+TLS 왕복 선제거 — RTT 클수록 효과, 중요 출처 소수에만 | 서드파티 연결 수립에 수백 ms 쓰는 워터폴을 본 사람 |
-| [fetchpriority — Fetch Priority API](fetchpriority.md) | 브라우저 우선순위 추론을 high/low로 보정 — LCP 이미지 high가 대표 사용법 | 발견은 빠른데 우선순위가 낮아 LCP가 밀리는 사람 |
-| [103 Early Hints](early-hints.md) | 본 응답 전 103으로 preconnect·preload 힌트 선송신 — SSR 사고 시간과 로딩을 겹치기 | TTFB 대기 중 브라우저가 노는 워터폴을 본 사람 |
-| [반응형 이미지 (srcset · sizes · picture)](responsive-images.md) | 해상도·뷰포트별 후보를 선언하고 브라우저가 고르는 표준 — 아트 디렉션·포맷 폴백 포함 | 모바일에 데스크톱 대형 이미지가 내려가는 걸 본 사람 |
-| [Learn Images — 이미지 포맷·압축 코스](learn-images.md) | AVIF>WebP>JPEG 압축 효율과 picture 폴백 — 동일 품질에서 30~50% 바이트 절감 근거 | 포맷 전환의 출처 있는 근거가 필요한 사람 |
-| [브라우저 내장 이미지 lazy loading](browser-level-image-lazy-loading.md) | loading="lazy"로 JS 없이 지연 로드 — 임계값은 연결 속도 따라 변동, LCP에는 금지 | 화면 밖 이미지가 초기 대역폭을 먹는 걸 본 사람 |
-| [LQIP · blur-up — Next.js Image placeholder](lqip-blur-up.md) | 초저해상도 블러를 먼저 보여주고 원본 교체 — 관용 패턴의 사실상 canonical 구현 | 저속에서 이미지 자리가 빈 채 남는 게 문제인 사람 |
-| [비디오 preload · poster](video-preload-poster.md) | preload 3값 트레이드오프와 poster — 비자동재생 비디오는 none+poster 권장 | 재생 전 비디오가 대역폭을 점유하는 걸 본 사람 |
-| [코드 분할](code-splitting.md) | 동적 import()로 라우트·컴포넌트 단위로 번들을 쪼개 지금 필요한 코드만 보내는 기법 | 초기 번들로 TTI/INP 무너진 엔지니어 |
-| [트리 셰이킹](tree-shaking.md) | ESM 정적 구조로 미사용 export 제거 — sideEffects·CJS 변환 함정까지 다루는 가이드 | 라이브러리 통짜 import 걷어낼 사람 |
-| [성능 예산 101](performance-budgets-101.md) | 번들 KB·요청 수·지표에 수치 상한을 걸어 회귀를 막는 방법론, budget.json CI 강제로 연결 | 개선이 되돌아가는 걸 겪은 엔지니어 |
-| [서드파티 JavaScript 효율적 로딩](efficiently-load-third-party-javascript.md) | 못 빼는 서드파티 스크립트의 async/defer·지연 주입·파사드 완화 전략 | 태그 스크립트에 대역폭 뺏긴 사람 |
-| [HTTP 캐싱 가이드 — MDN](http-caching.md) | private/shared·ETag 재검증·해시 파일명+immutable까지 HTTP 캐싱 전체 그림 | 재방문도 느린 원인 찾는 엔지니어 |
-| [stale-while-revalidate](stale-while-revalidate.md) | 만료 캐시를 즉시 응답하고 뒤에서 재검증 — 신선도 대신 지연을 숨기는 절충 전략 | API 캐시 신선도 딜레마에 낀 사람 |
-| [서비스 워커 캐싱 전략 (Workbox)](service-worker-caching-strategies.md) | SW 5대 전략의 정의와 리소스 유형별 선택 기준을 정리한 Workbox 공식 문서 | fetch 핸들러 전략 기준 없는 사람 |
-| [The Offline Cookbook](the-offline-cookbook.md) | 캐시를 언제 채우고 언제 읽을지 조합한 Jake Archibald의 오프라인·불안정망 레시피 | 오프라인 지원 요구받은 엔지니어 |
-| [HTTP/2 — High Performance Browser Networking](http2-high-performance-browser-networking.md) | 멀티플렉싱·HPACK이 HTTP/1.1 HoL을 없애는 원리 — 샤딩·스프라이트 철거의 근거 | 옛 최적화 관행 유효성 따지는 사람 |
-| [HTTP/3 · QUIC (RFC 9114 · RFC 9000)](http3-quic.md) | UDP 위 1-RTT/0-RTT 핸드셰이크와 스트림별 독립 손실 복구의 IETF 표준 원문 | HTTP/3 켜자는 제안에 근거 필요한 사람 |
-| [HTTP 압축 — MDN](http-compression.md) | gzip·Brotli·zstd 협상 동작과 "텍스트 필수, 기압축 포맷 금지" 원칙 | 무압축 JS/CSS 응답 발견한 엔지니어 |
-| [CDN 최적화](cdn-optimization.md) | 엣지 근접으로 RTT를 줄이고 캐시 키·s-maxage·엣지 기능으로 적중률 올리는 전략 | 원거리 사용자 TTFB 큰 서비스 담당자 |
-| [Rendering on the Web](rendering-on-the-web.md) | SSR/SSG/CSR/스트리밍/점진적 하이드레이션을 지표 트레이드오프 축으로 비교하는 기준 문서 | SSR 갈까 논쟁이 겉도는 팀의 리드 |
-| [React Suspense 스트리밍](react-suspense-streaming.md) | Suspense 경계로 준비된 UI부터 스트리밍 — 느린 데이터의 TTFB 인질극을 끊는 계약 | 느린 API가 SSR 전체 막는 구조 물려받은 사람 |
-| [Islands 아키텍처 · 점진적 하이드레이션](islands-architecture-progressive-hydration.md) | 정적 바다 위 인터랙티브 섬만 하이드레이션 — JS 비용을 구조로 줄이는 논거 | 전체 하이드레이션을 의심하기 시작한 사람 |
-| [Lab vs Field 데이터](lab-vs-field-data.md) | Lighthouse와 실사용자 수치가 다른 이유와 데이터별 용도 분리 기준 | 점수 좋은데 RUM 나쁜 모순 설명할 사람 |
-| [Lighthouse 스로틀링](lighthouse-throttling.md) | 시뮬레이트(기본 Slow 4G≈1.6Mbps/150ms+4x CPU)·applied·패킷 레벨 3방식의 정확도 차이 | 점수와 실제 3G 체감이 다른 이유 찾는 사람 |
-| [Chrome DevTools 네트워크 스로틀링](chrome-devtools-network-throttling.md) | 대역폭·지연·패킷 손실 커스텀 프로필로 개발 중 2G/3G 환경을 재현하는 방법 | 느린 회선의 로딩 UX를 본 적 없는 사람 |
-| [WebPageTest](webpagetest.md) | 실기기·지역·연결 프로필로 필름스트립·워터폴 실측 — 저속 검증의 최종 관문 | 배포본을 실제 3G에서 증명해야 할 사람 |
-
-## Next.js App Router (9)
+## 논문 (18)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
-| [next/image — 자동 이미지 최적화](nextjs-image.md) | 기기·뷰포트별 자동 리사이즈 + AVIF/WebP 변환, 지연 로딩 기본값으로 전송 바이트 절감 | 이미지가 LCP인 화면을 맡은 엔지니어 |
-| [Next.js 스트리밍 SSR — loading.js · Suspense · PPR](nextjs-streaming-ssr.md) | 정적 셸+스켈레톤을 먼저 흘려보내 첫 페인트를 서버 데이터 속도와 분리 | 느린 API 탓에 흰 화면을 보여주는 사람 |
-| [next/dynamic — 코드 스플리팅](nextjs-dynamic.md) | 조건부 무거운 클라이언트 컴포넌트를 초기 번들에서 분리해 열 때만 로드 | 첫 번들에 모달·차트가 다 들어간 사람 |
-| [next/font — 레이아웃 시프트 없는 폰트](nextjs-font.md) | 빌드 타임 셀프 호스팅으로 폰트 서버 커넥션 제거, size-adjust 폴백으로 CLS 0 | 폰트 스왑에 화면이 튀는 사람 |
-| [Next.js Link prefetch 튜닝](nextjs-link-prefetch.md) | 뷰포트 자동 prefetch를 경로별로 켜고 꺼서 데이터 낭비 없이 내비게이션만 예열 | 대량 링크가 대역폭을 갉아먹는 사람 |
-| [Next.js ISR / 정적 렌더링 — TTFB 절감](nextjs-isr.md) | 미리 렌더해 CDN 서빙, 재검증으로 갱신 — 서버 대기 없이 첫 바이트를 내보낸다 | 공용 페이지 TTFB를 줄이려는 사람 |
-| [next/script — 서드파티 스크립트 전략](nextjs-script.md) | 분석·광고·채팅 스크립트를 strategy별로 격리해 핵심 콘텐츠 대역폭을 지킨다 | GA·픽셀이 콘텐츠를 막는 사람 |
-| [Next.js 번들 분석 — @next/bundle-analyzer](nextjs-bundle-analyzer.md) | Webpack·Turbopack 분석기로 번들 측정, optimizePackageImports로 부분 임포트 | 번들 다이어트를 측정부터 시작할 사람 |
-| [useReportWebVitals — RUM 측정](nextjs-use-report-web-vitals.md) | 실사용자 LCP/INP/CLS를 내장 훅으로 수집해 lab과 field 수치의 괴리를 확인 | Lighthouse만 믿다 불만 받은 사람 |
+| [A Study on Tolerable Waiting Time: How Long Are Web Users Willing to Wait? (200…](a-study-on-tolerable-waiting-time.md) | Fiona Fui-Hoon Nah — Behaviour & Information Technology 23(3), 2004. 웹 사용자 인내 한계의 대표 연구 — 피드백(로딩 표시) 유무가 견딜 수 있는 대기 시간을 유의하게 늘리며, 피드백 없는 순수 대기의 한계는 약… | "2초 안에 뭐라도 보여줘야 한다"는 요구사항을 문서에 쓰면서, 그 2초의 출처를 달아야 하는 PM 또는 엔지니어. |
+| [Demystifying Page Load Performance with WProf (NSDI '13)](demystifying-page-load-performance-with-wprof.md) | Xiao Sophia Wang, Aruna Balasubramanian, Arvind Krishnamurthy, David Wetherall — USENIX NSDI '13. 페이지 로드 크리티컬 패스 분석의 원조 — 350개 페이지를 분석해 계산(JS/파싱)이 크리… | 캐시를 붙였는데 PLT가 기대만큼 줄지 않아서, 왜 그런지 설명해야 하는 엔지니어. |
+| [Dissecting Web Latency in Ghana (IMC '14)](dissecting-web-latency-in-ghana.md) | Yasir Zaki, Jay Chen, Thomas Pötsch, Talal Ahmad, Lakshminarayanan Subramanian — ACM IMC '14. 가나에서 클라이언트 관점의 페이지 로드 지연을 해부한 논문 — 병목은 대역폭이 아니라 (a) 재귀적… | 저속 네트워크 사용자 대응을 요구받았는데 "회선이 느리니 어쩔 수 없다"는 결론으로 흐르는 회의에 반박하고 싶은 엔지니어. |
+| [Eyeorg: A Platform for Crowdsourcing Web Quality of Experience Measurements (Co…](eyeorg-crowdsourcing-web-quality-of-experience.md) | Matteo Varvello, Jeremy Blackburn, David Naylor, Konstantina Papagiannaki — ACM CoNEXT '16. 페이지 로드 영상을 크라우드소싱해 "사람이 언제 로드됐다고 느끼는지"를 대규모로 수집한 논문 — PLT… | "onload 시간을 개선했으니 사용자 체감도 좋아졌다"는 보고를 받았거나 스스로 쓰려는 사람. |
+| [Faster Progress Bars: Manipulating Perceived Duration with Visual Augmentations…](faster-progress-bars-manipulating-perceived-duration.md) | Chris Harrison, Zhiquan Yeo, Scott E. Hudson — ACM CHI '10. 진행 바 위의 시각 효과(리빙 애니메이션·펄스)만 바꿔도 체감 시간이 달라짐을 직접 비교 실험으로 랭킹화한 논문 — 뒤로 흐르면서 감속하는 리빙 애니메이션이 체… | 스켈레톤이나 프로그레스 바에 shimmer 애니메이션을 넣는데, 방향과 속도를 감으로 정하고 있는 디자이너 또는 프론트엔드 엔지니어. |
+| [Flywheel: Google's Data Compression Proxy for the Mobile Web (NSDI '15)](flywheel-googles-data-compression-proxy-mobile-web.md) | Victor Agababov 외 9인 — USENIX NSDI '15. Chrome에 통합돼 수백만 사용자를 서빙한 데이터 절약 프록시의 3년 운영 보고 — 중앙값 사용자 기준 페이지 크기 50% 절감, 다만 압축이 곧 속도 향상은 아니라는(프록시 경유 오버헤드) 운… | 이미지·응답 압축이나 "라이트 모드"를 설계하면서, 실서비스 규모에서 압축 프록시가 실제로 어떤 득실을 냈는지 알고 싶은 엔지니어. |
+| [Klotski: Reprioritizing Web Content to Improve User Experience on Mobile Device…](klotski-reprioritizing-web-content-mobile-user-experience.md) | Michael Butkiewicz, Daimeng Wang, Zhe Wu, Harsha V. Madhyastha, Vyas Sekar — USENIX NSDI '15. "PLT는 앞으로도 사용자 인내 한계보다 길 것"이라는 현실을 받아들이고, 전체를 빠르게 하는 대신… | 느린 회선 사용자를 위해 무언가 해야 하는데, 전체 로드 시간을 인내 한계 안으로 줄이는 것이 물리적으로 불가능하다는 결론에 도달한 엔지니어. |
+| [Narrowing the Gap Between QoS Metrics and Web QoE Using Above-the-fold Metrics…](narrowing-the-gap-between-qos-metrics-and-web-qoe.md) | Diego da Hora, Alemnew Sheferaw Asrese, Vassilis Christophides, Renata Teixeira, Dario Rossi — PAM 2018. 3,400건 접속에 사용자 평점(1–5)을 붙인 그라운드트루스로 메트릭과 실제… | 성능 대시보드의 KPI를 하나 골라야 하는데, 모든 페이지에 같은 메트릭·같은 임계값을 걸어도 되는지 확신이 없는 엔지니어. |
+| [Polaris: Faster Page Loads Using Fine-grained Dependency Tracking (NSDI '16)](polaris-faster-page-loads-fine-grained-dependency-tracking.md) | Ravi Netravali, Ameesh Goyal, James Mickens, Hari Balakrishnan — USENIX NSDI '16. 브라우저가 페이지 의존성 그래프의 보이지 않는 간선(hidden dependency) 때문에 보수적으로 객체를 로드해 네… | preload·리소스 힌트·로드 순서 조정을 제안했는데 "그게 왜 빨라지는데?"라는 질문에 브라우저 내부 동작 수준으로 답하지 못하는 프론트엔드 엔지니어. |
+| [Prophecy: Accelerating Mobile Page Loads Using Final-state Write Logs (NSDI '18)](prophecy-accelerating-mobile-page-loads-final-state-write-logs.md) | Ravi Netravali, James Mickens — USENIX NSDI '18. 서버가 JS 힙과 DOM의 "최종 상태"를 미리 계산해 변수/노드당 write 1개짜리 로그로 내려보내고, 모바일 브라우저는 중간 계산을 전부 생략하고 재생하게 한 논문 — 실제… | RSC(React Server Components)나 서버 주도 렌더링으로의 전환을 제안하면서 "클라이언트 재계산을 서버 사전 계산으로 대체한다"는 방향 자체의… |
+| [Rethinking the Progress Bar (UIST '07)](rethinking-the-progress-bar.md) | Chris Harrison, Brian Amento, Stacey Kuznetsov, Robert Bell — ACM UIST '07. 같은 실제 소요 시간이라도 진행 바의 진행 함수(가속/감속/멈춤)에 따라 체감 시간이 달라진다는 것을 보인 논문 — 마지막에 빨라지… | 업로드·결제·설치 진행 바를 만드는데, 진행률을 실제 진행에 정직하게 1:1로 매핑해야 하는지 고민하는 엔지니어. |
+| [Speeding up Web Page Loads with Shandian (NSDI '16)](speeding-up-web-page-loads-with-shandian.md) | Xiao Sophia Wang, Arvind Krishnamurthy, David Wetherall — USENIX NSDI '16. "초기 로드에 쓰이지 않는 CSS가 3/4"라는 측정에서 출발해, 초기 화면에 필요한 상태만 먼저 내려보내도록 로드 과정을 재구성해… | 크리티컬 CSS 추출이나 스트리밍 SSR을 제안했는데 "그 복잡한 걸 왜 해야 하냐"는 반문에 학술적 근거를 대야 하는 엔지니어. |
+| [The Effect of Skeleton Screens: Users' Perception of Speed and Ease of Navigati…](the-effect-of-skeleton-screens.md) | Thomas Mejtoft, Arvid Långström, Ulrik Söderström — ECCE '18. 가상 뉴스 사이트에서 스켈레톤 vs 스피너를 비교한 실험 — 스켈레톤 쪽 체감 속도·탐색 용이성 평균 점수가 높았지만, 어떤 비교에서도 통계적 유의차는 없었… | "스켈레톤 넣어주세요"라는 요청 앞에서, 스켈레톤이 정말 스피너보다 나은지 근거를 확인하고 싶은 엔지니어. |
+| [The GAIUS Experience: Powering a Hyperlocal Mobile Web for Communities in Emerg…](the-gaius-experience-hyperlocal-mobile-web.md) | Rohail Asim 외 5인 — ICTD '24 (arXiv:2412.14178). 신흥 지역 모바일 웹의 문제를 "현지 콘텐츠 부재 + 복잡한 페이지·열악한 네트워크"로 규정하고, 경량 콘텐츠 엣지 + 단순화된 웹 명세 언어(MAML)로 페이지를 재작성하는 생태계… | 저사양·저대역 사용자용 "라이트 버전" 페이지를 만들지 검토 중인 엔지니어 또는 PM. |
+| [The Importance of Percent-Done Progress Indicators for Computer-Human Interface…](the-importance-of-percent-done-progress-indicators.md) | Brad A. Myers — ACM CHI '85. 진행률 표시기 연구의 시조 — 사람들이 진행률 표시기가 있는 쪽을 명확히 선호함을 보였으나, "진행률 표시기가 있으면 가변 응답 시간도 견딜 만해진다"는 가설은 통계적으로 유의하지 않았다고 정직하게 보고한 논문. | 로딩 UI에 진행 표시를 넣자고 했더니 "그거 넣는다고 뭐가 달라지냐"는 반문을 받은 디자이너 또는 엔지니어. |
+| [Vesper: Measuring Time-to-Interactivity for Web Pages (NSDI '18)](vesper-measuring-time-to-interactivity-for-web-pages.md) | Ravi Netravali, Vikram Nathan, James Mickens, Hari Balakrishnan — USENIX NSDI '18. "로드 완료"를 above-the-fold 콘텐츠가 보이고 그에 붙은 JS 핸들러까지 동작하는 시점(Ready Inde… | "화면은 떴는데 눌러도 반응이 없다"는 불만을 받는데, 대시보드의 시각 메트릭(Speed Index류)은 전부 좋게 나오는 상황의 엔지니어. |
+| [Vroom: Accelerating the Mobile Web with Server-Aided Dependency Resolution (SIG…](vroom-mobile-web-server-aided-dependency-resolution.md) | Vaspol Ruamviboonsuk, Ravi Netravali, Muhammed Uluyol, Harsha V. Madhyastha — ACM SIGCOMM '17. 제3자 프록시를 신뢰할 필요 없이 각 도메인 서버가 자기 리소스의 의존성 힌트를 제공(HTTP/2… | preload·103 Early Hints·서버 푸시를 도입하자고 제안했는데 "그런 힌트가 실제로 얼마나 효과가 있냐"는 질문을 받은 엔지니어. |
+| [WatchTower: Fast, Secure Mobile Page Loads Using Remote Dependency Resolution (…](watchtower-fast-secure-mobile-page-loads-remote-dependency.md) | Ravi Netravali, Anirudh Sivaraman, James Mickens, Hari Balakrishnan — ACM MobiSys '19. 원격 프록시가 페이지를 대신 로드해 느린 라스트마일 왕복을 없애는 방식의 두 난점 — HTTPS 암호화, 그리고… | 프록시 렌더링이나 엣지 렌더링 도입을 검토하는데, 벤더 자료는 전부 "빨라진다"고만 말해서 반대 조건이 궁금한 엔지니어. |
 
-## 라이브러리·도구 (24)
-
-| 자료 | 한 줄 | 이런 사람이 든다 |
-|---|---|---|
-| [react-adaptive-hooks](react-adaptive-hooks.md) | 회선·기기 신호로 서빙을 분기하는 적응형 로딩 패턴의 원조. 정체 상태라 패턴만 베낀다 | 적응형 로딩 개념을 처음 잡는 프론트 엔지니어 |
-| [react-use](react-use.md) | Network Information API를 래핑한 useNetworkState가 유지보수 상태로 제공되는 훅 모음 | 살아있는 네트워크 감지 훅이 필요한 사람 |
-| [quicklink](quicklink.md) | 보이는 링크를 idle에 프리페치, Save-Data·2G 자동 차단 내장. MPA·정적 사이트용 | MPA 페이지 전환 체감을 올리려는 사람 |
-| [Guess.js](guess-js.md) | GA 데이터로 다음 페이지를 예측해 프리페치하는 웹팩 플러그인. 정체 — 개념 학습용 | 데이터 기반 프리페치 개념을 배우려는 사람 |
-| [BlurHash](blurhash.md) | 이미지를 20~30자 문자열로 인코딩해 API 응답에 실어 즉시 블러 미리보기를 그리는 표준격 | 이미지 로딩 전 빈 사각형을 없애려는 사람 |
-| [ThumbHash](thumbhash.md) | BlurHash 개선판 — 알파 지원·더 정확한 색 재현. 신규 도입이면 이쪽이 소스 판단 | 플레이스홀더를 새로 고르는 사람 |
-| [plaiceholder (아카이브됨)](plaiceholder.md) | 2023-05 아카이브. 쓰지 말고 sharp로 base64를 직접 만들어 blurDataURL에 주입 | 레거시에서 이 이름을 만난 사람 |
-| [sharp](sharp.md) | 리사이즈·WebP/AVIF·플레이스홀더 생성까지 서버 이미지 파이프라인의 사실상 표준 | 서버 측 이미지 최적화를 세우는 사람 |
-| [lazysizes (대체됨)](lazysizes.md) | 네이티브 loading="lazy" 보급으로 존재 이유 소멸. 신규엔 쓰지 말 것 | 레거시 의존성 제거 근거가 필요한 사람 |
-| [unpic](unpic.md) | 30여 개 이미지 CDN URL을 통일 API로 다루고 srcset 자동 생성. ⭐400이나 활발 | next/image 못 쓰는 다중 CDN 환경의 사람 |
-| [Workbox](workbox.md) | 프리캐싱·SWR 등 캐싱 전략·오프라인 폴백을 모듈로 주는 서비스 워커 표준 라이브러리 | 오프라인·재방문 캐싱을 설계하는 사람 |
-| [Serwist](serwist.md) | Workbox 포크·next-pwa 후계. @serwist/next가 App Router 공식 지원 — Next SW 1순위 | Next.js에 PWA를 붙이려는 사람 |
-| [Partytown](partytown.md) | GA·GTM·픽셀을 웹 워커에서 실행해 메인 스레드를 비운다. 저사양 TBT/INP 개선 | 서드파티가 메인 스레드를 먹는 팀 |
-| [webpack-bundle-analyzer](webpack-bundle-analyzer.md) | 번들 내용물을 줌 가능한 트리맵으로 — 번들 다이어트의 첫 단계. Next는 공식 래퍼로 | 번들이 왜 큰지 눈으로 봐야 하는 사람 |
-| [size-limit](size-limit.md) | 크기+다운로드·실행 시간을 계산해 한도 초과 시 CI 실패. 이 계열 최선의 유지보수 | 사이즈 예산을 CI로 강제하려는 사람 |
-| [bundlesize (대체됨)](bundlesize.md) | 사이즈 예산 CI의 원조이나 정체. size-limit 또는 bundlewatch로 이전 | 레거시 CI 설정을 이전할지 판단하는 사람 |
-| [web-vitals 라이브러리](web-vitals.md) | LCP·INP·CLS를 실사용자 환경에서 재는 ~2KB 공식 라이브러리. Next 훅 내장 통합 | 실사용자 체감 데이터를 수집하려는 사람 |
-| [Lighthouse](lighthouse.md) | 느린 4G·CPU 스로틀링 시뮬레이션 내장 자동 감사 — 랩 환경 저속 점검의 기본 | 느린 환경 문제를 재현·진단하려는 사람 |
-| [Lighthouse CI](lighthouse-ci.md) | 커밋마다 Lighthouse를 돌려 회귀 차단, 지표별 성능 예산 assertion | 배포 후 몰래 나빠지는 걸 막으려는 팀 |
-| [sitespeed.io](sitespeed-io.md) | 실브라우저 반복 측정 + Grafana 추이 + 스로틀링 시나리오의 자체 호스팅 인프라 | 성능 모니터링을 자체 구축하는 팀 |
-| [awesome-wpo](awesome-wpo.md) | WPO 도구·아티클·컨퍼런스를 망라한 대표 awesome 리스트 — 도구 탐색의 출발점 | 성능 분야 전체 지형을 훑으려는 사람 |
-| [react-loading-skeleton](react-loading-skeleton.md) | 컴포넌트 타이포·레이아웃에 자동 적응하는 스켈레톤을 한 줄로 — loading.tsx/Suspense용 | 로딩 중 빈 화면·스피너를 바꾸려는 사람 |
-| [TanStack Virtual](tanstack-virtual.md) | 마크업 통제를 유지하며 보이는 행만 렌더 — 긴 리스트 1순위, react-query와 동일 생태계 | 수천 행 목록이 버벅이는 화면의 담당자 |
-| [react-window](react-window.md) | react-virtualized 경량 후속. 고정/가변 리스트·그리드 컴포넌트, 2025 v2로 재개 | 조립형 가상화나 그리드가 필요한 사람 |
-
-## 논문 (24)
+## 표준 (1)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
-| [Polaris (NSDI '16)](polaris-faster-page-loads-fine-grained-dependency-tracking.md) | 숨은 의존성까지 추적해 로드 순서를 스케줄링, PLT 중앙값 34% 단축 — 느린 망일수록 효과 큼 | 로드 순서 최적화의 이론적 근거가 필요한 사람 |
-| [Shandian (NSDI '16)](speeding-up-web-page-loads-with-shandian.md) | 초기 로드에 안 쓰이는 CSS가 3/4 — 초기 상태만 먼저 보내 PLT 절반 이하로 단축 | 크리티컬 CSS·스트리밍 SSR을 정당화할 사람 |
-| [Prophecy (NSDI '18)](prophecy-accelerating-mobile-page-loads-final-state-write-logs.md) | 서버가 JS힙·DOM 최종 상태를 사전 계산해 재생만 시킴 — PLT 53%·에너지 36% 절감 | RSC·서버 주도 렌더링의 선행 사례를 찾는 사람 |
-| [Vroom (SIGCOMM '17)](vroom-mobile-web-server-aided-dependency-resolution.md) | 서버가 의존성 힌트를 제공(push+preload)해 발견과 처리를 분리, PLT 약 절반 단축 | preload·Early Hints 효과의 근거가 필요한 사람 |
-| [WProf (NSDI '13)](demystifying-page-load-performance-with-wprof.md) | 크리티컬 패스 분석의 원조 — 캐싱해도 PLT는 비례해 줄지 않음, 동기 JS가 파싱을 막음 | 캐시 넣었는데 왜 안 빨라지는지 설명할 사람 |
-| [Klotski (NSDI '15)](klotski-reprioritizing-web-content-mobile-user-experience.md) | 전체를 빠르게 하는 대신 중요 콘텐츠를 시간 예산(2초) 안에 먼저 배달하는 우선순위 재조정 | above-the-fold 우선 로딩을 정당화할 사람 |
-| [WatchTower (MobiSys '19)](watchtower-fast-secure-mobile-page-loads-remote-dependency.md) | 원격 프록시는 조건에 따라 오히려 느려짐 — 도움될 때만 켜서 21.2–41.3% 개선 | 프록시·엣지 렌더링 도입을 심사하는 사람 |
-| [Percent-Done Progress Indicators (CHI '85)](the-importance-of-percent-done-progress-indicators.md) | 진행률 표시기 연구의 시조 — 선호는 명확하나 대기 감내 가설은 유의하지 않았다고 정직 보고 | 로딩 진행 표시의 원류 인용이 필요한 사람 |
-| [Rethinking the Progress Bar (UIST '07)](rethinking-the-progress-bar.md) | 같은 시간이라도 진행 함수에 따라 체감이 다름 — 끝에서 빨라지게, 멈춤은 초반에 | 업로드·결제 진행 바 곡선을 설계하는 사람 |
-| [Faster Progress Bars (CHI '10)](faster-progress-bars-manipulating-perceived-duration.md) | 시각 효과만 바꿔도 체감 시간이 달라짐 — 뒤로 흐르며 감속하는 애니메이션이 11% 단축 | shimmer 방향·속도를 정하는 사람 |
-| [A Study on Tolerable Waiting Time (2004)](a-study-on-tolerable-waiting-time.md) | 피드백 유무가 대기 감내를 유의하게 늘림 — 피드백 없는 한계 약 2초, 15초 초과는 이탈 | "2초 안에 뭐라도"의 인용처가 필요한 사람 |
-| [The Effect of Skeleton Screens (ECCE '18)](the-effect-of-skeleton-screens.md) | 스켈레톤 vs 스피너 — 평균 점수는 스켈레톤 우세지만 통계적 유의차는 없었다 | 스켈레톤 도입/제거 논쟁의 균형 근거를 찾는 사람 |
-| [Response Times: The 3 Important Limits (Nielsen)](response-times-the-3-important-limits.md) | 0.1초/1초/10초 세 한계 — 논문 아닌 검증된 2차 정리, 실험 심리학 결과에 기반 | 스피너·낙관적 업데이트 임계값을 정하는 사람 |
-| [Vesper (NSDI '18)](vesper-measuring-time-to-interactivity-for-web-pages.md) | "로드 완료"를 인터랙티브 시점으로 재정의 — 기존 메트릭은 24–64% 과소/과대평가 | TTI류 메트릭이 왜 따로 필요한지 설명할 사람 |
-| [Eyeorg (CoNEXT '16)](eyeorg-crowdsourcing-web-quality-of-experience.md) | 사람이 느끼는 로드 시점을 크라우드소싱 — 신형 메트릭조차 인간 지각을 대표 못함 | onload 개선=체감 개선 등식을 반박할 사람 |
-| [QoS ↔ Web QoE (PAM '18)](narrowing-the-gap-between-qos-metrics-and-web-qoe.md) | 3,400건 사용자 평점으로 검증 — 좋은 메트릭은 페이지 성격에 따라 다르다 | 성능 대시보드 KPI·임계값을 고르는 사람 |
-| [Speed Index (원 정의)](speed-index.md) | 뷰포트 시각 완성도를 시간 적분한 정의의 원문 — 논문 아닌 공식 문서(1차 출처) | Lighthouse Speed Index를 정확히 설명할 사람 |
-| [Speed Matters for Google Web Search (2009)](speed-matters-for-google-web-search.md) | 400ms 지연이 검색 수 0.2~0.6% 감소, 제거 후에도 이월 효과 — Google 실험 보고서 | 수백 ms의 영향을 1차 출처로 답할 사람 |
-| [Bing 2초 지연 실험 (Velocity '09)](performance-related-changes-and-their-user-impact.md) | Bing 2초 지연 = 쿼리 -1.8%·매출 -4.3% — 발표 영상이 현존 1차 기록(논문 아님) | 성능 투자 ROI를 설득해야 하는 사람 |
-| [Akamai/SOASTA 리테일 성능 보고서 (2017)](akamai-state-of-online-retail-performance-spring-2017.md) | "100ms = 전환율 최대 -7%"의 원 보고서 — 상관관계 기반 벤더 리포트임을 밝히고 인용 | 커머스 체크아웃 성능의 비즈니스 근거가 필요한 사람 |
-| [Amazon "100ms = 매출 1%" 출처 (2006)](amazon-100ms-make-data-useful.md) | 가장 유명한 "아마존 100ms"의 실제 1차 출처 — 강연 슬라이드+블로그, 논문 아님 | 떠도는 아마존 수치의 출처를 정확히 달 사람 |
-| [Flywheel (NSDI '15)](flywheel-googles-data-compression-proxy-mobile-web.md) | 수백만 사용자 압축 프록시 3년 운영 — 페이지 크기 50% 절감, 압축이 곧 속도는 아님 | 압축·경량 모드 설계에 실운영 교훈이 필요한 사람 |
-| [Dissecting Web Latency in Ghana (IMC '14)](dissecting-web-latency-in-ghana.md) | 병목은 대역폭이 아니라 DNS·리다이렉트·TLS 왕복 — 캐싱만으로 체감 크게 개선 | 왕복 횟수가 문제임을 보여야 하는 사람 |
-| [GAIUS (ICTD '24)](the-gaius-experience-hyperlocal-mobile-web.md) | 경량 엣지+단순 명세 언어(MAML)로 페이지 재작성 — 2G/3G에서 유효, 3개국 실배포 | 저대역 타깃 라이트 버전을 검토하는 사람 |
+| [HTTP/3 · QUIC (RFC 9114 · RFC 9000)](http3-quic.md) | UDP 위에 전송과 암호화 핸드셰이크를 통합(1-RTT, 재연결 0-RTT)하고 스트림별로 손실을 독립 복구하는 QUIC(RFC 9000)과, 그 위의 HTTP 매핑인 HTTP/3(RFC 9114)의 IETF 표준 원문. 요약본은 https://developer.mo… | 패킷 손실이 잦은 모바일 망 사용자의 지표가 유독 나쁜데, CDN 콘솔의 "HTTP/3 활성화" 토글을 켜자고 제안하려면 마케팅 문구가 아닌 표준 수준의 근거가… |
 
-## 서적·국내 자료 (12)
+## 공식문서 (55)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
-| [High Performance Browser Networking](high-performance-browser-networking.md) | 네트워크 물리 계층부터 HTTP/2까지, 대역폭 아닌 RTT가 병목이라는 원리의 표준 참고서(무료 전문) | 저속에서 왜 느린지 원리부터 알아야 하는 개발자 |
-| [Designing for Performance](designing-for-performance.md) | 성능을 디자인 의사결정 문제로 다루는 무료 공개 책 — 이미지·타이포·반응형 선택이 무게를 결정 | 디자이너와 무게 예산 합의해야 하는 사람 |
-| [Time Is Money](time-is-money-the-business-value-of-web-performance.md) | 로드 지연↔전환·이탈·매출 상관 실측 사례를 모은 얇은 설득용 책(유료) | 성능 작업을 경영진에 설득해야 하는 개발자 |
-| [Responsible JavaScript](responsible-javascript.md) | "JS를 덜 보내는 것"이 최선이라는 관점 — 전송+파싱·실행 이중 비용과 감량 패턴(유료) | 번들 다이어트 방향을 잡아야 하는 FE |
-| [Web Performance in Action](web-performance-in-action.md) | 측정→병목 식별→자산별 최적화→검증까지 워크플로 전체를 실습으로 관통하는 핸드북(유료) | 성능 개선을 처음부터 끝까지 실행할 개발자 |
-| [Image Optimization — Addy Osmani](image-optimization.md) | AVIF/WebP·srcset·지연 로딩·LQIP·이미지 CDN을 LCP/CLS와 연결한 이미지 전담서(유료) | 이미지 heavy 화면의 LCP를 공략하는 개발자 |
-| [Learning Patterns (patterns.dev)](learning-patterns.md) | 렌더링(SSR/SSG/ISR/스트리밍/RSC)·로딩 패턴을 항목별로 정리한 무료 웹 북, Next.js 매핑 직결 | 화면별 렌더링 패턴을 골라야 하는 React 개발자 |
-| [웹 서비스 캐시 똑똑하게 다루기 (토스)](toss-smart-web-service-cache.md) | HTML max-age=0+s-maxage 1년, 해시 자산 1년 — 재방문 전송량을 없애는 토스의 캐시 이원화 전략 | CDN·브라우저 캐시 정책을 설계하는 담당자 |
-| [조금만 신경써서 초기 렌더링 빠르게 하기 (토스페이먼츠)](toss-payments-faster-initial-rendering.md) | SSR 없이 CDN 배포+코드 스플리팅·트리 셰이킹으로 초기 렌더링을 당긴 토스페이먼츠 사례 | SSR 전환 없이 첫 페인트를 당겨야 하는 FE |
-| [FE 성능개선기 1·2부 (카카오 Biz)](kakao-fe-performance-improvement.md) | 실서비스 주문/폼의 측정→병목→개선을 수치와 함께 공개한 2부작 진행 벤치마크 | 결제·주문 화면 개선 프로젝트를 맡은 개발자 |
-| [왜 이미지만 700MB를 다운로드하는 거죠? (우아한형제들)](woowahan-why-images-download-700mb.md) | 피드 이미지 700MB→5MB: IntersectionObserver 지연 로딩·리사이즈·포맷 최적화 실전 기록 | 이미지 피드의 데이터 폭식을 잡으려는 개발자 |
-| [브라우저는 어떻게 동작하는가? (NAVER D2)](naver-d2-how-browsers-work.md) | 파싱→렌더 트리→레이아웃→페인트, 크리티컬 렌더링 패스 기초의 국내 표준 참고 글 | 팀에 렌더링 기초를 공유할 리드·온보딩 담당 |
+| [103 Early Hints](early-hints.md) | 서버가 본 응답을 만드는 동안(SSR "서버 사고 시간") 103 상태 코드로 preconnect·preload 힌트를 먼저 흘려보내, 브라우저의 대기와 리소스 로딩을 겹치게 하는 기법 — 보통 CDN 계층에서 켠다. | SSR TTFB가 긴 페이지에서, 서버가 응답을 만드는 수백 ms 동안 브라우저가 아무것도 안 하고 놀고 있는 워터폴을 본 엔지니어. |
+| [Adaptive Loading — 적응형 로딩 패턴](adaptive-loading.md) | "빠른 기기·네트워크엔 풀 경험, 느린 쪽엔 코어 경험" — 네트워크·메모리·CPU 신호별로 무엇을 빼고 무엇을 남길지 정리한 적응형 로딩 패턴의 원전(Addy Osmani, Chrome Dev Summit 2019). | 평균 지표는 멀쩡한데 저사양 기기·저속 망 사용자 구간에서만 이탈이 튀는 서비스를 맡아, "누구에게 무엇을 덜 줄 것인가"의 프레임 없이 개별 최적화를 산발적으… |
+| [App Shell 아키텍처](app-shell-architecture.md) | UI의 최소 뼈대(셸)를 서비스 워커로 캐시해 재방문 시 네트워크 없이 즉시 그리고, 콘텐츠만 네트워크에서 채우는 아키텍처의 원전(2015, Chrome 블로그). | 재방문 사용자조차 매번 흰 화면부터 시작하는 SPA를 맡아, 저속 망에서 "껍데기라도 즉시 뜨게" 만들 구조를 찾는 엔지니어. |
+| [CDN 최적화 (Content Delivery Networks)](cdn-optimization.md) | 엣지 근접 배치로 RTT 자체를 줄이는 원리, 캐시 키·s-maxage로 적중률을 끌어올리는 방법, 엣지에서 Brotli·HTTP/3·Early Hints를 켜는 활용 전략까지 — CDN을 "정적 파일 호스팅"이 아니라 성능 계층으로 쓰는 web.dev 가이드. | 원 서버에서 먼 지역 사용자의 TTFB가 수백 ms씩 나오는 걸 확인한 엔지니어. |
+| [Chrome DevTools 네트워크 스로틀링](chrome-devtools-network-throttling.md) | DevTools에서 대역폭·지연·패킷 손실을 지정한 커스텀 스로틀링 프로필을 만들어 2G/3G급 환경을 재현하는 방법의 공식 문서. Network 패널 프리셋은 https://developer.chrome.com/docs/devtools/network/reference | 스켈레톤과 플레이스홀더를 구현해 놓고도, 정작 느린 회선에서 그 화면이 어떻게 보이는지 한 번도 본 적 없는 프론트엔드 엔지니어. |
+| [Critical CSS 추출·인라인](critical-css.md) | above-the-fold 렌더에 필요한 CSS만 <head>에 인라인하고 나머지 스타일시트는 비동기로 미뤄, CSS 파일 왕복 없이 첫 페인트를 내는 기법. | RTT가 큰 망에서 흰 화면이 오래 가는 페이지를 맡아, 원인이 렌더 차단 CSS의 네트워크 왕복이라는 진단까지는 왔고 이제 실행 방법이 필요한 엔지니어. |
+| [Critical Rendering Path](critical-rendering-path.md) | HTML→DOM, CSS→CSSOM, 렌더 트리, 레이아웃, 페인트로 이어지는 브라우저 렌더링 파이프라인의 원리 문서 — CSS와 동기 JS가 왜 첫 페인트를 막는(렌더 차단) 리소스인지가 여기서 설명된다. | "이 스크립트를 head에 두면 화면이 늦게 뜬다"를 경험으로만 알고 있다가, 리뷰나 설계 논의에서 "왜?"라는 질문에 원리를 설명하지 못해 멈춘 엔지니어. |
+| [Designing for Performance](designing-for-performance.md) | Lara Callender Hogan(당시 Etsy)이 성능을 엔지니어링 과제가 아니라 디자인 의사결정 문제로 다룬 O'Reilly 책(2014) — 이미지 포맷·타이포그래피·반응형 설계 선택이 페이지 무게를 어떻게 결정하는지를 다루며, CC BY-NC-ND로 전문이… | 성능 얘기를 꺼내면 디자이너·기획자가 "그건 개발 이슈 아니에요?"라고 답하는 팀의 개발자, 또는 자기 시안이 왜 느린 페이지가 되는지 알고 싶은 디자이너. |
+| [HTTP 압축 — MDN](http-compression.md) | gzip·Brotli(br)·Zstandard(zstd) 종단간 압축의 동작(Accept-Encoding/Content-Encoding 협상)과 두 가지 원칙 — 텍스트 자산은 압축 필수, 기압축 포맷(이미지 등)은 이중 압축 금지 — 을 정리한 MDN 가이드. 인코… | 응답 헤더를 열어 봤더니 JS·CSS가 압축 없이 원문 그대로 내려가고 있는 걸 발견한 엔지니어. |
+| [HTTP 캐싱 가이드 — MDN](http-caching.md) | private/shared 캐시 구분, ETag 재검증, 해시 파일명 + Cache-Control: max-age=31536000, immutable 패턴까지 — 재방문 요청이 저속 네트워크를 아예 타지 않게 만드는 HTTP 캐싱의 전체 그림. 디렉티브별 상세는 짝… | 재방문 사용자마저 매번 느린 이유를 파다가, 정적 자산의 Cache-Control 헤더가 비어 있거나 no-cache로 도배돼 있는 걸 발견한 엔지니어. |
+| [HTTP/2 — High Performance Browser Networking](http2-high-performance-browser-networking.md) | 단일 연결 멀티플렉싱과 HPACK 헤더 압축이 HTTP/1.1의 head-of-line 블로킹을 없애는 원리를 설명하는 HPBN(Ilya Grigorik) 챕터. web.dev의 HTTP/2 문서가 이곳으로 리다이렉트되는, 사실상의 공식 참조다. | 도메인 샤딩·파일 병합·스프라이트 같은 옛 최적화 관행이 코드베이스와 빌드 설정에 남아 있는데, 지금도 유효한지 판단해야 하는 엔지니어. |
+| [High Performance Browser Networking](high-performance-browser-networking.md) | Ilya Grigorik(당시 Google)이 네트워크 물리 계층부터 TCP·TLS·모바일 무선망·HTTP/2까지 "왜 느린가"를 원리 수준에서 설명한 O'Reilly 책(2013)의 무료 전문 공개판 — 대역폭이 아니라 지연시간(RTT)이 웹 성능의 병목이라는 명제… | "3G에서 왜 이렇게 느리죠?"라는 질문에 "서버가 느려서요" 이상의 답을 못 하는 개발자. |
+| [Image Optimization — Addy Osmani](image-optimization.md) | Addy Osmani(Chrome 팀)가 페이지 바이트의 최대 비중인 이미지 하나만 전담으로 다룬 Smashing Magazine 단행본(2021) — AVIF/WebP 포맷 비교, srcset/sizes, 지연 로딩, blur-up/LQIP 플레이스홀더, 이미지 C… | 상품 목록·상세처럼 이미지가 곧 콘텐츠인 화면의 LCP를 공략해야 하는 커머스 프론트엔드 개발자. |
+| [Islands 아키텍처 · 점진적 하이드레이션](islands-architecture-progressive-hydration.md) | 페이지 대부분을 정적 HTML로 두고 인터랙티브한 "섬"만 하이드레이션하는 아키텍처(Astro 공식 개념 문서)와, 하이드레이션 시점을 뷰포트 진입·인터랙션까지 미루는 패턴(patterns.dev). 하이드레이션 JS 비용을 최적화가 아니라 구조로 줄이는 논거다. | 콘텐츠 중심 페이지(블로그·커머스 상세·랜딩)를 SPA 프레임워크로 만들었는데, 인터랙션은 검색창과 장바구니 버튼뿐인데도 페이지 전체를 하이드레이션하는 JS를… |
+| [LQIP · blur-up — Next.js Image placeholder](lqip-blur-up.md) | 원본 로드 전에 초저해상도 블러 이미지(LQIP)를 먼저 보여주고 도착하면 원본으로 교체하는 blur-up 패턴 — LQIP는 관용 패턴이라 표준 단독 문서가 없어, placeholder="blur"를 제공하는 Next.js Image 문서가 사실상 canonical… | 저속 환경에서 이미지 영역이 오래 빈 채로 남아 레이아웃 뼈대만 보이는 화면을 받아 든 엔지니어. |
+| [Lab vs Field 데이터](lab-vs-field-data.md) | Lighthouse 같은 통제 환경(lab) 수치와 실사용자(RUM/field) 수치가 다르게 나오는 이유 — 캐시 상태, 실제 기기·네트워크 분포, 사용자 행동 — 를 정리한 web.dev 문서. "점수는 좋은데 실사용자는 느리다"는 괴리를 해석하는 기준이다. 실사… | Lighthouse 점수를 확인하고 배포했는데 RUM·CrUX의 LCP 75퍼센타일은 "나쁨"으로 나오는 모순을 이해관계자에게 설명해야 하는 엔지니어. |
+| [Learn Images — 이미지 포맷·압축 코스](learn-images.md) | 이미지 포맷·압축·전달을 처음부터 끝까지 다루는 web.dev 공식 코스 — AVIF > WebP > JPEG 순의 압축 효율과 <picture> 폴백 체인으로, 동일 품질에서 전송 바이트를 30~50% 줄이는 포맷 전환의 근거 문서. | 페이지 전송량의 대부분이 이미지라는 리포트를 받아 들고, AVIF·WebP 전환이 실제로 얼마나 줄여주는지·미지원 브라우저는 어떻게 하는지 출처 있는 근거가 필… |
+| [Learning Patterns (patterns.dev)](learning-patterns.md) | Addy Osmani와 Lydia Hallie가 렌더링 패턴(SSR/SSG/ISR/스트리밍/RSC)과 로딩·성능 패턴을 패턴 단위 항목으로 정리한 무료 웹 북 — "이 화면에 어떤 렌더링·로딩 패턴을 쓸까"를 고르는 카탈로그로, Next.js 실무와 매핑이 가장 직접… | 새 화면을 잡을 때마다 "이건 SSR? SSG? 스트리밍? 클라이언트?"를 감으로 정하고 있는 React/Next.js 개발자. |
+| [Lighthouse 스로틀링](lighthouse-throttling.md) | Lighthouse 점수의 전제가 되는 스로틀링 세 방식 — 시뮬레이트(기본값, Slow 4G ≈ 1.6Mbps 다운/150ms RTT + 4x CPU 감속) vs applied(DevTools식 적용) vs 패킷 레벨 — 의 원리와 정확도 차이를 설명하는 공식 문서… | "Lighthouse는 괜찮게 나오는데 실제 느린 회선에서 열어 보니 훨씬 나쁘다"는 보고를 받고, 그 점수가 정확히 어떤 네트워크 가정 위에서 계산된 것인지… |
+| [Network Information API](network-information-api.md) | navigator.connection으로 사용자의 연결 품질(effectiveType: slow-2g/2g/3g/4g, downlink, rtt, saveData)을 읽고 change 이벤트로 변화를 감지하는 API — 단, MDN이 "Limited availabil… | 저속 연결 사용자에게 고해상도 이미지·자동재생 비디오·프리페치를 그대로 내려보내고 있다는 걸 알았지만, "지금 이 사용자의 네트워크가 느린가"를 코드에서 판별할… |
+| [Next.js ISR / 정적 렌더링 — TTFB 절감](nextjs-isr.md) | 빌드/재검증 시점에 미리 렌더해 CDN에서 서빙함으로써 서버 렌더 대기 없이 첫 바이트를 내보내는 Incremental Static Regeneration 가이드 — TTFB를 0에 가깝게 만든다. | 상품 상세·기획전처럼 사용자별로 다르지 않은 페이지인데 매 요청 서버 렌더를 돌리고 있어서, 가뜩이나 전송이 느린 회선의 사용자에게 서버 대기 시간까지 얹어 주… |
+| [Next.js Link prefetch 튜닝](nextjs-link-prefetch.md) | 프로덕션에서 뷰포트에 들어온 링크를 자동 prefetch하는 <Link>의 기본 동작을, 저속 환경에서 데이터 낭비 없이 의도된 내비게이션만 예열하도록 조절하는 법. | 무한 스크롤 목록을 배포했더니 화면을 스쳐 간 수백 개 링크가 전부 prefetch를 발사해, 데이터 요금과 대역폭에 민감한 모바일 사용자의 회선을 갉아먹고 있… |
+| [Next.js 번들 분석 — @next/bundle-analyzer](nextjs-bundle-analyzer.md) | @next/bundle-analyzer(Webpack)와 Turbopack 통합 분석기로 번들 구성을 시각화·측정하고, optimizePackageImports 등으로 줄이는 패키지 번들링 가이드 — 번들 다이어트의 착수점. | "번들 줄여줘"라는 과제를 받았는데 무엇이 큰지 모른 채 감으로 라이브러리를 빼 보고 있는 Next.js App Router 엔지니어. |
+| [Next.js 스트리밍 SSR — loading.js · Suspense · PPR](nextjs-streaming-ssr.md) | 데이터가 준비되기 전에 정적 셸과 스켈레톤을 먼저 흘려보내 "빈 화면 대기"를 없애는 App Router의 스트리밍 렌더링 — 체감 첫 페인트(FCP)를 서버 데이터 속도와 분리한다. | 느린 백엔드 API에 의존하는 페이지에서, 데이터가 다 준비될 때까지 사용자가 흰 화면만 보고 있다는 불만을 받은 Next.js App Router 엔지니어. |
+| [PRPL 패턴](prpl-pattern.md) | Preload(핵심 리소스 사전 로드) · Render(초기 라우트 최우선 렌더) · Pre-cache(서비스 워커로 나머지 라우트 캐시) · Lazy load(그 외 지연) — 라우트 단위 로딩 우선순위 전략을 네 글자로 압축한 패턴. | 라우트가 수십 개인 앱에서 "무엇을 먼저 보내고 무엇을 미룰지" 기준 없이 그때그때 최적화를 얹다가, 팀과 공유할 수 있는 한 장짜리 우선순위 프레임이 필요해진… |
+| [Perceived Performance — 체감 성능](perceived-performance.md) | 객관적 로드 시간과 별개로 존재하는 "사용자가 느끼는 속도"를 다루는 MDN Learn 문서 — 스피너·스켈레톤·진행 표시 같은 즉각 피드백과 점진적 콘텐츠 표시가 왜 대기 체감을 줄이는지의 원리. | 로드 시간 자체는 당장 크게 못 줄이는 상황에서 "느리다"는 사용자 불만을 받아 들고, 스켈레톤·플레이스홀더 도입을 제안하려는데 "눈속임 아니냐"는 반문에 댈… |
+| [RAIL 모델](rail-model.md) | Response 100ms · Animation 프레임 10ms · Idle · Load 5초 — 사용자 중심 성능 예산의 고전 모델. 단 문서 스스로 "이제는 Core Web Vitals를 권장"한다고 명시하므로, 개념 프레임으로만 인용하고 목표 수치는 CWV를 쓴… | "버튼을 누르면 몇 ms 안에 반응해야 하는가" 같은 인터랙션 예산을 정해야 하는데, 감이 아니라 출처 있는 고전적 기준이 필요한 엔지니어. |
+| [React Suspense 스트리밍](react-suspense-streaming.md) | <Suspense> 경계로 "준비된 UI부터 먼저 내보내고 느린 부분은 fallback으로 잡아두는" React 공식 계약. 서버 스트리밍(https://react.dev/reference/react-dom/server/renderToPipeableStream)·선택… | 페이지 한 구석의 느린 API(추천 목록, 리뷰, 외부 연동) 하나 때문에 SSR 응답 전체가 그 API를 기다리는 구조를 물려받은 React 엔지니어. |
+| [Rendering on the Web](rendering-on-the-web.md) | SSR/SSG/CSR/스트리밍 SSR/점진적 하이드레이션을 TTFB·FCP·TTI 트레이드오프 축 위에 나란히 놓고 비교하는 기준 문서. "어디서 렌더링할 것인가" 논쟁의 공용 지도다. | "우리 CSR인데 SSR로 가야 하나요?"라는 질문이 분기마다 다시 올라오는 팀의 엔지니어(또는 테크리드). |
+| [Responsible JavaScript](responsible-javascript.md) | Jeremy Wagner의 A Book Apart 책(2021) — 가장 확실한 성능 개선은 "JS를 덜 보내는 것"이라는 관점으로, 전송 시간에 저사양 기기의 파싱·실행 시간까지 겹치는 JS의 이중 비용과 그걸 줄이는 실무 패턴을 다룬다. | 번들이 수 MB로 불었는데 어디서부터 빼야 할지, 애초에 "빼자"는 말을 팀에 어떻게 설득할지 막막한 프론트엔드 개발자. |
+| [Save-Data 요청 헤더](save-data-header.md) | 데이터 절약 모드를 켠 사용자의 브라우저가 요청에 Save-Data: on을 실어 보내는 클라이언트 힌트 — 서버가 클라이언트 JS 없이 경량 응답을 내려줄 수 있고, 분기 시 Vary: Save-Data로 캐시 오염을 막는다. | 클라이언트 분기 코드를 넣을 수 없는(혹은 넣고 싶지 않은) 서버·엣지 계층에서 데이터 절약 사용자에게 가벼운 변형을 내려주고 싶은 엔지니어. |
+| [Speed Index (원 정의 문서, WebPagetest)](speed-index.md) | Patrick Meenan — 2012, WebPagetest 공식 문서. 논문이 아니라 Speed Index의 1차 출처 — 뷰포트의 시각적 완성도를 시간에 대해 적분해 "화면이 얼마나 빨리 채워지는가"를 단일 점수로 만든 정의의 원문. | Lighthouse 리포트의 Speed Index 점수를 놓고 "이 숫자가 정확히 뭘 잰 거냐"는 질문을 받은 엔지니어. |
+| [The Offline Cookbook](the-offline-cookbook.md) | 서비스 워커 캐시를 "언제 채우고, 언제 읽을지"의 조합으로 정리한 Jake Archibald의 고전 레시피 모음. cache & network race, offline fallback 등 오프라인·불안정 네트워크 대응 패턴을 망라한다. SW 기초는 짝 문서(http… | "오프라인도 지원해 주세요"라는 요구를 받았는데, 전략 이름 다섯 개만으로는 실제 상황 — 연결이 붙었다 끊겼다 하는 지하철, 응답이 오긴 오는데 한참 걸리는… |
+| [Time Is Money — The Business Value of Web Performance](time-is-money-the-business-value-of-web-performance.md) | Tammy Everts가 로드 지연과 전환율·이탈률·매출의 상관을 보여주는 실측 사례·연구를 모은 얇은 O'Reilly 책(2016) — 성능 개선을 기술 부채가 아니라 매출 문제로 번역해 주는 설득용 탄약고다. | "성능 개선 스프린트가 왜 필요한데요?"라는 PM·경영진의 질문 앞에서 LCP 수치만 들고 서 있는 개발자. |
+| [Web Performance in Action](web-performance-in-action.md) | Jeremy Wagner의 Manning 실습 핸드북(2017) — 측정 → 병목 식별 → CSS·이미지·폰트·JS 자산별 최적화 → 전송 계층까지 워크플로 전체를 통과하며, 스로틀링을 걸어 놓고 개선 전후를 검증하는 흐름이 책을 관통한다. | "성능 개선해 주세요"라는 티켓을 받았는데, 블로그 글 몇 개로 이미지 압축·코드 스플리팅을 산발적으로 아는 상태라 어디서 시작해 어떤 순서로 갈지 그림이 없는… |
+| [WebPageTest](webpagetest.md) | 실기기·실브라우저에 테스트 지역과 연결 프로필(3G/4G 등)을 골라 필름스트립·워터폴로 실측하는 도구. 시뮬레이션이 아닌 실측 스로틀링이라 저속 검증의 최종 관문이다. (사이트가 봇 접근을 차단할 수 있으나 브라우저에서는 정상 열린다.) | 저속 대응 작업을 끝냈다고 생각하지만, "실제 3G에서 진짜 괜찮은가"를 시뮬레이션 점수가 아닌 증거로 남겨야 하는 엔지니어. |
+| [fetchpriority — Fetch Priority API](fetchpriority.md) | 브라우저의 기본 리소스 우선순위 추론을 fetchpriority="high·low"로 보정하는 Fetch Priority API — LCP 이미지에는 high, 초기 화면 밖 리소스에는 low를 주는 것이 대표 사용법. | 대역폭이 좁은 망에서 LCP 이미지가 다른 리소스들과 경쟁하느라 늦게 도착하는데, 마크업 초반에 있어 발견은 이미 빠르니 preload로는 더 얻을 게 없는 엔… |
+| [next/dynamic — 코드 스플리팅](nextjs-dynamic.md) | React.lazy + Suspense를 감싼 next/dynamic으로 클라이언트 컴포넌트를 초기 번들에서 떼어내, 모달·탭·차트처럼 조건부로만 보이는 무거운 UI를 열 때만 로드하게 하는 가이드. | 초기 화면에 보이지도 않는 주소검색 모달·리치 에디터·차트 라이브러리가 첫 번들에 몽땅 들어가 있어서, 저속 회선 사용자가 화면을 만질 수 있게 되기까지 한참… |
+| [next/font — 레이아웃 시프트 없는 폰트](nextjs-font.md) | 폰트를 빌드 타임에 셀프 호스팅해 외부 폰트 서버로의 추가 커넥션을 없애고, size-adjust 기반 폴백 폰트 자동 계산으로 폰트 스왑 시 CLS를 제거하는 Next.js 내장 폰트 시스템. | 구글 폰트 <link>를 그대로 얹어 두었는데, 저속 환경에서 텍스트가 한 박자 늦게 뜨고 폰트가 도착하는 순간 문단이 밀리며 화면이 튀는 것을 본 Next.j… |
+| [next/image — 자동 이미지 최적화](nextjs-image.md) | 요청 기기·뷰포트에 맞춰 이미지를 자동 리사이즈하고 AVIF/WebP로 변환해 서빙하는 Next.js 내장 이미지 컴포넌트. 지연 로딩이 기본값이라 뷰포트 밖 이미지는 아예 요청되지 않는다. | 상품 목록·상세 화면의 LCP가 이미지인데 원본 크기를 그대로 내려보내고 있어서, 저속 회선 사용자의 첫 화면이 이미지 전송 시간만큼 밀리는 Next.js Ap… |
+| [next/script — 서드파티 스크립트 전략](nextjs-script.md) | 서드파티 스크립트를 afterInteractive(기본)·lazyOnload(유휴 시)·beforeInteractive(정말 필요한 것만) 우선순위로 격리해, 분석·광고·채팅 스크립트가 핵심 콘텐츠의 대역폭을 뺏지 못하게 하는 로딩 전략. | GA·마케팅 픽셀·채팅 위젯을 하나씩 붙이다 보니, 저속 회선에서 본 콘텐츠보다 서드파티 스크립트가 먼저 대역폭을 차지해 정작 상품 이미지가 늦게 뜨는 것을 확… |
+| [preconnect · dns-prefetch — 연결 사전 수립](preconnect-dns-prefetch.md) | 교차 출처와의 DNS+TCP+TLS 왕복을 미리 끝내두는 preconnect와 그 저비용 폴백 dns-prefetch — RTT가 큰 저속 네트워크일수록 왕복 선제거의 효과가 커진다. | CDN·API·폰트 서버 같은 서드파티 출처로의 첫 요청이 리소스 전송이 아니라 연결 수립(DNS·TCP·TLS)에만 수백 ms를 쓰는 워터폴을 보고 있는 엔지… |
+| [prefers-reduced-data 미디어 쿼리](prefers-reduced-data.md) | @media (prefers-reduced-data: reduce)로 CSS만으로 데이터 절약 선호를 감지하는 미디어 쿼리 — 단 Experimental이고 기본 활성화된 브라우저가 없어, 오늘은 미래 대비 병기용으로만 쓴다. | 배경 이미지·웹폰트처럼 CSS가 직접 요청하는 리소스를 데이터 절약 사용자에게 안 내려주고 싶은데, JS 분기가 도는 시점엔 CSS가 이미 요청을 날린 뒤라 손… |
+| [rel="preload" — 리소스 사전 로드](rel-preload.md) | 곧 쓸 리소스(웹폰트·LCP 이미지 등)를 파서가 발견하기 전에 높은 우선순위로 미리 받아두는 <link rel="preload"> 선언 — as 속성 의무, 폰트의 crossorigin 함정, 남용 시 대역폭 경쟁 부작용까지 명시된 기준 문서. | CSS 안에서야 발견되는 웹폰트, JS가 렌더해야 나타나는 LCP 이미지처럼 "브라우저가 늦게 발견하는" 리소스 때문에 워터폴 뒤쪽이 밀리는 걸 본 엔지니어. |
+| [stale-while-revalidate](stale-while-revalidate.md) | 만료된 캐시 응답을 일단 즉시 내주고 백그라운드에서 재검증하는 절충 전략. "거의 최신이면 충분한" 응답에서 지연을 통째로 숨기므로, 왕복이 비싼 고지연 네트워크에 특히 유효하다. | API 응답을 캐시하자니 낡은 데이터가 걱정이고, 매번 네트워크를 타자니 고지연 환경에서 화면마다 왕복 시간을 그대로 얻어맞는 딜레마에 낀 엔지니어. |
+| [useOptimistic — React 낙관적 UI 훅](useoptimistic.md) | 비동기 액션이 서버 응답을 기다리는 동안 예상 결과를 미리 화면에 반영하고, 액션이 끝나면(성공이든 실패든) 실제 상태로 자동 수렴하는 낙관적 UI의 React 공식 훅. | 고지연 환경에서 좋아요·장바구니 담기를 누를 때마다 서버 왕복 동안 버튼이 죽어 있는 화면을 받아 든 React 엔지니어. |
+| [useReportWebVitals — RUM 측정](nextjs-use-report-web-vitals.md) | web-vitals 라이브러리의 App Router 내장 통합 훅. 실사용자(느린 네트워크 사용자 포함)의 LCP/INP/CLS를 수집해, 개발 환경 lab 수치와 실제 필드 수치의 괴리를 확인하는 RUM 시작점. | Lighthouse 점수는 초록색인데 "화면이 늦게 뜬다"는 사용자 불만이 계속 들어와서, 내 맥북+사무실 와이파이가 아니라 실제 사용자의 기기·회선에서 잰 수… |
+| [반응형 이미지 (srcset · sizes · picture)](responsive-images.md) | srcset/sizes로 해상도·뷰포트별 이미지 후보를 선언하고 브라우저가 조건에 맞는 파일을 고르게 하는 표준 — <picture>를 쓴 아트 디렉션과 포맷 폴백까지 포함한 기준 가이드. | 모바일 저속 환경 사용자에게 데스크톱용 대형 원본 이미지가 그대로 내려가는 걸 발견한 엔지니어. |
+| [브라우저 내장 이미지 lazy loading](browser-level-image-lazy-loading.md) | loading="lazy" 속성 하나로 뷰포트 밖 이미지를 JS 없이 지연 로드하는 브라우저 내장 기능 — 로드 시작 거리 임계값이 연결 속도에 따라 달라지고, LCP 이미지에는 금지라는 함정까지 다룬 기준 문서. | 긴 목록·상세 페이지에서 화면 밖 이미지 수십 장이 초기 대역폭을 다 먹는 걸 발견했지만, IntersectionObserver 라이브러리를 붙이기엔 과하다고… |
+| [비디오 preload · poster](video-preload-poster.md) | <video>의 preload="none·metadata·auto" 트레이드오프와 poster 이미지 조합으로, 재생을 누르기 전의 비디오가 초기 대역폭을 잡아먹지 않게 하는 공식 가이드 — 자동재생이 아닌 비디오는 preload="none" + poster가 권장… | 상품 상세·숏폼 영상이 들어간 페이지에서, 아무도 재생을 누르지 않았는데 비디오가 초기 대역폭을 점유해 이미지·스크립트를 밀어내는 워터폴을 본 엔지니어. |
+| [서드파티 JavaScript 효율적 로딩 (Efficiently load third-party JavaScript)](efficiently-load-third-party-javascript.md) | 분석·광고·임베드처럼 내가 소유하지 않은 스크립트가 대역폭과 메인 스레드를 점유할 때의 완화 전략 — async/defer, 지연 주입, preconnect, 셀프 호스팅, 그리고 임베드를 클릭 전까지 가짜 UI로 대체하는 파사드 패턴(https://developer… | 내 번들은 다 줄였는데 워터폴을 열어 보니 태그 매니저로 들어온 스크립트들이 저속 회선의 대역폭을 잡아먹고 있는 걸 발견한 엔지니어. |
+| [서비스 워커 캐싱 전략 (Workbox Caching Strategies)](service-worker-caching-strategies.md) | cache-first / network-first / stale-while-revalidate / cache-only / network-only — 서비스 워커 5대 캐싱 전략의 정의와 리소스 유형별 선택 기준을 정리한 Workbox 공식 문서. | 서비스 워커를 도입하기로 했는데, fetch 핸들러에서 "캐시를 먼저 볼지 네트워크를 먼저 탈지"를 리소스마다 어떤 기준으로 정할지 막힌 엔지니어. |
+| [성능 예산 101 (Performance budgets 101)](performance-budgets-101.md) | 번들 KB·요청 수·시간 지표에 수치 상한(예산)을 정해 두고 넘으면 실패시키는 방식으로 성능 회귀를 막는 방법론 입문. 짝 문서(https://web.dev/articles/use-lighthouse-for-performance-budgets)에서 Lighthous… | 몇 주를 갈아 넣어 번들을 줄여 놨는데, 두 달 뒤 새 기능과 새 SDK가 들어오면서 수치가 원상복구된 걸 본 엔지니어. |
+| [코드 분할 (Reduce JavaScript payloads with code splitting)](code-splitting.md) | 라우트·컴포넌트 단위의 동적 import()로 번들을 쪼개 "지금 화면에 필요한 코드만" 먼저 보내는 기법의 web.dev 가이드. 초기 JS 페이로드가 커서 저속 네트워크에서 상호작용이 늦어질 때 가장 먼저 꺼내는 카드다. | 초기 번들이 부풀어, 느린 회선에서 화면은 떴는데 몇 초간 아무것도 눌리지 않는(TTI/INP 붕괴) 앱을 맡은 프론트엔드 엔지니어. |
+| [트리 셰이킹 (Reduce JavaScript payloads with tree shaking)](tree-shaking.md) | ES 모듈의 정적 구조를 이용해 import되지 않은 export를 번들에서 걷어내는 기법 가이드. named import, sideEffects 플래그, Babel의 CJS 변환 방지 같은 "설정했는데 왜 안 걷히지"급 실무 함정을 다룬다. | 라이브러리에서 함수 두어 개를 쓸 뿐인데 번들 분석기를 돌려 보니 라이브러리 전체가 들어와 있는 걸 발견한 엔지니어. |
+
+## 저장소 (24)
+
+| 자료 | 한 줄 | 이런 사람이 든다 |
+|---|---|---|
+| [BlurHash — 이미지 블러 플레이스홀더 인코딩](blurhash.md) | 이미지를 20~30자 문자열로 인코딩해, 진짜 이미지가 오기 전에 흐릿한 미리보기를 그리는 표준격 알고리즘. 문자열이 짧아 API 응답에 그대로 실어 보낼 수 있다. | 느린 회선에서 이미지 자리가 한참 흰 사각형으로 남아 있다가 툭 튀어나오는 화면을 고치라는 요구를 받은 엔지니어. |
+| [Guess.js — ML 예측 기반 프리페칭](guess-js.md) | Google Analytics 데이터로 "사용자가 다음에 갈 확률이 높은 페이지"를 예측해 그것만 프리페치하는 웹팩 플러그인. 아이디어는 훌륭하나 유지보수가 멈췄다. | "모든 링크를 프리페치하면 낭비고, 아무것도 안 하면 느리다 — 데이터가 있는데 왜 안 쓰지?"라는 생각에 도달한 엔지니어. |
+| [Lighthouse CI — 커밋마다 성능 회귀를 막는 CI](lighthouse-ci.md) | 커밋마다 Lighthouse를 자동으로 돌려 점수 회귀를 잡고, 성능 예산 assertion으로 "이 지표가 이 값을 넘으면 실패"를 거는 CI 도구. | 분기마다 한 번씩 "성능 개선 스프린트"를 하고, 그 사이에 도로 나빠지는 사이클을 반복하는 팀의 엔지니어. |
+| [Lighthouse — 성능·접근성 자동 감사](lighthouse.md) | 성능·접근성·SEO를 자동 감사하는 Google의 표준 도구. 느린 4G·CPU 스로틀링 시뮬레이션이 기본 내장이라, 빠른 개발 장비에서도 느린 환경의 문제를 재현해 볼 수 있다. | "인터넷 느릴 때 화면이 안 떠요"라는 제보를 받았지만 자기 장비에서는 모든 게 빠르게 떠서 문제를 재현조차 못 하는 엔지니어. |
+| [Partytown — 서드파티 스크립트 웹 워커 오프로딩](partytown.md) | GA·GTM·마케팅 픽셀 같은 서드파티 스크립트를 메인 스레드가 아니라 웹 워커에서 실행해, 내 코드가 아닌 코드가 사용자 인터랙션을 막는 문제를 구조적으로 제거한다. | 성능 프로파일을 열어 보니 정작 느린 건 우리 코드가 아니라 분석·마케팅 스크립트인데, "그거 빼자"는 말은 사업팀에 통하지 않는 엔지니어. |
+| [Serwist — Next.js 시대의 서비스 워커 툴킷](serwist.md) | Workbox 포크로 시작한 현대적 서비스 워커 툴킷. 방치된 next-pwa의 사실상 후계자이며, @serwist/next가 App Router를 공식 지원한다 — Next.js에 서비스 워커를 붙일 때 1순위. | Next.js App Router 프로젝트에 오프라인 지원·PWA를 붙이라는 요구를 받고 검색했더니, next-pwa는 방치됐고 Workbox는 Next 통합… |
+| [TanStack Virtual — 헤드리스 리스트 가상화](tanstack-virtual.md) | 마크업과 스타일을 완전히 내 손에 두면서 보이는 행만 렌더링하는 헤드리스 가상화 라이브러리. React 18+, 동적 행 높이를 지원하고 react-query와 같은 생태계(TanStack)다. | 상품 목록·주문 내역 수천 건을 그대로 렌더링해서, 느린 기기에서 스크롤이 뚝뚝 끊기고 첫 렌더가 한참 걸리는 화면을 맡은 엔지니어. |
+| [ThumbHash — 알파 채널을 지원하는 이미지 플레이스홀더 해시](thumbhash.md) | BlurHash의 개선판 — 비슷한 크기의 문자열로 알파 채널을 지원하고 색을 더 정확하게 재현하는 이미지 플레이스홀더 알고리즘. esbuild 제작자 Evan Wallace 작. | 이미지 블러 플레이스홀더를 새로 도입하기로 했고, 이왕이면 지금 시점의 최선을 고르고 싶은 엔지니어. |
+| [Workbox — 서비스 워커 캐싱 툴킷](workbox.md) | 프리캐싱, 런타임 캐싱 전략(stale-while-revalidate 등), 오프라인 폴백을 모듈로 제공하는 서비스 워커의 표준 라이브러리(Google Chrome 팀). | "지하철에서 앱이 아예 안 떠요"라는 불만을 받고 오프라인·재방문 캐싱을 설계해야 하는 엔지니어. |
+| [awesome-wpo — 웹 성능 최적화 큐레이션](awesome-wpo.md) | 웹 성능 최적화(WPO)의 도구·아티클·서적·컨퍼런스를 망라한 대표 awesome 리스트. 특정 문제의 답이 아니라 "이 분야에 뭐가 있는지"의 지도다. | 성능 개선 과제를 처음 맡아, 어떤 도구·자료의 계보가 존재하는지 전체 지형부터 훑어야 하는 엔지니어. |
+| [bundlesize — gzip 사이즈 CI 체크의 원조 (대체됨)](bundlesize.md) | 빌드 산출물의 gzip 크기를 CI에서 체크해 한도 초과 시 실패시키는 아이디어의 원조. 지금은 정체 상태이고 README부터 대안을 권장한다 — 새로 고른다면 여기가 아니다. | 기존 프로젝트의 CI 설정에서 bundlesize를 발견했거나, "번들 크기 CI 체크" 검색에서 이 이름을 만나 현재도 유효한 선택지인지 확인하려는 엔지니어. |
+| [lazysizes — 레거시 lazy loading 라이브러리 (대체됨)](lazysizes.md) | 한때 이미지 lazy loading의 표준이었으나, 네이티브 loading="lazy"가 전 브라우저에서 지원되면서 존재 이유가 대부분 사라진 라이브러리. 지금의 정답은 플랫폼 내장 기능이다. | 기존 코드베이스나 오래된 성능 가이드에서 lazysizes를 발견하고, 유지할지 걷어낼지 판단해야 하는 엔지니어. |
+| [plaiceholder — 빌드 타임 이미지 플레이스홀더 (아카이브됨)](plaiceholder.md) | 빌드 타임에 base64/blurhash 플레이스홀더를 생성해 주던 라이브러리였으나 2023-05 아카이브됐다. 지금 이 이름을 만났다면 답은 "쓰지 말고 sharp로 직접 만든다"이다. | 오래된 Next.js 튜토리얼이나 기존 코드베이스에서 plaiceholder를 발견하고, 이걸 그대로 쓰거나 업그레이드해도 되는지 확인하러 온 엔지니어. |
+| [quicklink — 뷰포트 링크 자동 프리페치](quicklink.md) | 뷰포트에 들어온 링크를 브라우저 idle 시간에 자동으로 프리페치하는 경량 라이브러리. Save-Data·2G 환경에서는 스스로 프리페치를 끈다 — 느린 네트워크 배려가 기본값이다. | 정적 사이트·MPA에서 "다음 페이지 클릭이 느리다"는 불만을 받았는데, 프레임워크 내장 프리페치가 없는 환경을 맡은 엔지니어. |
+| [react-adaptive-hooks — 네트워크·기기 적응형 로딩 훅](react-adaptive-hooks.md) | useNetworkStatus(effectiveType)·useSaveData·useHardwareConcurrency·useMemoryStatus 훅으로 사용자의 회선·기기 상태에 따라 다른 컴포넌트와 미디어를 서빙하는 "적응형 로딩" 패턴의 원조(Google Ch… | 모든 사용자에게 똑같은 고화질 이미지와 무거운 컴포넌트를 쏘고 있는데, 3G·저사양 기기 사용자의 이탈이 눈에 띄기 시작한 프론트엔드 엔지니어. |
+| [react-loading-skeleton — 레이아웃 적응형 스켈레톤 스크린](react-loading-skeleton.md) | 컴포넌트의 폰트 크기·줄 수 같은 레이아웃에 자동으로 적응하는 스켈레톤 스크린을 한 줄로 넣는 React 라이브러리. | 느린 회선에서 데이터가 올 때까지 화면이 텅 비거나 스피너만 도는 앱을 고치라는 요구를 받은 React 엔지니어. |
+| [react-use — useNetworkState를 포함한 React 훅 컬렉션](react-use.md) | 대형 범용 React 훅 모음. 느린 네트워크 대응 맥락에서는 Network Information API를 래핑한 useNetworkState 훅이 유지보수되는 상태로 제공된다는 점이 핵심이다. | "느린 회선이면 이미지 화질을 낮추고 프리페치를 줄이자"는 결정은 이미 섰는데, 방치된 라이브러리를 새 의존성으로 넣기는 싫은 React 엔지니어. |
+| [react-window — 컴포넌트 방식 리스트 가상화](react-window.md) | react-virtualized의 제작자가 만든 경량 후속작. 고정/가변 크기의 리스트·그리드를 컴포넌트로 제공하는, 조립형 가상화의 표준 선택지다. | 긴 목록 가상화가 필요한데, 배치 계산을 직접 다루는 헤드리스 방식보다 "리스트 컴포넌트에 행 렌더러만 꽂는" 방식이 팀에 맞는 엔지니어. |
+| [sharp — libvips 기반 Node.js 이미지 처리](sharp.md) | libvips를 감싼 Node.js 이미지 처리의 사실상 표준. 리사이즈·WebP/AVIF 변환·플레이스홀더 생성까지 서버 측 이미지 파이프라인의 거의 전부를 담당하고, next/image 최적화도 내부적으로 이것을 쓴다. | 원본 그대로의 수 MB짜리 이미지가 느린 회선 사용자에게 그대로 내려가고 있는 서비스를 맡은 엔지니어. |
+| [sitespeed.io — 자체 호스팅 성능 모니터링](sitespeed-io.md) | 실제 브라우저로 여러 페이지를 반복 테스트하고 결과를 Grafana 대시보드로 추이 모니터링하는 오픈소스 도구 모음. 네트워크 스로틀링 시나리오를 지원한다. | 외부 SaaS에 데이터를 보낼 수 없거나 비용 때문에, 성능 모니터링을 자체 인프라로 돌려야 하는 팀의 엔지니어. |
+| [size-limit — 실행 시간까지 재는 사이즈 예산 CI](size-limit.md) | 번들 크기뿐 아니라 다운로드+실행 시간까지 계산해, 정한 한도를 넘으면 CI를 실패시키는 성능 예산 도구(Autoprefixer 제작자 작). 이 계열에서 유지보수 상태가 가장 좋은 선택지. | 한 번 번들을 줄여 놨더니 세 달 뒤 슬그머니 다시 커져 있는 걸 발견한 엔지니어. |
+| [unpic — 이미지 CDN URL 통일 레이어](unpic.md) | Cloudinary·Imgix·Vercel 등 30여 개 이미지 CDN의 제각각인 변환 URL을 하나의 API로 다루고 srcset을 자동 생성해 주는 라이브러리. 스타는 적지만 Netlify 엔지니어가 꾸준히 유지보수한다. | 이미지가 여러 CDN에 흩어져 있는데 next/image 같은 프레임워크 최적화 컴포넌트를 못 쓰는 환경(비 Next.js, 혹은 프레임워크 제약)을 맡은 엔지… |
+| [web-vitals — Core Web Vitals RUM 측정 라이브러리](web-vitals.md) | LCP·INP·CLS를 실사용자 환경(RUM)에서 정확히 측정하는 약 2KB짜리 공식 라이브러리. "우리 서비스가 실제 느린 회선에서 어떤가"에 대한 유일하게 정직한 데이터 소스다. | 사무실 와이파이의 Lighthouse 점수는 좋은데 "고객 폰에서는 느리다"는 CS가 계속 들어오는 서비스의 엔지니어. |
+| [webpack-bundle-analyzer — 번들 트리맵 시각화](webpack-bundle-analyzer.md) | 번들 내용물을 줌 가능한 트리맵으로 펼쳐 "무엇이 몇 KB를 차지하는지"를 눈으로 보여주는 표준 도구. 번들 다이어트는 여기서 시작한다. | "번들 줄여줘"라는 요구를 받았는데 무엇이 큰지조차 모르는 상태의 엔지니어. |
+
+## 블로그 (5)
+
+| 자료 | 한 줄 | 이런 사람이 든다 |
+|---|---|---|
+| [FE 성능개선기 1·2부 — 카카오 Biz FE](kakao-fe-performance-improvement.md) | 카카오 Biz FE 팀이 실서비스(주문/폼)의 성능을 측정 → 병목 식별 → 개선의 순서로 밀고 간 과정을 수치와 함께 공개한 2부작 — 기법 소개가 아니라 "성능 개선 프로젝트는 이렇게 진행한다"의 국내 벤치마크 사례다. | "결제 화면 느리다"는 VOC를 받아 성능 개선 태스크를 맡았는데, 개별 기법은 알아도 프로젝트로서 어떻게 시작하고 어떻게 완료를 증명할지 그림이 없는 개발자. |
+| [브라우저는 어떻게 동작하는가?](naver-d2-how-browsers-work.md) | 렌더링 엔진이 HTML·CSS를 파싱해 렌더 트리를 만들고 레이아웃·페인트를 거쳐 화면을 그리기까지 — "받은 바이트가 픽셀이 되기까지"를 다룬 NAVER D2의 고전. 크리티컬 렌더링 패스 이해의 국내 표준 참고 글이다. | "CSS는 왜 head에, 스크립트는 왜 defer로?"라는 후배의 질문에 규칙은 아는데 이유를 설명하지 못한 개발자, 또는 팀 온보딩에서 렌더링 기초를 공유할… |
+| [왜 이미지만 700MB를 다운로드하는 거죠?](woowahan-why-images-download-700mb.md) | 우아한형제들이 피드 화면의 이미지 총 다운로드량 700MB를 5MB로 줄인 과정 — IntersectionObserver 지연 로딩, 리사이즈, 포맷 최적화 — 을 공개한 사례 글. 이미지 데이터 폭식 문제의 국내 대표 실전 기록이다. | 이미지 피드·목록 화면이 스크롤 몇 번에 수백 MB를 빨아들이는 걸 발견한 개발자. |
+| [웹 서비스 캐시 똑똑하게 다루기](toss-smart-web-service-cache.md) | 토스 박서진이 실운영 기준으로 정리한 Cache-Control 설계 — HTML은 max-age=0, s-maxage=31536000으로 브라우저는 매번 검증하되 CDN이 오래 들고 있게 하고, 해시 붙은 정적 자산은 1년 캐시해 재방문 전송량을 구조적으로 없애는 전… | 배포할 때마다 "캐시 때문에 예전 화면이 보여요" 이슈를 겪고, 그때마다 캐시를 통째로 끄는 것으로 도망쳐 온 프론트엔드·인프라 담당자. |
+| [조금만 신경써서 초기 렌더링 빠르게 하기](toss-payments-faster-initial-rendering.md) | 토스페이먼츠가 SSR을 도입하지 않고 — 정적 리소스의 CDN 배포와 코드 스플리팅·트리 셰이킹만으로 — 초기 렌더링을 개선한 실사례 글. "SSR 전환" 같은 큰 공사 없이 지금 구조에서 당길 수 있는 것부터 당기는 접근이다. | CSR 앱의 첫 화면이 느리다는 걸 알지만, SSR 전환은 일정·구조상 당장 불가능한 팀의 프론트엔드 개발자. |
+
+## 리포트 (2)
+
+| 자료 | 한 줄 | 이런 사람이 든다 |
+|---|---|---|
+| [Akamai / SOASTA: The State of Online Retail Performance (Spring 2017)](akamai-state-of-online-retail-performance-spring-2017.md) | Akamai — Spring 2017 벤더 리포트(상관관계 기반 RUM 데이터, 논문 아님). "100ms 지연이 전환율을 최대 7% 떨어뜨린다"는 널리 인용되는 수치의 원 보고서 — 2초 지연은 이탈률을 배 이상 높이며, 모바일이 데스크톱보다 지연에 민감하다. | 커머스 체크아웃 성능 개선을 제안하면서 "100ms = 전환율 7%"라는 유명 수치를 쓰려는 PM 또는 엔지니어. |
+| [Speed Matters for Google Web Search (2009)](speed-matters-for-google-web-search.md) | Jake Brutlag — 2009, Google 실험 보고서(공개 PDF). 구글 검색에 100–400ms 지연을 주입한 통제 실험 — 400ms 지연이 사용자당 검색 수를 0.2~0.6% 줄였고, 지연 제거 후에도 이월 효과가 잔존했다. 속도 저하가 사용 습관 자… | "수백 ms 개선이 무슨 의미가 있냐"는 회의론 앞에서 성능 투자를 정당화해야 하는 엔지니어 또는 PM. |
+
+## 발표 (2)
+
+| 자료 | 한 줄 | 이런 사람이 든다 |
+|---|---|---|
+| [Amazon \"100ms = 매출 1%\" — Make Data Useful (Greg Linden, 2006)](amazon-100ms-make-data-useful.md) | Greg Linden — 2006, Stanford 강연 슬라이드 + 블로그(동료 심사 논문 아님). 업계에서 가장 유명한 성능 수치 "아마존 100ms"의 실제 1차 출처 — Amazon A/B 테스트에서 100ms 단위 지연 시 매출이 유의하게 감소했다는 내용이며… | 문서나 발표에서 "아마존은 100ms 지연에 매출 1%가 빠진다더라"를 쓰려는데, 출처를 물으면 답할 수 없는 사람. |
+| [Performance Related Changes and their User Impact — Bing + Google 합동 (Velocity…](performance-related-changes-and-their-user-impact.md) | Eric Schurman (Bing), Jake Brutlag (Google) — O'Reilly Velocity 2009. 두 검색엔진이 독립적으로 수행한 지연 주입 실험의 합동 공개 발표(논문 아님) — Bing에서 2초 지연은 사용자당 쿼리 -1.8%, 매출 -… | 성능 개선 프로젝트의 예산·인력을 따내야 하는데, "성능이 매출에 영향을 준다"는 문장에 붙일 가장 유명한 수치의 원출처가 필요한 사람. |
+
+## 아티클 (1)
+
+| 자료 | 한 줄 | 이런 사람이 든다 |
+|---|---|---|
+| [Response Times: The 3 Important Limits — 0.1초 / 1초 / 10초 (Nielsen)](response-times-the-3-important-limits.md) | Jakob Nielsen — 1993 (*Usability Engineering* Ch.5), NN/g. 논문이 아니라 검증된 2차 정리 — 0.1초(즉각으로 느껴지는 한계), 1초(사고 흐름이 끊기지 않는 한계), 10초(주의 유지 한계)라는 세 기준선을 고정한 글… | "몇 ms부터 스피너를 보여줄까", "낙관적 업데이트를 어디까지 적용할까" 같은 임계값 결정을 해야 하는데 기준선이 없는 엔지니어. |

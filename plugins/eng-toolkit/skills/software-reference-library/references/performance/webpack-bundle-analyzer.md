@@ -34,3 +34,33 @@ https://github.com/webpack/webpack-bundle-analyzer
 ## 인용 포인트
 - 번들 최적화 작업의 첫 단계는 추측이 아니라 트리맵 확인이라는 절차 제안의 근거.
 - "gzip 기준 크기"와 "파싱 대상 크기"를 구분해 보는 습관 — 전송 비용과 실행 비용은 다르다.
+
+## 코드 예시
+
+"첫 단계는 추측이 아니라 트리맵 확인"과 "gzip 크기와 파싱 대상 크기를 구분해 본다"를 설정으로 옮긴 것.
+
+```js
+// next.config.mjs — ANALYZE=true next build 로 트리맵을 연다
+import withBundleAnalyzer from "@next/bundle-analyzer";
+
+const withAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default withAnalyzer({ reactStrictMode: true });
+
+// webpack 직접 설정 — 리포트를 파일로 떨궈 CI 아티팩트로 남긴다
+import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+
+export const plugins = [
+  new BundleAnalyzerPlugin({
+    analyzerMode: "static",           // 브라우저를 띄우지 않고 HTML 로 저장
+    reportFilename: "../reports/bundle.html",
+    defaultSizes: "gzip",             // 전송 비용 기준으로 먼저 본다
+    generateStatsFile: true,          // 리비전 간 비교용 원본
+    openAnalyzer: false,
+  }),
+];
+```
+
+`defaultSizes: "gzip"`은 전송 비용이지 실행 비용이 아니다 — 엔진이 파싱·컴파일해야 하는 양은 `parsed` 쪽이고, 두 값은 압축이 잘 되는 코드에서 크게 벌어진다. 게다가 트리맵은 **무엇이 첫 화면에 실제로 실행되는지**를 보여주지 못하므로, 여기서 작아 보이는 청크가 메인 스레드를 막는 범인일 수 있다.

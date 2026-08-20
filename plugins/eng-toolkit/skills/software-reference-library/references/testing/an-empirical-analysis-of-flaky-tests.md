@@ -38,3 +38,35 @@ https://mir.cs.illinois.edu/marinov/publications/LuoETAL14FlakyTestsAnalysis.pdf
 - 플레이키 원인의 최상위가 비동기 대기라는 결과 — "sleep(3000) 늘리기" 대신 조건 대기로 바꾸자는 코드 리뷰 지적의 근거.
 - 테스트 순서 의존이 유의미한 비중을 차지한다는 점 — 테스트 병렬화·무작위 순서 실행을 도입하자는 제안의 실증적 뒷받침.
 - 재시도는 대응이지 수정이 아니다 — 이 논문의 분류 자체가 "원인마다 처방이 다르다"는 것을 보여주므로, 일괄 재시도 정책에 대한 반론으로 쓰인다.
+
+## 코드 예시
+
+최상위 원인인 async wait 를, "sleep 늘리기" 대신 조건 기반 대기로 바꾼 before/after.
+
+```js
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// before — 고정 sleep. 느린 CI에서 깨지고, 고치는 방법이 숫자를 키우는 것뿐이다
+test('웹훅 수신 후 주문이 PAID 로 전이된다 (flaky)', async () => {
+  await postWebhook({ orderId: 'A1', status: 'paid' });
+  await sleep(3000);
+  expect((await getOrder('A1')).status).toBe('PAID');
+});
+
+// after — 조건이 참이 될 때까지만 기다린다. 빨리 되면 빨리 끝난다
+async function waitUntil(predicate, { timeout = 5000, interval = 50 } = {}) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (await predicate()) return;
+    await sleep(interval);
+  }
+  throw new Error('waitUntil: 조건이 시간 안에 만족되지 않음');
+}
+
+test('웹훅 수신 후 주문이 PAID 로 전이된다', async () => {
+  await postWebhook({ orderId: 'A1', status: 'paid' });
+  await waitUntil(async () => (await getOrder('A1')).status === 'PAID');
+});
+```
+
+조건 대기는 async wait 유형만 없앤다 — 테스트 순서 의존이나 공유 상태 경쟁은 그대로 남으므로, 이 패턴을 깔았다고 플레이키가 끝났다고 보고하면 안 된다.

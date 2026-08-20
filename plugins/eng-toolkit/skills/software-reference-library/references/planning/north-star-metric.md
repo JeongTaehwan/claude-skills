@@ -23,10 +23,10 @@ https://amplitude.com/blog/product-north-star-metric
 - 새 팀·새 도메인이 생겨서 그 팀의 성공을 무엇으로 볼지 정해야 할 때
 
 ## 이럴 땐 아니다
-- 개별 기능 하나의 성공 지표를 정하는 문제라면 북극성이 아니라 `planning/heart.md` (또는 원 논문 `planning/measuring-the-user-experience-on-a-large-scale-user-centered.md`)
+- 개별 기능 하나의 성공 지표를 정하는 문제라면 북극성이 아니라 `planning/heart.md` (또는 원 논문 `planning/heart.md`)
 - 목표 설정의 형식과 운영 리듬(분기 OKR 작성·리뷰)이 필요하면 `planning/google-re-work-okr.md`, `planning/what-matters-okr.md`
 - 정한 지표를 실험으로 검증하는 단계면 `planning/online-controlled-experiments-at-large-scale.md`
-- 지표가 올랐는데 해석이 미심쩍을 때는 `planning/a-dirty-dozen-12.md`
+- 지표가 올랐는데 해석이 미심쩍을 때는 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 
 ## 무엇이 들어있나
 핵심 주장은 "북극성 지표 하나를 고르면 정렬된다"가 아니라, 북극성은 그 자체로는 조종 불가능하고 **입력 지표들의 결과**로만 움직인다는 것이다. 그래서 실제 작업은 지표를 고르는 데 있지 않고, 그 지표를 몇 개의 조종 가능한 입력으로 쪼개는 데 있다.
@@ -37,3 +37,33 @@ Amplitude가 자사 방법론으로 밀고 있는 자료라 도구 세일즈 톤
 ## 인용 포인트
 - "북극성 지표는 조종하는 게 아니라 입력 지표를 통해 움직인다" — 목표 설정 회의에서 최상위 숫자만 던져놓고 끝나는 상황을 끊는 데 쓸 수 있다.
 - 매출을 북극성으로 삼으면 안 되는 이유(후행 지표이자 고객 가치와 어긋날 수 있음)는, 커머스 조직에서 GMV·거래액을 팀 목표로 그대로 내리는 관행을 되짚을 때 그대로 인용 가능하다.
+
+## 코드 예시
+
+북극성(주간 "가치를 받은 고객 수")과 그것을 움직이는 입력 지표를 한 쿼리에 나란히 두는 형태 — 최상위 숫자와 팀별 레버가 같은 화면에 있어야 "우리 팀은 올랐는데 전체는 왜"가 답이 된다.
+
+```sql
+-- 북극성: 주간 배송 완료까지 간 구매 고객 수 (매출이 아니라 고객이 받은 가치)
+WITH weekly AS (
+  SELECT
+    date_trunc('week', o.ordered_at)              AS week,
+    count(DISTINCT o.customer_id)
+      FILTER (WHERE o.status = 'DELIVERED')       AS north_star,
+    -- 입력 1: 유입 (마케팅 팀 레버)
+    count(DISTINCT s.visitor_id)                  AS visitors,
+    -- 입력 2: 첫 주문 전환 (온보딩 팀 레버)
+    count(DISTINCT o.customer_id)
+      FILTER (WHERE o.is_first_order)             AS new_buyers,
+    -- 입력 3: 재구매 (리텐션 팀 레버)
+    count(DISTINCT o.customer_id)
+      FILTER (WHERE NOT o.is_first_order)         AS repeat_buyers,
+    -- 가드레일: 할인으로 밀어올린 것인지 (매출을 목표로 둘 때 생기는 그 왜곡)
+    avg(o.discount_amount / nullif(o.gross_amount, 0)) AS discount_ratio
+  FROM orders o
+  LEFT JOIN sessions s ON s.week = date_trunc('week', o.ordered_at)
+  GROUP BY 1
+)
+SELECT * FROM weekly ORDER BY week DESC;
+```
+
+입력 지표를 나열했다고 인과가 증명된 건 아니다 — 이 쿼리가 보여주는 것은 상관뿐이고, 어느 레버가 실제로 북극성을 움직였는지는 실험으로만 갈린다.

@@ -34,3 +34,32 @@ Jake Brutlag — 2009, Google 실험 보고서(공개 PDF). 구글 검색에 100
 ## 인용 포인트
 - 400ms 지연 → 사용자당 검색 수 0.2~0.6% 감소 — "수백 ms는 무의미"라는 주장의 반례.
 - 지연 제거 후에도 잔존하는 이월 효과 — "나중에 고치면 된다"는 성능 부채 미루기에 대한 반박 근거.
+
+## 코드 예시
+
+이 보고서의 방법론(지연을 인위로 주입하는 통제 실험)을 자사 서비스에서 재현하는 최소 형태.
+
+```js
+import { createHash } from "node:crypto";
+import { setTimeout as sleep } from "node:timers/promises";
+
+const DELAY_MS = { control: 0, d100: 100, d400: 400 };
+const BUCKETS = Object.keys(DELAY_MS);
+
+// 사용자를 실험 기간 내내 같은 버킷에 고정한다 (요청마다 흔들리면 측정이 무의미)
+function bucketOf(userId) {
+  const h = createHash("sha1").update(`latency-exp-2026:${userId}`).digest()[0];
+  return BUCKETS[h % BUCKETS.length];
+}
+
+app.use(async (req, res, next) => {
+  const bucket = bucketOf(req.user.id);
+  res.set("X-Exp-Bucket", bucket);
+  metrics.increment("exp.exposure", { bucket }); // 노출을 먼저 기록
+  const delay = DELAY_MS[bucket];
+  if (delay) await sleep(delay);
+  next();
+});
+```
+
+이 보고서의 이월 효과가 그대로 이 코드의 함정이다 — 실험을 끝내고 미들웨어를 지워도 지연 버킷의 사용량은 즉시 돌아오지 않으므로, 노출 기간만 집계하면 피해를 과소평가하고 그 버킷을 계속 추적하지 않으면 회복 여부조차 모른다. 실사용자의 경험을 실제로 나쁘게 만드는 실험이라는 비용도 계산에 넣어야 한다.

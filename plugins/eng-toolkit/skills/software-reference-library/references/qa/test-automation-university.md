@@ -34,3 +34,29 @@ Applitools가 운영하는 테스트 자동화 전용 무료 온라인 강좌 �
 강사가 도구 벤더 소속이 아닌 외부 실무자들인 코스가 많아 특정 제품 홍보로 기울지 않는 편이지만, 운영 주체가 시각 테스트 도구 회사(Applitools)라는 점은 감안하고 볼 것.
 
 주의할 것은 강좌 자료의 신선도다. 도구 버전이 빠르게 바뀌는 영역이므로, 코스로 개념과 흐름을 잡고 실제 API는 반드시 공식 문서로 확인하는 조합이 안전하다.
+
+## 코드 예시
+
+Learning Path 를 그대로 두지 않고 사내 온보딩으로 옮긴 형태 — 각 단계마다 우리 저장소에서 실제로 제출할 산출물과, 강좌 버전과 우리 버전의 차이를 확인할 지점을 붙인다.
+
+```yaml
+# docs/onboarding/qa-automation.yaml
+tool_versions:                 # 강좌 영상과 우리 저장소가 어긋나는 지점
+  playwright: "1.49"           # 코스는 1.3x 기준 — locator API 변경 확인 필요
+  node: "20"
+path:
+  - step: 자동화 기초 개념
+    source: TAU 코스 (영상)
+    output: 없음
+    done_when: 왜 UI 대신 API 층에서 먼저 검증하는지 한 문단으로 설명
+  - step: 첫 E2E 작성
+    source: TAU Playwright 코스 + 공식 문서 locator 페이지
+    output: e2e/login.spec.ts PR
+    done_when: getByRole 기반 셀렉터만 사용, 대기에 waitForTimeout 없음
+  - step: 우리 저장소 규칙 적용
+    source: 사내 e2e/README.md
+    output: 기존 스펙 1건 리팩터링 PR
+    done_when: CODEOWNERS 에 본인 추가, 실패 시 재현 로그 첨부 방법 숙지
+```
+
+`done_when` 은 수료 인증서가 대신해 주지 못하는 부분이다 — 코스를 끝냈다는 사실과 우리 저장소에서 깨지지 않는 테스트를 쓸 수 있다는 것은 다른 상태이고, 이 파일은 그 간격을 드러낼 뿐 메워 주지는 않는다.

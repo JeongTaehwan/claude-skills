@@ -37,3 +37,28 @@ CAP를 "셋 중 둘 고르기"가 아니라 형식적 불가능성 정리로 증
 - "CAP는 분할이 일어났을 때의 선택 문제다" — 설계 논의를 '평소 트레이드오프'에서 '분할 시 동작 정의'로 옮기는 데 쓸 수 있는 한 문장.
 - CAP의 C는 선형화 가능성이지 ACID의 C가 아니라는 구분 — "우리는 AP니까 트랜잭션은 포기" 같은 논리 비약을 끊는 근거.
 - 원자적 일관성과 가용성을 함께 요구할 수 없다는 것은 취향이 아니라 증명된 결과라는 점.
+
+## 코드 예시
+
+"CAP 는 분할이 일어났을 때의 선택 문제"를 연산별 정책으로 내린 것 — 정족수를 못 채운 순간에 무엇을 할지가 코드에 적혀 있어야 설계가 끝난 것이다.
+
+```python
+N, W, R = 3, 2, 2  # W + R > N: 읽기·쓰기 정족수가 최소 한 노드에서 겹친다
+
+class QuorumUnavailable(Exception):
+    pass
+
+def write(replicas, key, value, on_partition):
+    """on_partition: 'reject'(정확성 우선) | 'accept_local'(가용성 우선)"""
+    acks = [r for r in replicas if r.try_put(key, value, timeout=0.2)]
+    if len(acks) >= W:
+        return "committed"
+    if on_partition == "reject":
+        # 재고 차감·쿠폰 발급: 분할 중에는 아예 받지 않는다
+        raise QuorumUnavailable(f"acks={len(acks)} < W={W}")
+    # 조회수·장바구니: 받아 두고 나중에 화해한다
+    replicas[0].put_pending(key, value)
+    return "pending_reconciliation"  # 화해 규칙이 없으면 이 분기는 유실과 같다
+```
+
+정족수가 겹친다는 건 최신 값을 볼 가능성을 만들 뿐, 논문이 말하는 선형화 가능성은 아니다 — 동시 쓰기의 순서, 읽기 수리, 시계 오차는 이 코드 밖에 있다. `pending_reconciliation` 분기를 고른 순간 충돌 해소 규칙(마지막 쓰기 우선인가, 병합인가)을 정하는 일이 남는다.

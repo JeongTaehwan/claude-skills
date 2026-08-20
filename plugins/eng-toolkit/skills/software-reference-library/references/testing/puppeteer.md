@@ -38,3 +38,34 @@ Node 에서 Chrome 또는 Firefox 를 DevTools Protocol / WebDriver BiDi 로 제
 ## 인용 포인트
 - Puppeteer 는 브라우저 제어 라이브러리이고 테스트 프레임워크가 아니다 — E2E 스택 선정 회의에서 Playwright/Cypress 와 같은 선상에 놓는 비교를 정리할 때 쓸 수 있다.
 - `puppeteer-core` 의 존재는 "브라우저 바이너리를 누가 관리하는가"를 배포 정책으로 명시하게 만든다.
+
+## 코드 예시
+
+테스트가 아닌 쪽 — 주문 확인서 HTML 을 PDF 로 뽑는 최소 스크립트. 러너도 단언도 없고 브라우저 제어 API 만 있다는 점이 이 라이브러리의 위치를 그대로 보여준다.
+
+```js
+import puppeteer from 'puppeteer';
+
+export async function renderReceiptPdf(html, outPath) {
+  const browser = await puppeteer.launch({
+    // 컨테이너에서 root 로 돌 때 필요한 경우가 많다
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  });
+  try {
+    const page = await browser.newPage();
+    // 폰트·이미지까지 다 받은 뒤로 판정 — PDF 가 빈 칸으로 나오는 것을 막는다
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.emulateMediaType('screen'); // print 스타일시트 대신 화면 스타일로
+    await page.pdf({
+      path: outPath,
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' },
+    });
+  } finally {
+    await browser.close(); // 안 닫으면 프로세스가 그대로 쌓인다
+  }
+}
+```
+
+`networkidle0` 은 "네트워크가 조용해졌다"일 뿐 렌더링이 끝났다는 보장이 아니다 — 웹폰트나 지연 로딩 차트가 있으면 `page.evaluate(() => document.fonts.ready)` 같은 명시적 조건을 하나 더 걸어야 한다. 그리고 요청마다 브라우저를 새로 띄우는 이 구조는 트래픽이 늘면 그대로 비용이 되므로, 서버에서 상시 쓸 거라면 브라우저 인스턴스 풀링을 전제해야 한다.

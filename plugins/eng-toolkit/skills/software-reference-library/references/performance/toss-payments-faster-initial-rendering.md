@@ -32,3 +32,33 @@ CSR 구조를 유지한 채 초기 렌더링을 개선한 과정 — 정적 리�
 ## 인용 포인트
 - "SSR 없이도 초기 렌더링은 당길 수 있다" — 아키텍처 전환 논의와 당장의 성능 개선을 분리하자는 주장의 실사례 근거.
 - 개선 수순의 순서 감각 — 전송 구간(CDN)과 전송량(스플리팅·셰이킹)을 먼저 치고, 렌더링 아키텍처는 그다음 문제로 미루는 우선순위의 참조 사례.
+
+## 코드 예시
+
+"전송 구간(CDN)과 전송량(스플리팅·트리 셰이킹)을 먼저 친다"는 순서를 설정 세 곳으로 옮긴 것.
+
+```js
+// 1) next.config.mjs — 정적 리소스를 CDN 오리진으로 뺀다 (전송 구간)
+export default {
+  assetPrefix: process.env.CDN_ORIGIN, // 예: https://static.example.com
+};
+
+// 2) package.json — 트리 셰이킹이 실제로 먹히게 하는 선언 (전송량)
+// {
+//   "sideEffects": ["*.css", "*.scss"]
+// }
+
+// 3) 첫 화면에 필요 없는 것은 잘라 내고, 필요할 때 가져온다
+import dynamic from "next/dynamic";
+
+const ReceiptViewer = dynamic(() => import("./ReceiptViewer"), {
+  ssr: false,
+  loading: () => <ReceiptSkeleton />,
+});
+
+// 배럴 임포트는 번들러의 트리 셰이킹을 무력화한다 — 경로를 직접 찍는다
+import debounce from "lodash-es/debounce";
+// import { debounce } from "lodash"; // 전체를 끌고 들어온다
+```
+
+`assetPrefix`는 바이트를 **다른 오리진으로 옮기는** 것이라, 고지연 회선의 첫 방문자는 DNS 조회와 TLS 핸드셰이크를 한 세트 더 치른다 — 재방문 캐시 적중이 많은 서비스에서는 남는 장사지만 첫 방문 LCP만 보면 오히려 나빠질 수 있으니 두 경우를 나눠 측정해야 한다.

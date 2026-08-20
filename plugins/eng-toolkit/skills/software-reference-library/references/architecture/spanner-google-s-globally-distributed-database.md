@@ -43,3 +43,35 @@ Spanner는 반정형 데이터에 SQL 질의, 스키마, 그리고 **외부 일�
 - 멀티 리전 강한 일관성 논의에서: 불가능하다는 주장이 아니라 "무엇을 대가로 지불할 것인가(커밋 지연 + 시계 인프라)"의 문제로 프레임을 바꿀 수 있다.
 - 시스템 설계 일반 원칙으로: TrueTime이 불확실성을 숨기지 않고 API의 반환값으로 드러낸 것은, 애매한 값을 확실한 척 반환하는 인터페이스를 비판할 때 그대로 쓸 수 있는 사례다.
 - 자체 구현으로 "타임스탬프 기준 정렬"을 하려는 설계에 대한 경고: NTP 오차 구간을 다루지 않으면 순서 보장이 아니라 순서 착각이 된다.
+
+## 코드 예시
+
+TrueTime 은 시각 하나가 아니라 구간을 돌려주고, commit wait 은 그 구간이 지나갈 때까지 일부러 기다린다 — 논문의 두 아이디어가 이 짧은 함수에 다 들어간다.
+
+```python
+import time
+from dataclasses import dataclass
+
+@dataclass
+class TTInterval:      # TrueTime API: 시각이 아니라 불확실성 구간을 반환한다
+    earliest: float
+    latest: float
+
+def tt_now() -> TTInterval:
+    t = time.time()
+    epsilon = 0.007    # GPS·원자시계로 좁게 유지되는 오차. NTP만 쓰면 훨씬 넓다
+    return TTInterval(t - epsilon, t + epsilon)
+
+def tt_after(t: float) -> bool:
+    return tt_now().earliest > t      # t 가 확실히 과거인가
+
+def commit(txn) -> float:
+    s = tt_now().latest               # 커밋 타임스탬프는 구간의 위쪽 끝
+    txn.write_prepared_records(s)
+    while not tt_after(s):            # commit wait — 정확성을 위해 일부러 지연한다
+        time.sleep(0.0005)
+    txn.release_locks()
+    return s
+```
+
+대기 시간은 곧 오차 구간 폭이다 — 시계 인프라 투자 없이 이 코드를 흉내 내면 `epsilon` 이 수십 ms~수 초로 벌어져, 정확성을 얻는 게 아니라 쓰기 지연만 그만큼 늘어난다.

@@ -26,7 +26,7 @@ Malte Ubl이 정리한 구글의 설계 문서 문화 — 무엇을 쓰고, 무�
 ## 이럴 땐 아니다
 - **무엇을** 만들지(요구사항·범위)를 합의하는 문서라면 — `planning/atlassian-prd.md`
 - 결정 하나를 짧게 기록하고 이후에도 추적하려면 — `architecture/architecture-decision-records.md`, `architecture/adr-github-io.md`
-- 조직 전체가 토론에 참여하는 공개 제안 절차를 원한다면 — `planning/rfd-requests-for-discussion.md`, `development/requests-for-discussion.md`
+- 조직 전체가 토론에 참여하는 공개 제안 절차를 원한다면 — `planning/rfd-requests-for-discussion.md`, `planning/rfd-requests-for-discussion.md`
 - 아키텍처 문서의 구조·뷰 체계 자체를 원한다면 — `architecture/arc42.md`, `architecture/c4-model.md`
 - 구글의 엔지니어링 관행 전반이라면 — `development/software-engineering-at-google.md`, `development/google-engineering-practices.md`
 
@@ -40,3 +40,37 @@ Malte Ubl이 정리한 구글의 설계 문서 문화 — 무엇을 쓰고, 무�
 - "Alternatives considered" 섹션의 존재 자체가 설계 리뷰의 질을 바꾼다 — 팀 템플릿에 이 칸을 넣자고 설득할 때.
 - 설계 문서가 필요 없는 경우가 있다는 명시 — "모든 티켓에 설계 문서를 붙이자"는 과잉 프로세스를 되돌릴 때 쓰는 반론 근거.
 - 설계 문서는 구현 시작과 함께 낡는 역사 기록이라는 관점 — 문서 최신화 의무를 무한정 지우려는 요구를 조정할 때.
+
+## 코드 예시
+
+"검토한 대안" 칸이 리뷰의 질을 바꾼다는 주장을, 실제 문서 골격에서 그 칸이 어떤 모양인지로 보인 것.
+
+```markdown
+# 설계 문서: 주문 상태 전이 재설계
+
+- 작성 @backend · 리뷰어 @a @b
+- 스냅샷 2026-08-20  <!-- 구현 시작 후에는 갱신하지 않는 역사 기록이다 -->
+
+## 맥락과 범위
+지금 무엇이 문제이고, 이 문서가 다루는 경계는 어디까지인가.
+
+## 목표 / 목표가 아닌 것
+- 목표: 결제 실패 후 재시도에서 주문 상태가 갈라지지 않게 한다
+- 목표 아님: 정산 로직 변경
+
+## 설계
+선택한 안. 상태 전이 표 한 장.
+
+## 검토한 대안
+### 대안 A — 상태 컬럼 유지 + 낙관적 잠금
+버린 이유: 웹훅 재전송이 겹칠 때 갱신 손실을 막지 못한다.
+### 대안 B — 이벤트 소싱
+버린 이유: 기존 주문 데이터 마이그레이션 비용이 이번 분기에 안 맞는다.
+
+## 전역 관심사
+보안·개인정보 / 운영·모니터링 / 롤백 경로
+
+## 미해결 질문
+```
+
+이 골격을 모든 티켓의 필수 서식으로 만들면 글이 말한 "설계 문서는 비형식적이어야 한다"를 정면으로 거스른다 — 설계가 자명하거나 알려진 패턴을 그대로 쓰는 변경에는 이 문서를 아예 만들지 않는 것이 원문의 권고다.

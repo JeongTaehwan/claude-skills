@@ -34,3 +34,33 @@ Response 100ms · Animation 프레임 10ms · Idle · Load 5초 — 사용자 �
 ## 인용 포인트
 - "100ms 안에 피드백을 주면 즉각적으로 느껴진다" — 인터랙션 예산 설정의 고전적 출처.
 - RAIL을 목표 수치로 쓰는 문서·제안을 교정할 때: 원문 스스로 CWV로의 이행을 권고한다는 사실.
+
+## 코드 예시
+
+R(100ms 안에 피드백)과 I(유휴 시간에 나머지)를 한 핸들러 안에서 갈라 놓은 형태 — 급한 것과 미룰 수 있는 것을 코드에서 분리한다.
+
+```js
+addToCartBtn.addEventListener("click", (e) => {
+  // R: 네트워크·집계보다 먼저, 눈에 보이는 응답을 즉시 준다
+  addToCartBtn.setAttribute("aria-busy", "true");
+  cartBadge.textContent = String(++optimisticCount);
+
+  // 실제 작업은 그 다음
+  postToCart(e.target.dataset.sku)
+    .catch(() => { cartBadge.textContent = String(--optimisticCount); })
+    .finally(() => addToCartBtn.removeAttribute("aria-busy"));
+
+  // I: 급하지 않은 일은 유휴 시간으로 미룬다
+  analyticsQueue.push({ type: "add_to_cart", sku: e.target.dataset.sku });
+  requestIdleCallback(
+    (deadline) => {
+      while (deadline.timeRemaining() > 0 && analyticsQueue.length) {
+        sendBeaconEvent(analyticsQueue.shift());
+      }
+    },
+    { timeout: 2000 } // 유휴가 안 오면 강제 실행
+  );
+});
+```
+
+100ms 는 피드백을 주는 시각이지 작업이 끝나는 시각이 아니다 — 그리고 `timeout` 을 빼면 바쁜 페이지에서 유휴 콜백이 사실상 영영 돌지 않는다.

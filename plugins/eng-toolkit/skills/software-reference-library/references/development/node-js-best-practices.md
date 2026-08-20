@@ -27,7 +27,7 @@ Node 백엔드의 관행을 프로젝트 구조·에러 처리·코드 스타일
 - API 시그니처나 런타임 동작의 정확한 사실 확인은 이 저장소가 아니라 `development/node-js-api.md`
 - 코드 포맷팅(따옴표, 세미콜론, 줄바꿈) 논쟁은 여기서 끝내지 말고 `development/prettier.md` 와 `development/eslint.md` 로 자동화해서 없애라
 - JavaScript 스타일 규칙 자체의 정본은 `development/airbnb-javascript-style-guide.md`
-- 웹 애플리케이션 보안 위험의 전체 지형은 여기 보안 절이 아니라 `development/owasp-top-10.md` 와 `development/owasp-cheat-sheet-series.md`
+- 웹 애플리케이션 보안 위험의 전체 지형은 여기 보안 절이 아니라 `security/owasp-top-10.md` 와 `security/owasp-cheat-sheet-series.md`
 - 조직 차원의 리뷰 문화·기준은 `development/google-code-review-developer-guide.md`
 
 ## 무엇이 들어있나
@@ -41,3 +41,34 @@ README 자체가 목차이자 본문 요약이다. 각 항목은 "규칙 한 줄
 - "모든 에러를 try/catch 로 잡아야 하지 않나"는 반론에, 운영 에러와 프로그래머 에러를 구분하고 후자는 재시작이 정답이라는 근거를 이 저장소에서 링크로 제시할 수 있다.
 - 폴더 구조를 계층형에서 도메인형으로 바꾸자고 설득할 때, 항목별 "Otherwise" 설명이 그대로 제안서의 리스크 절이 된다.
 - 각 항목에 외부 출처(블로그·컨퍼런스 발표)가 달려 있어, 사내 컨벤션 문서에 인용을 붙이기 좋다.
+
+## 코드 예시
+
+이 저장소 에러 처리 절의 핵심 주장 — 운영 에러와 프로그래머 에러를 구분하고, 후자는 잡아서 삼키지 말고 프로세스를 재시작한다.
+
+```js
+class AppError extends Error {
+  constructor(name, message, httpCode, isOperational = true) {
+    super(message);
+    this.name = name;
+    this.httpCode = httpCode;
+    this.isOperational = isOperational;   // 예상 가능한 실패인가, 버그인가
+    Error.captureStackTrace(this);
+  }
+}
+
+// 중앙 집중 핸들러 — 컨트롤러마다 try/catch 로 감싸 삼키지 않는다
+const errorHandler = {
+  handle(err, res) {
+    logger.error({ err });
+    const operational = err instanceof AppError && err.isOperational;
+    res?.status(operational ? err.httpCode : 500).json({ code: err.name });
+    if (!operational) process.exit(1);    // 버그면 죽이고 재시작에 맡긴다
+  },
+};
+
+app.use((err, req, res, next) => errorHandler.handle(err, res));
+process.on('uncaughtException', (err) => errorHandler.handle(err));
+```
+
+`process.exit(1)` 이 안전한 것은 프로세스 매니저(pm2, systemd, Kubernetes)가 즉시 되살려 줄 때뿐이다 — 그 전제가 없으면 이 규칙이 오히려 장애를 만든다.

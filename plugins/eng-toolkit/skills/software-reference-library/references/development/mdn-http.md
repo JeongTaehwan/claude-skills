@@ -38,3 +38,31 @@ CORS와 쿠키 문서는 브라우저 보안 모델을 전제로 서술되어 �
 ## 인용 포인트
 - 상태 코드 선택 논쟁에서 MDN 개별 페이지의 정의를 인용하면 팀 내 합의가 빠르다 — RFC보다 짧고 결론이 명확하다.
 - 브라우저 호환성 표는 "이 헤더는 아직 못 쓴다"는 결정을 문서로 남길 때 그대로 근거가 된다.
+
+## 코드 예시
+
+MDN 캐싱 문서가 정면으로 다루는 오해 — `no-cache` 는 "캐시 금지"가 아니라 "쓰기 전 매번 재검증"이라는 것을 조건부 요청 왕복으로 보인 것.
+
+```http
+GET /api/products/42 HTTP/1.1
+Host: shop.example.com
+
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+ETag: "v42-9f2c"
+Vary: Accept-Encoding
+Content-Type: application/json
+
+{"id":42,"price":19900}
+
+--- 재방문: 캐시는 남아 있고, 쓰기 전에 서버에 물어본다 ---
+
+GET /api/products/42 HTTP/1.1
+Host: shop.example.com
+If-None-Match: "v42-9f2c"
+
+HTTP/1.1 304 Not Modified
+ETag: "v42-9f2c"
+```
+
+정말로 저장 자체를 막고 싶으면 `no-cache` 가 아니라 `no-store` 다 — 이름과 동작이 어긋나는 대표 사례이고, `Vary` 를 빼먹으면 인코딩이 다른 클라이언트에 엉뚱한 표현이 재사용된다.

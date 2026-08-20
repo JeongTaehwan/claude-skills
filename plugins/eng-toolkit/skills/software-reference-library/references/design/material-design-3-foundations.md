@@ -35,3 +35,33 @@ Foundations는 컴포넌트 카탈로그와 분리된 층으로, 색·타이포�
 ## 인용 포인트
 - "색은 값이 아니라 역할"이라는 M3의 전제는, `--blue-500` 같은 이름을 `--color-primary`로 바꾸자는 리팩터링 제안의 근거가 된다.
 - 창 크기 클래스 개념은 "모바일/태블릿/PC" 대신 쓸 반응형 분기 어휘로 그대로 채택할 만하다.
+
+## 코드 예시
+
+"색은 값이 아니라 역할"이 실제로 무엇을 바꾸는지 — `on-*` 짝이 있으면 다크 테마가 새 팔레트가 아니라 매핑 문제가 된다.
+
+```css
+:root {
+  --md-sys-color-primary: #6750a4;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #eaddff;
+  --md-sys-color-on-primary-container: #21005d;
+}
+
+/* 다크는 같은 역할 이름에 다른 톤을 꽂는 것으로 끝난다 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-sys-color-primary: #d0bcff;
+    --md-sys-color-on-primary: #381e72;
+    --md-sys-color-primary-container: #4f378b;
+    --md-sys-color-on-primary-container: #eaddff;
+  }
+}
+
+.button--filled {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary); /* 배경이 바뀌면 전경이 따라온다 */
+}
+```
+
+`on-*` 짝이 대비를 보장하는 건 M3의 톤 팔레트를 그대로 썼을 때뿐이다 — 브랜드 색을 `primary`에 그냥 꽂으면 짝이 깨지고, M3 본체가 전제하는 시드 색에서 톤을 생성하는 dynamic color 부분이 이 하드코딩에는 빠져 있다. `prefers-color-scheme`만 쓰면 앱 안에서 사용자가 고른 테마도 무시된다.

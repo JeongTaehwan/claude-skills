@@ -35,3 +35,29 @@ CSS-Tricks는 블로그이므로 기사 단위 글은 시점에 따라 낡을 �
 
 ## 인용 포인트
 - 레이아웃 리뷰에서 속성 하나를 두고 설명이 길어질 때, 해당 가이드의 다이어그램 한 장이 설명을 대체한다.
+
+## 코드 예시
+
+가이드의 조직 원리 — 컨테이너에 붙는 속성과 아이템에 붙는 속성 — 를 그대로 주석으로 갈라 놓은 Flexbox 툴바.
+
+```css
+/* 컨테이너에 붙는 것: 축과 흐름을 정한다 */
+.toolbar {
+  display: flex;
+  flex-direction: row; /* 주축 = 가로. 이 한 줄이 아래 두 줄의 의미를 결정한다 */
+  flex-wrap: wrap;
+  justify-content: space-between; /* 주축 정렬 */
+  align-items: center;            /* 교차축 정렬 */
+  gap: 0.75rem;
+}
+
+/* 아이템에 붙는 것: 남는 공간을 어떻게 나눌지, 자기만 어떻게 설지 */
+.toolbar__search {
+  flex: 1 1 12rem;    /* grow shrink basis */
+  min-inline-size: 0; /* 긴 내용이 있으면 안 줄어드는 기본값(auto)을 푼다 */
+}
+.toolbar__actions { flex: 0 0 auto; }
+.toolbar__help    { margin-inline-start: auto; align-self: flex-start; }
+```
+
+`flex-direction`을 `column`으로 바꾸는 순간 `justify-content`와 `align-items`가 역할을 맞바꾼다 — 값을 바꿔 가며 맞추는 시행착오가 여기서 나온다. 가이드의 다이어그램은 이 관계는 보여주지만 브라우저 지원까지는 안 알려주므로, 실제 배포 대상 브라우저는 MDN 쪽에서 교차 확인해야 한다.

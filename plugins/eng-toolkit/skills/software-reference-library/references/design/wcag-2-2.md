@@ -41,3 +41,31 @@ https://www.w3.org/TR/WCAG22/
 - "접근성 어디까지 할까요"라는 질문에 "WCAG 2.2 AA"라고 답하면 범위 논쟁이 한 문장에 끝난다. 등급이 곧 스코프 정의다.
 - 성공 기준은 통과/실패로 판정되므로, 그대로 QA 테스트 케이스 ID로 승격시킬 수 있다 — 별도의 체크리스트를 창작할 필요가 없다.
 - 접근성 요구를 "선의"가 아니라 "국내 인증 심사 기준의 원본"으로 프레이밍하면 우선순위 협상이 쉬워진다.
+
+## 코드 예시
+
+성공 기준이 "판정 가능하게" 쓰였다는 성질을 그대로 보여주는 것 — 1.4.3 Contrast(Minimum)는 감이 아니라 계산식이라 함수 하나로 옮겨진다.
+
+```js
+// sRGB 채널 → 선형값 (WCAG 상대 휘도 정의 그대로)
+const channel = (v) => {
+  const c = v / 255;
+  return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+};
+const luminance = ([r, g, b]) =>
+  0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+
+function contrastRatio(fg, bg) {
+  const [hi, lo] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+// AA 합격선: 본문 4.5:1, 큰 텍스트(24px 또는 18.66px bold) 3:1, UI 경계 3:1
+const AA = { body: 4.5, large: 3, nonText: 3 };
+const passesAA = (ratio, kind) => ratio >= AA[kind];
+
+const r = contrastRatio([117, 117, 117], [255, 255, 255]); // #757575 on #fff
+console.log(r.toFixed(2), passesAA(r, 'body')); // 4.61 true
+```
+
+이 계산은 배경이 단색일 때만 뜻이 있다 — 텍스트 뒤에 이미지·그라디언트·반투명 오버레이가 깔리면 대비값은 픽셀마다 달라지고, 이 함수는 통과라고 답한다. 1.4.3 하나를 통과했다고 AA를 만족한 것도 아니다.

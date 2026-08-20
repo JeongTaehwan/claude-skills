@@ -40,3 +40,26 @@ WebAIM은 또한 자동화 도구의 한계를 명시적으로 말한다. 자동
 - 접근성 작업의 우선순위를 올려야 할 때, WebAIM Million의 연차 실측 수치를 근거로 쓴다 — "업계 평균이 이 정도로 나쁘다"가 아니라 "자동 검출만으로도 이 정도가 걸린다"는 쪽으로 프레이밍한다.
 - "axe 통과했으니 접근성 완료" 보고를 막을 때, 자동 검사 커버리지의 한계에 대한 WebAIM의 서술을 인용한다.
 - 색상 대비 논쟁은 Contrast Checker 결과 스크린샷 한 장으로 끝난다. 취향이 아니라 판정이라는 점을 보여주는 게 핵심이다.
+
+## 코드 예시
+
+"자동 검출만으로도 이 정도가 걸린다"를 우리 화면에서 확인하는 것 — WebAIM Million이 매년 상위로 꼽는 유형만 골라 센다.
+
+```js
+const q = (sel) => [...document.querySelectorAll(sel)];
+const named = (el) =>
+  el.getAttribute('aria-label')?.trim() || el.getAttribute('aria-labelledby');
+
+const findings = {
+  missingAlt: q('img:not([alt])').length,
+  emptyLink: q('a[href]').filter((a) => !a.textContent.trim() && !named(a)).length,
+  emptyButton: q('button').filter((b) => !b.textContent.trim() && !named(b)).length,
+  unlabeledInput: q('input:not([type="hidden"]), select, textarea')
+    .filter((el) => !el.labels?.length && !named(el)).length,
+  missingLang: document.documentElement.lang ? 0 : 1,
+};
+
+console.table(findings);
+```
+
+가장 흔한 유형인 저대비 텍스트가 여기 빠진 건 게을러서가 아니다 — 배경이 부모나 이미지에서 오면 DOM만으로 실제 색을 알 수 없다. 그리고 이 다섯 개가 전부 0이 되어도 끝이 아니다: 자동 검사가 덮는 건 일부뿐이고 `alt=""`가 그 이미지에 적절한지 같은 판단은 사람 몫이라는 것이 WebAIM의 일관된 입장이다.

@@ -34,3 +34,31 @@ https://d2.naver.com/helloworld/59361
 ## 인용 포인트
 - 스크립트·스타일이 파싱과 렌더링을 어디서 막는지의 단계별 설명 — "왜 CSS는 위에, JS는 defer"라는 컨벤션을 규칙이 아니라 원리로 만들어 준다.
 - 렌더 트리 → 레이아웃 → 페인트라는 단계 구분 자체 — 성능 논의에서 "어느 단계 비용인가"를 가르는 공용 어휘의 한국어 출처.
+
+## 코드 예시
+
+"CSS는 head에, JS는 defer" 컨벤션을 규칙이 아니라 파이프라인 단계로 읽는 형태 — 무엇이 파싱을 멈추고 무엇이 렌더 트리를 막는지가 마크업에 그대로 드러난다.
+
+```html
+<head>
+  <!-- 렌더 블로킹: 렌더 트리를 만들려면 CSSOM 이 필요하므로 여기서 기다린다 -->
+  <link rel="stylesheet" href="/critical.css" />
+
+  <!-- 렌더링에 당장 필요 없는 CSS 는 렌더 블로킹에서 빼 둔다 -->
+  <link rel="stylesheet" href="/print.css" media="print" />
+
+  <!-- 파서 블로킹: 이 자리에서 DOM 구성이 멈춘다. 꼭 필요한 게 아니면 쓰지 않는다 -->
+  <!-- <script src="/legacy.js"></script> -->
+
+  <!-- 파싱과 병렬로 받고, DOM 완성 뒤 문서 순서대로 실행 -->
+  <script src="/app.js" defer></script>
+
+  <!-- 순서·DOM 과 무관한 독립 스크립트만 async -->
+  <script src="/analytics.js" async></script>
+</head>
+<body>
+  <h1>주문 내역</h1>
+</body>
+```
+
+`defer`·`async` 는 실행 시점만 옮길 뿐 다운로드 바이트를 줄이지 않는다 — 저속 회선에서는 파이프라인을 안 막아도 스크립트가 도착할 때까지 화면이 죽어 있는 건 그대로다.

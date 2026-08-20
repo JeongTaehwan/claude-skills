@@ -30,3 +30,33 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefe
 ## 인용 포인트
 - "CSS에도 데이터 절약 감지 자리를 마련해 두되 단독 의존은 금지" — 점진적 향상 병기 패턴의 근거.
 - 기능 제안 리뷰에서 "이 미디어 쿼리는 아직 어떤 브라우저에도 기본 활성화돼 있지 않다"는 사실 확인용.
+
+## 코드 예시
+
+CSS가 직접 요청하는 리소스(배경 이미지·웹폰트)를 감지 지점 안쪽으로 옮긴 형태 — JS·헤더 분기가 주 경로이고, 이 블록은 표준이 켜지는 날 자동으로 살아난다.
+
+```css
+/* 기본(풀) 경험 */
+.hero {
+  background-image: url("/hero-1600.avif");
+  background-color: #10233f; /* 이미지가 빠져도 대비가 유지되도록 */
+}
+
+@font-face {
+  font-family: "Brand";
+  src: url("/fonts/brand.woff2") format("woff2");
+  font-display: swap;
+}
+
+/* 데이터 절약 선호: 배경 이미지를 아예 요청하지 않고 웹폰트도 건너뛴다 */
+@media (prefers-reduced-data: reduce) {
+  .hero {
+    background-image: none;
+  }
+  body {
+    font-family: system-ui, -apple-system, sans-serif; /* 시스템 폰트로 대체 */
+  }
+}
+```
+
+오늘 이 블록은 어떤 사용자에게도 적용되지 않는다 — 기본 활성화된 브라우저가 없으므로, 실제 절약은 JS(`navigator.connection.saveData`)나 `Save-Data` 헤더 분기가 해야 하고 여기는 자리만 잡아 두는 것이다.

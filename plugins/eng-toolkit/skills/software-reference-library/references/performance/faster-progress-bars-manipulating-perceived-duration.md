@@ -34,3 +34,31 @@ Chris Harrison, Zhiquan Yeo, Scott E. Hudson — ACM CHI '10. 진행 바 위의 
 ## 인용 포인트
 - 뒤로 흐르며 감속하는 리빙 애니메이션이 체감 시간 11% 단축 — shimmer 방향·감속 설계를 정할 때의 구체 근거.
 - 시각 효과만으로 체감 시간이 달라진다 — "실제 속도를 못 줄이면 할 게 없다"는 체념에 대한 반례.
+
+## 코드 예시
+
+"뒤로 흐르며 감속하는 리빙 애니메이션이 체감 11% 단축" — 진행 로직은 손대지 않고 shimmer 의 방향과 이징만 논문 결과대로 맞춘 형태.
+
+```css
+.progress {
+  height: 8px; border-radius: 4px; overflow: hidden;
+  background: #e9e9ee;
+}
+.progress__fill {
+  height: 100%; width: var(--pct, 0%);
+  transition: width .2s linear;           /* 진행 자체는 그대로 */
+  /* 리빙(ribbing): 반복되는 사선 줄무늬 */
+  background-image: linear-gradient(115deg,
+    rgba(255,255,255,.35) 25%, transparent 25%, transparent 50%,
+    rgba(255,255,255,.35) 50%, rgba(255,255,255,.35) 75%, transparent 75%);
+  background-size: 28px 28px;
+  background-color: #3b5bdb;
+  animation: rib 1.1s cubic-bezier(.15,.85,.35,1) infinite; /* 감속 곡선 */
+}
+/* 진행 방향(오른쪽)의 반대로 흐르게 한다 — 방향이 핵심이다 */
+@keyframes rib { from { background-position: 28px 0 } to { background-position: 0 0 } }
+
+@media (prefers-reduced-motion: reduce) { .progress__fill { animation: none } }
+```
+
+체감 11%는 실제 시간을 1ms 도 줄이지 않으므로, 이건 몇 초짜리 대기를 견디게 만드는 장치이지 수십 초짜리 대기의 해법이 아니다 — 그리고 방향을 반대로 두면 같은 원리로 체감이 늘어난다.

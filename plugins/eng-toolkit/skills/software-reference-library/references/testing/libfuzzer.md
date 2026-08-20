@@ -38,3 +38,32 @@ https://llvm.org/docs/LibFuzzer.html
 ## 인용 포인트
 - "libFuzzer 는 maintenance-only 모드이고 원저자들은 Centipede 로 이동했다" — 도구 선택 논의에서 반드시 인용해야 하는 공식 서술.
 - 사전(`-dict`)과 값 프로파일이 구조화된 입력의 탐색 깊이를 좌우한다는 설명은, "퍼징 돌렸는데 아무것도 안 나온다"는 보고에 대한 첫 번째 점검 항목이다.
+
+## 코드 예시
+
+핵심 계약인 `LLVMFuzzerTestOneInput` 하나와, 탐색 깊이를 좌우하는 사전·길이 옵션까지의 최소 골격.
+
+```cpp
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include "json_parser.h"
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+  std::string input(reinterpret_cast<const char *>(Data), Size);
+
+  JsonParser parser;
+  parser.Parse(input);  // 크래시·새니타이저 위반이 곧 실패 신호다
+
+  return 0;             // 0 이외의 반환값은 예약되어 있다
+}
+
+// 빌드 — 커버리지 계측(fuzzer)과 메모리 검사(address)를 함께 켠다
+//   clang++ -g -O1 -fsanitize=fuzzer,address json_fuzz.cc json_parser.cc -o json_fuzz
+// 실행 — 코퍼스 디렉터리에 결과가 쌓이고, 사전이 구조화 입력의 탐색을 크게 바꾼다
+//   ./json_fuzz corpus/ -dict=json.dict -max_len=4096
+// 코퍼스 최소화 — 같은 커버리지를 내는 최소 집합만 남긴다
+//   ./json_fuzz -merge=1 corpus_min/ corpus/
+```
+
+인프로세스라 전역 상태가 실행 사이에 남는다 — 하네스가 파서 인스턴스를 재사용하거나 캐시를 건드리면 재현되지 않는 크래시가 나오고, 그때는 퍼저가 아니라 하네스를 먼저 의심해야 한다.

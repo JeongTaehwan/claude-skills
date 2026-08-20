@@ -33,3 +33,38 @@ Google Analytics의 페이지 전이 데이터를 학습해 각 페이지에서 
 ## 인용 포인트
 - 프리페치 대상 선정을 감이 아니라 실측 트래픽 확률로 정하는 접근의 선행 사례로.
 - "좋은 아이디어라도 유지보수가 멈추면 프로덕션 선택지에서 빠진다"는 의존성 평가 기준의 실례.
+
+## 코드 예시
+
+"프리페치 대상을 감이 아니라 실측 전이 확률로 정한다"는 아이디어만 가져와, 정체된 플러그인 대신 자사 로그와 유지되는 수단으로 직접 구현한 형태.
+
+```sql
+-- 페이지뷰 로그에서 다음 페이지 전이 확률을 뽑는다 (Guess.js 가 GA 로 하던 일)
+WITH t AS (
+  SELECT session_id, path,
+         LEAD(path) OVER (PARTITION BY session_id ORDER BY ts) AS next_path
+  FROM pageviews WHERE event_date >= CURRENT_DATE - INTERVAL '30' DAY
+)
+SELECT path, next_path,
+       COUNT(*) * 1.0 / SUM(COUNT(*)) OVER (PARTITION BY path) AS p
+FROM t WHERE next_path IS NOT NULL
+GROUP BY path, next_path
+QUALIFY ROW_NUMBER() OVER (PARTITION BY path ORDER BY COUNT(*) DESC) <= 2;
+```
+
+```js
+// 산출물을 빌드에 넣고, 확률이 임계값을 넘는 경로만 프리페치한다
+import routeGraph from './route-graph.json'; // { "/": [["/search", 0.42], ["/cart", 0.11]] }
+
+const conn = navigator.connection;
+if (!conn?.saveData && !/2g/.test(conn?.effectiveType ?? '')) {
+  for (const [href, p] of routeGraph[location.pathname] ?? []) {
+    if (p < 0.25) continue;                 // 확률 낮으면 낭비다
+    const l = document.createElement('link');
+    l.rel = 'prefetch'; l.href = href;
+    document.head.append(l);
+  }
+}
+```
+
+전이 확률은 과거 트래픽의 기록이라 개편·프로모션 직후에는 곧바로 틀려지고, 프리페치는 빗나가면 저속 사용자의 대역폭을 그냥 태운다 — 그래서 확률 임계값과 회선 조건을 둘 다 걸어야 한다.

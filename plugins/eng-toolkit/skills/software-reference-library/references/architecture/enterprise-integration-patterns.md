@@ -41,3 +41,36 @@ Gregor Hohpe와 Bobby Woolf가 정리한 **메시징 기반 통합 패턴 카탈
 - 패턴별 표준 아이콘 세트가 제공되어, 통합 아키텍처 다이어그램의 표기를 팀 컨벤션으로 굳힐 때 그대로 채택할 수 있다.
 - "at-least-once 환경에서 중복 제거는 수신자 책임" — 컨슈머 멱등성 구현을 생략하자는 제안을 되돌릴 때의 근거. `architecture/end-to-end-arguments-in-system-design.md` 와 함께 인용하면 논지가 더 강해진다.
 - 패턴 이름이 업계 공용어에 가깝기 때문에, 설계 문서에서 긴 설명 대신 이름 하나로 합의를 만들 수 있다.
+
+## 코드 예시
+
+Aggregator + Correlation Identifier — 카탈로그가 이 패턴에 붙여 둔 조건("완료 조건과 타임아웃을 반드시 정의하라")을 코드에서 두 개의 종료 경로로 만든 것.
+
+```python
+import time
+
+class Aggregator:
+    def __init__(self, expected: int, timeout_s: float):
+        self.expected, self.timeout_s = expected, timeout_s
+        self.groups = {}  # correlation_id -> {"parts": {...}, "started": ts}
+
+    def on_message(self, correlation_id: str, part_id: str, payload):
+        g = self.groups.setdefault(
+            correlation_id, {"parts": {}, "started": time.monotonic()})
+        g["parts"][part_id] = payload      # 같은 part 재수신은 덮어쓴다
+        if len(g["parts"]) == self.expected:
+            return self._emit(correlation_id, complete=True)   # 완료 조건
+        return None
+
+    def sweep(self):                       # 주기 호출: 두 번째 종료 경로
+        now = time.monotonic()
+        for cid, g in list(self.groups.items()):
+            if now - g["started"] >= self.timeout_s:
+                yield self._emit(cid, complete=False)
+
+    def _emit(self, cid: str, complete: bool):
+        g = self.groups.pop(cid)
+        return {"correlation_id": cid, "parts": g["parts"], "complete": complete}
+```
+
+`complete=False` 로 나간 묶음을 어떻게 쓸지는 코드가 답하지 않는다 — 부분 결과로 진행할지 실패로 볼지는 도메인 판단이다. 또 상태가 프로세스 메모리에만 있어서 재시작하면 진행 중이던 그룹이 사라지고(그래서 Message Store 가 따라붙는다), Competing Consumers 로 인스턴스를 늘리는 순간 같은 correlation 의 조각이 서로 다른 인스턴스로 흩어져 영원히 안 모인다.

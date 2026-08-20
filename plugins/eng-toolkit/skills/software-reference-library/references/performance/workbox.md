@@ -35,3 +35,35 @@ https://github.com/GoogleChrome/workbox
 ## 인용 포인트
 - 캐싱 전략 논의에서 "직접 발명하지 말고 표준 전략(SWR 등)의 이름과 구현을 그대로 쓰자"는 합의의 근거.
 - 오프라인 지원 제안 시 "서비스 워커 맨손 구현"의 대안으로 제시하는 표준 선택지.
+
+## 코드 예시
+
+"맨손 구현 대신 표준 구현" — 캐시 버전 관리와 오프라인 폴백을 직접 짜지 않고 프리캐싱 모듈에 맡기는 서비스 워커.
+
+```js
+import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
+import { setCatchHandler } from "workbox-routing";
+
+cleanupOutdatedCaches(); // 이전 버전이 남긴 캐시를 정리한다
+
+// 빌드가 주입한 매니페스트(파일별 리비전 해시 포함) — 무효화가 자동으로 관리된다
+precacheAndRoute(self.__WB_MANIFEST);
+
+// 어떤 라우트도 응답하지 못했을 때의 마지막 그물
+setCatchHandler(async ({ request }) => {
+  if (request.destination === "document") return caches.match("/offline.html");
+  if (request.destination === "image") return caches.match("/img/placeholder.svg");
+  return Response.error();
+});
+
+// 새 워커로 갈아탈 시점은 앱이 사용자에게 물어보고 결정한다
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+// 빌드 쪽(workbox-build injectManifest) 설정:
+// { swSrc: "src/sw.js", swDest: "dist/sw.js",
+//   globDirectory: "dist", globPatterns: ["**/*.{js,css,html,woff2}"] }
+```
+
+프리캐싱은 설치 시점에 매니페스트 **전체를 내려받는다** — 느린 회선의 첫 방문자에게는 눈에 안 보이는 큰 백그라운드 전송이고, 그가 재방문하지 않으면 순수 낭비다. `globPatterns`를 넓게 잡는 순간 이 비용이 조용히 커지므로 프리캐시는 셸만 담고 나머지는 런타임 캐싱으로 넘기는 편이 안전하다.

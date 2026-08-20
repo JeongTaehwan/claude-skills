@@ -33,3 +33,31 @@ https://github.com/siddharthkp/bundlesize
 ## 인용 포인트
 - 사이즈 예산 CI라는 관행의 기원 — "이건 검증된 오래된 아이디어"임을 보일 때.
 - 도구는 죽어도 관행은 남는다 — CI 설정 이전 PR에서 "같은 예산, 새 도구"를 설명하는 근거.
+
+## 코드 예시
+
+"도구는 죽어도 관행은 남는다" — 레거시 bundlesize 설정의 예산을 그대로 유지한 채 size-limit 으로 옮기는 이전 PR의 실체.
+
+```jsonc
+// before — package.json 의 "bundlesize" 필드 (정체된 도구)
+"bundlesize": [
+  { "path": "./dist/main.*.js",   "maxSize": "120 kB", "compression": "gzip" },
+  { "path": "./dist/vendor.*.js", "maxSize": "180 kB", "compression": "gzip" }
+]
+```
+
+```js
+// after — .size-limit.js. 같은 예산, 같은 gzip 기준
+module.exports = [
+  { name: 'main',   path: 'dist/main.*.js',   limit: '120 kB', gzip: true },
+  { name: 'vendor', path: 'dist/vendor.*.js', limit: '180 kB', gzip: true },
+];
+```
+
+```yaml
+# CI: 한도를 넘으면 종료 코드가 0이 아니므로 잡이 실패한다
+- run: npm run build
+- run: npx size-limit
+```
+
+이전에서 조용히 깨지는 건 예산 숫자가 아니라 글롭이다 — 해시가 붙은 파일명이나 청크 분할 방식이 바뀌면 매칭되는 파일이 0개가 되고, 그때 도구는 통과로 보고하므로 이전 직후 한 번은 한도를 일부러 낮춰 실패하는지 확인해야 한다.

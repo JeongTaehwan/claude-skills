@@ -34,3 +34,28 @@ Kyle Kingsbury가 실제 DB·큐·코디네이션 서비스에 장애를 주입�
 ## 인용 포인트
 - "문서의 일관성 주장은 검증된 적 없으면 가설로 취급한다"는 원칙을 저장소 선정 기준에 넣을 때, 이 시리즈가 실증 근거가 된다.
 - Redis 기반 분산 락(Redlock)의 안전성 논쟁은 재고 차감 락 설계 리뷰에서 자주 재현되는 사례다.
+
+## 코드 예시
+
+"격리 수준 이름을 가설로 취급한다"를 코드에 반영하면, 읽고-계산하고-쓰는 대신 조건을 DB 안에 넣고 영향 행 수로 판정하게 된다.
+
+```sql
+-- 위험: 격리 수준이 광고대로 동작해야만 맞는 코드 (lost update 창이 열린다)
+SELECT stock FROM items WHERE id = 42;          -- 앱에서 stock >= 3 확인
+UPDATE items SET stock = stock - 3 WHERE id = 42;
+
+-- 안전: 조건을 UPDATE 안으로 옮긴다. 격리 수준과 무관하게 한 문장이 원자적이다.
+UPDATE items
+   SET stock = stock - 3
+ WHERE id = 42
+   AND stock >= 3;
+-- 영향 행 수가 0이면 재고 부족 — 예외로 올려 트랜잭션을 되돌린다.
+
+-- 여러 행을 함께 잠가야 하면 읽는 시점에 잠금을 명시한다.
+BEGIN;
+SELECT stock FROM items WHERE id IN (42, 43) ORDER BY id FOR UPDATE;
+-- ... 검증 후 갱신 ...
+COMMIT;
+```
+
+`FOR UPDATE` 는 단일 노드 RDBMS의 보장이다 — 다중 리더 복제나 분산 SQL로 옮기는 순간 같은 문장이 같은 뜻을 유지하는지는 다시 검증해야 하고, 그게 이 시리즈가 반복해서 보여준 것이다.

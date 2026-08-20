@@ -38,3 +38,32 @@ Pact 의 핵심 주장은 통합 테스트의 방향을 뒤집는 것이다 — 
 ## 인용 포인트
 - "계약은 제공자의 API 명세가 아니라 소비자가 실제로 의존하는 부분집합" — 계약 테스트가 왜 E2E 통합 환경보다 싸고 빠른지 설명하는 핵심 논거.
 - `can-i-deploy` 게이트는 "배포해도 되는지"를 사람 합의가 아니라 기계가 판정하게 만든다 — 서비스 간 배포 순서 조율 회의를 줄이자고 제안할 때 쓸 수 있다.
+
+## 코드 예시
+
+"계약은 소비자가 실제로 쓰는 부분집합"을 그대로 옮긴 소비자 테스트 — 쓰지 않는 필드는 아예 적지 않고, 쓰는 필드도 값이 아니라 타입으로만 묶는다 (Pact JS v3 이상, `PactV3`).
+
+```ts
+import { PactV3, MatchersV3 } from '@pact-foundation/pact';
+const { like, integer } = MatchersV3;
+
+const pact = new PactV3({ consumer: 'web-bff', provider: 'order-api' });
+
+it('주문 조회', async () => {
+  await pact
+    .given('주문 42 가 존재한다')          // provider state
+    .uponReceiving('주문 상세 요청')
+    .withRequest({ method: 'GET', path: '/orders/42' })
+    .willRespondWith({
+      status: 200,
+      // 화면이 쓰는 필드만 선언 — 나머지는 제공자가 바꿔도 안 깨진다
+      body: { id: integer(42), status: like('PAID') },
+    })
+    .executeTest(async (mock) => {
+      const res = await fetch(`${mock.url}/orders/42`);
+      expect((await res.json()).status).toBe('PAID');
+    });
+});
+```
+
+이 테스트가 통과해도 증명된 건 "소비자가 이런 응답을 기대한다"뿐이다. 생성된 pact 파일을 제공자 CI 가 실제 서비스에 재생(provider verification)하고 `given` 에 대응하는 state handler 가 그 상태를 실제로 만들어 주기 전까지는 아무것도 보장되지 않는다.

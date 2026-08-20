@@ -26,7 +26,7 @@ https://dora.dev/
 - 4개 지표를 **실제로 계산하고 대시보드에 올리는** 실무는 `development/dora-four-keys.md`
 - 배포를 실제로 자주 하기 위한 브랜치 전략은 `development/trunk-based-development.md`
 - 배포와 릴리스를 분리하는 구현 기법은 `development/feature-toggles.md`, `development/canary-release.md`
-- 장애 대응·SLO·에러 예산 같은 신뢰성 운영 체계는 `development/sre-workbook.md`
+- 장애 대응·SLO·에러 예산 같은 신뢰성 운영 체계는 `infrastructure/sre-workbook.md`
 - 제품 성과 지표(리텐션, 전환)를 고르는 문제는 개발 지표가 아니라 `planning/north-star-metric.md` 쪽이다
 
 ## 무엇이 들어있나

@@ -36,3 +36,35 @@ https://static.googleusercontent.com/media/research.google.com/en//archive/mapre
 ## 인용 포인트
 - "표현력을 줄여서 장애 복구를 얻는다"는 거래는, 파이프라인에 임의 로직을 넣자는 요구를 거절할 때의 원칙적 근거다.
 - 백업 태스크로 꼬리 지연을 처리한다는 아이디어는 배치뿐 아니라 온라인 요청의 헤지 리트라이 논의에서도 그대로 인용된다.
+
+## 코드 예시
+
+재실행 기반 장애 복구가 성립하려면 "같은 태스크를 두 번 돌려도 결과가 하나"여야 한다 — 논문이 그걸 얻는 방법은 임시 파일 + 원자적 rename 이다.
+
+```python
+import os, json
+from collections import defaultdict
+
+def map_fn(line: str):                    # 결정적이어야 한다 — 시각·난수 금지
+    for word in line.split():
+        yield (word.lower(), 1)
+
+def reduce_fn(key: str, values):
+    return sum(values)
+
+def run_reduce_task(task_id: int, pairs, out_dir: str) -> str:
+    grouped = defaultdict(list)
+    for k, v in pairs:
+        grouped[k].append(v)
+
+    # 백업 태스크와 동시에 돌 수 있으므로 임시 이름은 태스크별로 유일하게
+    tmp = os.path.join(out_dir, f".tmp-{task_id}-{os.getpid()}")
+    final = os.path.join(out_dir, f"part-{task_id:05d}")
+    with open(tmp, "w") as f:
+        for k in sorted(grouped):
+            f.write(json.dumps({k: reduce_fn(k, grouped[k])}) + "\n")
+    os.rename(tmp, final)                 # 커밋은 이 한 줄. 중복 실행돼도 결과는 하나
+    return final
+```
+
+`os.rename` 의 원자성은 같은 파일시스템 안에서만 성립한다 — S3 같은 객체 스토리지에는 rename 이 없어서, 그 위에서는 같은 보장을 커밋 프로토콜로 따로 사야 한다.

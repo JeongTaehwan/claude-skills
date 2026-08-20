@@ -37,3 +37,31 @@ Mozilla 단독 문서가 아니라 Open Web Docs를 포함한 여러 브라우�
 ## 인용 포인트
 - 기술 선택 문서에서 "이 API는 아직 지원 범위가 부족하다"를 주장할 때, 호환성 표가 그대로 근거가 된다.
 - 블로그 링크 대신 MDN 링크를 리뷰 코멘트에 다는 습관 하나로, "출처가 오래됐다"는 논쟁이 사라진다.
+
+## 코드 예시
+
+"스펙에 있느냐"와 "지금 쓸 수 있느냐"가 다른 질문이라는 MDN 의 전제를, 기능 탐지와 폴백으로 코드에 옮긴 것.
+
+```js
+// 호환성 표에서 내린 판단을 런타임 분기로 남긴다 — 사용자 에이전트 문자열은 보지 않는다
+const canObserve = 'IntersectionObserver' in window;
+
+function lazyLoad(img) {
+  if (!canObserve) {
+    img.src = img.dataset.src;        // 폴백: 즉시 로드
+    return;
+  }
+  const io = new IntersectionObserver((entries, observer) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.src = entry.target.dataset.src;
+      observer.unobserve(entry.target);
+    }
+  }, { rootMargin: '200px' });
+  io.observe(img);
+}
+
+document.querySelectorAll('img[data-src]').forEach(lazyLoad);
+```
+
+`'X' in window` 는 존재 여부만 잡는다 — 옵션 하나(`rootMargin` 의 단위 허용 범위 같은)나 반환 타입이 브라우저마다 다른 경우는 MDN 페이지 하단의 호환성 표를 봐야 알 수 있다.

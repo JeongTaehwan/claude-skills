@@ -36,3 +36,32 @@ https://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf
 ## 인용 포인트
 - 성질 + 자동 생성 + 반례 축소라는 세 요소가 한 세트라는 점. "랜덤이라 디버깅이 어렵다"는 반박에 대한 표준 답이 축소(shrinking)다.
 - 이 논문이 2000년 것이고 이후 거의 모든 언어에 이식되었다는 사실 자체가, 속성 기반 테스트를 실험적 기법이 아니라 검증된 기법으로 제시할 때 쓸 수 있는 근거다.
+
+## 코드 예시
+
+논문이 말한 세 조각을 원전 형태로 — 성질(`prop_`), 도메인 생성기(`Arbitrary`), 그리고 조건부 성질의 `==>`.
+
+```haskell
+import Test.QuickCheck
+
+data Order = Order { currency :: String, quantity :: Int } deriving (Eq, Show)
+
+-- 생성기는 일급 값이다: "우리 도메인의 유효한 주문"을 코드로 적는다
+instance Arbitrary Order where
+  arbitrary = Order <$> elements ["KRW", "USD"] <*> choose (1, 100)
+
+-- 왕복 성질 — 예제를 고르지 않고 관계를 적는다
+prop_roundTrip :: Order -> Bool
+prop_roundTrip o = decode (encode o) == Just o
+
+-- 조건부 성질 — 전제를 만족하는 입력에서만 검사
+prop_discountNonNegative :: Int -> Double -> Property
+prop_discountNonNegative amount rate =
+  amount >= 0 && rate >= 0 && rate <= 1
+    ==> applyDiscount amount rate >= 0
+
+-- $ quickCheck prop_roundTrip
+-- *** Failed! Falsifiable (after 27 tests and 4 shrinks): Order "USD" 1
+```
+
+`==>` 는 전제를 만족하지 않는 입력을 **버린다** — 전제가 좁으면 대부분이 버려져 `Gave up! Passed only 43 tests` 로 끝나고, 통과한 것처럼 보이는 초록불이 사실은 거의 검사하지 않은 결과가 된다. 그럴 땐 필터가 아니라 생성기 쪽을 고쳐 유효 입력만 만들게 하는 것이 논문이 생성기를 일급으로 둔 이유다.

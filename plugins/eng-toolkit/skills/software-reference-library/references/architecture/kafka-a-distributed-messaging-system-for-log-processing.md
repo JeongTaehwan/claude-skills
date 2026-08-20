@@ -35,3 +35,33 @@ LinkedIn의 활동 스트림·운영 지표 수집이라는 구체적 문제에�
 ## 인용 포인트
 - "소비 상태를 브로커에서 소비자로 옮겼기 때문에 브로커가 단순해지고 확장된다"는 설계 논리는, 상태를 어디에 두느냐가 확장성을 결정한다는 일반 교훈으로 인용하기 좋다.
 - 순서 보장이 토픽이 아니라 파티션 단위라는 사실은 주문 상태 이벤트 설계 리뷰에서 반드시 짚어야 할 지점이다.
+
+## 코드 예시
+
+논문의 두 결론 — 순서는 파티션 단위이고 소비 위치는 소비자가 들고 있다 — 이 코드에서는 "키를 주문 ID로 잡는다"와 "처리 뒤에 직접 커밋한다"로 나타난다.
+
+```python
+from confluent_kafka import Producer, Consumer
+
+# 같은 주문의 이벤트는 같은 파티션으로 — 순서 보장은 여기까지만 성립한다.
+producer = Producer({"bootstrap.servers": "kafka:9092"})
+producer.produce("order-events", key="ord-1042", value=b'{"type":"PAID"}')
+producer.flush()
+
+consumer = Consumer({
+    "bootstrap.servers": "kafka:9092",
+    "group.id": "settlement",
+    "enable.auto.commit": False,      # 오프셋은 소비자가 소유한다
+    "auto.offset.reset": "earliest",  # 재처리를 위해 처음부터
+})
+consumer.subscribe(["order-events"])
+
+while True:
+    msg = consumer.poll(1.0)
+    if msg is None or msg.error():
+        continue
+    handle(msg.key(), msg.value())    # 처리가 끝난 뒤에야
+    consumer.commit(msg)              # 위치를 옮긴다 → 최소 한 번
+```
+
+`commit` 을 처리 뒤로 미루면 at-least-once가 되고, 그 대가로 `handle` 은 반드시 멱등해야 한다 — 이 코드가 감추는 건 중복 처리 방어이지 없애준 게 아니다.

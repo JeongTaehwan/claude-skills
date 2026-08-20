@@ -35,3 +35,28 @@ Awesome 시리즈 중에서도 "사람이 읽을 글" 비중이 높은 축이다
 
 ## 인용 포인트
 - 신규 입사자용 학습 자료 목록의 출발점으로 그대로 옮겨 쓰기 좋다. 다만 내부용으로 옮길 때는 링크 생존 확인이 필요하다.
+
+## 코드 예시
+
+큐레이션을 사내 온보딩 목록으로 옮길 때 "링크가 죽어 있다"는 이 자료의 알려진 한계를 매달 자동으로 걸러내는 스크립트.
+
+```bash
+#!/usr/bin/env bash
+# docs/qa-onboarding.md 안의 링크 생존 확인 — cron 으로 월 1회
+set -uo pipefail
+LIST=docs/qa-onboarding.md
+dead=0
+
+grep -oE 'https?://[^)[:space:]]+' "$LIST" | sort -u | while read -r url; do
+  code=$(curl -sSL --max-time 15 -o /dev/null -w '%{http_code}' "$url" || echo 000)
+  case "$code" in
+    2*|3*) ;;                      # 살아 있음
+    405|403) echo "MANUAL $code $url" ;;   # HEAD/봇 차단 — 사람이 확인
+    *) echo "DEAD $code $url"; dead=1 ;;
+  esac
+done
+
+exit $dead
+```
+
+살아 있는 URL과 살아 있는 내용은 다르다 — 200 을 돌려주는 블로그가 6년째 갱신이 없을 수 있고, 이 스크립트는 그걸 구분하지 못한다.

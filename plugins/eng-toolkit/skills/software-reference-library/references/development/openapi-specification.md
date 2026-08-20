@@ -42,3 +42,39 @@ Security Scheme 절에서 OAuth2 플로우, API Key 위치, HTTP 인증 스킴�
 - "문서를 사람이 최신화하자"는 제안에 반대할 때, 스펙이 코드 생성·목·검증의 공통 입력이 된다는 구조를 근거로 들 수 있다.
 - 3.0 → 3.1 업그레이드 리스크를 설명할 때 `nullable` 폐기와 JSON Schema 정합화를 구체적 breaking point 로 제시할 수 있다.
 - `x-` 확장이 명세에 명시적으로 허용된다는 점은, 사내 규약을 스펙에 얹자는 제안의 근거가 된다.
+
+## 코드 예시
+
+3.1 의 스키마 모델(타입 배열로 null 표현), `$ref` 재사용, `x-` 확장을 한 스펙에 모은 최소 예제.
+
+```yaml
+openapi: 3.1.0
+info: { title: Order API, version: 2.1.0 }
+paths:
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      x-owner-team: order-platform        # x- 확장은 명세가 공식 허용 — 사내 메타데이터도 규격 위반이 아니다
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+components:
+  schemas:
+    Order:
+      type: object
+      required: [orderId, totalAmount]    # 선택/필수를 문장이 아니라 스펙으로 못 박는다
+      properties:
+        orderId: { type: string }
+        totalAmount: { type: integer }
+        canceledAt: { type: [string, 'null'], format: date-time }
+```
+
+마지막 줄이 3.0 → 3.1 의 breaking point 다 — 3.0 의 `nullable: true` 를 그대로 두고 버전만 올리면 도구가 조용히 다르게 해석한다.

@@ -39,3 +39,28 @@ https://developers.google.com/style
 ## 인용 포인트
 - 표현 논쟁이 붙었을 때 "사내 취향" 대신 "사실상의 업계 기준"을 근거로 제시할 수 있어, 논의가 개인 대 개인에서 벗어난다.
 - 단어 목록이 있어서 규칙을 통째로 읽히지 않고도 링크 하나로 지적할 수 있다.
+
+## 코드 예시
+
+"표현 논쟁을 사람 대 사람에서 떼어 낸다"를 끝까지 밀면 규칙이 CI 로 간다 — 이 가이드는 Vale 의 Google 스타일 패키지로 그대로 실행할 수 있다.
+
+```ini
+; .vale.ini
+StylesPath = styles
+MinAlertLevel = warning
+
+Packages = Google
+
+[*.md]
+BasedOnStyles = Google
+; 제품명·고유명사는 단어 목록 판정에서 빼 둔다
+Vocab = Product
+```
+
+```bash
+# styles/config/vocabularies/Product/accept.txt 에 허용 단어를 한 줄씩
+vale sync
+vale docs/
+```
+
+이 설정이 잡는 것은 문장 층위뿐이다 — 수동태, `you` 와 `the user` 의 혼용, 비권장 용어까지다. 한 문서가 튜토리얼과 레퍼런스를 겸해서 안 읽히는 문제는 경고 0건으로도 그대로 남는다. 한국어 문서에 걸면 규칙 대부분이 무의미하게 도는 것도 함께 알아 둬야 한다.

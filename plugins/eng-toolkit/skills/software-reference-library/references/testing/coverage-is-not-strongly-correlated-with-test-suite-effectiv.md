@@ -39,3 +39,26 @@ http://linozemtseva.com/research/2014/icse/coverage/coverage_is_not_strongly_cor
 - 커버리지-효과성 상관이 스위트 크기를 통제하면 약해진다는 결과는, 커버리지 목표 수치를 품질 게이트로 삼는 정책에 대한 표준 반론으로 쓸 수 있다.
 - 더 강한 커버리지 기준이 예측력을 크게 개선하지 못했다는 점은, "분기 커버리지로 올리자"는 절충안까지 함께 막는다.
 - 커버리지를 버리는 대신 "미커버 영역 탐지용 하한 신호"로 재정의하자는 제안의 근거로 인용하기 좋다.
+
+## 코드 예시
+
+전사 80% 게이트 대신, 커버리지를 "아예 안 건드린 영역"을 찾는 하한 신호로 재정의한 설정.
+
+```js
+// jest.config.js
+module.exports = {
+  collectCoverage: true,
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
+
+  coverageThreshold: {
+    // 전역 수치는 목표가 아니라 바닥이다 — 여기를 올리는 경쟁을 만들지 않는다
+    global: { statements: 40 },
+
+    // 조용히 틀리면 치명적인 모듈만 따로 높게 잡는다
+    './src/billing/**/*.ts': { statements: 90, branches: 85 },
+    './src/inventory/**/*.ts': { statements: 90, branches: 85 },
+  },
+};
+```
+
+임계치를 넘겼다는 것은 그 코드가 실행됐다는 뜻일 뿐, 검증됐다는 뜻이 아니다 — 이 설정은 미커버 영역만 잡아 주고, 실제 검출력은 어서션 리뷰나 뮤테이션 점수로 따로 봐야 한다.

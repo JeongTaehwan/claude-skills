@@ -40,3 +40,29 @@ https://hypothesis.readthedocs.io/en/latest/
 - 실패 예제를 데이터베이스에 저장해 재시도한다는 설계는, "무작위 테스트는 재현이 안 된다"는 반대 의견에 대한 구체적 답변으로 쓸 수 있다.
 - pytest 위에 얹히는 구조라 기존 테스트 파이프라인 변경 없이 점진 도입이 가능하다는 점은 도입 제안의 핵심 근거다.
 - 상태 기반 테스트 기능은 주문·재고 같은 상태 전이 로직의 불변식 검증에 속성 기반 접근을 확장할 수 있음을 보여 준다.
+
+## 코드 예시
+
+전략을 조합해 도메인 값을 만들고 왕복 성질을 단언하면서, 과거에 터졌던 반례는 `@example` 로 회귀 테스트로 승격시킨 형태.
+
+```python
+from hypothesis import given, example, settings
+from hypothesis import strategies as st
+
+# 기본 전략을 조합해 "유효한 주문 항목"을 만든다
+line_item = st.fixed_dictionaries({
+    "sku": st.text(min_size=1, max_size=20),
+    "quantity": st.integers(min_value=1, max_value=99),
+    "unit_price": st.integers(min_value=0, max_value=10_000_000),
+})
+
+@given(st.lists(line_item, min_size=1, max_size=20))
+# 한 번 잡힌 반례는 고정해 둔다 — 무작위에 다시 맡기지 않는다
+@example([{"sku": "A", "quantity": 1, "unit_price": 0}])
+@settings(max_examples=500)
+def test_encode_decode_roundtrip(items):
+    # 왕복 성질: 직렬화하고 되돌리면 원본과 같아야 한다
+    assert decode_order(encode_order(items)) == items
+```
+
+실패 예제 데이터베이스는 기본적으로 로컬 `.hypothesis/` 에 쌓인다 — CI 컨테이너가 매번 새로 뜨면 재시도 효과가 사라지므로, 중요한 반례는 결국 `@example` 로 코드에 박아 두는 편이 안전하다.

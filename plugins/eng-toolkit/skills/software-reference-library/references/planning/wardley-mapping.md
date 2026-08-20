@@ -37,3 +37,34 @@ Wardley 매핑의 핵심 주장은 "위치와 이동이 없는 그림은 지도�
 ## 인용 포인트
 - "지도(map) vs 다이어그램" — 아키텍처 그림에 위치·이동 정보가 없다는 지적을 할 때.
 - "모든 것은 상품화 쪽으로 이동한다" — 자체 개발 고집이나 반대로 조기 아웃소싱을 판단할 때의 축.
+
+## 코드 예시
+
+자체 개발 vs 구매 논쟁을 취향에서 좌표로 옮기는 최소 형식 — 각 요소에 진화 단계(`stage`)와 이동 방향(`movement`)이 붙어야 다이어그램이 아니라 지도가 된다.
+
+```yaml
+# strategy/map-주문도메인.yaml
+anchor: 고객이 주문한 물건을 제때 받는다     # 맨 위는 사용자 니즈. 내부 시스템이 아니다.
+
+components:
+  - name: 주문 상태 관리
+    stage: custom          # genesis | custom | product | commodity
+    movement: 느림          # 우리 사업의 차별점이라 당분간 왼쪽에 남는다
+    decision: 직접 만든다
+
+  - name: 결제 처리
+    stage: product         # PG 로 이미 상품화된 영역
+    movement: commodity 쪽
+    decision: 사온다
+    note: 여기를 직접 만드는 것이 이 지도에서 가장 자주 나오는 낭비
+
+  - name: 배송 추적 알림
+    stage: commodity
+    decision: 유틸리티로 쓴다
+
+  - name: 이탈 예측
+    stage: genesis         # 아직 무엇이 되는지 모른다
+    decision: 실험으로만. 여기에 SLA 를 요구하면 실패한다
+```
+
+단계 표기가 붙었다고 판단이 자동으로 나오지는 않는다 — `stage` 를 어디에 찍을지가 실제 논쟁이고, 이 파일은 그 논쟁을 없애는 게 아니라 한 칸으로 좁힌다.

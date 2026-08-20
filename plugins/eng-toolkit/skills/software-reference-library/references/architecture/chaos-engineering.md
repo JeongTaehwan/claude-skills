@@ -24,7 +24,7 @@ Netflix 팀이 IEEE Software에 낸 논문으로, "장애를 주입해본다"는
 - 주문·결제처럼 실패가 돈으로 직결되는 경로에 대해 실험 범위를 어디까지 허용할지 선을 그을 때
 
 ## 이럴 땐 아니다
-- 원칙을 실무 체크리스트 형태로 짧게 훑고 싶으면 `development/principles-of-chaos-engineering.md`
+- 원칙을 실무 체크리스트 형태로 짧게 훑고 싶으면 `infrastructure/principles-of-chaos-engineering.md`
 - 실제 주입 도구를 고르는 단계면 `testing/chaos-monkey.md`, 도구·라이브러리 지형 전반은 `qa/awesome-chaos-engineering.md`
 - 실험이 아니라 *이미 난 장애*에서 배우는 체계(포스트모템)를 만들려면 `development/postmortem-culture-learning-from-failure.md`
 - 분산 시스템의 일관성 보장이 실제로 깨지는지를 외부에서 검증하는 쪽이면 `architecture/jepsen.md`
@@ -38,3 +38,36 @@ Netflix 팀이 IEEE Software에 낸 논문으로, "장애를 주입해본다"는
 - "카오스 엔지니어링은 장애를 일으키는 것이 아니라 이미 시스템에 존재하는 무질서를 드러내는 것" — 승인 논의에서 프레임을 바꾸는 데 쓰인다.
 - 정상 상태를 비즈니스 출력 지표로 정의하라는 원칙은, 실험을 넘어 SLI 설계 논의에도 그대로 인용 가능.
 - IEEE Software 게재 + Netflix 실무진 저자라는 출처 조합이라, "검증되지 않은 유행"이라는 반론을 무력화하는 데 효과적이다.
+
+## 코드 예시
+
+논문이 요구하는 네 가지 — 정상 상태를 사용자 출력 지표로, 가설을 먼저, 폭발 반경을 설계 조건으로, 상시 반복 — 을 실험 정의 파일 한 장으로 만든 것.
+
+```yaml
+experiment: pg-latency-2s
+hypothesis: >
+  PG 응답이 2초 지연돼도 분당 주문 완료 수는 기준선의 95% 이상을 유지한다.
+
+steady_state:
+  metric: orders_completed_per_minute   # CPU·에러 로그가 아니라 사용자 관점 출력
+  baseline_window: 30m
+  pass_if: ">= 0.95 * baseline"
+
+method:
+  fault: latency
+  target: outbound-http:pg.example.com
+  inject: 2000ms
+
+blast_radius:
+  environment: production   # 스테이징 통과는 프로덕션의 증거가 되지 않는다
+  traffic_share: 1%
+  duration: 10m
+
+abort_when:                 # 하나라도 걸리면 즉시 주입 해제
+  - orders_completed_per_minute < 0.90 * baseline
+  - payment_error_rate > 2%
+
+schedule: "0 14 * * TUE"    # 상시 반복 — 시스템은 실험보다 빨리 변한다
+```
+
+`traffic_share: 1%` 는 지표가 즉시 보일 때만 1% 다 — 집계 지연이 60초면 실제 폭발 반경은 "1% × 감지 지연"이고, 중단 버튼보다 사고가 먼저 끝난다. 그리고 가설이 반증되지 않았다는 것은 안전하다는 뜻이 아니라 이 실험이 정보를 별로 주지 못했다는 뜻에 가깝다.

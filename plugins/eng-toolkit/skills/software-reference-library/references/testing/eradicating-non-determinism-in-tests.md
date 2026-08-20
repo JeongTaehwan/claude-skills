@@ -40,3 +40,33 @@ https://martinfowler.com/articles/nonDeterminism.html
 - "비결정적 테스트는 가치가 없는 정도가 아니라 스위트 전체의 신뢰를 갉아먹는다"는 프레임은, 플레이키 정리 작업에 스프린트 시간을 배정해 달라고 설득할 때 가장 효과적인 논거다.
 - 격리(quarantine) 개념은 "당장 못 고치니 그냥 두자"와 "다 고칠 때까지 릴리스 중단" 사이의 실행 가능한 중간 정책으로 그대로 제도화할 수 있다.
 - 재시도가 원인 조사를 영구히 지연시킨다는 지적은 CI 재시도 도입 논의의 표준 반론이다.
+
+## 코드 예시
+
+"시간을 주입 가능한 것으로 만들라"를 그대로 옮긴 before/after — 자정·월말에만 깨지던 테스트가 결정적이 된다.
+
+```js
+// before — 현재 시각을 직접 읽는다. 월말 23:59 에 CI 가 돌면 깨진다
+export function couponExpired(coupon) {
+  return coupon.expiresAt < Date.now();
+}
+
+test('만료 쿠폰은 사용할 수 없다', () => {
+  const coupon = { expiresAt: Date.now() - 1000 }; // "지금"에 상대적
+  expect(couponExpired(coupon)).toBe(true);
+});
+
+// after — 시각을 인자로 받는다. 프로덕션에서만 Date.now 를 넘긴다
+export function couponExpiredAt(coupon, now) {
+  return coupon.expiresAt < now;
+}
+
+test('만료 시각 직전/직후 경계', () => {
+  const expiresAt = Date.parse('2026-03-01T00:00:00Z'); // 고정 시각
+  expect(couponExpiredAt({ expiresAt }, expiresAt - 1)).toBe(false);
+  expect(couponExpiredAt({ expiresAt }, expiresAt)).toBe(false);
+  expect(couponExpiredAt({ expiresAt }, expiresAt + 1)).toBe(true);
+});
+```
+
+시각 주입은 시간 유형의 비결정성만 없앤다 — 공유 DB 상태나 고정 sleep 으로 기다리는 비동기는 그대로 남고, 호출부 어딘가가 여전히 `Date.now()` 를 직접 읽고 있으면 원인이 한 단계 안쪽으로 숨을 뿐이다.

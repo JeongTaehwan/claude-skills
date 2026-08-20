@@ -35,3 +35,33 @@ libvips를 감싼 Node.js 이미지 처리의 사실상 표준. 리사이즈·We
 ## 인용 포인트
 - 이미지 파이프라인 도구 선정에서 "next/image가 내부적으로 쓰는 그 라이브러리"라는 사실상 표준 지위.
 - 아카이브된 플레이스홀더 래퍼들(plaiceholder 등)을 걷어내고 sharp 직접 호출로 통일하자는 제안의 근거.
+
+## 코드 예시
+
+"플레이스홀더 래퍼를 걷어내고 sharp 직접 호출로 통일한다"와 "최신 포맷 변환으로 전송 바이트를 줄인다"를 한 파이프라인에 넣은 것.
+
+```js
+import sharp from "sharp";
+
+// next/image 의 blurDataURL 에 그대로 넣을 초소형 인라인 이미지
+export async function makeBlurDataURL(input) {
+  const buf = await sharp(input).resize(10).webp({ quality: 20 }).toBuffer();
+  return `data:image/webp;base64,${buf.toString("base64")}`;
+}
+
+// 업로드 시점에 폭별 · 포맷별 변형을 미리 굽는다
+export async function buildVariants(input, outDir) {
+  const { width } = await sharp(input).metadata();
+  const widths = [480, 960, 1600].filter((w) => w <= width); // 원본보다 크게 늘리지 않는다
+
+  await Promise.all(
+    widths.flatMap((w) => [
+      sharp(input).resize(w).avif({ quality: 50 }).toFile(`${outDir}/${w}.avif`),
+      sharp(input).resize(w).webp({ quality: 72 }).toFile(`${outDir}/${w}.webp`),
+    ])
+  );
+  return widths;
+}
+```
+
+sharp는 libvips 네이티브 바인딩이라 설치된 바이너리가 실행 플랫폼(아키텍처·libc)과 맞아야 하고, AVIF 인코딩은 CPU를 크게 먹는다 — 요청마다 부르는 자리가 아니라 업로드·빌드 시점에 한 번 굽는 자리에 둬야 한다.

@@ -34,3 +34,30 @@ https://www.smashingmagazine.com/
 
 ## 인용 포인트
 - 특정 기법의 실무 도입 사례가 필요할 때, "누군가 이미 이렇게 했다"는 근거로 기획·설계 문서에 붙이기 좋다. 다만 규범이 아니라 사례이므로 사양 문서와 함께 인용하는 편이 안전하다.
+
+## 코드 예시
+
+이 매체가 메우는 층의 전형 — 스펙 문서에도 디자인 시스템 문서에도 없는 "반응형 데이터 테이블 + 신기능" 조합.
+
+```css
+/* 화면 폭이 아니라 이 컴포넌트가 놓인 폭으로 분기한다 */
+.table-wrap {
+  container-type: inline-size;
+  container-name: orders;
+  overflow-x: auto; /* 좁으면 우선 가로 스크롤로 살려 둔다 */
+}
+
+/* 좁은 컨테이너에서는 행을 카드처럼 접는다 */
+@container orders (max-width: 40rem) {
+  .orders thead { position: absolute; clip-path: inset(50%); } /* 시각만 감춘다 */
+  .orders tr { display: block; border-block-end: 1px solid #ddd; }
+  .orders td { display: grid; grid-template-columns: 8rem 1fr; gap: 0.5rem; }
+  .orders td::before { content: attr(data-label); font-weight: 600; }
+}
+
+/* :has() — 선택된 행이 있으면 벌크 툴바를 띄운다. JS 클래스 토글 없이 */
+.bulk-toolbar { display: none; }
+.orders:has(input[type="checkbox"]:checked) + .bulk-toolbar { display: flex; }
+```
+
+`attr(data-label)`은 셀마다 라벨을 마크업에 중복해 넣어야 성립하고, `thead`를 감추는 순간 표 구조 안내가 스크린리더에서 약해진다 — 이런 글의 결론이 대개 "완전한 해법은 없다"인 이유다. 발행 시점에 따라 `:has()`와 컨테이너 쿼리의 지원 상황도 달라지므로 사양·지원 여부는 MDN에서 교차 확인해야 한다.

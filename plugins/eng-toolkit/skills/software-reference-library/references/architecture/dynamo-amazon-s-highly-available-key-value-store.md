@@ -41,3 +41,34 @@ https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
 - "충돌 해소를 애플리케이션이 한다" — 최종 일관성 저장소를 도입하자는 제안에 대해, 그 결정이 개발팀에 어떤 숙제를 남기는지 드러내는 데 쓴다.
 - 장바구니의 "삭제된 항목이 되살아날 수 있음을 감수한다"는 결정은, 비즈니스 관점에서 어떤 오류가 더 싼지를 먼저 정하라는 논지의 교과서적 사례다.
 - SLA를 평균이 아니라 99.9 퍼센타일로 정의한 대목은, 성능 목표를 평균 응답시간으로 잡는 관행을 바꾸자는 제안의 근거가 된다.
+
+## 코드 예시
+
+"저장소는 인과관계 없는 버전이 여럿이라는 것까지만 알려주고, 무엇이 옳은지는 애플리케이션이 정한다"를 벡터 클럭 비교 + 장바구니 병합으로 옮긴 것.
+
+```python
+def dominates(a: dict, b: dict) -> bool:
+    """클럭 a 가 b 보다 엄밀히 뒤인가 — 모든 노드 카운터가 b 이상이고 같지는 않다"""
+    return a != b and all(a.get(node, 0) >= c for node, c in b.items())
+
+def on_write(clock: dict, node_id: str, cart: dict) -> dict:
+    new_clock = dict(clock)
+    new_clock[node_id] = new_clock.get(node_id, 0) + 1  # 쓴 노드만 올린다
+    return {"cart": cart, "clock": new_clock}
+
+def reconcile(versions: list) -> dict:
+    # 다른 버전에 인과적으로 덮이지 않은 것들만 남는다 = 형제 버전
+    siblings = [v for v in versions
+                if not any(dominates(o["clock"], v["clock"]) for o in versions)]
+    if len(siblings) == 1:
+        return siblings[0]
+    cart, clock = {}, {}
+    for v in siblings:  # 장바구니는 합집합 — 되살아나는 게 사라지는 것보다 싸다
+        for sku, qty in v["cart"].items():
+            cart[sku] = max(cart.get(sku, 0), qty)
+        for node, c in v["clock"].items():
+            clock[node] = max(clock.get(node, 0), c)
+    return {"cart": cart, "clock": clock}
+```
+
+`max` 병합은 "지웠다"와 "아직 안 담았다"를 구분하지 못한다 — 삭제를 진짜로 반영하려면 툼스톤이 필요하고, 그 순간 이 함수는 도메인 규칙 덩어리가 된다. 클럭도 무한히 자라서 논문 자체가 절단을 언급하는데, 자르는 순간 없는 인과관계를 만들어 내 형제 버전이 조용히 사라질 수 있다. 이 코드가 보여주는 건 최종 일관성이 저장소가 아니라 개발팀에게 남기는 숙제의 크기다.

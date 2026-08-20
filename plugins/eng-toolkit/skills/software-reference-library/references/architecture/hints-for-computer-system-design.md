@@ -36,3 +36,31 @@ Lampson이 실제 시스템(Alto, Bravo, SDS 940 등)을 만들며 얻은 설계
 ## 인용 포인트
 - "When in doubt, leave it out" 은 스코프 협상에서 그대로 쓰인다 — 확신 없는 기능을 넣는 쪽에 입증 책임을 넘긴다.
 - "예외 경로는 단순하게" 는 결제 실패·타임아웃 처리 설계에서, 정교한 복구 로직보다 안전한 종료를 택하자는 근거가 된다.
+
+## 코드 예시
+
+"정상 경로를 빠르게, 예외 경로를 단순하게, 안전한 쪽으로 끝내라"를 결제 타임아웃 처리에 그대로 적용한 형태.
+
+```python
+import httpx
+
+class Undetermined(Exception):
+    """승인 여부를 모른다 — 성공으로도 실패로도 단정하지 않는다."""
+
+def authorize(order_id: str, amount_krw: int) -> str:
+    try:
+        # 정상 경로: 분기 없이 곧바로
+        res = httpx.post(
+            "https://pg.example.com/authorize",
+            json={"orderId": order_id, "amount": amount_krw},
+            timeout=3.0,
+        )
+        res.raise_for_status()
+        return "APPROVED" if res.json()["approved"] else "REJECTED"
+    except (httpx.TimeoutException, httpx.HTTPStatusError) as e:
+        # 예외 경로: 재시도·보상 로직을 여기서 만들지 않는다.
+        # 상태를 미확정으로 남기고 조회 배치가 판정하게 넘긴다.
+        raise Undetermined(order_id) from e
+```
+
+예외 경로를 단순하게 두는 대가는 "미확정" 상태를 누군가 반드시 닫아야 한다는 것이다 — 대사 배치가 없으면 이 코드는 단순한 게 아니라 미완성이다.

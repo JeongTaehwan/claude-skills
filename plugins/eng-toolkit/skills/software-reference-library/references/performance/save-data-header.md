@@ -34,3 +34,27 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Save-Data
 ## 인용 포인트
 - "데이터 절약 대응은 클라이언트 JS 없이도 가능하다" — 서버/엣지 분기 설계 제안의 근거.
 - `Vary: Save-Data` 누락이 만드는 캐시 오염 — 분기 응답 리뷰에서 지적할 때 인용.
+
+## 코드 예시
+
+"데이터 절약 대응은 클라이언트 JS 없이도 가능하다"를 서버 분기로 옮기고, 분기와 `Vary`를 한 자리에 묶어 둔 형태.
+
+```js
+app.get("/product/:id", async (req, res) => {
+  const lite = req.get("Save-Data") === "on";
+
+  // 분기했으면 반드시 Vary — 빠뜨리면 CDN이 한쪽 변형을 모두에게 내려준다
+  res.set("Vary", "Save-Data");
+  res.set("Cache-Control", "public, max-age=300");
+
+  const product = await loadProduct(req.params.id);
+  res.render(lite ? "product-lite" : "product", {
+    product,
+    hero: lite ? "/img/hero-480.jpg" : "/img/hero-1600.avif",
+    gallery: lite ? product.images.slice(0, 1) : product.images,
+    autoplayVideo: !lite,
+  });
+});
+```
+
+`Save-Data: on`은 사용자가 절약 모드를 직접 켠 Chromium 계열에서만 올라온다 — 즉 트래픽 대부분에는 이 헤더가 아예 없으므로, 이 분기는 기본 경로가 무거워도 된다는 면죄부가 아니라 이미 가벼운 기본 위에 얹는 추가 절약이어야 한다.

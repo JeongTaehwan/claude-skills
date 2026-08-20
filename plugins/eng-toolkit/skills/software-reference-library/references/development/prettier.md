@@ -41,3 +41,29 @@ https://prettier.io/docs/
 - 설정 논쟁이 붙었을 때 "옵션을 늘리지 않는 것이 이 도구의 설계 결정"이라는 공식 입장을 그대로 인용하면, 취향 협상이 도구 선택 문제로 환원된다.
 - ESLint 와의 역할 분리는 양쪽 공식 문서가 같은 말을 하므로, 린트 설정 정리 제안의 근거로 두 문서를 함께 붙이는 것이 효과적이다.
 - 전체 포맷팅 커밋을 blame 에서 제외하는 방법이 문서에 있다는 점은, "지금 넣으면 히스토리가 더러워진다"는 반대에 대한 실무적 답이 된다.
+
+## 코드 예시
+
+"지금 넣으면 blame 이 더러워진다"는 반대와 "ESLint 와 싸운다"는 반대를 각각 처리하는 도입 절차.
+
+```bash
+# 1) 전체 포맷팅을 딱 한 커밋으로 분리한다
+npx prettier . --write
+git commit -am "chore: prettier 일괄 적용"
+
+# 2) 그 커밋만 blame 에서 제외한다 — 문서가 제시하는 히스토리 오염 대응
+git rev-parse HEAD >> .git-blame-ignore-revs
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+git add .git-blame-ignore-revs && git commit -m "chore: blame ignore revs"
+
+# 3) 역할 분리 — 린터에서 서식 규칙을 꺼 충돌을 없앤다
+npm i -D eslint-config-prettier
+# eslint.config.js 배열의 마지막에 놓아야 앞선 서식 규칙을 덮는다
+#   import prettier from "eslint-config-prettier";
+#   export default [ ...기존설정, prettier ];
+
+# 4) CI 는 고치지 않고 검사만 한다 (차이가 있으면 종료 코드가 0 이 아니다)
+npx prettier . --check
+```
+
+`.git-blame-ignore-revs` 는 GitHub 웹 blame 도 읽지만, 각 개발자의 로컬에서는 3번째 줄의 `git config` 를 각자 한 번 실행해야 적용된다 — 저장소에 파일만 올려두고 끝내면 절반만 된 것이다. 그리고 파싱이 안 되는 파일은 조용히 포매팅되지 않으므로 `--check` 통과가 곧 전부 포맷됐다는 뜻은 아니다.

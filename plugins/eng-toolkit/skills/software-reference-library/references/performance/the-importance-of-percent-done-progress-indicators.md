@@ -34,3 +34,38 @@ Brad A. Myers — ACM CHI '85. 진행률 표시기 연구의 시조 — 사람�
 ## 인용 포인트
 - 사용자는 진행률 표시기가 있는 쪽을 명확히 선호한다 — 로딩 표시 도입의 40년 된 원류 인용.
 - 선호와 성과는 다르다(감내 가설은 유의하지 않았다) — 로딩 UI 개선 효과를 "만족도"와 "행동 변화"로 나눠 측정하자는 주장의 근거.
+
+## 코드 예시
+
+"선호와 성과를 나눠 측정하라"를 계측 코드로 옮긴 것 — 진행 표시 변형별로 이탈(성과)과 만족도(선호)를 서로 다른 이벤트로 남긴다.
+
+```js
+const t0 = performance.now();
+let settled = false;
+
+function reportAbandon(reason) {
+  if (settled) return;
+  settled = true;
+  // 성과 축: 실제로 기다려 줬는가 / 몇 ms 만에 떠났는가
+  navigator.sendBeacon("/metrics", JSON.stringify({
+    event: "wait_abandoned",
+    variant,                       // "spinner" | "percent"
+    reason,                        // "cancel" | "hidden"
+    waitedMs: Math.round(performance.now() - t0),
+  }));
+}
+
+cancelButton.addEventListener("click", () => reportAbandon("cancel"));
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") reportAbandon("hidden");
+});
+
+await job;
+if (!settled) {
+  settled = true;
+  track("wait_completed", { variant, waitedMs: Math.round(performance.now() - t0) });
+  maybeAskSatisfaction(variant); // 선호 축 — 성과 지표와 같은 칸에 섞지 않는다
+}
+```
+
+이 논문의 결과대로라면 두 축은 **엇갈리는 것이 정상**이다(선호는 올라가고 감내는 유의하지 않았다) — 그래서 어느 축을 의사결정 기준으로 삼을지 계측 전에 못 박아 두지 않으면, 나중에 움직인 쪽을 골라 결론을 만들게 된다.

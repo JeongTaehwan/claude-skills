@@ -26,7 +26,7 @@ https://github.com/ligurio/awesome-software-quality
 - 테스트 자동화 프레임워크(브라우저·모바일·API 러너)만 필요하면 이쪽은 범위가 너무 넓다 → `qa/awesome-test-automation.md`
 - 테스트를 어떻게 생각할지, 어떤 전략을 세울지 같은 사람 쪽 문제라면 → `qa/awesome-testing.md`
 - 특정 기법을 이미 정했고 바로 쓸 도구 문서가 필요하면 개별 항목으로 → `testing/hypothesis.md`, `testing/fast-check.md`, `testing/stryker-mutator.md`
-- 보안 취약점 관점의 도구·기준이면 → `development/owasp-cheat-sheet-series.md`
+- 보안 취약점 관점의 도구·기준이면 → `security/owasp-cheat-sheet-series.md`
 
 ## 무엇이 들어있나
 이 목록의 특징은 "테스트 = 품질"이라는 등식을 깨는 구성에 있다. 동적 테스트 도구와 나란히 정적 분석, 추상 해석, 정리 증명·모델 체커, 테스트 케이스 자동 생성, 결함 예측 관련 자료가 배치돼 있어서, 품질 확보 수단이 테스트 하나가 아니라는 걸 목록의 구조 자체가 보여 준다.
@@ -34,3 +34,34 @@ https://github.com/ligurio/awesome-software-quality
 
 ## 인용 포인트
 - "테스트 커버리지를 올리는 것 말고도 검증 수단이 있다"는 주장을 팀에 꺼낼 때, 도구 카테고리 자체가 근거가 된다.
+
+## 코드 예시
+
+"품질 확보 수단이 테스트 하나가 아니다"를 CI 잡 구조로 못 박은 형태 — 예제 기반 테스트, 속성 기반 테스트, 정적 분석, 뮤테이션이 각각 독립 게이트다.
+
+```yaml
+# .github/workflows/quality.yml
+on: [pull_request]
+jobs:
+  static:                      # 타입·린트: 실행 없이 잡는 결함
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint .
+  example-based:               # 우리가 떠올린 경우의 수
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci && npx vitest run
+  property-based:              # 떠올리지 못한 경우의 수 (fast-check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci && npx vitest run --dir test/property
+```
+
+잡을 나눠도 "무엇을 검증하는지"는 나뉘지 않는다 — property-based 잡이 통과해도 생성기가 좁으면 상태 전이 누락은 그대로 남는다. 잡 개수는 커버리지가 아니다.

@@ -38,3 +38,24 @@ Django, Cloudflare, Gatsby 등 실제 채택 사례가 있는 프레임워크다
 ## 인용 포인트
 - "이 문서는 튜토리얼인가 레퍼런스인가"라는 질문 하나로 문서 리뷰의 방향 없는 논쟁을 끝낼 수 있다.
 - 문서가 나쁜 이유를 "작성자가 글을 못 써서"가 아니라 "한 문서가 두 목적을 겸해서"로 재정의하면, 개선 작업이 개인 비판이 아니라 구조 작업이 된다.
+
+## 코드 예시
+
+네 사분면을 디렉터리로 굳혀 놓은 형태 — 새 문서를 쓸 때 "어디에 넣을까"가 곧 "이건 무슨 종류인가"를 강제로 묻게 된다.
+
+```yaml
+# mkdocs.yml
+nav:
+  - 시작하기:                     # Tutorial — 따라 하면 되게. 여기서 설명하지 않는다
+      - tutorials/first-order.md
+  - 이렇게 합니다:                # How-to — 목표를 이미 아는 사람용. 개념을 가르치지 않는다
+      - how-to/issue-coupon.md
+      - how-to/refund-payment.md
+  - 레퍼런스:                     # Reference — 서술만. 정확성이 유일한 기준
+      - reference/api-orders.md
+      - reference/error-codes.md
+  - 배경:                         # Explanation — 왜 이렇게 되어 있는가
+      - explanation/coupon-rules.md
+```
+
+디렉터리가 종류를 지켜 주지는 않는다 — 튜토리얼 안으로 배경 설명이 스며드는 건 리뷰에서만 잡힌다. 그리고 이 프레임워크는 지도이지 계획서가 아니라서, 네 폴더를 처음부터 다 채우려 드는 것이 오히려 원 취지에서 벗어난다.

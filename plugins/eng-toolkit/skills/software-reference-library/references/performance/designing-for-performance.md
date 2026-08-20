@@ -37,3 +37,34 @@ Lara Callender Hogan(당시 Etsy)이 성능을 엔지니어링 과제가 아니�
 - "성능은 사용자 경험이다" — 성능 작업을 미학과의 트레이드오프가 아니라 UX의 일부로 자리매김하는 선언의 출처.
 - 무게 예산을 디자인 단계에서 합의하자는 제안의 근거 — "다 만든 뒤 최적화"가 아니라 "만들기 전에 예산"이라는 순서 전환.
 - 저자가 Etsy 엔지니어링 매니저 출신이라는 점 — 이론서가 아니라 실조직에서 나온 관점임을 함께 인용하면 설득력이 붙는다.
+
+## 코드 예시
+
+"다 만든 뒤 최적화"가 아니라 "만들기 전에 예산" — 디자이너와 합의한 페이지 무게를 대화가 아니라 CI가 지키는 파일로 옮긴다.
+
+```json
+// budget.json — Lighthouse 에 그대로 넘긴다. 숫자는 팀이 합의한 값이어야 의미가 있다
+[
+  {
+    "path": "/*",
+    "resourceSizes": [
+      { "resourceType": "image",  "budget": 300 },
+      { "resourceType": "font",   "budget": 100 },
+      { "resourceType": "script", "budget": 170 },
+      { "resourceType": "total",  "budget": 600 }
+    ],
+    "resourceCounts": [
+      { "resourceType": "font",       "budget": 3 },
+      { "resourceType": "third-party", "budget": 8 }
+    ]
+  }
+]
+```
+
+```bash
+# 시안 리뷰 때 같이 본다 — "이 히어로 이미지를 넣으면 예산 어디를 깎을까"가 대화의 형태가 된다
+lighthouse https://staging.example.com --budget-path=budget.json \
+  --output=json --output-path=./budget-report.json --quiet
+```
+
+예산은 초과를 알려줄 뿐 무엇을 포기할지 정해주지 않는다 — 숫자를 개발자가 혼자 정하면 리뷰에서 매번 예외 승인으로 무너지므로, 이 파일의 값은 디자인·기획이 함께 서명한 것이어야 작동한다.

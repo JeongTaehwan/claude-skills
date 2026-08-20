@@ -34,3 +34,34 @@ https://github.com/dvtng/react-loading-skeleton
 ## 인용 포인트
 - 스켈레톤을 "실제 컴포넌트에 인라인"으로 넣어 레이아웃 이중화를 피하는 설계의 대표 구현.
 - 로딩 UX 개선 제안에서 스피너 → 콘텐츠 모양 뼈대로의 전환을 한 줄 비용으로 실험할 수 있다는 근거.
+
+## 코드 예시
+
+스켈레톤 전용 컴포넌트를 따로 만들지 않는 것이 이 라이브러리의 요점 — 같은 마크업 안에서 값만 뼈대로 바뀐다.
+
+```jsx
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
+function ProductCard({ product }) {
+  // product 가 없으면 같은 자리·같은 타이포그래피로 뼈대가 그려진다
+  return (
+    <article className="card">
+      <h3>{product ? product.name : <Skeleton />}</h3>
+      <p className="desc">{product ? product.summary : <Skeleton count={2} />}</p>
+      <span className="price">{product ? `${product.price}원` : <Skeleton width={80} />}</span>
+    </article>
+  );
+}
+
+export default function ProductList({ products, isLoading }) {
+  const items = isLoading ? Array.from({ length: 6 }) : products;
+  return (
+    <SkeletonTheme baseColor="#ebebeb" highlightColor="#f5f5f5">
+      {items.map((p, i) => <ProductCard key={p?.id ?? i} product={p} />)}
+    </SkeletonTheme>
+  );
+}
+```
+
+뼈대는 대기를 짧게 만들지 않는다 — 응답이 200ms 만에 오는 경우엔 오히려 깜빡임만 남으므로, 일정 시간 이상 걸릴 때만 띄우는 지연 표시가 함께 필요하다.

@@ -40,3 +40,39 @@ mock·stub·fake를 언제 쓰고 언제 쓰지 말지를 우선순위로 못 �
 - "구글은 모킹 프레임워크를 광범위하게 도입했다가, 유지보수 비용은 크고 버그 검출력은 낮다는 결론에 도달해 방향을 되돌렸다" — 목 남용을 줄이자는 제안에서 가장 강한 근거.
 - "fake는 API 소유자가 만들고, 실제 구현과 대조해 테스트해야 한다" — 각 팀이 제각각 목을 만들어 계약이 어긋나는 문제의 해법을 조직 규칙으로 제안할 때.
 - 상호작용 검증은 코드가 동작함을 보이지 못하고 특정 호출이 일어났음만 보인다 — verify 위주 테스트를 걷어낼 때의 기준 문장.
+
+## 코드 예시
+
+"fake 는 API 소유자가 만들고 실제 구현과 대조해 테스트한다"를 구조로 옮긴 것 — 계약 테스트 한 벌을 실제 구현과 fake 양쪽에 그대로 돌린다.
+
+```java
+// API 소유 팀이 선언: 이 타입은 목으로 만들지 말 것 (Error Prone 어노테이션)
+@DoNotMock("실제 구현 또는 InMemoryCouponStore 를 쓸 것")
+public interface CouponStore {
+    Optional<Coupon> find(String code);
+    void markUsed(String code, OrderId orderId);
+}
+
+// 계약 테스트 — 구현이 무엇이든 지켜야 하는 동작만 적는다
+abstract class CouponStoreContractTest {
+    abstract CouponStore newStore();
+
+    @Test
+    void markUsed_twice_isRejected() {
+        CouponStore store = newStore();
+        store.markUsed("WELCOME10", ORDER_A);
+        assertThrows(AlreadyUsedException.class,
+                     () -> store.markUsed("WELCOME10", ORDER_B));
+    }
+}
+
+class InMemoryCouponStoreTest extends CouponStoreContractTest {   // fake
+    CouponStore newStore() { return new InMemoryCouponStore(); }
+}
+
+class JdbcCouponStoreTest extends CouponStoreContractTest {       // 실제 구현
+    CouponStore newStore() { return new JdbcCouponStore(testDataSource()); }
+}
+```
+
+계약 테스트가 초록이어도 fake 의 충실도는 계약에 적힌 만큼만 보장된다 — 동시 요청 두 건이 같은 쿠폰을 집는 경합은 JDBC 쪽에만 존재하고, 위 테스트로는 양쪽 모두 통과한다.

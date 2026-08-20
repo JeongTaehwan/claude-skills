@@ -41,3 +41,26 @@ https://redis.io/docs/latest/
 - "원자성 ≠ 내구성"은 이 문서를 근거로 팀에 설명하기 좋은 구분이다. 복제·영속성 문서의 비동기 서술을 인용하면, 재고·쿠폰 잔량의 원천을 RDB 에 둘지 Redis 에 둘지의 논의가 취향에서 보장 비교로 바뀐다.
 - 명령어별 시간 복잡도 표기는 "운영 중 `KEYS` 금지" 같은 규약을 문서화할 때의 직접 근거가 된다.
 - 분산 락 문서가 스스로 밝히는 전제 조건은, 락 구현을 승인할지 판단하는 리뷰 체크리스트로 옮겨 쓸 수 있다.
+
+## 코드 예시
+
+"원자성 ≠ 내구성" — 앞 절반은 코드로 얻지만, 뒤 절반은 설정을 확인해야 알 수 있다.
+
+```bash
+# 재고 확인과 차감을 한 원자 단위로. 중간 상태는 다른 클라이언트에 보이지 않는다
+redis-cli EVAL "
+  local left = tonumber(redis.call('GET', KEYS[1]) or '0')
+  if left < tonumber(ARGV[1]) then return -1 end
+  return redis.call('DECRBY', KEYS[1], ARGV[1])
+" 1 stock:sku-42 1
+
+# 여기까지가 원자성이다. 그 결과가 장애 후에 남는지는 아래가 결정한다
+redis-cli CONFIG GET appendonly    # no 면 AOF 없음 — 마지막 스냅샷 이후가 통째로 날아간다
+redis-cli CONFIG GET appendfsync   # everysec 이 기본 — 최대 1초치 쓰기 유실 가능
+redis-cli INFO replication         # 복제는 비동기: 마스터가 OK 한 차감이 페일오버 후 사라질 수 있다
+
+# 싱글 스레드라 O(N) 명령 하나가 전체를 멈춘다 — 운영 중엔 KEYS 대신 SCAN
+redis-cli --scan --pattern 'stock:*'
+```
+
+Lua 스크립트가 주는 건 "중간 상태가 보이지 않는다"까지다. 위 세 줄이 각각 유실 창을 하나씩 열어 두므로, 이 값을 재고·쿠폰 잔량의 **원천**으로 삼는다는 건 그 창을 감수하겠다는 결정이다. 돈에 직결된다면 원천은 관계형 DB 에 두고 Redis 는 앞단 게이트로만 쓰는 구조를 먼저 검토해야 한다.

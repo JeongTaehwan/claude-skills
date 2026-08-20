@@ -38,3 +38,32 @@ https://tech.socarcorp.kr/
 
 ## 인용 포인트
 - 동시 예약 중복을 막는 방식을 팀에 제안할 때, 같은 문제를 실서비스에서 겪은 국내 사례를 근거로 붙일 수 있다.
+
+## 코드 예시
+
+"두 사람에게 같은 걸 팔면 끝장"인 자원을, 시간 구간째로 DB 제약에 맡기는 방식.
+
+```sql
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+CREATE TABLE reservation (
+  id     bigserial PRIMARY KEY,
+  car_id bigint    NOT NULL,
+  period tstzrange NOT NULL,             -- 대여 슬롯을 값 하나로 다룬다
+  status text      NOT NULL DEFAULT 'confirmed',
+  -- 같은 차량의 확정 예약끼리는 구간이 겹칠 수 없다
+  EXCLUDE USING gist (car_id WITH =, period WITH &&) WHERE (status = 'confirmed')
+);
+
+-- 두 요청이 동시에 들어와도 뒤엣것은 23P01(exclusion_violation)로 떨어진다.
+-- 애플리케이션의 "겹치나 먼저 조회" 는 필요 없다 — 그 조회와 INSERT 사이가 바로 구멍이었다
+INSERT INTO reservation (car_id, period)
+VALUES (7, tstzrange('2026-08-21 10:00+09', '2026-08-21 14:00+09', '[)'));
+
+-- 물리 상태와 DB 상태가 어긋난 건을 찾는 보정 쿼리
+SELECT r.id, r.period, c.state
+  FROM reservation r JOIN car c ON c.id = r.car_id
+ WHERE r.status = 'confirmed' AND upper(r.period) < now() AND c.state <> 'returned';
+```
+
+제약이 덮는 범위는 `status = 'confirmed'` 뿐이다 — 가결제·장바구니 같은 중간 상태를 같은 제약에 넣을지가 실제 설계 판단이고, 넣으면 이탈한 세션이 슬롯을 잠근다. 그리고 겹침 판정이 DB 로 내려간 대신 실패가 SQL 예외로 올라오므로, 23P01 을 사용자에게 보일 메시지로 번역하는 일이 애플리케이션 몫으로 남는다.

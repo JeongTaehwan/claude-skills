@@ -39,3 +39,31 @@ https://tech.kakaopay.com/
 ## 인용 포인트
 - 결제 코드의 테스트 비용을 정당화할 때, 같은 도메인 회사가 왜 그만큼 투자했는지를 사례로 붙이면 "과하다"는 반론이 약해진다.
 - 레거시 결제 모듈 교체를 단계적으로 하자고 제안할 때, 무중단 전환 사례가 일정 협상의 근거가 된다.
+
+## 코드 예시
+
+"빠르게 짜는 법"이 아니라 "틀렸을 때 알아챌 수 있게 짜는 법" — 중복 웹훅과 대사(reconciliation)가 그 두 축이다.
+
+```sql
+-- 웹훅 중복 수신은 애플리케이션 if 문이 아니라 제약으로 막는다
+CREATE TABLE pg_webhook (
+  event_id    text PRIMARY KEY,          -- PG 가 부여한 이벤트 식별자
+  payment_id  bigint NOT NULL,
+  received_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- 두 번째 수신은 0 행이 되고, 그때는 결제 상태를 다시 건드리지 않는다
+INSERT INTO pg_webhook (event_id, payment_id) VALUES ($1, $2)
+ON CONFLICT (event_id) DO NOTHING
+RETURNING event_id;
+
+-- 대사 배치: 조용히 틀어진 건을 찾는다. 이게 없으면 금액 오차는 아무도 모른 채 지나간다
+SELECT p.id, p.amount AS our_amount, s.amount AS pg_amount, p.status
+  FROM payment p
+  FULL OUTER JOIN pg_settlement s ON s.payment_id = p.id
+ WHERE COALESCE(s.settled_on, p.paid_on) = CURRENT_DATE - 1
+   AND (p.amount IS DISTINCT FROM s.amount
+        OR p.id IS NULL OR s.payment_id IS NULL);
+```
+
+대사 쿼리는 **차이가 있다**까지만 말해 준다. 어느 쪽이 맞는지, 자동 정정할지 사람이 볼지, 며칠까지 미정산을 정상으로 볼지는 전부 도메인 규칙이고, 그걸 정하지 않은 채 배치만 돌리면 아무도 안 보는 알림만 쌓인다 — 이 블로그의 글들이 결론보다 판단 근거를 길게 쓰는 이유가 그 지점이다.

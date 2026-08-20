@@ -40,3 +40,28 @@ https://refactoring.com/catalog/
 - 리뷰 가이드에 "구조 개선 요청은 카탈로그의 기법 이름으로 쓴다"는 규칙을 넣을 때의 표준 목록으로 인용할 수 있다.
 - "리팩터링은 외부 동작을 바꾸지 않는다"는 정의는, 동작 변경과 구조 변경을 커밋 단위로 분리하자는 규약의 근거가 된다.
 - 리팩터링을 별도 일정으로 떼어내자는 제안에 대해, 작은 변형의 연쇄라는 원저의 단위 개념이 반론 근거가 된다.
+
+## 코드 예시
+
+기법 이름을 커밋 어휘로 쓰고, "리팩터링은 외부 동작을 바꾸지 않는다"는 정의를 커밋 경계로 강제하는 형태.
+
+```bash
+# 카탈로그의 이름을 그대로 쓴다 — 리뷰어가 제목만 보고 무슨 변형인지 안다
+git commit -m "refactor: Extract Function — 주문 금액 계산에서 calculateDiscount 분리"
+git commit -m "refactor: Replace Temp with Query — subtotal 임시변수 제거"
+git commit -m "refactor: Decompose Conditional — 배송비 분기 정리"
+
+# 동작 변경은 반드시 별도 커밋으로 뗀다
+git commit -m "fix: 쿠폰 중복 적용 시 합계가 음수가 되던 문제"
+
+# 각 구조 변경 시점마다 테스트가 통과하는가 = 언제든 멈출 수 있는 단위였는가
+git rebase --exec 'npm test' main
+
+# 리뷰어는 구조 변경만 따로 훑는다
+git log --oneline --grep '^refactor' main..HEAD
+
+# 회귀가 나면 이분 탐색이 성립한다 — 커밋이 섞여 있으면 이게 안 된다
+git bisect start HEAD main
+```
+
+`refactor:` 라벨은 동작이 안 바뀌었다는 **주장**이지 증명이 아니다. 증명은 테스트가 하고, 테스트가 없는 코드에서는 이 커밋 규약이 오히려 안전하다는 착각만 준다 — 그럴 땐 기법 목록보다 특성화 테스트를 먼저 깔아야 한다.

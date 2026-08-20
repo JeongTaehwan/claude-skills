@@ -37,3 +37,34 @@ https://martinfowler.com/
 ## 인용 포인트
 - 용어 논쟁을 끝낼 때: 저자가 각 패턴 항목에 "언제 쓰지 말아야 하는가"를 함께 적어두므로, 도입 반대 근거로도 그대로 쓸 수 있다.
 - CQRS·마이크로서비스 같은 유행 패턴 도입 제안이 올라왔을 때, 그 패턴을 이름 붙인 사람 본인이 남긴 유보 조건을 인용하면 감정 싸움 없이 논의를 조건 검토로 바꿀 수 있다.
+
+## 코드 예시
+
+Feature Toggle 항목의 두 권고 — 판단 지점(decision point)과 판단 로직(decision logic)을 분리하고, 토글 종류마다 수명을 다르게 관리한다 — 를 최소 형태로 옮긴 것.
+
+```typescript
+type ToggleKind = "release" | "experiment" | "ops" | "permission";
+
+interface Toggle {
+  kind: ToggleKind;
+  enabled: (ctx: { userId: string }) => boolean;
+  removeBy?: string; // release 토글은 수명이 짧다 — 만료일을 코드에 남긴다
+}
+
+// 판단 로직은 한곳에 모은다.
+const toggles: Record<string, Toggle> = {
+  newCheckout: { kind: "release", enabled: () => true, removeBy: "2026-09-30" },
+  killswitchPg: { kind: "ops", enabled: () => process.env.PG_DOWN !== "1" },
+};
+
+export function isEnabled(name: string, ctx: { userId: string }): boolean {
+  const t = toggles[name];
+  if (!t) return false; // 모르는 토글은 꺼진 것으로 — 오타가 기능을 켜지 않게
+  return t.enabled(ctx);
+}
+
+// 판단 지점은 이 한 줄뿐. 조건문이 코드 전역으로 번지지 않는다.
+if (isEnabled("newCheckout", { userId })) renderNewCheckout();
+```
+
+`removeBy` 는 주석일 뿐 아무것도 강제하지 않는다 — 만료된 release 토글을 CI에서 실패시키지 않으면, 토글 부채는 이 구조를 갖춰도 똑같이 쌓인다.

@@ -40,3 +40,28 @@ Git Flow, GitHub Flow, GitLab Flow 등과의 비교 절이 따로 있어, 팀 �
 - "브랜치 수명이 길수록 통합 비용이 커진다"는 명제는 브랜치 전략 변경 제안서의 첫 문단으로 쓸 수 있다.
 - "미완성 기능은 브랜치가 아니라 플래그로 감춘다"는 원칙은, TBD 도입에 대한 가장 흔한 반론에 대한 표준 답변이다.
 - 릴리스 브랜치에서 직접 고치지 말고 trunk 에 먼저 넣고 체리픽하라는 규칙은 핫픽스 절차 문서에 그대로 옮길 수 있다.
+
+## 코드 예시
+
+"브랜치가 며칠 이상 산다"를 실패 신호로 다루려면 먼저 세야 하고, 릴리스 수정은 방향이 정해져 있다.
+
+```bash
+# 통합 지연을 감이 아니라 수치로 본다
+for b in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '/main$'); do
+  base=$(git merge-base origin/main "$b")
+  age=$(( ( $(date +%s) - $(git log -1 --format=%ct "$base") ) / 86400 ))
+  [ "$age" -gt 1 ] && echo "${age}일 뒤처짐: $b"
+done
+
+# 미완성 코드는 브랜치가 아니라 실행 경로에서 감춘다 — 그래서 브랜치가 짧아진다
+#   if (flags.newCheckout) { renderNewCheckout() } else { renderLegacy() }
+
+# 핫픽스는 릴리스 브랜치에서 고치지 않는다. trunk 에 먼저 넣고 체리픽한다
+git switch main
+git commit -am "fix: 쿠폰 만료 계산 오류"
+git switch release/1.4
+git cherry-pick -x main          # -x 로 원본 커밋 해시를 메시지에 남긴다
+git tag v1.4.3 && git push origin release/1.4 --tags
+```
+
+`merge-base` 로 잰 값은 "이 브랜치가 trunk 에서 갈라진 뒤 얼마나 지났나"이지 실제 작업 시간이 아니다 — rebase 한 번이면 0 으로 리셋되므로 대리 지표일 뿐이고, 진짜 보고 싶은 건 첫 커밋부터 머지까지 걸린 시간이다. 체리픽 방향을 반대로 해서 릴리스 브랜치에서 먼저 고치는 순간, 이 전략이 막으려던 브랜치 분기가 그대로 돌아온다.

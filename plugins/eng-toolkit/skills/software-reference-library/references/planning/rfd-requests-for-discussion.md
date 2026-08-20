@@ -24,7 +24,6 @@ https://www.oxide.computer/blog/rfd-1-requests-for-discussion
 
 ## 이럴 땐 아니다
 - 기술 선택 하나(예: 메시지 큐 A vs B)의 결정 기록 포맷만 필요하다면 ADR 쪽이 가볍다 — `architecture/architecture-decision-records.md`, `architecture/adr-github-io.md`
-- 같은 RFD를 개발 도메인 관점에서 정리한 항목은 `development/requests-for-discussion.md`
 - 설계 문서의 내용 구성(무엇을 써야 하는가)이 문제라면 `planning/design-docs-at-google.md`
 - 제품 요구사항 문서 템플릿이 필요하면 `planning/atlassian-prd.md`
 
@@ -37,3 +36,36 @@ Git 위에서 돌아가도록 설계되어 있어(브랜치 = 토론 중, 머지
 ## 인용 포인트
 - 문서 상태 모델(draft/discussion/published/abandoned)은 그대로 사내 규칙으로 옮겨 쓸 수 있다.
 - "버려진 제안도 남긴다" — 결정 기록 도입을 설득할 때 가장 잘 먹히는 논거.
+
+## 코드 예시
+
+문서 맨 위 세 줄이 이 프로세스의 전부다 — 번호·상태·토론 링크가 있어야 독자가 "이걸 지금 믿어도 되나"를 열어보기 전에 판단한다.
+
+```markdown
+---
+authors: 이도현 <dohyun@example.com>
+state: discussion   # ideation | discussion | published | abandoned
+discussion: https://github.com/example/rfd/pull/142
+---
+
+# RFD 142: 쿠폰 중복 적용 정책
+
+## 배경
+현재 쿠폰은 1개만 적용된다. 제휴 쿠폰과 등급 쿠폰을 함께 쓰게 해달라는 요청이
+분기마다 재발하고, 그때마다 같은 논쟁을 처음부터 다시 한다.
+
+## 제안
+쿠폰에 `stackable` 속성을 두고, 스택 가능한 것끼리만 합산한다.
+
+## 검토한 대안
+- 전면 중복 허용 — 할인율 상한 계산이 정산과 어긋나 폐기
+- 정책 엔진 도입 — 지금 규모에 과하다
+
+## 미해결 질문
+- 스택 시 할인 상한을 어디서 강제하는가 (주문? 정산?)
+
+<!-- 브랜치가 곧 상태다: 열려 있으면 토론 중, 머지되면 확정.
+     폐기할 때도 파일을 지우지 않고 state 를 abandoned 로 바꿔 머지한다. -->
+```
+
+상태 칸을 넣어도 갱신하는 사람이 없으면 `discussion` 인 채 반년 묵은 문서가 쌓인다 — 상태 전이를 강제하는 것은 이 형식이 아니라 리뷰 습관이다.

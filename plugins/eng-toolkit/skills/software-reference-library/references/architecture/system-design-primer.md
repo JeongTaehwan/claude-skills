@@ -26,7 +26,7 @@ https://github.com/donnemartin/system-design-primer
 
 ## 이럴 땐 아니다
 - 각 주제를 실제로 깊게 파야 하면 여기서 멈추면 안 된다 — 일관성·복제·파티셔닝의 정확한 이해는 `architecture/designing-data-intensive-applications.md`.
-- 운영 중인 시스템의 신뢰성 목표(SLO)와 장애 대응은 `development/google-sre-books.md`.
+- 운영 중인 시스템의 신뢰성 목표(SLO)와 장애 대응은 `infrastructure/google-sre-books.md`.
 - 실제 대규모 시스템의 사례 모음이 필요하면 `architecture/awesome-scalability.md`, 클라우드 환경의 검증된 실무 문서는 `architecture/amazon-builders-library.md`.
 - 서비스 분리 후의 트랜잭션 패턴은 `architecture/microservices-io.md`.
 - 이 저장소는 커뮤니티 정리물이라 1차 출처가 아니다. 문서·ADR에 인용할 근거로는 여기서 링크된 원 논문(Dynamo, Bigtable, MapReduce 등)을 쓰는 편이 낫다.
@@ -41,3 +41,33 @@ https://github.com/donnemartin/system-design-primer
 - 설계 회의 시작 시 "우리가 지금 최적화하려는 게 지연시간인가 처리량인가, 가용성인가 일관성인가"로 축을 잡을 때 이 문서의 앞 절 구성을 그대로 쓸 수 있다.
 - 캐시 도입 제안에 무효화 전략을 함께 요구할 때, 캐시 전략별 트레이드오프 표가 체크리스트가 된다.
 - 지연시간 수치표는 "네트워크 왕복 한 번이 메모리 접근보다 몇 자릿수 비싼가"를 근거로 N+1 호출이나 과도한 서비스 분리를 지적할 때 쓸 수 있다.
+
+## 코드 예시
+
+캐시 항목이 "빨라진다"에서 끝나지 않고 무효화와 스탬피드를 함께 적는다는 점을, cache-aside 최소 구현으로 옮긴 것.
+
+```python
+import json, random, redis
+
+r = redis.Redis(host="cache", port=6379)
+TTL = 300
+
+def get_product(product_id: str) -> dict:
+    key = f"product:{product_id}"
+    cached = r.get(key)
+    if cached is not None:
+        return json.loads(cached)            # hit
+
+    # miss — 여기서 원본을 읽는다. 읽는 쪽이 캐시를 채운다(cache-aside).
+    data = db_fetch_product(product_id)
+    # TTL 에 지터를 준다. 같은 시각에 만든 키가 같은 시각에 함께 만료되면
+    # 만료 직후 트래픽이 전부 DB로 몰린다(스탬피드).
+    r.setex(key, TTL + random.randint(0, 60), json.dumps(data))
+    return data
+
+def update_product(product_id: str, patch: dict) -> None:
+    db_update_product(product_id, patch)
+    r.delete(f"product:{product_id}")        # 갱신이 아니라 삭제 — 다음 읽기가 채운다
+```
+
+`db_update_product` 와 `r.delete` 사이는 트랜잭션이 아니다 — 그 틈에 다른 요청이 옛 값을 읽어 캐시에 다시 넣으면 TTL 만큼 낡은 값이 살아남는다. 이 창을 못 받아들이는 데이터라면 캐시가 아니라 읽기 모델을 따로 만들어야 한다.

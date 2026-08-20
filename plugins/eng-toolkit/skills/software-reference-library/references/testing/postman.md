@@ -36,3 +36,30 @@ API 요청을 손으로 쏴 보는 도구로 알려진 Postman 을, 컬렉션·�
 
 ## 인용 포인트
 - 컬렉션을 팀 워크스페이스로 옮기는 것만으로 "개인 검증"이 "공유 회귀 세트"가 된다 — API 검증 자산화를 제안할 때의 최소 첫걸음.
+
+## 코드 예시
+
+"손으로 쏘는 요청"을 실행 자산으로 바꾸는 최소 조각 — 로그인 요청의 Tests 탭에 단언을 붙이고, 응답에서 뽑은 토큰을 다음 요청이 쓸 변수로 넘긴다.
+
+```js
+// 요청 [POST /auth/login] 의 Tests 스크립트
+pm.test('200 으로 응답한다', () => {
+  pm.response.to.have.status(200);
+});
+
+pm.test('응답이 1초 안에 온다', () => {
+  pm.expect(pm.response.responseTime).to.be.below(1000);
+});
+
+const body = pm.response.json();
+
+pm.test('토큰이 내려온다', () => {
+  pm.expect(body).to.have.property('accessToken');
+});
+
+// 다음 요청들이 {{accessToken}} 으로 참조 — 환경이 아니라 컬렉션 변수에 두면
+// 실행이 끝난 뒤 환경 파일에 토큰이 남지 않는다
+pm.collectionVariables.set('accessToken', body.accessToken);
+```
+
+이렇게 얻은 회귀 세트는 **실행 순서에 의존한다** — 로그인 요청을 건너뛰면 뒤 요청이 통째로 무너진다. 그리고 컬렉션은 공유돼야 자산이 되므로, 내보낸 JSON 을 저장소에 넣고 CI 에서 `newman run` 으로 돌려야 "누가 언제 확인했는지"가 기록으로 남는다.

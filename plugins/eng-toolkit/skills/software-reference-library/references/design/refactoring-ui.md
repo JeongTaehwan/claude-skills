@@ -36,3 +36,37 @@ Tailwind CSS를 만든 Adam Wathan과 디자이너 Steve Schoger가 "재능 말�
 ## 인용 포인트
 - "Design with tactics, not talent"는 디자인을 배울 수 있는 기술로 규정할 때 쓰기 좋은 한 문장이다.
 - "폰트나 색을 바꾸기 전에 위계와 여백부터"라는 우선순위는 UI 개선 티켓의 작업 순서를 정할 때 그대로 쓸 수 있다.
+
+## 코드 예시
+
+책의 전술 네 개 — 회색조 먼저, 간격은 스케일에서만 고르기, 위계는 크기가 아니라 색 명도로, 그림자는 고도 — 를 카드 하나에 적용한 형태.
+
+```css
+:root {
+  /* 1. 색은 회색조 단계부터 만든다. 색상은 나중에 얹는다 */
+  --gray-900: #1a202c;
+  --gray-700: #4a5568;
+  --gray-500: #a0aec0;
+  --gray-200: #e2e8f0;
+
+  /* 2. 간격은 연속값이 아니라 비선형 스케일에서만 고른다 */
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+}
+
+/* 3. 위계는 글자 크기를 키우는 대신 색 명도로 만든다 */
+.card__title { color: var(--gray-900); font-weight: 600; }
+.card__body  { color: var(--gray-700); }
+.card__meta  { color: var(--gray-500); font-size: 0.875rem; }
+
+/* 4. 그림자는 장식이 아니라 '얼마나 떠 있는지'의 스케일이다 */
+.card {
+  padding: var(--space-6);
+  border: 1px solid var(--gray-200);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
+}
+```
+
+`--gray-500`은 흰 배경에서 대비가 약 2.1:1이라 본문에 쓰면 WCAG AA에 한참 못 미친다 — 명도로 위계를 만드는 전술은 "보조 정보에만"이라는 전제가 붙어야 성립한다. 팔레트가 라이트 모드 한 방향만 정의돼 있다는 것도 이 코드에는 안 보인다.

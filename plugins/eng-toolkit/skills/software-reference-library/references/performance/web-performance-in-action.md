@@ -35,3 +35,32 @@ Jeremy Wagner의 Manning 실습 핸드북(2017) — 측정 → 병목 식별 →
 ## 인용 포인트
 - 측정 없이 최적화하지 않는다 — 성능 티켓의 착수 조건으로 "현재 수치 + 스로틀링 조건"을 요구하는 프로세스 제안의 출처.
 - 자산 유형별로 병목과 처방이 다르다는 구성 자체 — "성능 개선"이라는 뭉툭한 티켓을 자산별 작업으로 쪼개는 분해 틀로 쓴다.
+
+## 코드 예시
+
+"성능 티켓의 착수 조건은 현재 수치 + 스로틀링 조건"이라는 프로세스 제안을, 개선 전후를 같은 조건으로 뽑는 스크립트로 옮긴 것.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+URL="$1"; LABEL="$2"          # 예: ./measure.sh https://example.com/p/42 before
+OUT="perf/${LABEL}.json"
+mkdir -p perf
+
+# 조건을 명시하지 않은 수치는 비교할 수 없는 숫자다 — 저속 프로필을 코드에 박아 둔다
+npx lighthouse "$URL" \
+  --only-categories=performance \
+  --throttling-method=devtools \
+  --throttling.requestLatencyMs=562 \
+  --throttling.downloadThroughputKbps=1474 \
+  --throttling.uploadThroughputKbps=675 \
+  --throttling.cpuSlowdownMultiplier=4 \
+  --output=json --output-path="$OUT" --quiet
+
+jq -r '.audits | "LCP \(.["largest-contentful-paint"].numericValue|floor)ms  " +
+                 "TBT \(.["total-blocking-time"].numericValue|floor)ms  " +
+                 "SI \(.["speed-index"].numericValue|floor)ms"' "$OUT"
+```
+
+랩 측정 1회는 편차가 크다 — 같은 커밋을 세 번 돌려 중앙값을 비교하지 않으면 개선인지 노이즈인지 구분되지 않는다. 그리고 감사 항목 이름은 오늘의 Lighthouse 것이지 이 책(2017, Core Web Vitals 이전)의 지표가 아니므로, 책에서는 워크플로만 가져오고 지표는 갈아끼워야 한다.

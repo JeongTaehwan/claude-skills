@@ -23,7 +23,7 @@ A/B 테스트의 기본 개념과 실무 용어(대조군/실험군, 통계적 �
 - 실험 도구를 도입하기 전에 도구가 무엇을 자동으로 해 주고 무엇을 내가 정해야 하는지 감을 잡을 때
 
 ## 이럴 땐 아니다
-- 실험 결과가 이상해서 "이 결과를 믿어도 되나"를 판단해야 할 때 — 함정 목록은 `planning/a-dirty-dozen-12.md`
+- 실험 결과가 이상해서 "이 결과를 믿어도 되나"를 판단해야 할 때 — 함정 목록은 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 대규모 실험 플랫폼을 실제로 설계·운영해야 할 때 — `planning/online-controlled-experiments-at-large-scale.md`, `planning/trustworthy-online-controlled-experiments.md`
 - 실험으로 무엇을 측정할지, 지표 자체를 고르는 문제라면 — `planning/heart.md`, `planning/north-star-metric.md`
 
@@ -35,3 +35,30 @@ A/B 테스트를 "동일 요소의 두 버전을 동시에 무작위 배정해 �
 ## 인용 포인트
 - "실험 종료 조건(표본 크기·기간)은 실험 시작 전에 정한다" — 결과가 좋게 나올 때까지 들여다보다 멈추는 관행을 막는 규칙으로 실험 설계 템플릿에 그대로 넣을 수 있다.
 - A/B 테스트의 성립 조건이 "동시성 + 무작위 배정"이라는 정의는, 프로모션 전후 비교를 실험 결과라고 주장하는 논의를 정리할 때 쓴다.
+
+## 코드 예시
+
+"실험 종료 조건은 시작 전에 정한다"를 문서 문장이 아니라 계산과 설정값으로 고정한 형태.
+
+```python
+from scipy.stats import norm
+
+def sample_size_per_arm(baseline_rate, mde_abs, alpha=0.05, power=0.80):
+    """전환율 실험에서 그룹당 필요한 표본 수 (양측 검정, 균등 배정)."""
+    z_alpha = norm.ppf(1 - alpha / 2)
+    z_beta = norm.ppf(power)
+    p = baseline_rate
+    return 2 * (z_alpha + z_beta) ** 2 * p * (1 - p) / mde_abs ** 2
+
+# 기준 전환율 5%, 최소 검출 효과 0.5%p
+n = round(sample_size_per_arm(0.05, 0.005))
+
+# 실험 시작 전에 문서에 박아 두는 종료 조건
+stop_rule = {
+    "per_arm_n": n,
+    "min_days": 14,        # 요일 효과를 덮으려면 주 단위로
+    "peek_allowed": False, # 중간에 보고 멈추지 않는다
+}
+```
+
+이 공식은 이항 지표·균등 배정·고정 표본 검정을 가정한다 — 중간에 결과를 보며 멈추는 순차 검정을 쓸 거라면 이 숫자는 그대로 쓸 수 없고, 애초에 `peek_allowed`를 여는 순간 유의수준이 명목값보다 커진다.

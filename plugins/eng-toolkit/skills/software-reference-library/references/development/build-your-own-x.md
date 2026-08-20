@@ -36,3 +36,25 @@ https://github.com/codecrafters-io/build-your-own-x
 
 ## 인용 포인트
 - 온보딩이나 스터디 예산을 요청할 때, 추상적인 "학습 시간"이 아니라 구체적 산출물이 있는 과제 목록으로 제시할 수 있다.
+
+## 코드 예시
+
+"설명을 읽는 것과 만들어 보는 것이 다르다"를 가장 짧게 보여 주는 형태 — Git 오브젝트 해시를 직접 계산해서 `git hash-object` 와 같은 값이 나오는지 맞춰 본다.
+
+```python
+import hashlib
+
+def blob_id(content: bytes) -> str:
+    # Git 오브젝트 = "<type> <byte 길이>\0" + 내용, 그걸 SHA-1
+    header = f"blob {len(content)}\0".encode()
+    return hashlib.sha1(header + content).hexdigest()
+
+print(blob_id(b"hello\n"))
+```
+
+```bash
+# 같은 값이 나온다
+printf 'hello\n' | git hash-object --stdin
+```
+
+여기까지가 "만들어 보기"의 전형적인 도달점이다 — zlib 압축, 트리·커밋 오브젝트, 팩 파일은 아직 없다. 완성물이 프로덕션급이 아니라는 점이 이 목록의 전제이자 한계다.

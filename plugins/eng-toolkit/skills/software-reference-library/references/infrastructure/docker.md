@@ -1,0 +1,68 @@
+---
+title: Docker 공식 문서
+url: https://docs.docker.com/get-started/
+domain: infrastructure
+type: 공식문서
+lang: en
+---
+
+# Docker 공식 문서
+
+https://docs.docker.com/get-started/
+
+## 한 줄
+Docker 의 설치부터 이미지·컨테이너·레이어·Compose 까지 개념과 표준 워크플로를 순서대로 잡아 주는 1차 출처 — 블로그 복붙 Dockerfile 을 쓰다가 왜 이미지가 2GB 인지 모를 때 돌아오는 곳.
+
+## 페르소나
+**로컬에서는 잘 되는데 컨테이너에서만 깨지는 문제를 반복해서 만나는 백엔드 엔지니어.** 누군가 만들어 둔 Dockerfile 을 복사해 쓰고 있어서 빌드가 느려도, 이미지가 커도, 캐시가 매번 깨져도 어디를 건드려야 하는지 모른다. 볼륨과 바인드 마운트의 차이, 컨테이너 간 네트워크가 어떻게 이름으로 붙는지 같은 기본을 한 번도 정리해 본 적이 없다.
+
+## 이럴 때 연다
+- 서비스에 Dockerfile 을 처음 붙이면서 베이스 이미지와 레이어 순서를 정할 때
+- 빌드가 매번 처음부터 도는 이유(캐시 무효화 지점)를 찾을 때
+- 로컬 개발 환경에 DB·Redis 등을 Compose 로 묶어 띄울 때
+- 컨테이너 안에서 사라지는 데이터 때문에 볼륨/마운트 선택을 해야 할 때
+- CI 에서 쓸 이미지의 크기·빌드 시간을 줄여야 할 때
+
+## 이럴 땐 아니다
+- 컨테이너를 **운영에서 오케스트레이션**하는 문제(스케줄링, 레플리카, 롤링 업데이트)는 `architecture/kubernetes-concepts.md`
+- 설정을 환경변수로 빼고 상태를 밖으로 밀어내는 **앱 쪽 설계 원칙**은 `development/the-twelve-factor-app.md`
+- CI 파이프라인에서 이미지를 빌드·푸시하는 워크플로 문법은 `development/github-actions.md`
+- 테스트에서 실제 의존성(DB, 카프카)을 컨테이너로 띄우는 용도라면 `testing/testcontainers.md` 가 더 직접적이다
+- 빌드 산출물의 출처·서명 같은 공급망 문제는 `development/slsa.md`
+
+## 무엇이 들어있나
+Get started 섹션은 "Docker 가 무엇인지"와 설치, 그리고 기본 워크플로를 잡는 데 초점이 있고, 더 깊은 시나리오는 별도 Guides 로 넘긴다. 즉 이 페이지는 개념 정렬용이고, 실제 문제 해결은 Guides/Reference 로 이어진다.
+핵심적으로 붙잡아야 할 개념은 이미지가 **불변의 레이어 스택**이라는 것이다. Dockerfile 의 명령 순서가 곧 캐시 경계이므로, 자주 바뀌는 것(소스 코드)을 뒤로, 덜 바뀌는 것(의존성 설치)을 앞으로 두는 것만으로 빌드 시간이 달라진다.
+컨테이너는 기본적으로 상태를 버린다는 전제 위에 있고, 남겨야 하는 데이터는 볼륨으로 명시적으로 밖에 두게 되어 있다. 이 전제를 모르고 컨테이너 안에 파일을 쌓으면 재배포마다 조용히 사라진다.
+Compose 는 프로덕션 오케스트레이터가 아니라 여러 컨테이너를 한 파일로 묶어 로컬/테스트에서 재현하는 도구로 위치한다.
+
+## 인용 포인트
+- "로컬에서는 되는데요"를 없애는 것이 컨테이너의 본래 목적이라는 점 — 환경 차이를 코드로 고정한다는 논지는 Dockerfile 을 저장소에 넣자는 제안의 근거가 된다.
+- 이미지 레이어와 캐시 구조는 CI 빌드 시간 단축 작업의 우선순위(무엇을 먼저 고칠지)를 정하는 논거로 쓰기 좋다.
+
+## 코드 예시
+
+"덜 바뀌는 것을 앞으로, 자주 바뀌는 것을 뒤로"라는 레이어 캐시 원칙과, 빌드 도구를 최종 이미지에 남기지 않는 멀티스테이지 구성을 한 파일에 적용한 형태.
+
+```dockerfile
+# 1단계 빌드 — 의존성 설치를 소스 복사보다 앞에 둬야 캐시가 산다
+FROM node:20-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# 2단계 실행 — 컴파일러와 devDependencies 는 여기로 넘어오지 않는다
+FROM node:20-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=build /app/dist ./dist
+USER node
+EXPOSE 3000
+CMD ["node", "dist/main.js"]
+```
+
+이 코드가 감추는 것: `.dockerignore` 가 없으면 `COPY . .` 가 `node_modules` 와 `.git` 을 통째로 밀어 넣어, 위에서 아낀 캐시가 매 빌드 무효화된다.

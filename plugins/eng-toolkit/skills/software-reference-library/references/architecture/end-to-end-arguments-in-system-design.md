@@ -40,3 +40,31 @@ https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf
 - "게이트웨이가 검증하니 서비스는 생략해도 된다"에 대한 표준 반론: 게이트웨이는 그 서비스 호출의 유일한 경로임을 보장할 수 없으므로, 그 검증은 최적화이지 정확성 근거가 아니다.
 - 큐의 exactly-once 보장을 근거로 컨슈머 멱등 처리를 생략하자는 제안에 대해, 최종 상태를 아는 것은 컨슈머뿐이라는 논지로 대응할 수 있다.
 - 40년 된 1차 논문이라, 계층 책임 논쟁을 개인 취향에서 원리 문제로 옮기는 데 출처로서의 무게가 있다.
+
+## 코드 예시
+
+"브로커의 전달 보장은 최적화이지 컨슈머 면제 사유가 아니다" — 최종 상태를 아는 종단(컨슈머)이 자기 트랜잭션 안에서 중복을 스스로 막는 형태.
+
+```python
+# CREATE TABLE processed_event (
+#   event_id TEXT PRIMARY KEY, processed_at TIMESTAMPTZ NOT NULL DEFAULT now());
+
+def handle_order_paid(conn, event: dict) -> str:
+    with conn:                      # 중복 표시와 상태 변경을 한 트랜잭션으로 묶는다
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO processed_event (event_id) VALUES (%s) "
+                "ON CONFLICT (event_id) DO NOTHING",
+                (event["event_id"],),
+            )
+            if cur.rowcount == 0:
+                return "duplicate"  # 이미 처리한 이벤트 — 조용히 끝낸다
+            cur.execute(
+                "UPDATE orders SET status = 'PAID' "
+                " WHERE id = %s AND status = 'PENDING'",  # 상태 전이도 한 번만
+                (event["order_id"],),
+            )
+    return "processed"
+```
+
+이 방어는 부수효과가 같은 DB 안에 있을 때만 성립한다 — 핸들러가 메일 발송이나 PG 승인 같은 외부 호출을 하면 그 효과는 이 트랜잭션이 되돌리지 못하므로, 상대 쪽에도 별도의 멱등 키가 필요하다. 종단은 하나가 아니라 부수효과마다 하나씩 있다는 것이 이 코드가 감추는 부분이다.

@@ -34,3 +34,34 @@ https://github.com/ai/size-limit
 ## 인용 포인트
 - "성능 예산은 문서가 아니라 CI 게이트여야 한다"는 프로세스 제안의 대표 구현.
 - 예산을 KB가 아니라 다운로드+실행 시간으로 선언할 수 있다는 점 — 느린 기기 기준의 예산 수립 근거.
+
+## 코드 예시
+
+"성능 예산은 문서가 아니라 CI 게이트"이고 "예산을 KB가 아니라 시간으로 선언한다"를 `package.json` 설정으로 옮긴 것.
+
+```json
+{
+  "scripts": {
+    "size": "size-limit"
+  },
+  "size-limit": [
+    {
+      "name": "초기 진입 번들 (느린 기기 기준 시간 예산)",
+      "path": "dist/main.*.js",
+      "limit": "1.5 s"
+    },
+    {
+      "name": "Button 하나만 임포트했을 때 (트리셰이킹 감시)",
+      "path": "dist/index.js",
+      "import": "{ Button }",
+      "limit": "10 kB"
+    }
+  ],
+  "devDependencies": {
+    "@size-limit/preset-big-lib": "^11.0.0",
+    "size-limit": "^11.0.0"
+  }
+}
+```
+
+`1.5 s`는 실측이 아니라 고정된 저속 회선·평균 기기 모델에 번들 크기를 대입한 **계산값**이다 — 그래서 CI 게이트로는 안정적이지만 실제 사용자 기기의 성능 벤치마크로 인용하면 안 되고, 시간 한도를 쓰려면 실행 시간 측정이 포함된 프리셋(`preset-big-lib`·`preset-app`)이 필요하다.

@@ -27,7 +27,7 @@ https://martinfowler.com/articles/microservice-testing/
 - 단일 애플리케이션 안에서의 층 배치가 문제라면 `qa/the-practical-test-pyramid.md`
 - 계약 테스트를 실제 도구로 구현하는 단계면 `testing/pact.md`, 개념 정의만 필요하면 `testing/contracttest.md`
 - 외부 의존을 프로세스 밖에서 목으로 세우는 방법이 필요하면 `testing/wiremock-http.md` 또는 `testing/testcontainers.md`
-- 분산 환경의 장애 내성 검증이 목적이면 `testing/principles-of-chaos-engineering.md`
+- 분산 환경의 장애 내성 검증이 목적이면 `infrastructure/principles-of-chaos-engineering.md`
 
 ## 무엇이 들어있나
 Clemson의 출발점은 단순하다. 마이크로서비스는 독립 배포와 팀 병렬화를 얻는 대신 네트워크 분할을 들여왔고, 인프로세스 모놀리스를 전제로 만들어진 테스트 전략은 그대로 쓸 수 없다는 것.
@@ -42,3 +42,37 @@ Clemson의 출발점은 단순하다. 마이크로서비스는 독립 배포와 
 - "테스트 전략은 아키텍처를 따라 재고되어야 한다" — 서비스 분리 후 테스트 방식을 그대로 두는 관성에 대한 반론.
 - 컴포넌트 테스트 + 계약 테스트로 E2E를 대체한다는 구도 — E2E 스펙 감축 제안을 정당화하는 표준 논거.
 - 통합 테스트를 "경계 통신 검증"으로 좁히는 정의 — 통합 테스트가 무한히 비대해지는 것을 막는 기준선.
+
+## 코드 예시
+
+E2E 가 짊어지던 확신을 한 층 아래로 내려보내는 계약 테스트 — 소비자 쪽에서 기대를 명세하고, 그 기대는 공급자 빌드에서 재생돼 검증된다.
+
+```javascript
+// order-service/test/contract/coupon.pact.test.js
+const { PactV3, MatchersV3 } = require('@pact-foundation/pact')
+const { like, integer } = MatchersV3
+
+const provider = new PactV3({
+  consumer: 'order-service',
+  provider: 'coupon-service',
+})
+
+test('유효한 쿠폰 조회 계약', async () => {
+  provider
+    .given('쿠폰 WELCOME10 이 사용 가능하다')   // 공급자가 만들어야 할 상태
+    .uponReceiving('WELCOME10 조회 요청')
+    .withRequest({ method: 'GET', path: '/coupons/WELCOME10' })
+    .willRespondWith({
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: { code: like('WELCOME10'), discountRate: integer(10) },
+    })
+
+  await provider.executeTest(async (mockServer) => {
+    const coupon = await fetchCoupon(mockServer.url, 'WELCOME10')
+    expect(coupon.discountRate).toBe(10)   // 소비자가 실제로 쓰는 필드만 단언
+  })
+})
+```
+
+계약은 소비자가 쓰는 필드의 모양만 고정한다 — 할인율 10 이 의미상 맞는지, 두 서비스가 같은 통화를 가정하는지는 이 층에서 잡히지 않고, 그래서 E2E 를 0 으로 만들 수는 없다.

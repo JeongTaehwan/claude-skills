@@ -38,3 +38,35 @@ Example Index에는 실제로 동작하는 참조 구현이 모여 있어, 자�
 ## 인용 포인트
 - "커스텀 드롭다운 하나 만드는 데 왜 이렇게 오래 걸리냐"는 질문에, 해당 패턴의 키보드 인터랙션 표를 그대로 보여주면 범위가 설명된다.
 - 네이티브 `<select>`/`<button>`을 커스텀으로 대체하자는 제안에 대해, "No ARIA is better than bad ARIA" 원칙과 필요한 속성 목록을 근거로 비용을 제시할 수 있다.
+
+## 코드 예시
+
+Tabs 패턴의 키보드 인터랙션 표 — "Tab 키는 탭 목록 전체에 한 번만 멈추고, 탭 사이 이동은 화살표"를 roving tabindex로 옮긴 형태.
+
+```js
+const tabs = [...tablist.querySelectorAll('[role="tab"]')];
+
+function activate(index) {
+  tabs.forEach((tab, i) => {
+    const selected = i === index;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1; // 선택된 탭만 탭 순서에 남긴다
+    document.getElementById(tab.getAttribute('aria-controls')).hidden = !selected;
+  });
+  tabs[index].focus();
+}
+
+tablist.addEventListener('keydown', (e) => {
+  const current = tabs.indexOf(document.activeElement);
+  if (current === -1) return;
+  const last = tabs.length - 1;
+  if (e.key === 'ArrowRight') activate(current === last ? 0 : current + 1);
+  else if (e.key === 'ArrowLeft') activate(current === 0 ? last : current - 1);
+  else if (e.key === 'Home') activate(0);
+  else if (e.key === 'End') activate(last);
+  else return;
+  e.preventDefault(); // 화살표로 페이지가 스크롤되지 않게
+});
+```
+
+이건 화살표 이동만으로 패널이 바뀌는 automatic activation이다 — 패널 로딩이 비싸면 APG는 Enter/Space로 확정하는 manual activation을 따로 권한다. 마크업 쪽에 `role="tab"`·`aria-controls`·`role="tabpanel"`·`aria-labelledby`가 이미 붙어 있다는 전제도 이 코드에는 안 보인다.

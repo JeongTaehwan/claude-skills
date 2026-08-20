@@ -34,3 +34,38 @@ https://github.com/streamich/react-use
 ## 인용 포인트
 - 네트워크 적응 로직을 넣을 때 "정체된 원조(react-adaptive-hooks) 대신 유지보수되는 구현을 쓴다"는 의존성 선택의 근거.
 - 회선 신호 구독을 직접 구현하지 않고 검증된 훅으로 받자는 코드리뷰 코멘트의 출처.
+
+## 코드 예시
+
+회선 신호 구독을 직접 짜지 않고 `useNetworkState` 로 받아, 화질·자동재생·프리페치 강도를 한 곳에서 분기한다.
+
+```jsx
+"use client"; // App Router 에서는 클라이언트 컴포넌트 전용
+
+import Image from "next/image";
+import { useNetworkState } from "react-use";
+
+export function HeroMedia({ product }) {
+  const { online, effectiveType, saveData } = useNetworkState();
+
+  const lean = saveData || effectiveType === "2g" || effectiveType === "slow-2g";
+
+  if (!online) return <p>오프라인입니다. 연결되면 자동으로 불러옵니다.</p>;
+
+  if (lean) {
+    return (
+      <Image
+        src={product.imageUrl}
+        alt={product.name}
+        width={480}
+        height={480}
+        quality={40} // 저속·데이터 절약이면 화질을 낮춰 바이트를 줄인다
+      />
+    );
+  }
+
+  return <video src={product.clipUrl} width={960} height={960} autoPlay muted loop playsInline />;
+}
+```
+
+`effectiveType`·`saveData` 는 Chromium 계열에서만 채워지고 훅은 하이드레이션 이후에 도는 — 즉 첫 렌더는 언제나 무거운 쪽이다. 서버에서 이미 무거운 마크업을 내보낸 뒤라면 절약은 두 번째 화면부터 시작된다.

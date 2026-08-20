@@ -34,3 +34,29 @@ Ravi Netravali, James Mickens — USENIX NSDI '18. 서버가 JS 힙과 DOM의 "�
 ## 인용 포인트
 - 서버 사전 계산으로 중앙값 PLT 53%·에너지 36%·대역폭 21% 절감 — "저사양 기기의 병목은 네트워크만이 아니라 클라이언트 계산"이라는 주장의 실험 근거.
 - RSC·서버 주도 렌더링 계열 설계 문서에서 "이 방향의 극단까지 밀어붙인 학술 선행 사례"로 인용.
+
+## 코드 예시
+
+논문의 "계산 이전"을 실무 수준으로 낮춘 형태 — 원본 데이터와 집계 코드는 서버에 남고, 폰에는 최종 상태만 내려간다.
+
+```jsx
+// app/dashboard/page.jsx — 서버 컴포넌트 (번들에 포함되지 않는다)
+import { aggregateByMonth } from "@/lib/aggregate";
+import RevenueChart from "./revenue-chart"; // "use client"
+
+export default async function DashboardPage() {
+  // 주문 원본 수만 건은 클라이언트로 넘어가지 않는다
+  const orders = await db.order.findMany({ where: { year: 2026 } });
+
+  // 집계·포맷팅까지 서버에서 끝낸 "최종 상태"
+  const monthly = aggregateByMonth(orders).map((m) => ({
+    label: `${m.month}월`,
+    revenue: m.revenue,
+    display: m.revenue.toLocaleString("ko-KR"),
+  }));
+
+  return <RevenueChart data={monthly} />; // 12개 항목만 직렬화되어 전송
+}
+```
+
+집계 코드가 서버에 남는다는 건 클라이언트가 스스로 다시 계산할 수 없다는 뜻이다 — 필터·기간 변경 같은 인터랙션마다 서버 왕복이 생기므로, 고지연 회선에서는 로드는 빨라지고 조작은 느려지는 맞바꿈이 된다.

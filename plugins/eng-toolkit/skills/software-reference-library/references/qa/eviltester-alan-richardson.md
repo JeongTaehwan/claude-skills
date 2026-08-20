@@ -36,3 +36,28 @@ https://www.eviltester.com/
 
 ## 인용 포인트
 - QA 온보딩이나 사내 교육에 "읽기"가 아니라 "풀기" 과제를 넣고 싶을 때, apichallenges를 그대로 과제로 배정할 수 있다.
+
+## 코드 예시
+
+"Postman 으로 요청 몇 개" 다음 단계를 손으로 옮긴 형태 — 정상 경로가 아니라 메서드·인증·상태 전이의 경계를 한 바퀴 두들겨 보고 응답 코드를 기록한다.
+
+```bash
+#!/usr/bin/env bash
+# 주문 API 탐색 — 성공을 확인하는 게 아니라 경계의 반응을 수집한다
+BASE=${BASE:-http://localhost:8080}
+probe() {  # $1=설명 나머지=curl 인자
+  local label=$1; shift
+  printf '%-34s %s\n' "$label" "$(curl -s -o /dev/null -w '%{http_code}' "$@")"
+}
+
+probe "인증 없이 조회"        "$BASE/orders/1"
+probe "남의 주문 조회"        -H "Authorization: Bearer $USER_A" "$BASE/orders/9999"
+probe "허용 안 된 메서드"     -X DELETE -H "Authorization: Bearer $USER_A" "$BASE/orders/1"
+probe "Content-Type 누락"     -X POST --data '{"sku":"A"}' "$BASE/orders"
+probe "빈 배열로 주문 생성"   -X POST -H 'Content-Type: application/json' \
+      -H "Authorization: Bearer $USER_A" --data '{"items":[]}' "$BASE/orders"
+probe "배송완료 주문을 취소"  -X POST -H "Authorization: Bearer $USER_A" \
+      "$BASE/orders/1/cancel"
+```
+
+응답 코드는 질문이지 판정이 아니다 — 남의 주문에 404 가 오는 것이 정보 은닉인지 조회 버그인지는 이 출력만으로 갈리지 않고, 다음 실험을 사람이 설계해야 한다.

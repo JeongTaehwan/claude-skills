@@ -36,3 +36,32 @@ Stack, Box, Center, Cluster, Sidebar, Switcher, Cover, Grid, Frame, Reel, Impost
 ## 인용 포인트
 - "디자인 시안에 없는 화면 폭에서 깨진다"는 QA 이슈가 반복될 때, 브레이크포인트 추가가 아니라 위임 방식으로 가야 한다는 논거를 여기서 가져올 수 있다.
 - 컴포넌트가 자기 바깥 마진을 갖는 관행을 걷어낼 때, Stack 논지가 설득 재료가 된다.
+
+## 코드 예시
+
+"간격은 부모가 책임진다"(Stack)와 "브레이크포인트 대신 브라우저에 위임한다"(Switcher) 두 주장을 그대로 옮긴 프리미티브.
+
+```css
+/* Stack — 자식은 자기 마진을 갖지 않고, 부모가 '사이' 간격만 만든다 */
+.stack > * {
+  margin-block: 0;
+}
+.stack > * + * {
+  margin-block-start: var(--space, 1.5rem);
+}
+
+/* Switcher — 미디어 쿼리 없이 가로 배치와 세로 배치를 오간다 */
+.switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space, 1.5rem);
+}
+.switcher > * {
+  flex-grow: 1;
+  /* 컨테이너가 30rem보다 좁으면 basis가 큰 양수가 되어 각 항목이 한 줄을 차지하고,
+     넓으면 음수가 0으로 잘려 한 줄에 나란히 선다 */
+  flex-basis: calc((30rem - 100%) * 999);
+}
+```
+
+`* + *`는 자식 사이에만 걸리므로 조건부 렌더링으로 주석 노드나 빈 래퍼가 끼면 간격이 어긋난다. Switcher도 항목이 늘어나면 통제가 풀려서, Every Layout 원문은 `:nth-last-child(n+5)`로 개수 상한을 따로 건다.

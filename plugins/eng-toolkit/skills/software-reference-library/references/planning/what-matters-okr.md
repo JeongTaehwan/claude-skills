@@ -26,7 +26,7 @@ https://www.whatmatters.com/
 ## 이럴 땐 아니다
 - 무료·간결한 도입 가이드와 흔한 실수 목록이면 `planning/google-re-work-okr.md` 로 충분하다. 이쪽은 책·강좌 생태계와 묶인 허브라 분량이 많다.
 - 제품이 성공했는지 측정할 지표 체계 자체를 설계하는 문제라면 `planning/north-star-metric.md` 나 `planning/heart.md` 다. OKR 은 목표 설정 형식이지 지표 설계 방법론이 아니다.
-- 지표 해석이 틀려서 잘못된 결론을 내는 게 문제라면 `planning/a-dirty-dozen-12.md` 로 간다.
+- 지표 해석이 틀려서 잘못된 결론을 내는 게 문제라면 `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md` 로 간다.
 - 백로그 우선순위를 매기는 문제라면 `planning/rice.md`. OKR 로 우선순위를 대체하려다 실패하는 게 흔한 오용이다.
 
 ## 무엇이 들어있나
@@ -37,3 +37,42 @@ https://www.whatmatters.com/
 ## 인용 포인트
 - OKR 사이클 단계별 템플릿과 대화 가이드는 사내 위키에 그대로 옮겨 팀 규칙으로 삼기 좋다 — 형식 논쟁을 원저자 자료로 종결시킬 수 있다.
 - "Dear Andy" 칼럼은 "우리 팀만 이런가?" 싶은 도입 실패 패턴에 대한 답을 문답 형태로 담고 있어, 회고에서 근거로 인용하기 좋다.
+
+## 코드 예시
+
+KR 이 작업 완료율로 퇴화하는 것을 형식으로 막은 형태 — KR 칸에 `baseline`·`target` 이 강제되면 "쿠폰 정책 개편 100% 완료" 같은 문장은 애초에 들어갈 자리가 없다.
+
+```yaml
+# okr/2026-Q3/team-payments.yaml
+objective: 결제 단계에서 고객을 잃지 않는다      # 정성적·기억되는 한 문장
+
+key_results:
+  - kr: 결제 실패 후 24시간 내 재시도율
+    baseline: 20%
+    target: 45%
+    scoring: 달성률 = (현재 - baseline) / (target - baseline)
+  - kr: 결제 화면 이탈률
+    baseline: 12%
+    target: 8%
+  - kr: 결제 문의 CS 인입 건수 (주간)
+    baseline: 340
+    target: 200
+
+# 아래는 KR 이 아니라 initiative 다. 같은 칸에 섞으면 OKR 이 할 일 목록이 된다.
+initiatives:
+  - 실패 사유 문구 4종 매핑
+  - 원클릭 재시도 버튼
+  - 간편결제 2종 추가
+
+check_in:                     # 분기 말 보고가 아니라 중간 리듬이 실행의 본체
+  cadence: 격주
+  questions:
+    - 지난 2주 KR 숫자가 어디로 움직였나
+    - 무엇이 막고 있나
+    - target 을 그대로 둘 것인가, 근거가 바뀌었나
+
+grading: 분기 말 0.0~1.0 으로 공개 채점. 1.0 이 계속 나오면 목표가 낮은 것이다.
+performance_review_link: 없음   # 인사평가와 연결하면 낮은 목표를 세우게 된다
+```
+
+`initiatives` 를 분리해도 체크인에서 그 목록의 진척만 이야기하면 결과는 같다 — 이 형식이 바꾸는 것은 문서이고, 대화를 바꾸는 것은 `check_in.questions` 를 실제로 묻는 사람이다.

@@ -26,7 +26,7 @@ https://martinfowler.com/articles/feature-toggles.html
 ## 이럴 땐 아니다
 - 트래픽을 소수 인스턴스에 먼저 흘려 보는 **배포 수준**의 점진 노출은 `development/canary-release.md`
 - 브랜치를 짧게 유지하는 전체 전략은 `development/trunk-based-development.md`
-- 실험 설계·유의성·지표 함정 같은 통계 문제는 `planning/online-controlled-experiments-at-large-scale.md`, `planning/a-dirty-dozen-12.md`
+- 실험 설계·유의성·지표 함정 같은 통계 문제는 `planning/online-controlled-experiments-at-large-scale.md`, `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 배포 성과를 지표로 말해야 한다면 `development/dora.md`
 
 ## 무엇이 들어있나
@@ -40,3 +40,30 @@ Pete Hodgson 이 쓴 이 글의 핵심은 분류다. Release Toggle(미완성 �
 - "플래그가 다 같은 플래그가 아니다"라는 분류는, 플래그 정리 작업에서 무엇을 지워도 되는지 판단하는 기준을 곧바로 제공한다.
 - 릴리스 토글에 만료 개념을 붙이자는 제안은 이 글을 근거로 팀 규약으로 승격시키기 좋다.
 - 토글 결정 지점을 한 곳으로 모으라는 조언은, 조건문을 도메인 로직에 직접 박는 PR 에 대한 리뷰 논거가 된다.
+
+## 코드 예시
+
+분류(네 종류)와 배치(결정 지점을 한 곳에)를 같이 강제한 형태 — 플래그를 등록할 때 종류를 적게 만들고, 릴리스 토글에는 만료일을 필수로 둔다.
+
+```ts
+type Kind = "release" | "experiment" | "ops" | "permissioning";
+
+// release 토글만 만료일이 필수 — 태생이 임시물이라는 걸 타입으로 못 박는다
+type Toggle =
+  | { kind: "release"; expiresOn: string }
+  | { kind: Exclude<Kind, "release"> };
+
+const registry = {
+  "new-checkout": { kind: "release", expiresOn: "2026-09-30" },
+  "coupon-kill-switch": { kind: "ops" }, // 운영 중 즉시 꺼야 하므로 런타임 조회
+} satisfies Record<string, Toggle>;
+
+// 조건문은 여기 한 곳에만 있다. 도메인 코드는 Checkout 구현체만 받는다
+export function checkoutFor(user: User): Checkout {
+  return router.isOn("new-checkout", user)
+    ? new NewCheckout()
+    : new LegacyCheckout();
+}
+```
+
+만료일 필드는 스스로 아무것도 하지 않는다 — 만료된 릴리스 토글에서 빌드를 깨는 CI 검사를 붙여야 실제 제거로 이어진다. 종류별로 값을 읽어 오는 곳도 서로 다르다(릴리스는 배포 시점 설정, ops 는 런타임 제어 평면). 위 registry 는 분류만 담고 저장소는 담지 않는다.

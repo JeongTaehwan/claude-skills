@@ -34,3 +34,29 @@ Yasir Zaki, Jay Chen, Thomas Pötsch, Talal Ahmad, Lakshminarayanan Subramanian 
 ## 인용 포인트
 - 병목은 대역폭이 아니라 DNS·리다이렉트·TLS 왕복 — "느린 회선 = 손쓸 수 없음" 단정에 대한 실측 반례.
 - DNS 캐싱·리다이렉션 캐싱만으로 체감 지연 대폭 개선 — dns-prefetch·리다이렉트 제거·커넥션 재사용 작업의 우선순위 근거.
+
+## 코드 예시
+
+논문이 한 해부를 그대로 흉내 낸다 — 한 요청의 시간을 DNS·TCP·TLS·리다이렉트로 쪼개, 병목이 대역폭인지 왕복인지 눈으로 가른다.
+
+```bash
+curl -sS -o /dev/null -L "https://example.com/" -w '
+DNS        %{time_namelookup}s
+TCP        %{time_connect}s      (누적)
+TLS        %{time_appconnect}s   (누적)
+TTFB       %{time_starttransfer}s
+전체        %{time_total}s
+리다이렉트  %{num_redirects}회 / %{time_redirect}s
+연결 수립  %{num_connects}회
+받은 바이트 %{size_download}
+'
+```
+
+```
+# 처방 1: 리다이렉트 체인 제거 — 한 홉마다 DNS+TCP+TLS 가 통째로 반복된다
+# 처방 2: 첫 왕복 전에 연결을 미리 세운다
+Link: <https://cdn.example.com>; rel=preconnect
+Link: <https://api.example.com>; rel=preconnect
+```
+
+`time_total` 대비 `size_download` 를 보면 실효 대역폭이 나온다 — 그 값이 회선 대역폭 근처면 진짜 대역폭 병목이지만, 한참 낮은데 시간만 길다면 논문이 가나에서 본 것과 같은 왕복 병목이고 이때는 파일을 줄여도 거의 안 빨라진다.

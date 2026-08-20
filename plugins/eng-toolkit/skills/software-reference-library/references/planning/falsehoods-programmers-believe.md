@@ -26,7 +26,7 @@ https://github.com/kdeldycke/awesome-falsehood
 ## 이럴 땐 아니다
 - 스키마 변경 자체의 안전한 절차(무중단 마이그레이션 등)를 찾는 거라면 이 저장소가 아니라 아키텍처 쪽 자료를 봐야 한다 — `architecture/designing-data-intensive-applications.md`
 - 입력 검증을 코드로 구현할 스키마 검증 라이브러리를 찾는 거면 `development/zod.md`
-- 보안 관점의 입력 처리 규칙이면 `development/owasp-cheat-sheet-series.md`
+- 보안 관점의 입력 처리 규칙이면 `security/owasp-cheat-sheet-series.md`
 
 ## 무엇이 들어있나
 "Falsehoods programmers believe about X" 형식의 글들을 X 별로 묶은 링크 모음이다. 이름, 주소, 시간과 타임존, 전화번호, 이메일, 성별, 통화와 금액, 국가·지리, 네트워크 등이 대표 카테고리다.
@@ -37,3 +37,28 @@ https://github.com/kdeldycke/awesome-falsehood
 ## 인용 포인트
 - 리뷰에서 "그런 경우가 있나요?"라는 반문이 나올 때, 해당 카테고리 글의 반례 목록을 그대로 붙이면 논쟁이 짧아진다.
 - 금액·통화 필드를 부동소수점으로 두자는 제안에 대한 반박 근거를 여기서 찾을 수 있다.
+
+## 코드 예시
+
+"내가 걸려는 제약이 반례 목록에 있는가"를 확인하고 나서 나오는 스키마의 모양 — 특히 금액을 부동소수점으로 두지 않는 부분.
+
+```sql
+-- 사람이 입력하는 필드에 '당연한' 제약을 걸기 전에 반례를 확인한 결과 (PostgreSQL)
+CREATE TABLE customer (
+  id                BIGSERIAL PRIMARY KEY,
+  display_name      TEXT NOT NULL,        -- 성/이름 분리 안 함, 길이 상한 두지 않음
+  email             TEXT,                 -- 정규식으로 막지 않고 발송 성공으로 검증
+  email_verified_at TIMESTAMPTZ,
+  phone_e164        TEXT,                 -- 국가번호 포함 원문 보관, 표시용 포맷은 별도
+  country_code      CHAR(2) NOT NULL,     -- ISO 3166-1 alpha-2
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now()  -- 타임존 없는 TIMESTAMP 금지
+);
+
+CREATE TABLE order_payment (
+  order_id     BIGINT PRIMARY KEY,
+  currency     CHAR(3) NOT NULL,          -- ISO 4217
+  amount_minor BIGINT  NOT NULL           -- 최소 화폐 단위 정수, FLOAT/NUMERIC 반올림 회피
+);
+```
+
+여기서 반례를 피한 방식은 대부분 "제약을 걸지 않는 것"이고, 그만큼 검증 책임이 애플리케이션과 운영 쪽으로 넘어간다 — 공짜가 아니다. `amount_minor`도 통화별 소수 자릿수(KRW 0자리, USD 2자리)를 코드 어딘가가 알고 있어야 값에 의미가 생긴다.

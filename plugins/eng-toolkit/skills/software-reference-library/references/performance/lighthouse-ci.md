@@ -35,3 +35,29 @@ CI에서 Lighthouse를 반복 실행하고 결과를 저장·비교하는 러너
 ## 인용 포인트
 - 성능 개선 과제의 마무리는 "개선"이 아니라 "회귀 방지 장치 설치"라는 주장의 도구적 근거.
 - 성능 예산을 지표 단위(assertion)로 선언하는 방식의 표준 구현.
+
+## 코드 예시
+
+"이 지표가 이 값을 넘으면 머지 실패" — 성능 예산을 릴리스 노트가 아니라 CI 게이트로 못 박는 `lighthouserc.json`.
+
+```json
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:3000/", "http://localhost:3000/products"],
+      "numberOfRuns": 3
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.85 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
+        "unused-javascript": "off"
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}
+```
+
+`numberOfRuns: 3` 은 중앙값을 쓰게 해 변동을 줄일 뿐 없애지 못한다 — 한도를 실측 분포에 딱 붙여 잡으면 코드와 무관한 실패가 반복된다.

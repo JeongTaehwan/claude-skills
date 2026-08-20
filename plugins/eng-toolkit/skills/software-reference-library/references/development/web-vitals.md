@@ -27,8 +27,8 @@ Google 이 정한 사용자 체감 성능 지표의 정의 문서 — 로딩(LCP
 ## 이럴 땐 아니다
 - 우리 페이지를 실제로 측정하고 개선 항목을 뽑는 도구는 `development/lighthouse.md`
 - 업계 전체 분포와 비교해 목표선을 잡으려면 `development/web-almanac.md`
-- 백엔드 지연·에러율 같은 서비스 신뢰성 지표(SLI/SLO)는 `development/google-sre-books.md`
-- 분산 추적으로 지연 원인을 서버 구간까지 따라가려면 `development/opentelemetry-docs.md`
+- 백엔드 지연·에러율 같은 서비스 신뢰성 지표(SLI/SLO)는 `infrastructure/google-sre-books.md`
+- 분산 추적으로 지연 원인을 서버 구간까지 따라가려면 `infrastructure/opentelemetry-docs.md`
 - 어떤 개선 기법을 어떤 순서로 적용할지는 지표 문서가 아니라 별도 플레이북의 영역이다
 
 ## 무엇이 들어있나
@@ -42,3 +42,35 @@ Core Web Vitals 외에 TTFB, FCP 같은 보조 지표들이 진단용으로 함�
 - "75번째 백분위수로 판정한다"는 규칙은, 성능 SLO 를 평균이 아닌 백분위로 세우자고 설득할 때의 표준 근거다.
 - 세 지표의 임계값(좋음/개선 필요/나쁨 구간)은 QA 성능 판정표에 그대로 옮겨 쓸 수 있는 형태로 정리돼 있다.
 - "필드 데이터가 판정 기준"이라는 서술은, 로컬/스테이징 측정치만으로 성능 개선을 완료 처리하려는 흐름을 막는 데 쓸 수 있다.
+
+## 코드 예시
+
+"판정은 필드 데이터로 한다"를 실제로 하려면, 개발자 노트북이 아니라 사용자 브라우저에서 값이 올라와야 한다.
+
+```js
+import { onLCP, onINP, onCLS } from "web-vitals";
+
+function send(metric) {
+  const body = JSON.stringify({
+    name: metric.name,      // "LCP" | "INP" | "CLS"
+    value: metric.value,
+    rating: metric.rating,  // "good" | "needs-improvement" | "poor"
+    id: metric.id,
+    path: location.pathname,
+  });
+  // 페이지가 사라지는 중에도 전송되어야 한다 — 그래서 일반 fetch 가 아니다
+  if (!navigator.sendBeacon?.("/rum", body)) {
+    fetch("/rum", { method: "POST", body, keepalive: true });
+  }
+}
+
+onLCP(send);
+onINP(send);
+onCLS(send);
+
+// 판정 쿼리는 평균이 아니라 백분위다
+//   SELECT name, PERCENTILE_CONT(value, 0.75) OVER (PARTITION BY name) FROM rum
+//   WHERE ts >= CURRENT_DATE - 28
+```
+
+`metric.rating` 은 이벤트 하나에 붙는 라벨이지 페이지의 판정이 아니다. "good 비율 몇 %" 대시보드를 만들면 web.dev 가 말하는 기준과 다른 숫자가 나온다 — 규칙은 **28일 창의 75번째 백분위수가 임계값 안에 드는가**이므로, 집계 단위를 그렇게 맞추지 않으면 통과했다고 믿은 채로 실패해 있게 된다.

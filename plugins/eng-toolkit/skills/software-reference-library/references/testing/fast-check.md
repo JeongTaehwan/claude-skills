@@ -42,3 +42,32 @@ TypeScript 지원과 타입 추론이 강한 편이고, 모델 기반/상태 머
 ## 인용 포인트
 - shrinking 으로 최소 반례를 얻는다는 점은, 무작위 테스트가 "재현 불가능한 실패만 늘린다"는 흔한 우려에 대한 직접적인 반박이다.
 - 기존 러너(Jest/Vitest) 위에서 동작한다는 점은 도입 비용이 낮다는 근거로 제안서에 쓸 수 있다.
+
+## 코드 예시
+
+"예제 대여섯 개" 대신 할인 계산이 어떤 입력에서도 지켜야 할 불변식을 선언한 것 — 기존 Jest 러너 안에서 그대로 돈다.
+
+```js
+import fc from 'fast-check';
+
+test('할인가는 항상 [0, 원금] 안에 있다', () => {
+  fc.assert(
+    fc.property(
+      fc.integer({ min: 0, max: 10_000_000 }), // 원금
+      fc.integer({ min: 0, max: 100 }),        // 할인율(%)
+      fc.integer({ min: 0, max: 50_000 }),     // 정액 할인
+      (total, rate, flat) => {
+        const paid = applyDiscount(total, { rate, flat });
+        expect(paid).toBeGreaterThanOrEqual(0);
+        expect(paid).toBeLessThanOrEqual(total);
+      }
+    ),
+    { numRuns: 1000 }
+  );
+});
+
+// 실패하면 최소 반례와 함께 시드가 출력된다.
+// { seed: -1234, path: "3:1" } 를 옵션에 그대로 넣으면 로컬에서 재현된다.
+```
+
+이 테스트는 내가 적은 성질만 지킨다 — 범위만 단언했으므로 할인 금액이 완전히 틀린 구현도 통과한다. 왕복 성질이나 기존 구현과의 동등성처럼 더 강한 성질을 찾는 것이 진짜 작업이다.

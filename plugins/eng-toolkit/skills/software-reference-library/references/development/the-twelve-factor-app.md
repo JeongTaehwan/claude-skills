@@ -26,9 +26,9 @@ https://12factor.net/
 ## 이럴 땐 아니다
 - 배포 파이프라인과 릴리스 속도 지표는 `development/dora.md` / `development/dora-four-keys.md`
 - 브랜치 전략·통합 주기 문제는 `development/trunk-based-development.md`
-- 운영 신뢰성(SLO, 온콜, 장애 대응) 체계는 `development/google-sre-books.md`
+- 운영 신뢰성(SLO, 온콜, 장애 대응) 체계는 `infrastructure/google-sre-books.md`
 - 클라우드 아키텍처 전반의 설계 원칙(비용·복원력·보안 축)은 `architecture/aws-well-architected-framework.md`
-- 컨테이너 이미지 작성법 자체는 `development/docker.md`
+- 컨테이너 이미지 작성법 자체는 `infrastructure/docker.md`
 
 ## 무엇이 들어있나
 핵심 주장은 "앱은 실행 환경을 알면 안 된다"이다. 코드는 하나이고, 환경 차이는 전부 환경변수(Config)로만 들어온다 — 그래서 `config/production.yml` 처럼 환경별 파일을 코드에 두는 흔한 관행을 정면으로 반대한다.
@@ -41,3 +41,34 @@ https://12factor.net/
 - "설정은 환경변수에" — 환경별 설정 파일을 저장소에 커밋하는 관행을 걷어낼 때의 표준 근거.
 - "로그는 이벤트 스트림" — 앱이 로그 파일 회전을 직접 하지 않아야 하는 이유를 한 줄로 설명할 수 있다.
 - "개발/운영 환경 격차 최소화" — 로컬만 SQLite, 운영은 MySQL 같은 구성을 반대할 때 인용.
+
+## 코드 예시
+
+"앱은 실행 환경을 알면 안 된다"를 배포 매니페스트 한 장으로 옮기면, 12개 항목 중 절반이 한눈에 보인다.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: orders }
+spec:
+  replicas: 3                            # 무상태·무공유여야 이 숫자를 마음대로 올릴 수 있다
+  template:
+    spec:
+      terminationGracePeriodSeconds: 30  # Disposability — 빠른 시작과 우아한 종료
+      containers:
+        - name: orders
+          image: ghcr.io/acme/orders:1.4.2   # 빌드 산출물은 불변, 환경만 갈아 끼운다
+          ports: [{ containerPort: 8080 }]   # 포트 바인딩으로 자기완결적 서비스
+          env:
+            - name: DATABASE_URL             # 백킹 서비스는 앱 입장에서 URL 하나 차이
+              valueFrom:
+                secretKeyRef: { name: orders-secrets, key: database-url }
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef: { name: orders-config, key: log-level }
+          # 로그 파일도 로컬 볼륨도 없다. 앱은 stdout 에 흘리고 수집·회전은 환경의 책임
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+```
+
+`replicas: 3` 은 무상태를 **선언**한 게 아니라 가정한 것이다. 인메모리 세션이나 로컬 업로드 디렉터리가 코드에 하나라도 남아 있으면 이 매니페스트는 12factor 준수가 아니라 재현 안 되는 버그의 원인이 된다. 그리고 시크릿을 환경변수로 넣는 부분은 문서가 쓰인 시점의 관행이라, 지금은 프로세스 환경과 `kubectl describe` 에 값이 드러난다는 점을 따로 감안해야 한다.

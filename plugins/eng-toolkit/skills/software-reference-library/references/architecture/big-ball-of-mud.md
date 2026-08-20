@@ -35,3 +35,36 @@ http://www.laputan.org/mud/
 ## 인용 포인트
 - "진흙 덩어리는 무능의 결과가 아니라 특정 제약 아래서의 합리적 귀결" — 레거시 논의에서 책임 공방을 구조 논의로 전환시키는 프레임.
 - 처방이 전면 재작성이 아니라 조각별 성장(Piecemeal Growth)과 동작 유지(Keep It Working)라는 점은, 리라이트 제안에 대한 표준 반론으로 쓸 수 있다.
+
+## 코드 예시
+
+"전면 재작성 대신 동작을 유지한 채 구획을 나눠 점진적으로"(Keep It Working + Piecemeal Growth)를 코드 경계 하나로 옮긴 것 — 레거시는 손대지 않고 감싸기만 한다.
+
+```ts
+import * as legacy from "./legacy/pricing"; // 3천 줄짜리 calcPrice — 수정 금지
+
+export interface PricingPort {
+  quote(orderId: string): Promise<number>;
+}
+
+class LegacyPricing implements PricingPort {
+  quote(orderId: string) {
+    return Promise.resolve(legacy.calcPrice(orderId));
+  }
+}
+
+class NewPricing implements PricingPort {
+  async quote(orderId: string): Promise<number> {
+    /* 새 규칙으로 다시 쓴 계산 */ return 0;
+  }
+}
+
+// 카테고리 단위로만 넘긴다. 넘기기 전에는 새 구현을 그림자로 돌려 차이를 기록.
+const MIGRATED = new Set(["book", "ebook"]);
+
+export function pricingFor(category: string): PricingPort {
+  return MIGRATED.has(category) ? new NewPricing() : new LegacyPricing();
+}
+```
+
+경계 뒤의 진흙은 그대로다 — 이 코드가 하는 일은 새 코드가 진흙에 새로 들러붙지 못하게 막는 것뿐이다. `MIGRATED` 가 몇 달째 늘지 않으면 구현이 둘로 늘어난 채 굳어 오히려 나빠지므로, 이행 마감과 담당자는 코드가 아니라 계획에 있어야 한다.

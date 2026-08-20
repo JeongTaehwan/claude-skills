@@ -35,3 +35,43 @@ https://github.com/TanStack/virtual
 ## 인용 포인트
 - 긴 목록 성능 문제의 표준 해법이 "가상화"이고, 그 현행 1순위 구현이라는 기술 선정 근거(특히 react-query 프로젝트).
 - 헤드리스 접근이 디자인 시스템과 가상화 로직의 결합을 끊는다는 아키텍처 논거.
+
+## 코드 예시
+
+"헤드리스가 디자인 시스템과 가상화 로직의 결합을 끊는다"를 실제 훅 사용으로 옮긴 것 — 배치 계산만 라이브러리가 하고 마크업은 전부 내 것이다.
+
+```tsx
+import { useVirtualizer } from "@tanstack/react-virtual";
+
+function OrderList({ orders }: { orders: Order[] }) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: orders.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 72, // 첫 추정치 — 실제 높이는 measureElement 가 잰다
+    overscan: 8,
+  });
+
+  return (
+    <div ref={parentRef} style={{ height: 600, overflow: "auto" }}>
+      {/* 전체 높이를 잡아 스크롤바 길이를 실제 목록과 맞춘다 */}
+      <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        {virtualizer.getVirtualItems().map((row) => (
+          <div
+            key={row.key}
+            data-index={row.index}
+            ref={virtualizer.measureElement} // 동적 행 높이 측정
+            style={{ position: "absolute", top: 0, left: 0, width: "100%",
+                     transform: `translateY(${row.start}px)` }}
+          >
+            <OrderRow order={orders[row.index]} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+가상화는 보이지 않는 행을 **DOM에서 없애는** 것이라 브라우저 페이지 내 검색(Ctrl+F), 전체 인쇄, 스크린 리더의 목록 훑기가 함께 사라진다. 그리고 이 훅은 렌더링 비용만 줄인다 — 주문 5천 건을 한 번에 내려주는 응답이 원인이라면 여기서는 아무것도 나아지지 않는다.

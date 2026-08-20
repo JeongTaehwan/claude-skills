@@ -36,3 +36,26 @@ https://context-driven-testing.com/
 ## 인용 포인트
 - "There are good practices in context, but there are no best practices." — 획일적 프로세스 요구에 대한 표준 반론으로 그대로 인용 가능하다.
 - 원칙 3(사람이 맥락의 가장 중요한 부분)은 테스트 자동화만으로 품질을 보장하겠다는 계획에 대한 반론 근거가 된다.
+
+## 코드 예시
+
+"베스트 프랙티스는 없다"를 커버리지 게이트에 적용한 형태 — 조직 공통 80% 하나 대신, 모듈의 실패 비용에 따라 기준을 다르게 선언하고 그 이유를 옆에 남긴다.
+
+```jsonc
+// jest.config.json — 경로별 임계값은 Jest 가 지원하는 형식
+{
+  "coverageThreshold": {
+    "global": { "lines": 60 },
+    "./src/payments/": {
+      // 조용히 틀리고 되돌리기 비싼 영역: 분기까지 강제
+      "lines": 90, "branches": 85
+    },
+    "./src/admin/internal-tools/": {
+      // 사용자 10명, 실패가 즉시 눈에 보임: 게이트 없음
+      "lines": 0
+    }
+  }
+}
+```
+
+숫자를 맥락별로 나눠도 여전히 숫자다 — 이 설정은 결제 모듈의 90%가 의미 있는 단언으로 채워졌는지 아니면 호출만 하고 끝나는 테스트인지 구분하지 못한다.

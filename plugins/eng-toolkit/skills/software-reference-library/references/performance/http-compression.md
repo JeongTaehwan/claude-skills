@@ -36,3 +36,35 @@ gzip·Brotli(br)·Zstandard(zstd) 종단간 압축의 동작(Accept-Encoding/Con
 ## 인용 포인트
 - "텍스트는 무조건 압축, 기압축 바이너리는 건드리지 않는다" — 압축 설정 리뷰의 두 줄 체크리스트.
 - 정적 자산의 빌드 타임 사전 압축(최고 레벨 Brotli) 제안의 근거.
+
+## 코드 예시
+
+"텍스트는 무조건 압축, 기압축 바이너리는 건드리지 않는다" — 빌드 타임에 최고 레벨로 미리 만들어 두고 서버는 고르기만 하게 한다.
+
+```bash
+# 빌드 후 1회. 텍스트만 대상이고 이미지·폰트(woff2)는 이미 압축돼 있어 제외한다
+find dist -type f \( -name '*.js' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.json' \) \
+  -exec brotli -q 11 -k {} \; \
+  -exec gzip -9 -k {} \;
+# → app.js, app.js.br, app.js.gz 가 나란히 놓인다
+```
+
+```nginx
+# 런타임 CPU 0: 미리 만든 .br/.gz 를 Accept-Encoding 에 맞춰 그대로 내보낸다
+brotli_static on;
+gzip_static   on;
+
+# 사전 압축본이 없는 동적 응답만 즉석 압축
+gzip on;
+gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+gzip_comp_level 5;   # 요청마다 도는 경로라 11 같은 값은 CPU 낭비다
+```
+
+```
+# 확인: 요청의 Accept-Encoding 과 응답의 Content-Encoding 이 협상 결과다
+$ curl -sI -H 'Accept-Encoding: br' https://example.com/app.js | grep -i 'content-encoding\|vary'
+content-encoding: br
+vary: Accept-Encoding
+```
+
+`Vary: Accept-Encoding` 이 빠지면 중간 캐시가 br 응답을 br 을 못 읽는 클라이언트에게 그대로 내주고, 그건 느린 게 아니라 깨진 페이지다 — 그리고 사전 압축은 파일이 바뀔 때마다 다시 만들어야 하므로 배포 파이프라인에 묶여 있어야 한다.

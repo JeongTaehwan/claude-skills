@@ -35,3 +35,35 @@ https://scholar.harvard.edu/files/waldo/files/waldo-94.pdf
 ## 인용 포인트
 - 분산 시스템의 어려움은 지연이 아니라 부분 실패다 — 요청이 실패한 것인지, 성공했는데 응답만 유실된 것인지 호출자는 원리적으로 구별할 수 없다. 멱등키·중복 결제 방지 설계의 근거로 그대로 쓸 수 있다.
 - "나중에 분산시키면 된다"는 계획에 대한 반박: 원격 경계는 나중에 끼워 넣는 배관이 아니라 인터페이스 설계 시점에 정해지는 것.
+
+## 코드 예시
+
+"실패한 것인지, 성공했는데 응답만 유실된 것인지 구별할 수 없다"는 논문의 결론을 반환 타입으로 강제한 형태 — 성공/실패 2치를 허용하지 않는다.
+
+```ts
+type RemoteResult<T> =
+  | { status: "ok"; value: T }
+  | { status: "failed" }    // 서버가 처리하지 않았음이 확인됨
+  | { status: "unknown" };  // 응답 유실 — 승인됐을 수도 있다
+
+async function charge(orderId: string, amount: number): Promise<RemoteResult<unknown>> {
+  try {
+    const res = await fetch("https://pg.example.com/v1/charges", {
+      method: "POST",
+      headers: {
+        "Idempotency-Key": `charge:${orderId}`, // 재시도해도 같은 키
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ orderId, amount }),
+      signal: AbortSignal.timeout(3000),
+    });
+    if (res.status >= 500 || res.status === 408) return { status: "unknown" };
+    if (!res.ok) return { status: "failed" };
+    return { status: "ok", value: await res.json() };
+  } catch {
+    return { status: "unknown" }; // 타임아웃·연결 끊김
+  }
+}
+```
+
+`unknown` 을 표현했을 뿐 해소한 건 아니다 — 조회 API 재확인이나 정산 대사로 확정 짓는 절차가 뒤에 없으면 타입만 정직해지고 돈은 여전히 틀어진다.

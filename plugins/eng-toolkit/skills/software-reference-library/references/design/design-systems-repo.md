@@ -35,3 +35,34 @@ Jad Limcaco가 운영하는 개인 큐레이션 사이트이며, 표준이나 �
 
 ## 인용 포인트
 - "우리 문서에 이 항목까지 써야 하나"라는 논의에, 동종 업계 공개 시스템 여러 개의 문서 구조를 근거로 제시할 수 있다.
+
+## 코드 예시
+
+갤러리의 문서 사이트들을 겹쳐 목차를 역설계한 결과 — 공통으로 나타나는 항목만 남겨 컴포넌트 문서 템플릿으로 굳힌다.
+
+```yaml
+name: Toast
+status: stable # draft | beta | stable | deprecated
+since: "2.4.0"
+owner: "@team/design-system"
+
+usage:
+  do:
+    - 이미 끝난 작업의 결과를 알릴 때
+  dont:
+    - 사용자의 확인이 필요할 때 (Dialog 를 쓴다)
+    - 화면에 계속 떠 있어야 할 때 (Banner 를 쓴다)
+
+accessibility:
+  role: status
+  keyboard:
+    - Esc 로 닫힌다
+  notes: 자동 소멸은 최소 5초 이상
+
+alternatives: [Banner, Dialog, InlineMessage]
+implementations:
+  react: "@acme/ui/Toast"
+  figma: "https://figma.com/file/.../Toast"
+```
+
+스키마는 항목이 있는지만 본다 — 가장 자주 비는 칸이 `dont`인데, 비어 있어도 통과한다. 그리고 이 사이트는 큐레이션이지 규범이 아니라서, 여러 시스템에 공통으로 나타난다는 건 그게 관행이라는 뜻이지 옳다는 뜻이 아니다.

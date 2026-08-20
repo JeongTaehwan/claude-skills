@@ -43,3 +43,36 @@ Leslie Lamport, CACM 1978
 - happened-before 를 부분 순서로 못 박은 대목 — "이벤트에 순서가 있다"는 전제로 짜인 코드를 리뷰에서 문제 삼을 때 근거가 된다.
 - concurrent 의 정의(인과적으로 무관함) — 충돌 해소 규칙을 "둘 중 하나를 임의로 고른다"로 정할 때, 그것이 편법이 아니라 정의상 정당한 선택임을 설명할 수 있다.
 - 시스템 외부 채널로 인한 anomalous behavior 지적 — 논리 시계만으로 충분하지 않은 경우(고객이 앱과 콜센터를 오가며 만든 인과)를 설명할 때 그대로 적용된다.
+
+## 코드 예시
+
+논리적 시계 규칙 두 개(이벤트마다 증가, 수신 시 받은 값보다 크게 끌어올림)와, 전체 순서를 만들려면 프로세스 ID로 임의 tie-break 해야 한다는 결론.
+
+```python
+class LamportClock:
+    def __init__(self, pid: str):
+        self.pid = pid
+        self.counter = 0
+
+    def tick(self) -> int:
+        # 규칙 1: 로컬 이벤트마다 증가
+        self.counter += 1
+        return self.counter
+
+    def send(self, payload: dict) -> dict:
+        return {**payload, "ts": self.tick(), "pid": self.pid}
+
+    def receive(self, msg: dict) -> int:
+        # 규칙 2: 받은 값보다 크게 끌어올린다 → send → receive 가 항상 성립
+        self.counter = max(self.counter, msg["ts"]) + 1
+        return self.counter
+
+def total_order_key(msg: dict) -> tuple[int, str]:
+    # (ts) 만으로는 부분 순서다. pid 로 갈라야 전체 순서가 되지만
+    # 그 tie-break 는 인과가 아니라 임의 규칙이다.
+    return (msg["ts"], msg["pid"])
+
+events = sorted(received, key=total_order_key)
+```
+
+`ts` 가 작다고 "먼저 일어났다"가 아니다 — 두 이벤트가 concurrent 면 이 정렬은 인과를 반영하지 않는 임의 순서일 뿐이고, 그걸 근거로 상태를 덮으면 논리 시계를 쓰고도 같은 버그가 난다.

@@ -27,7 +27,7 @@ https://gatling.io/docs/
 - 스크립트를 파이썬으로 쓰고 싶고 분산 실행이 간단해야 한다면 `testing/locust.md`
 - CLI·개발자 워크플로 중심의 가벼운 부하 테스트라면 `testing/k6-io-docs.md`
 - GUI 기반의 전통적 도구와 플러그인 생태계를 원한다면 `testing/apache-jmeter.md`
-- 부하가 아니라 장애 주입으로 복원력을 보는 거라면 `testing/principles-of-chaos-engineering.md`, `testing/chaos-monkey.md`
+- 부하가 아니라 장애 주입으로 복원력을 보는 거라면 `infrastructure/principles-of-chaos-engineering.md`, `testing/chaos-monkey.md`
 
 ## 무엇이 들어있나
 문서는 Getting Started(SDK별 설치와 첫 시뮬레이션), Guides(CI/CD 통합 등 실행 문제), Concepts(부하 테스트 기본, 주입 프로파일, 메트릭), Reference(SDK·설정 전체), Integrations(빌드 도구·CI·관측 도구)로 나뉜다. SDK 는 Java, Kotlin, Scala, JavaScript, TypeScript 를 지원한다 — Scala 전용이라는 오래된 인상과는 다르다.
@@ -42,3 +42,37 @@ Concepts 절의 주입 프로파일(injection profile) 설명은 도구 사용�
 - 가상 사용자를 스레드가 아닌 메시지로 모델링한다는 설계 설명은, 부하 생성기 자체가 병목이 되는 문제를 논의할 때 인용하기 좋다.
 - 다중 언어 SDK 지원은 "Gatling = Scala 필수"라는 통념 때문에 후보에서 빠지는 상황을 정정하는 근거다.
 - 실시간 대시보드·웹 UI 가 Enterprise 기능이라는 점은 도구 비교표에서 반드시 명시해야 할 항목이다.
+
+## 코드 예시
+
+"동시 사용자 N명"을 도착률로 정의하는 주입 프로파일(open model)을, 다단계 주문 시나리오에 얹은 Java SDK 형태.
+
+```java
+import io.gatling.javaapi.core.*;
+import io.gatling.javaapi.http.*;
+import static io.gatling.javaapi.core.CoreDsl.*;
+import static io.gatling.javaapi.http.HttpDsl.*;
+
+public class CheckoutSimulation extends Simulation {
+
+  HttpProtocolBuilder httpProtocol =
+      http.baseUrl("https://staging.example.com").acceptHeader("application/json");
+
+  ScenarioBuilder scn = scenario("checkout")
+      .exec(http("장바구니 담기").post("/api/cart")
+          .body(StringBody("{\"sku\":\"A-1\",\"quantity\":1}"))
+          .check(status().is(200)))
+      .pause(2)
+      .exec(http("주문 생성").post("/api/orders")
+          .check(status().is(201)));
+
+  {
+    setUp(scn.injectOpen(
+        rampUsers(200).during(60),          // 1분간 도착률을 끌어올린다
+        constantUsersPerSec(50).during(180) // 이후 초당 50명 도착 유지
+    )).protocols(httpProtocol);
+  }
+}
+```
+
+`injectOpen` 은 서버가 느려져도 새 사용자를 계속 밀어 넣는다(open model) — 실제 사용자 수가 대기열에 묶이는 서비스라면 `injectClosed` 쪽이 현실에 가깝고, 둘의 결과는 같은 시스템에서도 전혀 다르게 나온다.

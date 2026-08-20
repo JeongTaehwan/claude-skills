@@ -38,3 +38,29 @@ https://danluu.com/
 ## 인용 포인트
 - "업계 표준이니까"라는 논거에 맞설 때, 같은 형태의 주장이 실측에서 무너진 사례를 제시하는 방식이 유효하다.
 - 성능 논쟁에서 "추정 말고 측정하자"로 방향을 트는 데 쓸 수 있는 구체적 선례가 많다.
+
+## 코드 예시
+
+"추정 말고 측정하자"를 가장 작게 실행한 형태 — 그리고 회의에서 인용되는 평균값이 사용자가 실제로 겪는 값을 어떻게 가리는지 같은 표본에서 바로 보여 준다.
+
+```python
+import statistics, time
+
+samples = []
+for _ in range(2000):
+    t0 = time.perf_counter()
+    handle_request()
+    samples.append((time.perf_counter() - t0) * 1000)
+
+samples.sort()
+
+def pct(p: float) -> float:
+    return samples[min(int(len(samples) * p), len(samples) - 1)]
+
+print(f"mean {statistics.fmean(samples):6.1f} ms")  # 보통 이 숫자가 인용된다
+print(f"p50  {pct(0.50):6.1f} ms")
+print(f"p99  {pct(0.99):6.1f} ms")                  # 100명 중 1명이 겪는 값
+print(f"p999 {pct(0.999):6.1f} ms")
+```
+
+이 숫자도 한 프로세스 안에서 잰 값일 뿐이다 — 클라이언트 대기 큐와 네트워크는 빠져 있고, 부하 생성기 자체가 느려지면 가장 느린 요청이 표본에서 통째로 사라진다(coordinated omission). 측정으로 옮겨도 무엇을 못 재고 있는지는 여전히 따로 적어야 한다.

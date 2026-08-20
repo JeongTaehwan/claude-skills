@@ -35,3 +35,27 @@ https://github.com/atinfo/awesome-test-automation
 
 ## 인용 포인트
 - 도구 선정 문서에서 "후보 조사 범위"의 출처로 쓸 수 있다. 최종 근거로는 약하고, 범위를 좁힌 과정을 보여 주는 용도다.
+
+## 코드 예시
+
+"자동화 = UI 자동화"라는 습관을 깨는 목록의 분류 축을, 실행 가능한 스크립트 이름으로 그대로 옮긴 형태.
+
+```json
+{
+  "scripts": {
+    "test:unit": "vitest run",
+    "test:api": "vitest run --dir test/api",
+    "test:contract": "pact-broker can-i-deploy --pacticipant checkout --version $GIT_SHA",
+    "test:ui": "playwright test --project=chromium",
+    "test:visual": "playwright test --grep @visual --update-snapshots=none",
+    "test:perf": "k6 run perf/checkout.js",
+    "test:ci": "npm run test:unit && npm run test:api && npm run test:contract"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "vitest": "^2.1.0"
+  }
+}
+```
+
+`test:ci` 에 UI·성능이 빠져 있는 것이 이 구성의 실제 결정이다 — 층별 도구를 갖췄다는 사실과 매 PR에서 어느 층을 돌리는지는 별개이고, 후자를 적어 두지 않으면 스택만 늘어난다.

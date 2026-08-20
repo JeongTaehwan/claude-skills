@@ -37,3 +37,35 @@ Fowler 자신은 고전파 쪽에 기운다고 명시하면서도, 두 방식이
 ## 인용 포인트
 - 리뷰 기준으로 옮길 수 있는 한 줄: 목을 쓰면 테스트가 구현에 결합되고, 그 대가로 실패 지점이 좁아진다 — 이 맞바꿈을 감당할 만한 곳에만 쓴다.
 - "Fake는 동작하는 구현이지만 프로덕션에는 못 쓰는 것" — 인메모리 리포지토리를 목 대신 쓰자고 제안할 때의 용어적 근거.
+
+## 코드 예시
+
+같은 동작을 행위 검증과 상태 검증으로 각각 쓴 것 — 무엇을 맞바꾸는지가 두 테스트의 단언 줄에 그대로 드러난다.
+
+```java
+// Mockist: 협력 객체를 전부 목으로 두고 호출을 검증한다
+@Test
+void placesOrder_behaviourVerification() {
+    OrderRepository repo = mock(OrderRepository.class);
+    PricingService pricing = mock(PricingService.class);
+    when(pricing.total(cart)).thenReturn(9000L);
+
+    new OrderService(repo, pricing).place(cart);
+
+    verify(pricing, times(1)).total(cart);          // 호출 횟수에 결합
+    verify(repo).save(argThat(o -> o.total() == 9000L));
+}
+
+// Classical: Fake 를 쓰고 결과 상태를 검증한다
+@Test
+void placesOrder_stateVerification() {
+    InMemoryOrderRepository repo = new InMemoryOrderRepository();  // Fake
+    OrderService service = new OrderService(repo, new PricingService());
+
+    OrderId id = service.place(cart);
+
+    assertEquals(9000L, repo.findById(id).orElseThrow().total());
+}
+```
+
+아래쪽이 항상 낫다는 뜻은 아니다 — `InMemoryOrderRepository` 는 유지해야 할 두 번째 구현이고, 그것이 실제 저장소와 어긋나기 시작하면 초록 불이 거짓말을 한다.

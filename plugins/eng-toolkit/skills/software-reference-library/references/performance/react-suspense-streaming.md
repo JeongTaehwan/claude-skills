@@ -34,3 +34,39 @@ Suspense의 동작 규칙 — 경계 안의 무언가가 아직 준비되지 않
 ## 인용 포인트
 - "페이지에서 가장 느린 데이터가 TTFB를 결정하게 두지 마라 — 경계로 격리하라" — 스트리밍 도입 제안의 한 줄 논거.
 - 스켈레톤을 임기응변이 아니라 컴포넌트 계약(fallback)으로 공식화한 출처.
+
+## 코드 예시
+
+`onShellReady` 가 TTFB 를 결정하는 지점이다 — 경계 밖(셸)이 준비되면 바로 흘려보내고, 느린 경계는 뒤따라 도착한다.
+
+```js
+import { renderToPipeableStream } from "react-dom/server";
+
+app.get("/product/:id", (req, res) => {
+  let didError = false;
+
+  const { pipe, abort } = renderToPipeableStream(<App id={req.params.id} />, {
+    bootstrapScripts: ["/main.js"],
+
+    // 셸(느린 Suspense 경계 밖)이 준비된 순간 — 여기서 첫 바이트가 나간다
+    onShellReady() {
+      res.statusCode = didError ? 500 : 200;
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      pipe(res);
+    },
+
+    // 셸 자체가 실패하면 스트리밍을 시작하지 않았으므로 정상 에러 응답이 가능하다
+    onShellError() {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "text/html");
+      res.send("<!doctype html><p>일시적인 오류가 발생했습니다.</p>");
+    },
+
+    onError(err) { didError = true; console.error(err); },
+  });
+
+  setTimeout(abort, 10_000); // 느린 경계를 무한정 기다리지 않는다
+});
+```
+
+셸을 이미 보낸 뒤 경계 안에서 터진 에러는 상태 코드를 바꿀 수 없다 — 그래서 `onShellError` 와 `onError` 가 나뉘어 있고, 경계를 너무 바깥에 치면 스트리밍의 이득이 사라진다.

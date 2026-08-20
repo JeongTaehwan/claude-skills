@@ -38,3 +38,29 @@ https://playwright.dev/docs/test-components
 ## 인용 포인트
 - "컴포넌트 내부 인스턴스 접근은 지원하지 않는다" — 내부 상태를 찔러 보는 테스트를 리뷰에서 거절할 때 공식 근거로 쓸 수 있다.
 - 개발 서버가 렌더할 수 있으면 프레임워크를 가리지 않는다는 설계는, 프레임워크 전환 시 테스트 자산을 지킬 수 있다는 논거가 된다.
+
+## 코드 예시
+
+"내부 인스턴스는 건드리지 않는다"를 지킨 컴포넌트 테스트 — 입력도 검증도 DOM 을 통해서만 하고, 대신 진짜 브라우저 렌더링을 얻는다.
+
+```tsx
+// Counter.spec.tsx — 실험 패키지 @playwright/experimental-ct-react 기준
+import { test, expect } from '@playwright/experimental-ct-react';
+import Counter from './Counter';
+
+test('버튼을 누르면 표시된 값이 오른다', async ({ mount }) => {
+  const component = await mount(<Counter initial={0} step={2} />);
+
+  // component.instance().state 같은 접근은 하지 않는다
+  await component.getByRole('button', { name: '증가' }).click();
+  await expect(component.getByRole('status')).toHaveText('2');
+});
+
+test('비활성 상태의 모양이 유지된다', async ({ mount }) => {
+  const component = await mount(<Counter initial={0} disabled />);
+  // 실제 레이아웃이 그려지므로 컴포넌트 단위 시각 회귀가 가능하다
+  await expect(component).toHaveScreenshot('counter-disabled.png');
+});
+```
+
+패키지 경로는 버전에 따라 다르다 — 위는 `@playwright/experimental-ct-*` 기준이고, 현재 문서는 story/gallery 구성으로 옮겨 갔으니 도입 전에 쓰는 Playwright 버전의 test-components 문서를 확인해야 한다. 그리고 `toHaveScreenshot` 은 렌더 환경(OS·폰트)에 민감하므로 기준 이미지는 CI 와 같은 컨테이너에서 생성해야 한다.

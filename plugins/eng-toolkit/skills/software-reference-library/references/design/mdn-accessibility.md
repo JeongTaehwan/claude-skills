@@ -35,3 +35,32 @@ https://developer.mozilla.org/en-US/docs/Web/Accessibility
 
 ## 인용 포인트
 - "ARIA를 안 쓰는 것이 잘못 쓰는 것보다 낫다"는 정리는, 마크업 리뷰에서 무분별한 role 추가를 되돌리자고 할 때 인용 가능하다.
+
+## 코드 예시
+
+ARIA 첫 번째 규칙을 어겼을 때 무엇을 직접 다시 만들어야 하는지 — 아래 두 줄은 같은 버튼이 아니다.
+
+```html
+<div role="button" tabindex="0" aria-disabled="true" id="cancel-fake">주문 취소</div>
+
+<!-- 포커스 순서, Enter/Space, 비활성, 폼 제출이 전부 기본 제공된다 -->
+<button type="button" disabled>주문 취소</button>
+```
+
+```js
+const fake = document.getElementById('cancel-fake');
+
+// div 버전이 되살려야 하는 최소치
+fake.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault(); // Space로 페이지가 스크롤되지 않게
+  fake.click();
+});
+
+fake.addEventListener('click', (e) => {
+  // aria-disabled 는 '읽히는' 상태일 뿐, 클릭을 막아 주지 않는다
+  if (fake.getAttribute('aria-disabled') === 'true') e.stopImmediatePropagation();
+}, true);
+```
+
+이래도 아직 모자라다 — `<button disabled>`는 포커스 자체를 탭 순서에서 빼고 폼 제출도 막지만, `aria-disabled`는 이름 그대로 알림이라 포커스는 그대로 살아 있다. 강제 색상 모드(`forced-colors`)에서 div가 버튼으로 그려지지 않는다는 것도 이 코드에는 안 보인다.

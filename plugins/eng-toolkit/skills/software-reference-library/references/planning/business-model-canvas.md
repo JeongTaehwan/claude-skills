@@ -37,3 +37,34 @@ Strategyzer 페이지가 강조하는 용도는 세 가지다. 기존 사업 모
 ## 인용 포인트
 - 9블록 구조는 신규 기획 킥오프 문서의 목차로 그대로 쓸 수 있다 — 기능 논의가 시작되기 전에 "고객 세그먼트와 수익원부터 채우자"는 순서를 강제할 때.
 - '탐색'과 '활용' 모델을 구분해 포트폴리오로 관리한다는 관점은, 신규 실험 조직과 기존 사업 조직에 같은 지표를 들이대는 관행에 반대할 때 인용한다.
+
+## 코드 예시
+
+"채워진 칸이 아니라 못 채운 칸이 산출물"이라는 사용법을, 9블록에 검증 상태를 붙여 가설 목록으로 다루는 형태.
+
+```yaml
+# 값보다 status 를 본다 — hypothesis / unknown 칸이 다음에 할 일이다
+name: 구독형 프리미엄 리포트
+blocks:
+  customer_segments:
+    value: 월 3회 이상 리포트를 여는 무료 사용자
+    status: validated          # 근거: 2026-07 앱 로그 분석
+  value_proposition:
+    value: 개인화된 월간 지출 리포트
+    status: hypothesis
+    next_test: 사전 등록 랜딩 전환율
+  revenue_streams:
+    value: 월 4,900원 구독
+    status: hypothesis
+    next_test: 가격 민감도 인터뷰 8건
+  cost_structure:
+    value: 리포트 배치 생성 비용, 사용자당 월 약 120원
+    status: hypothesis
+  channels:               { value: 앱 내 배너, status: hypothesis }
+  customer_relationships: { value: null, status: unknown }   # 빈 칸이 곧 안건
+  key_resources:          { value: 지출 분류 모델, status: validated }
+  key_activities:         { value: null, status: unknown }
+  key_partners:           { value: null, status: unknown }
+```
+
+`status` 칸이 없으면 아홉 칸을 그럴듯하게 채운 문서가 그대로 결정으로 승격된다 — 이 예시가 막으려는 것이 정확히 그것이다. 다만 `validated` 라벨은 옆에 근거를 적지 않는 한 자기 선언일 뿐이고, 캔버스는 어느 칸이 비었는지만 보여 줄 뿐 어느 칸부터 검증할지는 정해 주지 않는다.

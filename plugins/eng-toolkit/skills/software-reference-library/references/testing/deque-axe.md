@@ -35,3 +35,34 @@ axe의 핵심 주장은 "자동 검사로 잡을 수 있는 접근성 문제는 
 ## 인용 포인트
 - "자동 접근성 검사는 통과 증명이 아니라 스크리닝"이라는 선을 그을 때 벤더 자신의 문서를 근거로 쓸 수 있다 — 접근성 대응 범위를 과대 약속하지 않도록 막는 데 유용하다.
 - 자동/수동 점검 예산 분리를 제안할 때, 도구 벤더조차 수동 점검 트랙을 별도 제품으로 두고 있다는 사실이 설득력을 준다.
+
+## 코드 예시
+
+무료 층(axe-core CLI)만으로 스크리닝 게이트를 세우고, 그 결과를 "통과 증명"이 아니라 "자동 판별분 통과"로 이름 붙인 형태.
+
+```yaml
+# .github/workflows/a11y-screening.yml
+name: a11y screening   # 이름부터 'screening' — 접근성 통과 게이트가 아니다
+on: pull_request
+
+jobs:
+  axe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci && npm run build && npm run start &
+
+      # 차단 대상 규칙 집합을 태그로 명시하고, 위반이 있으면 비정상 종료
+      - run: npx @axe-core/cli http://localhost:3000/checkout
+             --tags wcag2a,wcag2aa
+             --save a11y-results.json
+             --exit
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: a11y-results, path: a11y-results.json }
+```
+
+CLI 는 렌더링이 끝난 시점의 정적 DOM 한 장만 본다 — 모달·포커스 이동·키보드 순서처럼 상호작용 뒤에야 드러나는 문제는 이 게이트를 통과하고 그대로 남는다.

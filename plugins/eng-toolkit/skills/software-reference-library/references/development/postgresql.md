@@ -41,3 +41,33 @@ https://www.postgresql.org/docs/current/
 - "트랜잭션으로 감쌌으니 동시성 문제는 없다"는 주장에 대한 반례가 문서 안에 명문화되어 있다 — READ COMMITTED 의 스냅샷 규칙을 그대로 인용하면 설계 리뷰가 짧아진다.
 - 격리 수준을 올리자는 제안에는 "직렬화 실패 시 재시도 로직이 애플리케이션 책임"이라는 문서의 문장을 함께 붙여야 비용까지 같이 논의된다.
 - 무중단 마이그레이션 계획서에서 "이 DDL 은 ACCESS EXCLUSIVE 락을 잡으므로 배포 시간대를 분리한다"는 근거로 락 충돌 표를 첨부할 수 있다.
+
+## 코드 예시
+
+"트랜잭션으로 감쌌으니 안전하다"가 왜 틀리는지 — READ COMMITTED 의 스냅샷 규칙을 코드로 옮기면 이렇게 보인다.
+
+```sql
+-- 위험: 같은 트랜잭션이어도 SELECT 와 UPDATE 는 서로 다른 스냅샷을 볼 수 있다
+BEGIN;
+SELECT remaining FROM coupon_stock WHERE coupon_id = 42;  -- 앱에서 remaining > 0 판단
+UPDATE coupon_stock SET remaining = remaining - 1 WHERE coupon_id = 42;
+COMMIT;
+
+-- 방법 1: 판단을 DB 로 내린다. 조건이 깨지면 0 행이 갱신되고, 앱은 그걸로 실패를 안다
+UPDATE coupon_stock
+   SET remaining = remaining - 1
+ WHERE coupon_id = 42 AND remaining >= 1
+RETURNING remaining;
+
+-- 방법 2: 읽은 값으로 계산해야만 한다면 행 락을 먼저 잡는다
+BEGIN;
+SELECT remaining FROM coupon_stock WHERE coupon_id = 42 FOR UPDATE;
+UPDATE coupon_stock SET remaining = remaining - 1 WHERE coupon_id = 42;
+COMMIT;
+
+-- 배포 전 확인: 이 세션이 잡은 락 모드가 무엇인지 (DDL 이 ACCESS EXCLUSIVE 인지)
+SELECT locktype, mode, relation::regclass, granted
+  FROM pg_locks WHERE pid = pg_backend_pid();
+```
+
+방법 2 는 핫 로우에서 요청을 직렬화시켜 처리량을 깎는다. 그리고 격리 수준을 REPEATABLE READ 이상으로 올려 해결하려 한다면, 직렬화 실패(SQLSTATE `40001`) 시 재시도는 문서가 명시하듯 애플리케이션 책임이다 — 격리 수준만 올리고 재시도를 안 넣으면 문제의 모양만 바뀐다.

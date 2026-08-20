@@ -36,3 +36,33 @@ https://storybook.js.org/docs/writing-tests
 
 ## 인용 포인트
 - "스토리를 쓰는 김에 테스트가 따라온다"는 구도는, 컴포넌트 테스트 도입에서 가장 큰 저항인 추가 작업량 논쟁을 우회하는 논거다. 이미 스토리를 유지하고 있다면 한계비용이 낮다는 점을 근거로 삼을 것.
+
+## 코드 예시
+
+"스토리가 곧 케이스"를 그대로 옮긴 형태 — 카탈로그용으로 이미 있던 스토리에 `play` 만 붙이면 상호작용 테스트가 된다 (Storybook 8, CSF3).
+
+```ts
+import type { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, within } from '@storybook/test';
+import { CouponForm } from './CouponForm';
+
+const meta: Meta<typeof CouponForm> = { component: CouponForm };
+export default meta;
+type Story = StoryObj<typeof CouponForm>;
+
+// 카탈로그에 그대로 남는 스토리
+export const Empty: Story = { args: { total: 10000 } };
+
+// 같은 스토리 + play = 상호작용 테스트. 시각 회귀·접근성 검사도 이 위에 얹힌다
+export const Applied: Story = {
+  args: { total: 10000 },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByLabelText('쿠폰 코드'), 'SAVE10');
+    await userEvent.click(canvas.getByRole('button', { name: '적용' }));
+    await expect(canvas.getByRole('status')).toHaveTextContent('1,000원 할인');
+  },
+};
+```
+
+임포트 경로가 버전마다 다르다 — Storybook 8 은 `@storybook/test` 로 통합됐지만 7 은 `@storybook/jest` + `@storybook/testing-library` 로 갈라져 있다. 그리고 `play` 는 스토리를 **띄운 상태에서** 돌기 때문에 로딩·에러 같은 상태를 실제 API 가 아니라 args·데코레이터로 만들어 줘야 하고, 그 목이 실제 응답과 어긋나면 초록불이 거짓이 된다.

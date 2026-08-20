@@ -37,3 +37,36 @@ discovery와 delivery는 순차 단계가 아니라 동시에 돌아가는 두 �
 ## 인용 포인트
 - feature team / empowered team 대비 — 조직 구조 논의를 시작할 때 가장 자주 인용되는 프레임.
 - "출시는 성공이 아니다(shipping is not success)" — 완료 정의를 지표 기반으로 바꿀 때의 근거.
+
+## 코드 예시
+
+feature team 과 empowered team 의 차이는 태도가 아니라 **팀에 무엇을 건네는가**다 — 분기 브리프의 칸 구성만 봐도 어느 쪽인지 갈린다.
+
+```yaml
+# quarter/2026-Q3/team-payments.yaml
+team: 결제
+
+# feature team 이라면 여기에 기능 목록이 들어간다. empowered team 은 문제를 받는다.
+problem: 카드 결제 실패 후 재시도 없이 이탈하는 주문이 월 8천 건이다.
+
+outcome:
+  metric: 결제 실패 후 24시간 내 재시도율
+  baseline: 20%
+  target: 45%
+  measured_by: analytics.payment_retry_rate   # 팀이 아니라 계측이 판정한다
+
+constraints:                # 해법이 아니라 경계만 준다
+  - PG 계약 변경 불가
+  - 저장된 카드 정보 취급 범위는 현행 유지
+
+solution: 미정                # 해법은 팀이 정한다 — 이 칸이 위에서 채워져 오면 feature team
+risks_to_validate:          # 출시 전에 답을 내야 하는 것
+  value: 고객이 재시도를 원하는가, 다른 수단으로 옮기고 싶어하는가
+  usability: 실패 사유 문구를 보고 무엇을 고쳐야 하는지 아는가
+  feasibility: PG 응답 코드로 사유 4종 분류가 실제로 가능한가
+  viability: 재시도 유도가 CS·정산 규칙과 충돌하지 않는가
+
+done_when: 배포가 아니라 target 도달 여부로 판정한다
+```
+
+`solution: 미정` 을 적어둬도 위에서 이미 해법이 정해져 내려왔다면 이 파일은 서류일 뿐이다 — 이 브리프가 검증하는 것은 팀의 일하는 방식이 아니라 결정권의 위치다.

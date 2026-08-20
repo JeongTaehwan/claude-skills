@@ -34,3 +34,37 @@ MDN Learn 코스의 일부라 깊은 실험 데이터보다는 원리와 기법 
 ## 인용 포인트
 - "같은 대기 시간도 피드백이 있으면 짧게 느껴진다" — 스켈레톤/진행 표시 도입 제안의 근거.
 - 객관 지표 개선이 막힌 곳에서 체감 개선이 별도의 레버라는 프레임 — 성능 작업 우선순위 논의에 인용.
+
+## 코드 예시
+
+문서의 두 기법을 한 흐름에 넣은 형태 — 클릭 즉시 피드백(네트워크보다 먼저), 그리고 다 오기 전에 온 것부터 그리는 점진적 표시.
+
+```js
+async function loadItems(btn, list) {
+  // 1) 즉각 피드백: 요청을 보내기 전에 UI가 먼저 반응한다
+  btn.disabled = true;
+  btn.textContent = "불러오는 중…";
+  list.replaceChildren(...Array.from({ length: 5 }, renderSkeletonRow));
+
+  const res = await fetch("/api/items"); // 서버는 NDJSON 을 흘려보낸다
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+
+  let buffer = "";
+  let first = true;
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += value;
+    const lines = buffer.split("\n");
+    buffer = lines.pop(); // 잘린 마지막 줄은 다음 청크로
+    for (const line of lines) {
+      if (first) { list.replaceChildren(); first = false; } // 첫 도착 시 스켈레톤 제거
+      list.append(renderRow(JSON.parse(line))); // 2) 준비된 것부터 표시
+    }
+  }
+  btn.disabled = false;
+  btn.textContent = "새로고침";
+}
+```
+
+바뀐 것은 대기의 모양뿐이고 전체 소요 시간은 그대로다 — 스켈레톤 행의 높이가 실제 행과 다르면 체감을 얻고 레이아웃 시프트를 잃는다.

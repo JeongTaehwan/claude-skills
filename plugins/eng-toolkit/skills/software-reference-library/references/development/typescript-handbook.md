@@ -41,3 +41,39 @@ Handbook 이 반복해서 강조하는 것은 TypeScript 가 **구조적(structu
 - "타입은 런타임에 존재하지 않는다"는 서술은 API 경계에 런타임 스키마 검증이 왜 따로 필요한지 설명하는 근거로 그대로 쓸 수 있다.
 - 구조적 타이핑 설명은 "같은 모양이면 통과한다"는 사실을 이용한 실수(예: 금액 타입과 수량 타입을 둘 다 `number` 로 둔 경우)를 지적할 때 인용하기 좋다.
 - `strict` 옵션 관련 서술은 신규 프로젝트에서 strict 를 기본값으로 켜자는 제안의 근거가 된다.
+
+## 코드 예시
+
+"같은 모양이면 통과한다"가 금액과 수량을 어떻게 섞어 버리는지, 그리고 타입을 집합으로 보면 전수 검사가 왜 공짜로 나오는지.
+
+```ts
+// 구조적 타이핑 — 이름이 아니라 모양으로 판정한다. 타입 별칭은 아무것도 막지 못한다
+type Won = number;
+type Qty = number;
+declare function charge(amount: Won): void;
+const qty: Qty = 3;
+charge(qty);                     // 통과한다. 금액 자리에 수량이 들어갔는데도
+
+// 모양을 실제로 다르게 만들어야 막힌다 (브랜딩)
+type Brand<T, B extends string> = T & { readonly __brand: B };
+type KRW = Brand<number, "KRW">;
+declare function pay(amount: KRW): void;
+// pay(qty);                     // error: number 를 KRW 에 할당할 수 없음
+
+// never 는 공집합 — 이 관점을 잡으면 전수 검사가 규칙이 아니라 결과가 된다
+type Order =
+  | { kind: "created" }
+  | { kind: "paid"; paidAt: Date }
+  | { kind: "canceled"; reason: string };
+
+function label(o: Order): string {
+  switch (o.kind) {
+    case "created": return "주문 접수";
+    case "paid": return "결제 완료";
+    case "canceled": return `취소 (${o.reason})`;
+    default: return ((x: never) => x)(o);   // 상태가 하나 늘면 여기서 컴파일이 깨진다
+  }
+}
+```
+
+`__brand` 는 타입 소거로 컴파일 후 사라지고, `as KRW` 는 검사를 끄는 단언일 뿐이다 — 이 표식이 보장하는 건 "코드 안에서 섞이지 않는다"까지고, 외부에서 들어온 숫자가 정말 원화인지는 API 경계의 런타임 검증(`development/zod.md`)이 따로 봐야 한다.

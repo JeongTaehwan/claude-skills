@@ -40,3 +40,31 @@ Valentin J.M. Manès 외(2018, 이후 IEEE TSE) — 흩어진 퍼저들을 "모�
 ## 인용 포인트
 - 퍼저 비교를 "도구 이름 나열"이 아니라 "모델 퍼저 각 단계의 설계 선택"으로 전환하는 프레임 — 도구 선정 문서의 목차를 그대로 이 단계 구분으로 잡을 수 있다.
 - 퍼징의 지속적 인기 이유를 단순성·낮은 배포 비용·실제 취약점 발견 실적으로 정리한 부분은, 퍼징 도입 제안서의 도입 논거로 쓸 수 있다.
+
+## 코드 예시
+
+서베이의 "모델 퍼저" 단계 구분이 실제 명령의 어느 옵션에 대응하는지 — 도구 이름 대신 단계로 비교하라는 프레임을 그대로 적용한 것 (libFuzzer).
+
+```cpp
+// harness.cc — 입력 하나를 대상에 흘려 넣는 것이 하네스의 전부다
+#include <cstdint>
+#include <cstddef>
+#include "order_parser.h"
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+  if (size > 4096) return 0;          // 지나치게 큰 입력은 버린다
+  ParseOrderPayload(data, size);      // 크래시·sanitizer 위반이 곧 신호
+  return 0;                           // 0 이 아닌 값은 예약되어 있다
+}
+```
+
+```bash
+# 빌드: -fsanitize=fuzzer 가 커버리지 계측(실행·평가 단계)을 심는다
+clang++ -g -O1 -fsanitize=fuzzer,address harness.cc order_parser.cc -o fuzz_order
+
+# preprocess = 시드 코퍼스, 입력 생성 = 사전(dict)/길이 제한,
+# 코퍼스 갱신 = corpus/ 디렉터리에 커버리지를 늘린 입력만 남는 것
+./fuzz_order corpus/ -dict=order.dict -max_len=4096 -jobs=4
+```
+
+여기서 오라클은 **크래시와 sanitizer 위반뿐**이다 — 파서가 조용히 잘못된 금액을 뱉는 종류의 버그는 이 구성이 절대 잡지 못하므로, 그걸 잡으려면 하네스 안에 불변식 단언을 직접 넣거나 오라클 문제 쪽 접근이 필요하다. 그리고 결과 품질은 대개 변이 알고리즘보다 `corpus/` 에 무엇을 넣었는지에 더 좌우된다.

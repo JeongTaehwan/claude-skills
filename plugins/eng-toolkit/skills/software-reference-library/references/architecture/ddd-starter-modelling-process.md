@@ -41,3 +41,29 @@ DDD를 "어디서부터 시작하느냐"에서 막히는 사람을 위해 DDD Cr
 - "전술 설계보다 전략적 설계가 먼저" — 폴더 구조 리팩터링부터 하자는 제안을 되돌릴 때 쓸 수 있는 프레임.
 - core / supporting / generic 하위 도메인 구분은, 어디에 인력과 설계 노력을 몰아줄지 결정하는 논의(직접 만들 것 vs 사서 쓸 것)에 그대로 인용된다.
 - DDD Crew는 커뮤니티 저장소라 라이선스가 열려 있어, 다이어그램을 팀 내부 문서에 가져다 쓰기 좋다.
+
+## 코드 예시
+
+전술 설계 이전 단계의 산출물 — 하위 도메인을 core/supporting/generic 으로 나누고 컨텍스트 간 관계 유형까지 적은 컨텍스트 맵. "직접 만들 것 vs 사서 쓸 것"이 그림 안에서 결정된다.
+
+```mermaid
+flowchart LR
+  subgraph core["core — 직접 만든다 (인력 우선 배치)"]
+    ORDER["주문"]
+    PRICING["가격·프로모션"]
+  end
+  subgraph supporting["supporting — 만들되 최소로"]
+    SETTLE["정산"]
+  end
+  subgraph generic["generic — 사서 쓴다"]
+    AUTH["인증 · 외부 IdP"]
+    PG["결제 승인 · PG사"]
+  end
+
+  ORDER -->|"Customer-Supplier · 주문이 상류"| SETTLE
+  ORDER -->|"ACL · PG 용어를 도메인에 들이지 않는다"| PG
+  ORDER -->|"Conformist · IdP 스키마를 그대로 받는다"| AUTH
+  PRICING -->|"Shared Kernel · 금액 VO 만 공유"| ORDER
+```
+
+화살표가 정하는 건 의존 방향과 번역 책임이지 데이터 일관성이 아니다 — ACL 을 세워도 PG 가 느리면 주문은 여전히 느리다. 그리고 core 판정은 오늘의 판단이라 유효기간이 있고, Shared Kernel 은 두 팀이 함께 바꿔야 하는 코드라 관계 유형 중 가장 비싸다. 이 그림을 팀 경계와 나란히 놓고 보지 않으면 절반만 그린 것이다.

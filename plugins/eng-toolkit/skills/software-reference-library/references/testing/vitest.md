@@ -41,3 +41,37 @@ API는 Jest와 대체로 호환되게 설계되어 있어(`describe`/`it`/`expec
 ## 인용 포인트
 - 테스트 설정과 빌드 설정의 이중 관리를 없앤다는 점은, 러너 교체 제안에서 가장 계량하기 쉬운 이득이다 — "설정 파일 하나가 줄어든다"가 아니라 "설정 불일치로 생기는 버그 계열이 사라진다"로 쓰는 편이 낫다.
 - Jest API 호환 + 공식 마이그레이션 가이드의 존재는 전환 리스크를 낮추는 근거로 제시할 수 있다.
+
+## 코드 예시
+
+"테스트 환경은 애플리케이션 환경과 같아야 한다"의 실체 — 별칭·플러그인은 앱 설정에서 그대로 상속받고, 테스트 파일에는 테스트에만 필요한 것만 적는다.
+
+```ts
+// vitest.config.ts
+import { defineConfig, mergeConfig } from 'vitest/config';
+import viteConfig from './vite.config';
+
+// 별칭(@/), 플러그인, define, 환경변수를 다시 적지 않는다
+export default mergeConfig(
+  viteConfig,
+  defineConfig({
+    test: {
+      environment: 'jsdom',
+      setupFiles: ['./src/test/setup.ts'],
+      coverage: { provider: 'v8', reporter: ['text', 'lcov'] },
+    },
+  }),
+);
+```
+
+```ts
+// src/cart.test.ts — 전역이 주입되지 않으므로 명시적으로 가져온다
+import { describe, it, expect, vi } from 'vitest';
+import { total } from '@/cart';        // 앱과 같은 별칭이 그대로 동작
+
+describe('total', () => {
+  it('빈 장바구니는 0원', () => expect(total([])).toBe(0));
+});
+```
+
+Jest 에서 옮겨 온 코드가 `describe is not defined` 로 깨지는 것이 이 지점이다 — 전역 주입을 원하면 `test.globals: true` 를 켜야 하고, 그러면 Jest 와 비슷해지는 대신 어디서 온 API 인지가 코드에서 사라진다. 그리고 `environment: 'jsdom'` 은 브라우저가 아니라 브라우저 API 의 구현체라, 레이아웃·실제 이벤트 순서가 걸린 검증은 여기서 통과해도 보장되지 않는다.

@@ -29,7 +29,7 @@ https://lamport.azurewebsites.net/pubs/byz.pdf
 - 대부분의 사내 시스템은 크래시 장애만 가정해도 충분하다. 그 경우 `architecture/paxos-made-simple.md` 나 `architecture/in-search-of-an-understandable-consensus-algorithm.md`(Raft)가 실제로 필요한 자료다 — 비잔틴 내성은 훨씬 비싸므로 위협 모델 없이 도입하면 낭비다.
 - 원격 호출이 로컬 호출과 다르다는 일반적 사실을 설명해야 하면 `architecture/a-note-on-distributed-computing.md`.
 - 실제 시스템이 주장하는 보장을 깨보는 실증 검증은 `architecture/jepsen.md`.
-- 애플리케이션 보안 위협 모델링은 `development/owasp-threat-modeling.md`.
+- 애플리케이션 보안 위협 모델링은 `security/owasp-threat-modeling.md`.
 
 ## 무엇이 들어있나
 문제는 비유로 제시된다. 도시를 포위한 비잔틴 장군들이 전령을 통해서만 소통하며 공격/후퇴에 합의해야 하는데, 장군 중 일부는 배신자라 서로 다른 장군에게 서로 다른 말을 전할 수 있다. 요구는 두 가지다 — 충직한 장군들은 모두 같은 결정에 이르러야 하고, 사령관이 충직하다면 그 명령을 따라야 한다.
@@ -41,3 +41,32 @@ https://lamport.azurewebsites.net/pubs/byz.pdf
 - 노드 수 산정 근거: "비잔틴 내성을 요구하면 f개 결함에 3f+1개 노드가 필요하다"는 수치는 도입 비용을 구체화해 논의를 현실화한다.
 - 서명 도입 제안의 근거: 인증이 있으면 필요한 참여자 수 하한이 근본적으로 낮아진다는 결과는, 내부 통신에도 인증을 붙이자는 주장에 이론적 뒷받침이 된다.
 - 위협 모델 정리 시: "우리가 막으려는 것이 크래시인가 임의 오동작인가"를 먼저 묻게 만드는 기준선. 대부분의 경우 답이 전자라는 걸 확인하는 것도 이 논문의 효용이다.
+
+## 코드 예시
+
+3m+1 하한이 클러스터 규모 산정에서 실제로 하는 일 — 같은 결함 수를 견디는 데 크래시 모델과 비잔틴 모델이 요구하는 노드 수를 나란히 계산한다.
+
+```python
+from collections import Counter
+
+def nodes_for_crash(f: int) -> int:
+    return 2 * f + 1          # 크래시만 가정 — 과반수면 된다
+
+def nodes_for_byzantine(m: int) -> int:
+    return 3 * m + 1          # 구두 메시지 모델의 하한
+
+def byzantine_quorum(n: int) -> int:
+    m = (n - 1) // 3          # n 이 견딜 수 있는 배신자 수
+    return (n + m) // 2 + 1   # n=3m+1 이면 2m+1
+
+def decide(values: list) -> object | None:
+    # 충직한 노드가 정족수 이상 같은 값을 보고했을 때만 채택한다
+    value, count = Counter(values).most_common(1)[0]
+    return value if count >= byzantine_quorum(len(values)) else None
+
+# f=1 을 견디려면: 크래시 3대, 비잔틴 4대. f=2 면 5대 vs 7대.
+print(nodes_for_crash(1), nodes_for_byzantine(1))   # 3 4
+print(nodes_for_crash(2), nodes_for_byzantine(2))   # 5 7
+```
+
+이 계산은 노드 수만 말할 뿐 라운드 수와 메시지 복잡도를 감춘다 — 서명 없는 구두 메시지 알고리즘은 m+1 라운드가 필요하고 메시지가 지수적으로 늘어나며, 그래서 실제 시스템은 먼저 서명을 붙여 문제를 바꾼다.

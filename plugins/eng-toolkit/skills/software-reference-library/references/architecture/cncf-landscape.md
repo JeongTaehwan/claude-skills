@@ -35,3 +35,33 @@ https://landscape.cncf.io/
 성숙도 단계가 실무에서 가장 쓸모 있는 신호다. **Graduated**는 CNCF 졸업 프로젝트로 채택 사례와 거버넌스가 검증된 축, **Incubating**은 성장 중, **Sandbox**는 초기 단계다. Sandbox 프로젝트를 결제·정산처럼 되돌리기 비싼 경로에 넣는 결정은 이 단계 표기만으로도 논의의 온도가 달라진다.
 
 읽을 때 주의할 점 하나: Landscape에 실렸다는 것은 **추천이 아니다**. 항목 수가 방대하고 상용 제품도 함께 실리므로, 여기서 후보를 뽑고 판단은 다른 자료에서 하는 2단계 사용이 맞다.
+
+## 코드 예시
+
+"Landscape 는 후보 모집단이지 추천이 아니다"와 "Sandbox 를 되돌리기 비싼 경로에 넣지 않는다"를 팀 규칙 파일로 고정한 것.
+
+```yaml
+# tech-selection/policy.yaml
+candidate_pool:
+  source: landscape.cncf.io
+  rule: 해당 카테고리 전체를 훑는다. 후보에서 뺀 것도 제외 사유를 남긴다.
+
+# 성숙도별로 허용되는 사용처 — 판단이 아니라 게이트다
+maturity_gate:
+  graduated:  [any]
+  incubating: [internal-tooling, non-critical-path]
+  sandbox:    [spike-only]      # 결제·정산·인증 경로 금지
+  unlisted:   [spike-only]
+
+# 후보마다 반드시 채워야 하는 칸. 하나라도 비면 비교표에 올리지 않는다.
+required_fields:
+  - cncf_status        # graduated | incubating | sandbox | unlisted (조회일 함께)
+  - governance         # foundation | single-vendor
+  - license
+  - exit_cost          # 2년 뒤 걷어낼 때 드는 비용의 형태
+
+decision:
+  made_in: ADR         # 채택 여부는 이 파일이 아니라 ADR 에서 정한다
+```
+
+성숙도 표기는 시점 정보다 — Sandbox 였던 프로젝트가 졸업하기도 하고 관리 주체가 바뀌기도 하므로, 조회일 없이 적힌 `cncf_status` 는 몇 달 뒤 근거가 아니라 오해가 된다. 그리고 이 게이트는 채택 리스크의 한 축(거버넌스)만 본다 — 우리 팀이 그 도구를 운영할 수 있는가는 여기 없다.

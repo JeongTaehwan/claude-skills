@@ -34,3 +34,31 @@ Cloudinary·Imgix·Vercel 등 30여 개 이미지 CDN의 제각각인 변환 URL
 ## 인용 포인트
 - "스타 수가 아니라 유지보수 주체와 활동으로 평가한다"는 의존성 선정 기준의 실례(⭐ 400이지만 활발).
 - CDN 종속을 URL 조립 층에서 격리하자는 아키텍처 제안의 기성 구현 근거.
+
+## 코드 예시
+
+"CDN 종속을 URL 조립 층에서 격리한다"를 실제 호출로 옮긴 것 — 소스 URL만 바꾸면 CDN이 바뀌어도 호출부는 그대로다.
+
+```jsx
+import { Image } from "@unpic/react";
+import { transformUrl } from "unpic";
+
+// 컴포넌트: CDN 을 알아서 판별하고 srcset · sizes 를 만들어 준다
+<Image
+  src="https://res.cloudinary.com/demo/image/upload/product.jpg"
+  layout="constrained"   // 최대 폭까지만 늘어나는 반응형
+  width={800}
+  height={600}
+  alt="상품 대표 이미지"
+  priority             // LCP 후보면 지연 로딩을 끈다
+/>;
+
+// 컴포넌트를 못 쓰는 자리(메타 태그·이메일·OG 이미지)에서는 URL 만 변환한다
+const ogImage = transformUrl({
+  url: product.imageUrl, // Cloudinary 든 Imgix 든 Vercel 이든 같은 호출
+  width: 1200,
+  height: 630,
+});
+```
+
+unpic이 하는 일은 **URL 문자열을 다시 쓰는 것뿐**이다 — 실제 리사이즈·포맷 변환은 CDN이 하므로, 그 CDN이 요청한 폭이나 포맷을 지원하지 않으면 에러 없이 원본이 그대로 내려온다. 최적화가 먹었는지는 코드가 아니라 응답의 `Content-Type`·바이트 수로 확인해야 한다.

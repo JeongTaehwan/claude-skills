@@ -36,3 +36,34 @@ Meszaros가 만든 "Test Double"(스턴트 더블에서 따온 비유)이 상위
 ## 인용 포인트
 - 팀 테스트 컨벤션의 용어 절에 그대로 옮겨 쓸 수 있는 다섯 줄 정의가 있다. 출처가 Fowler 페이지라 근거 시비가 붙지 않는다.
 - "Fake는 동작하는 구현이지만 운영에 부적합한 지름길을 쓴다"는 정의는, 인메모리 리포지토리를 만들자는 제안을 정당화할 때 바로 인용된다.
+
+## 코드 예시
+
+다섯 정의를 팀 컨벤션으로 옮긴 형태 — 접미사가 곧 정의이고, 리뷰 코멘트가 무엇을 가리키는지 이름만 봐도 갈린다.
+
+```typescript
+// test/doubles/index.ts
+const dummyLogger: Logger = { info() {}, error() {} }          // Dummy: 자리만 채움
+
+export class FakeCouponRepository implements CouponRepository { // Fake: 동작하는 구현
+  private rows = new Map<string, Coupon>()                      //  — 운영엔 못 씀
+  async findByCode(code: string) { return this.rows.get(code) ?? null }
+  async save(coupon: Coupon) { this.rows.set(coupon.code, coupon) }
+}
+
+export const stubPricingClient: PricingClient = {               // Stub: 정해진 답만
+  total: async () => 9_000,
+}
+
+export const spyMailer = {                                      // Spy: 호출을 기록
+  sent: [] as string[],
+  async send(to: string) { spyMailer.sent.push(to) },
+}
+
+// Mock: 기대한 호출을 미리 프로그래밍하고 그 호출 자체를 검증한다
+const mockPgClient = vi.fn().mockResolvedValue({ approved: true })
+await checkout({ pg: mockPgClient, amount: 9_000 })
+expect(mockPgClient).toHaveBeenCalledWith({ amount: 9_000, currency: 'KRW' })
+```
+
+이름을 통일해도 어느 쪽을 쓸지는 정해지지 않는다 — 마지막 블록만이 행위 검증이고 나머지는 상태 검증을 돕는 도구라는 사실을 아는 것과, 그중 무엇을 택할지는 별개의 결정이다.

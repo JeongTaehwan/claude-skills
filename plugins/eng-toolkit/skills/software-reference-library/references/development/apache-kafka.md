@@ -38,3 +38,29 @@ Configuration 장은 브로커·토픽·프로듀서·컨슈머·Connect·Stream
 
 ## 인용 포인트
 - "Kafka 가 exactly-once 를 지원하니 중복 걱정 없다"는 주장에 대해, 공식 문서가 규정한 보장 범위를 그대로 인용해 경계를 그을 수 있다. 외부 시스템 연동에는 여전히 멱등 키가 필요하다는 결론이 문서에서 직접 도출된다.
+
+## 코드 예시
+
+문서가 규정한 보장 범위를 설정으로 옮긴 것과, 그 범위가 끝나는 지점에서 우리가 직접 세우는 방어선.
+
+```properties
+# 프로듀서: 재시도로 생기는 브로커 내 중복을 막는다
+acks=all
+enable.idempotence=true
+max.in.flight.requests.per.connection=5
+
+# 토픽/브로커: 이게 없으면 acks=all 이 의미를 잃는다
+min.insync.replicas=2
+
+# 컨슈머: 자동 커밋을 끄고 처리가 끝난 뒤 커밋
+enable.auto.commit=false
+isolation.level=read_committed
+```
+
+```sql
+-- 외부 DB 로 나가는 순간 Kafka 의 보장은 끊긴다 → 멱등 키는 우리가 건다
+INSERT INTO coupon_issue (event_id, user_id) VALUES (?, ?)
+ON CONFLICT (event_id) DO NOTHING;
+```
+
+`enable.idempotence` 가 막는 것은 프로듀서 재전송 중복까지다. 컨슈머가 처리 후 커밋 전에 죽으면 재처리는 그대로 일어나므로, 위 `ON CONFLICT` 쪽이 실제 방어선이다.

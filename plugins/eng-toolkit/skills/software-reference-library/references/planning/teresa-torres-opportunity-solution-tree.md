@@ -39,3 +39,34 @@ https://www.producttalk.org/opportunity-solution-tree/
 ## 인용 포인트
 - "기회는 해결책이 아니다" — 기회 트리가 기능 목록으로 무너질 때 되돌리는 규칙.
 - 트리 꼭대기는 하나의 outcome — 목표가 5개인 로드맵을 문제 삼을 때 쓸 수 있다.
+
+## 코드 예시
+
+트리를 파일로 두면 규칙 위반이 눈에 보인다 — `outcome` 이 하나인지, `opportunities` 칸에 기능 이름이 들어갔는지, 솔루션이 한 개뿐인지가 들여쓰기만 봐도 드러난다.
+
+```yaml
+# discovery/ost-결제.yaml
+outcome: 결제 실패 후 24시간 내 재시도율   # 꼭대기는 반드시 하나
+
+opportunities:                              # 사용자가 겪는 문제. 기능 이름 금지.
+  - id: OPP-1
+    statement: 왜 실패했는지 몰라서 뭘 고쳐야 할지 모른다
+    evidence: [INT-0805-A, INT-0805-C]      # 인터뷰 기록 id — 근거 없는 기회는 가설일 뿐
+    solutions:
+      - id: SOL-1a
+        statement: 실패 사유를 행동 가능한 문장으로 바꿔 보여준다
+        assumptions:                        # 실험은 솔루션이 아니라 이 가정에 붙는다
+          - id: A-1
+            statement: 사유를 알면 같은 카드로 다시 시도한다
+            test: 실패 화면 문구 A/B, 지표는 24시간 내 재시도율
+      - id: SOL-1b
+        statement: 실패 시 다른 저장 카드를 즉시 제안한다
+      - id: SOL-1c
+        statement: 실패 30분 뒤 재시도 링크를 알림으로 보낸다
+  - id: OPP-2
+    statement: 재시도하려면 결제 정보를 처음부터 다시 입력해야 한다
+    evidence: [INT-0812-B]
+    solutions: []                            # 아직 비어 있음 — 비교는 OPP-1 과 여기서 한다
+```
+
+트리가 잘 그려져도 비교를 SOL 끼리 하면 원래의 취향 논쟁으로 돌아간다 — 이 파일에서 우선순위가 갈리는 자리는 형제 `opportunities` 사이다.

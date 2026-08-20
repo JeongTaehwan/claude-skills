@@ -38,3 +38,33 @@ Human Interface Guidelines는 디자인 문서지만 App Review Guidelines와 �
 ## 인용 포인트
 - "iOS 관례를 따를지 말지"가 취향 논쟁이 될 때, 해당 컴포넌트 페이지의 Best practices 항목을 그대로 붙이면 논쟁이 끝난다.
 - 커스텀 UI를 밀어붙이려는 요구에 대해 "시스템 컴포넌트를 버리면 접근성·다이내믹 타입·다크 모드를 우리가 직접 유지해야 한다"는 비용 논거를 세울 수 있다.
+
+## 코드 예시
+
+"시스템 것을 쓰면 공짜로 따라온다"가 코드에서 어떻게 생겼는지 — 고정 pt와 하드코딩 회색을 안 쓰는 것만으로 다이내믹 타입과 다크 모드가 붙는다.
+
+```swift
+struct SubscriptionRow: View {
+  let plan: Plan
+
+  var body: some View {
+    HStack {
+      VStack(alignment: .leading) {
+        Text(plan.name)
+          .font(.headline) // 고정 크기가 아닌 텍스트 스타일 → 다이내믹 타입 대응
+        Text(plan.priceDescription)
+          .font(.subheadline)
+          .foregroundStyle(.secondary) // 하드코딩 회색이 아닌 시맨틱 색 → 다크 모드 대응
+      }
+      Spacer()
+      Button("구독") { purchase(plan) }
+        .buttonStyle(.borderedProminent)
+    }
+    .padding()
+    .background(Color(.secondarySystemGroupedBackground))
+    .accessibilityElement(children: .combine)
+  }
+}
+```
+
+여기서 맞춘 건 UI 층뿐이다 — 구독 자체는 StoreKit을 통과해야 하고, 외부 결제 링크·가격 표기·해지 경로처럼 실제로 리젝이 나는 항목은 HIG가 아니라 App Review Guidelines 쪽에서 갈린다. 심사 리스크가 걸린 기능이면 두 문서를 같이 봐야 한다.

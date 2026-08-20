@@ -36,3 +36,36 @@ https://martinfowler.com/bliki/ContractTest.html
 
 ## 인용 포인트
 - 계약 테스트는 스텁을 대체하는 것이 아니라 스텁의 유효성을 지키는 장치 — "목이 있으니 통합 테스트는 필요 없다"는 주장에 대한 표준 반론.
+
+## 코드 예시
+
+같은 기대 하나를 두 번 쓴다 — 빠른 테스트에서는 스텁을 만드는 재료로, 계약 테스트에서는 실제 공급자에 던지는 질문으로.
+
+```js
+// 소비자가 공급자에게 갖는 기대를 한 곳에 적어 둔다 (계약)
+export const approvePayment = {
+  path: '/v1/payments',
+  request: { orderId: 'A-1', amount: 24000, currency: 'KRW' },
+  expect: (body) => {
+    expect(typeof body.paymentId).toBe('string');
+    expect(body.status).toBe('APPROVED');
+  },
+};
+
+// (1) 평소 테스트는 이 기대로 만든 스텁을 쓴다 — 빠르지만 실제와 어긋날 수 있다
+export const paymentStub = buildStubFrom(approvePayment);
+
+// (2) 계약 테스트는 같은 기대를 실제 공급자(샌드박스)에 실행한다
+test('PG 결제 승인 계약이 여전히 유효하다', async () => {
+  const res = await fetch(PG_SANDBOX_BASE + approvePayment.path, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(approvePayment.request),
+  });
+
+  expect(res.status).toBe(200);
+  approvePayment.expect(await res.json());
+});
+```
+
+이 테스트가 지키는 것은 내가 의존하는 필드뿐이다 — 공급자가 내가 안 쓰는 부분을 바꾸면 잡히지 않고, 반대로 샌드박스와 운영이 다르게 동작하면 초록불이 또 거짓말이 된다.

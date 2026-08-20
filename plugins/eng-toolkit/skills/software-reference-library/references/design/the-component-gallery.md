@@ -38,3 +38,27 @@ https://component.gallery/
 ## 인용 포인트
 - 컴포넌트 이름 논쟁이 길어질 때, 명칭 분포를 근거로 제시하면 취향 대결이 관찰 대조로 바뀐다.
 - 새 컴포넌트 추가 요청을 심사할 때 "다른 시스템들도 이걸 별도 컴포넌트로 두는가"를 기준의 하나로 쓸 수 있다.
+
+## 코드 예시
+
+명칭 분포를 훑고 내린 결정을 컴포넌트 API 계약에 기록으로 남긴 형태 — 이름과 경계는 되돌리기 비싼 결정이라 근거를 코드 옆에 둔다.
+
+```ts
+/**
+ * Toast — 별칭: Snackbar(Material), Notification(Carbon), Flash(Primer).
+ * Banner 는 별개 컴포넌트로 둔다: 페이지에 고정되고 자동으로 사라지지 않는다.
+ */
+export type ToastProps = {
+  /** 분포상 4종이 가장 흔하다. severity/type 대신 status 로 통일 */
+  status: 'info' | 'success' | 'warning' | 'error';
+  title: string;
+  description?: string;
+  /** 자동 소멸 시간. null 이면 사용자가 닫을 때까지 유지 (error 기본값) */
+  durationMs?: number | null;
+  /** 액션은 최대 하나 — 두 개 이상 필요하면 Toast 가 아니라 Dialog 다 */
+  action?: { label: string; onSelect: () => void };
+  onDismiss: () => void;
+};
+```
+
+업계 분포를 따랐다는 게 우리 제품에 맞다는 뜻은 아니다. 그리고 갤러리는 모아 놓은 구현의 접근성 정확성을 보증하지 않으므로, 이 Toast 가 `role="status"`로 읽혀야 하는지 `role="alert"`여야 하는지는 여기서 나오지 않는다 — APG 쪽에서 따로 가져와야 하고, 이 타입에는 그 결정이 안 드러난다.

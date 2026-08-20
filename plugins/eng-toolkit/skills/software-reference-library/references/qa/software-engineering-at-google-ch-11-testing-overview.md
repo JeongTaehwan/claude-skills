@@ -39,3 +39,35 @@ https://abseil.io/resources/swe-book/html/ch11.html
 ## 인용 포인트
 - 테스트 크기를 "무엇을 쓸 수 있는가"(프로세스/머신/네트워크)로 정의하는 방식은, 팀 내 용어 혼란을 끝내고 CI 파이프라인 분리 기준으로 그대로 쓸 수 있다.
 - Testing on the Toilet / Test Certified는 "문화는 교육으로 바뀌지 않는다"는 주장에 대한 반례로, 소규모 개입의 설계 사례로 인용하기 좋다.
+
+## 코드 예시
+
+크기 분류가 용어 합의가 아니라 **도구가 강제하는 제약**이라는 점을 그대로 구현한 것 — small 로 표시한 테스트는 네트워크와 sleep 을 쓰지 못한다.
+
+```python
+# conftest.py
+import socket, time, pytest
+
+class ForbiddenInSmallTest(RuntimeError):
+    pass
+
+@pytest.fixture(autouse=True)
+def enforce_test_size(request, monkeypatch):
+    marker = request.node.get_closest_marker("size")
+    size = marker.args[0] if marker else "small"      # 미표시는 small 로 간주
+    if size != "small":
+        return
+    def blocked(*args, **kwargs):
+        raise ForbiddenInSmallTest(
+            "small 테스트는 네트워크·sleep 을 쓸 수 없다. @pytest.mark.size('medium') 로 올려라"
+        )
+    monkeypatch.setattr(socket, "socket", blocked)
+    monkeypatch.setattr(time, "sleep", blocked)
+
+# pyproject.toml
+# [tool.pytest.ini_options]
+# markers = ["size(name): small | medium | large"]
+# 프리서브밋: pytest -m "not size('large')"
+```
+
+강제되는 것은 자원 경계뿐이다 — small 로 통과한 테스트도 `sleep` 대신 바쁜 대기를 쓰거나 전역 상태를 공유하면 여전히 불안정해지고, 그건 이 fixture 가 잡지 못한다.

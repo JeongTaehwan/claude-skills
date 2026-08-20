@@ -42,3 +42,31 @@ GraphQL 이 "무엇을 보장하는가"를 정의한 원문 명세 — 튜토리
 ## 인용 포인트
 - non-null 표시가 실패 시 부모까지 null 로 만든다는 규칙 — 스키마에서 `!` 를 보수적으로 쓰자는 주장의 근거.
 - 전송 계층이 명세 밖이라는 사실 — "GraphQL 이니까 HTTP 상태 코드는 항상 200" 같은 관행을 논의할 때 출발점.
+
+## 코드 예시
+
+명세의 null 전파 규칙 — `!` 하나가 부분 실패를 어디까지 번지게 하는지를 스키마로 보인 것.
+
+```graphql
+type Query {
+  product(id: ID!): Product        # nullable — 실패가 여기서 멈춘다
+}
+
+type Product {
+  id: ID!
+  title: String
+  reviews: [Review!]!              # 리스트도 원소도 non-null
+}
+
+type Review {
+  body: String                     # nullable: 리졸버가 실패하면 이 필드만 null
+  author: User!                    # non-null: 실패해도 Review 를 null 로 만들 수 없다
+}                                  # → [Review!]! 도 null 불가 → Product 가 통째로 null 이 된다
+
+type User {
+  id: ID!
+  nickname: String
+}
+```
+
+`author` 리졸버 하나가 실패하면 응답은 `{"data": {"product": null}, "errors": [...]}` 가 된다 — 명세가 data 와 errors 의 공존을 기본 모델로 삼기 때문에 나오는 형태다.

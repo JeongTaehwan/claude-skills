@@ -34,3 +34,37 @@ SSR/SSG/CSR/스트리밍 SSR/점진적 하이드레이션을 TTFB·FCP·TTI 트�
 ## 인용 포인트
 - "서버 렌더링은 공짜가 아니다 — FCP를 사고 TTFB로 지불한다" — 전략 전환 논의에서 비용 축을 세우는 문장.
 - 리하이드레이션 비용의 명명 — "보이는데 눌리지 않는 화면"이 왜 생기는지의 출처.
+
+## 코드 예시
+
+"보이는데 눌리지 않는 구간"을 없애는 방식 — 하이드레이션 전에는 브라우저 기본 동작으로 굴러가고, JS 가 도착하면 그 위에 얹는다.
+
+```jsx
+"use client";
+
+import { useEffect, useState } from "react";
+
+function useHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []); // 서버 렌더 결과에는 false 로 박힌다
+  return hydrated;
+}
+
+export function SearchForm({ q }) {
+  const hydrated = useHydrated();
+
+  return (
+    // action/method 가 있으므로 JS 가 없어도 제출이 그냥 된다 (전체 페이지 이동)
+    <form
+      action="/search"
+      method="get"
+      onSubmit={hydrated ? handleClientSideSearch : undefined}
+    >
+      <input name="q" defaultValue={q} />
+      <button type="submit">검색</button>
+    </form>
+  );
+}
+```
+
+하이드레이션 비용 자체가 사라지는 건 아니다 — 저속 회선에서는 여전히 JS 를 기다리고, 그동안의 제출은 느린 전체 페이지 이동으로 처리된다. 그리고 모든 인터랙션에 대응하는 서버 라우트를 둘 수 있는 것도 아니다.

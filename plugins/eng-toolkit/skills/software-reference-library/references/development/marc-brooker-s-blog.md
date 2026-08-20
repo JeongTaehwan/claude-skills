@@ -38,3 +38,33 @@ AWS에서 실제로 그 시스템을 만든 엔지니어가 재시도·타임아
 ## 인용 포인트
 - "재시도가 장애를 키운다"를 감이 아니라 모델로 설명해야 할 때 — 재시도 정책 변경 제안서의 근거로 쓰인다.
 - 이용률과 지연의 비선형 관계는 오토스케일링 임계값이나 용량 버퍼를 늘리자는 주장의 정량적 논거가 된다.
+
+## 코드 예시
+
+"재시도는 부하 증폭기"라는 논지를 그대로 옮긴 형태 — 횟수 제한만이 아니라 **재시도 예산**과 **full jitter** 백오프를 함께 건다.
+
+```python
+import random, time
+
+class TransientError(Exception):
+    pass
+
+RETRY_BUDGET = 0.1        # 전체 호출 대비 재시도 허용 비율
+_calls = _retries = 0
+
+def call_with_retry(fn, max_attempts=3, base=0.05, cap=2.0):
+    global _calls, _retries
+    _calls += 1
+    for attempt in range(max_attempts):
+        try:
+            return fn()
+        except TransientError:
+            # 예산 초과면 재시도하지 않는다 — 이미 포화된 시스템에 부하를 더 얹지 않기 위해
+            if attempt + 1 == max_attempts or _retries > _calls * RETRY_BUDGET:
+                raise
+            _retries += 1
+            # full jitter: 동시에 실패한 클라이언트가 같은 시각에 몰려오는 것을 막는다
+            time.sleep(random.uniform(0, min(cap, base * 2 ** attempt)))
+```
+
+`max_attempts` 만 만지는 튜닝이 위험한 이유가 여기 있다 — 예산과 지터 없이 횟수만 늘리면 장애 시 유입이 배수로 늘어 회복을 고정시킨다.

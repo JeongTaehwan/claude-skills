@@ -37,3 +37,32 @@ https://www.designcouncil.org.uk/our-resources/the-double-diamond/
 ## 인용 포인트
 - 요구사항이 해결책 형태로 내려왔을 때: "지금 우리는 첫 번째 다이아몬드를 건너뛰고 두 번째부터 시작하고 있다"는 문장 하나로 회의의 프레임을 바꿀 수 있다.
 - 정부 기관(UK Design Council)이 공개한 프레임워크라 출처 신뢰도가 높다 — 사내 프로세스 문서에 근거로 달기 좋다.
+
+## 코드 예시
+
+"첫 번째 다이아몬드를 건너뛰지 않는다"를 말이 아니라 단계별 통과 조건으로 적어 둔 킥오프 계획.
+
+```yaml
+# 단계마다 "무엇이 나와야 다음으로 가는가"를 명시한다
+problem_statement: null        # 비어 있다면 아직 첫 번째 다이아몬드 안이다
+
+phases:
+  - id: discover               # 발산 · 문제 공간
+    outputs: [사용자 인터뷰 8건, CS 문의 분류, 퍼널 이탈 데이터]
+    exit_gate: 근거가 붙은 문제 후보가 3개 이상 적혀 있다
+  - id: define                 # 수렴 · 문제 공간
+    outputs: [문제 정의 한 문장, 성공 판정 기준]
+    exit_gate: problem_statement 가 채워졌다
+  - id: develop                # 발산 · 해결 공간
+    outputs: [해결안 스케치 3개 이상, 프로토타입]
+    exit_gate: 사용자에게 보여 준 기록이 있다
+  - id: deliver                # 수렴 · 해결 공간
+    outputs: [릴리스, 측정 결과]
+
+# 되돌아가는 것이 정상 동작이다
+loop_back_allowed: [develop -> define, deliver -> define]
+
+participants: [PM, 디자이너, 개발, CS]   # 참여 축을 빼면 도식만 남는다
+```
+
+`exit_gate`를 통과 도장으로 운영하는 순간 원문이 부정하는 워터폴이 된다 — `loop_back_allowed`가 실제로 한 번도 쓰이지 않는 팀에서 이 파일은 단계 이름만 바꾼 폭포수 일정표다.

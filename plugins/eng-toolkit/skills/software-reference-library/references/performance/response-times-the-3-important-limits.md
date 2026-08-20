@@ -34,3 +34,35 @@ Jakob Nielsen — 1993 (*Usability Engineering* Ch.5), NN/g. 논문이 아니라
 ## 인용 포인트
 - 0.1초/1초/10초 세 한계 — 로딩 UI 임계값(지연 스피너, 낙관적 업데이트 적용 범위) 결정의 표준 기준선.
 - "1초 이상이면 피드백, 10초 이상이면 퍼센트 진행 표시" — 로딩 표시 정책을 규칙으로 만들 때 그대로 옮겨 쓰는 권고.
+
+## 코드 예시
+
+"1초 이상이면 피드백, 10초 이상이면 퍼센트 진행 표시"라는 권고를 로딩 UI 상태 전이 규칙으로 옮긴 것.
+
+```ts
+// Nielsen 0.1 / 1 / 10초 기준선을 그대로 상수로 둔다
+const LIMITS = { instant: 100, feedback: 1000, determinate: 10_000 };
+
+type LoadingUI = "none" | "spinner" | "percent";
+
+function showProgress(estimatedMs: number, render: (ui: LoadingUI) => void) {
+  // 0.1초 안에 끝날 일이면 표시 대신 낙관적 업데이트로 간다
+  if (estimatedMs < LIMITS.instant) return () => {};
+
+  render("none");
+  const timers = [
+    setTimeout(() => render("spinner"), LIMITS.feedback),
+    setTimeout(() => render("percent"), LIMITS.determinate),
+  ];
+  return () => {
+    timers.forEach(clearTimeout);
+    render("none");
+  };
+}
+
+const stop = showProgress(estimate, setLoadingUI);
+await save();
+stop(); // 1초 전에 끝나면 스피너가 아예 나타나지 않아 깜빡임이 없다
+```
+
+세 숫자는 사람의 지각 한계지 네트워크 예산이 아니다 — 10초 구간에서 `percent`로 넘어가려면 실제 진행률을 알 수 있는 작업이어야 하고, 알 수 없는 작업에 가짜 퍼센트를 그리면 기준선을 지킨 게 아니라 어긴 것이 된다.

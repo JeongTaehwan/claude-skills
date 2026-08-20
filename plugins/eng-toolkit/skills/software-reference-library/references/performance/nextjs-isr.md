@@ -35,3 +35,39 @@ ISR 가이드 — 빌드 시점에 미리 렌더한 페이지를 CDN에서 서�
 ## 인용 포인트
 - "저속에서는 전송 시간이 길기 때문에 TTFB 절감이 체감에 직결된다" — 정적화 우선순위를 정할 때의 근거.
 - 주기 재검증과 온디맨드 재검증의 존재 — "정적이면 갱신 못 한다"는 반대의 교정.
+
+## 코드 예시
+
+"정적이면 갱신 못 한다"의 교정 — 주기 재검증을 기본으로 깔고, 상품이 실제로 바뀔 때만 태그로 즉시 무효화한다.
+
+```jsx
+// app/products/[id]/page.jsx
+export const revalidate = 3600; // 최대 1시간까지는 오래된 정적 페이지를 그대로 서빙
+
+export async function generateStaticParams() {
+  const ids = await getPopularProductIds(); // 인기 상품만 미리 굽는다
+  return ids.map((id) => ({ id }));
+}
+
+export default async function ProductPage({ params }) {
+  const { id } = await params;
+  const res = await fetch(`https://api.example.com/products/${id}`, {
+    next: { tags: [`product:${id}`] }, // 온디맨드 무효화를 위한 태그
+  });
+  const product = await res.json();
+  return <ProductDetail product={product} />;
+}
+```
+
+```js
+// app/api/products/[id]/route.js — 관리자 저장 시 호출
+import { revalidateTag } from "next/cache";
+
+export async function POST(req, { params }) {
+  const { id } = await params;
+  revalidateTag(`product:${id}`); // 다음 요청부터 새 페이지
+  return Response.json({ revalidated: true });
+}
+```
+
+`revalidate` 는 "이 시간까지는 옛 데이터를 보여도 좋다"는 선언이다 — 가격·재고처럼 틀리면 안 되는 값이 이 페이지에 박혀 있으면, TTFB를 얻는 대가로 잘못된 숫자를 CDN이 퍼뜨린다.

@@ -43,3 +43,40 @@ API 는 불변(immutable) 방식이다. `.optional()`, `.min()` 같은 메서드
 - "TypeScript 타입은 런타임에 존재하지 않으므로 외부 입력은 반드시 런타임 검증이 필요하다"는 논지를, 이 라이브러리의 존재 이유로 그대로 인용할 수 있다.
 - 스키마 하나에서 타입과 검증이 함께 나온다는 점은, 검증 코드를 손으로 유지하는 관행을 걷어낼 때의 핵심 근거다.
 - `.safeParse()` 와 `.parse()` 의 구분은 "경계에서 예외를 던질 것인가 값으로 다룰 것인가"를 팀 규칙으로 정할 때 논의의 틀이 된다.
+
+## 코드 예시
+
+"스키마가 곧 타입"과 "경계에서는 예외를 던지지 않는다"를 웹훅 핸들러 하나에 같이 담으면 이렇게 된다.
+
+```ts
+import { z } from "zod";
+
+// 결제 수단마다 필드가 다른 페이로드는 판별 유니온으로 정확히 모델링한다
+const Payment = z.discriminatedUnion("method", [
+  z.object({ method: z.literal("card"), cardBin: z.string().length(6) }),
+  z.object({ method: z.literal("point"), pointId: z.string().min(1) }),
+]);
+
+const Webhook = z
+  .object({
+    orderId: z.coerce.number().int().positive(),   // 쿼리스트링의 "1042" 도 받는다
+    amount: z.number().int().nonnegative(),
+    discount: z.number().int().nonnegative().default(0),
+    payment: Payment,
+  })
+  .refine((v) => v.discount <= v.amount, {          // 필드 간 관계도 스키마 안에서
+    message: "할인 금액이 주문 금액을 넘을 수 없습니다",
+    path: ["discount"],
+  });
+
+type Webhook = z.infer<typeof Webhook>;             // 타입은 스키마에서 파생된다
+
+// 웹훅은 예외를 흘리면 안 되는 경계다 — 값으로 받는다
+const parsed = Webhook.safeParse(await req.json());
+if (!parsed.success) {
+  await deadLetter.push({ issues: parsed.error.issues });
+  return new Response(null, { status: 400 });
+}
+```
+
+`coerce` 는 생각보다 관대하다 — `""` 는 `0` 으로, `"true"` 는 `true` 로 통과하므로 "빈 값이 0 원으로 들어온" 사고가 검증을 지나갈 수 있다. 그리고 `.refine()` 을 객체 스키마에 붙이는 순간 그 스키마는 `.extend()`·`.pick()` 같은 파생이 막힌다. 공용 스키마는 순수 object 로 두고 관계 규칙은 쓰는 쪽에서 얹는 편이 재사용에 낫다.

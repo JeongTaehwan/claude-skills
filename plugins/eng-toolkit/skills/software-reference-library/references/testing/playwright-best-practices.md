@@ -40,3 +40,28 @@ https://playwright.dev/docs/best-practices
 - "구현 세부가 아니라 사용자에게 보이는 것을 테스트하라" — 리뷰에서 클래스 셀렉터를 반려할 때 그대로 인용 가능한 원칙.
 - 자동 대기가 있으므로 고정 sleep 은 불필요하다는 공식 입장은, 코드베이스에서 임의 대기를 일괄 제거하자는 제안의 근거가 된다.
 - 테스트 격리와 독립적 데이터 생성이 병렬화의 전제라는 서술은, "테스트가 느리다"는 문제를 인프라가 아니라 설계 문제로 되돌린다.
+
+## 코드 예시
+
+세 가지 지침(사용자 지향 로케이터, 고정 sleep 제거, 테스트별 자기 데이터)을 한 테스트에서 before/after 로 대조한 것.
+
+```ts
+// before — 클래스 셀렉터 + 고정 대기 + 공유 계정
+test('결제', async ({ page }) => {
+  await page.goto('/cart');                       // 앞 테스트가 담아 둔 장바구니에 의존
+  await page.click('.btn.btn-primary.checkout');  // 스타일 리팩터링 한 번에 깨진다
+  await page.waitForTimeout(3000);                // 느리고, 그래도 가끔 깨진다
+  expect(await page.locator('.toast').innerText()).toContain('완료');
+});
+
+// after — 역할/텍스트로 찾고, 단언이 대기를 대신하고, 데이터는 테스트가 만든다
+test('결제', async ({ page, request }) => {
+  const { id } = await (await request.post('/api/test/carts')).json(); // 자기 데이터
+  await page.goto(`/cart/${id}`);
+  await page.getByRole('button', { name: '결제하기' }).click();
+  // 웹 우선 단언이 조건 충족까지 자동 재시도 — sleep 불필요
+  await expect(page.getByRole('status')).toContainText('완료');
+});
+```
+
+`expect(...).toContainText()` 의 자동 재시도는 **Locator 를 받았을 때만** 동작한다 — `innerText()` 처럼 값을 먼저 꺼내 놓고 단언하면 그 순간의 스냅샷을 비교하는 것이라 재시도가 사라지고, sleep 을 지운 만큼 그대로 플레이키해진다.

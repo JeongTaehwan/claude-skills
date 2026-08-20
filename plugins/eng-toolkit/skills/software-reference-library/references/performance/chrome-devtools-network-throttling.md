@@ -34,3 +34,28 @@ DevTools에서 대역폭·지연·패킷 손실을 지정한 커스텀 스로틀
 ## 인용 포인트
 - "느린 상태를 본 적 없는 로딩 UX는 검증된 적 없는 것" — 저속 프로필 확인을 프론트엔드 작업의 완료 조건에 넣자는 제안.
 - 팀 공용 커스텀 스로틀링 프로필(수치 합의)을 정의하자는 제안의 출처.
+
+## 코드 예시
+
+"우리 사용자 하위 10%의 회선"을 클릭이 아니라 숫자로 못 박아, DevTools가 쓰는 것과 같은 CDP 명령으로 팀 전체가 같은 조건을 재현하는 형태.
+
+```js
+// throttling-profiles.js — 팀 합의 수치를 코드로 공유한다
+export const PROFILES = {
+  // DevTools "Slow 3G" 상당: 400kbps 다운 / 400kbps 업 / 왕복 2000ms
+  slow3g: { downloadThroughput: 400 * 1024 / 8, uploadThroughput: 400 * 1024 / 8, latency: 2000 },
+  // 자사 RUM p90 에서 뽑은 값
+  p90:    { downloadThroughput: 1.2 * 1024 * 1024 / 8, uploadThroughput: 300 * 1024 / 8, latency: 350 },
+};
+
+// Puppeteer 에서 적용 — DevTools 의 Network 패널 스로틀링과 같은 CDP 명령이다
+const client = await page.createCDPSession();
+await client.send('Network.emulateNetworkConditions', {
+  offline: false,
+  ...PROFILES[process.env.PROFILE ?? 'slow3g'],
+});
+await page.goto('https://staging.example.com/checkout');
+await page.screenshot({ path: `checkout-${process.env.PROFILE}.png` }); // 로딩 상태가 실제로 보이는 순간
+```
+
+이 스로틀링은 브라우저의 요청 레벨에서 지연을 얹는 것이라 패킷 손실·혼잡 제어·TLS 핸드셰이크 재시도 같은 실제 저속망의 고통은 재현되지 않는다 — 여기서 괜찮아 보인다고 현장에서 괜찮다는 뜻은 아니다.

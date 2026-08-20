@@ -42,3 +42,34 @@ https://docs.pytest.org/
 - "실패한 assert 문에 대한 상세 정보 — `self.assert*` 이름을 외울 필요 없이" — unittest 에서 옮기자는 제안의 가장 짧은 근거.
 - 픽스처는 상속이 아니라 요청으로 준비 코드를 조립한다 — 테스트 베이스 클래스가 비대해진 코드베이스를 정리할 때의 방향 제시.
 - 기존 unittest 스위트를 그대로 돌릴 수 있다는 점은 "한 번에 다 바꿔야 한다"는 전환 저항을 제거한다.
+
+## 코드 예시
+
+"상속이 아니라 요청으로 조립한다"를 그대로 옮긴 형태 — 픽스처가 다른 픽스처를 이름으로 요청하고, 경계 케이스는 상속 계층이 아니라 `parametrize` 로 늘어난다.
+
+```python
+# conftest.py — 준비 코드는 베이스 클래스가 아니라 이름을 가진 픽스처가 된다
+import pytest
+
+@pytest.fixture(scope="session")
+def db_url():
+    return "postgresql://localhost/test"
+
+@pytest.fixture                     # 다른 픽스처를 인자로 '요청'한다
+def session(db_url):
+    s = connect(db_url)
+    yield s                         # yield 뒤가 teardown
+    s.rollback()
+    s.close()
+
+# test_discount.py
+@pytest.mark.parametrize(
+    ("amount", "rate", "expected"),
+    [(10_000, 0.1, 9_000), (0, 0.1, 0), (10_000, 0, 10_000)],
+    ids=["정상", "0원", "할인없음"],
+)
+def test_apply_discount(session, amount, rate, expected):
+    assert apply_discount(session, amount, rate) == expected  # 평범한 assert 로 충분
+```
+
+`scope="session"` 은 실행 비용을 줄이는 대신 테스트 간 격리를 깬다 — 위에서 세션 스코프에 둔 것은 값(URL)뿐이고, 상태를 가진 커넥션은 기본 function 스코프에 두고 매번 롤백한다. 이 구분을 흐리면 테스트 순서에 따라 결과가 달라지고, `-p no:randomly` 같은 플래그로 순서를 고정하며 버티게 된다.

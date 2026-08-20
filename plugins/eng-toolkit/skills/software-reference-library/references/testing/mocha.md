@@ -36,3 +36,39 @@ BDD/TDD/exports 등 여러 인터페이스, 리포터 교체, `--grep` 필터링
 
 ## 인용 포인트
 - 러너와 어서션의 분리는 자유도이자 비용이다 — 도구 통일 논의에서 "왜 이 저장소만 설정이 다른가"를 설명할 때 쓸 수 있는 프레임.
+
+## 코드 예시
+
+문서가 명시하는 두 함정 — `done` 과 Promise 를 섞는 것, 화살표 함수로 컨텍스트를 잃는 것 — 의 before/after.
+
+```js
+const { expect } = require('chai'); // 어서션은 별도 라이브러리
+
+// before ① done 과 Promise 를 함께 쓴다
+//   Mocha 가 "Resolution method is overspecified" 로 거부한다
+it('주문을 생성한다', (done) => {
+  return createOrder({ sku: 'A-1' }).then((order) => {
+    expect(order.status).to.equal('PENDING');
+    done();
+  });
+});
+
+// before ② 화살표 함수라 this 가 테스트 컨텍스트가 아니다 → this.timeout 사용 불가
+it('정산 배치가 완료된다', () => {
+  this.timeout(10000);
+});
+
+// after ① async 로 쓰고 done 은 버린다
+it('주문을 생성한다', async () => {
+  const order = await createOrder({ sku: 'A-1' });
+  expect(order.status).to.equal('PENDING');
+});
+
+// after ② 컨텍스트가 필요하면 일반 function 으로
+it('정산 배치가 완료된다', async function () {
+  this.timeout(10000);
+  await runSettlement();
+});
+```
+
+타임아웃을 늘리는 것은 느린 테스트를 통과시킬 뿐 원인을 없애지 않는다 — 배치가 왜 10초를 쓰는지 모르는 채 숫자만 키우면 플레이키가 시간 문제로 옮겨 갈 뿐이다.

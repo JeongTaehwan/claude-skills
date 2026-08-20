@@ -35,3 +35,28 @@ AFL의 핵심 주장은 단순하다. 입력을 무작위로 바꾸되, 실행 �
 ## 인용 포인트
 - "퍼징 = 랜덤 입력"이라는 오해를 교정할 때: 랜덤이 아니라 커버리지 피드백을 적합도 함수로 쓰는 진화적 탐색이라는 점.
 - 퍼징 도입을 제안할 때, 테스터가 케이스를 상상해내는 비용 대신 CPU 시간을 쓰는 접근이라는 프레이밍.
+
+## 코드 예시
+
+"계측 → 시드 코퍼스 → 변이 루프 → 크래시 최소화"라는 AFL 골격 전체를 명령 네 줄로 옮긴 것.
+
+```bash
+# 1) 커버리지 계측을 심어서 빌드한다 — 이게 랜덤 퍼징과 갈리는 지점
+afl-gcc -o parser_fuzz parser.c
+
+# 2) 시드 코퍼스: 유효한 입력 몇 개만 있으면 된다
+mkdir -p seeds out
+printf 'GET /index.html HTTP/1.0\r\n\r\n' > seeds/basic.txt
+
+# 3) 변이 루프. @@ 는 AFL이 만든 임시 입력 파일 경로로 치환된다
+#    (프로그램이 stdin을 읽으면 @@ 를 빼면 된다)
+afl-fuzz -i seeds -o out -- ./parser_fuzz @@
+
+# 4) 나온 크래시 입력을 사람이 읽을 크기로 줄인다
+afl-tmin -i out/crashes/id:000000* -o crash_min.txt -- ./parser_fuzz @@
+
+# 코퍼스가 불어나면 같은 커버리지를 내는 최소 집합으로 솎아낸다
+afl-cmin -i out/queue -o corpus_min -- ./parser_fuzz @@
+```
+
+`afl-gcc` 로 빌드하지 않으면 커버리지 피드백이 없어 그냥 랜덤 퍼징이 되고, AFL은 이를 경고만 하고 계속 돈다. 또 이 저장소는 아카이브 상태라 실무 도입은 AFL++(`afl-clang-fast` 등) 쪽이 보통이다.

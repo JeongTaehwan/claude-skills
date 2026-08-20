@@ -24,11 +24,11 @@ https://cwe.mitre.org/top25/
 - 취약점 리포트에 표준 식별자(CWE-ID)를 붙여야 할 때
 
 ## 이럴 땐 아니다
-- 웹 애플리케이션 관점의 위험 범주(설계 결함, 설정 오류 포함)를 보려면 `development/owasp-top-10.md` — CWE 는 코드 결함 유형, OWASP Top 10 은 애플리케이션 리스크 범주로 축이 다르다
-- 구체적 방어 구현법(입력 검증, 세션, 암호 저장)의 레시피는 `development/owasp-cheat-sheet-series.md`
-- 무엇을 어디까지 검증해야 하는가의 요구사항 체계는 `development/owasp-asvs.md`
-- 설계 단계에서 위협을 도출하는 절차는 `development/owasp-threat-modeling.md`
-- 개발 프로세스 전반에 보안을 심는 조직 차원의 프레임워크는 `development/nist-secure-software-development-framework.md`
+- 웹 애플리케이션 관점의 위험 범주(설계 결함, 설정 오류 포함)를 보려면 `security/owasp-top-10.md` — CWE 는 코드 결함 유형, OWASP Top 10 은 애플리케이션 리스크 범주로 축이 다르다
+- 구체적 방어 구현법(입력 검증, 세션, 암호 저장)의 레시피는 `security/owasp-cheat-sheet-series.md`
+- 무엇을 어디까지 검증해야 하는가의 요구사항 체계는 `security/owasp-asvs.md`
+- 설계 단계에서 위협을 도출하는 절차는 `security/owasp-threat-modeling.md`
+- 개발 프로세스 전반에 보안을 심는 조직 차원의 프레임워크는 `security/nist-secure-software-development-framework.md`
 - 의존성·빌드 공급망 쪽 위험은 `development/slsa.md` 와 `development/openssf-scorecard.md`
 
 ## 무엇이 들어있나
@@ -40,3 +40,33 @@ https://cwe.mitre.org/top25/
 ## 인용 포인트
 - 보안 작업에 시간을 배정받아야 할 때, "이 유형이 실제 CVE 통계에서 몇 위"라는 형태의 근거는 감상적 호소보다 훨씬 잘 통과된다.
 - 린트 규칙을 끄자는 요청에 대해, 그 규칙이 대응하는 CWE 의 순위를 근거로 반박할 수 있다.
+
+## 코드 예시
+
+"수천 건의 경고 중 무엇을 CI 차단 조건으로 올릴 것인가"를 규칙에 CWE-ID 를 박아 두는 방식으로 정리한 것 — 나중에 왜 이 규칙이 차단인지 설명할 근거가 규칙 안에 남는다.
+
+```yaml
+# rules/authz.yml
+rules:
+  - id: order-lookup-without-owner-check
+    languages: [python]
+    severity: ERROR
+    message: 주문 조회에 소유자 검증이 없다 (CWE-862)
+    metadata:
+      cwe:
+        - "CWE-862: Missing Authorization"
+      references:
+        - https://cwe.mitre.org/data/definitions/862.html
+    patterns:
+      - pattern: Order.objects.get(id=$ID)
+      - pattern-not-inside: |
+          if request.user == $OWNER:
+              ...
+```
+
+```bash
+# ERROR 가 하나라도 나오면 종료 코드 1 — 여기까지가 차단선
+semgrep scan --config ./rules/ --error
+```
+
+`metadata.cwe` 는 탐지에 관여하지 않는 문서용 필드다. 그리고 Top 25 순위는 인터넷 전체 통계이지 우리 위험 순서가 아니다 — 위 규칙처럼 커머스에서 실제로 아픈 유형을 도메인 보정으로 끌어올려야 목록이 쓸모를 갖는다.

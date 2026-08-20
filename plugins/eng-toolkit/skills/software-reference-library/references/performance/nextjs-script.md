@@ -34,3 +34,33 @@ https://nextjs.org/docs/app/guides/scripts
 ## 인용 포인트
 - "빼는 게 아니라 뒤로 미는 것" — 마케팅·분석 스크립트를 둘러싼 조직 간 협상에서 쓸 수 있는 프레이밍.
 - `worker` 전략은 experimental이라는 지위 — 도입 제안 시 명시하고 인용할 것.
+
+## 코드 예시
+
+"빼는 게 아니라 뒤로 미는 것" — 같은 스크립트 목록을 그대로 두되 좁은 회선에서 무엇이 먼저 지나갈지를 `strategy` 로 못 박는다.
+
+```jsx
+// app/layout.jsx
+import Script from "next/script";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="ko">
+      <body>
+        {children}
+
+        {/* 동의 배너처럼 하이드레이션 전에 떠야 하는 것만 */}
+        <Script src="https://cdn.example.com/consent.js" strategy="beforeInteractive" />
+
+        {/* 기본값: 페이지가 인터랙티브해진 뒤 */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-XXXX" strategy="afterInteractive" />
+
+        {/* 급하지 않은 것은 유휴 시점까지 미룬다 */}
+        <Script src="https://cdn.example.com/chat-widget.js" strategy="lazyOnload" />
+      </body>
+    </html>
+  );
+}
+```
+
+`beforeInteractive` 는 하나만 잘못 넣어도 앞의 두 전략으로 벌어 둔 이득을 통째로 되돌린다 — 그리고 어떤 전략을 쓰든 다운로드 바이트와 서드파티 서버로의 커넥션 왕복은 그대로 남는다.

@@ -37,3 +37,35 @@ Carbon이 다른 시스템과 갈리는 지점은 **모든 것을 수치화한�
 
 ## 인용 포인트
 - "우리 팀 간격·폰트 기준을 처음부터 정하자"는 논의가 길어질 때, 검증된 스케일을 통째로 채택하고 논의를 종료하는 근거로 쓴다.
+
+## 코드 예시
+
+"디자이너 판단이 개입할 여지를 줄인다"는 태도가 실제로 어떻게 강제되는지 — 픽셀 값과 폰트 크기를 직접 쓸 자리가 없다.
+
+```scss
+@use '@carbon/styles/scss/spacing' as *;
+@use '@carbon/styles/scss/type' as *;
+@use '@carbon/styles/scss/theme' as *;
+
+// 간격은 고정 토큰에서만 고른다 ($spacing-05 = 16px, $spacing-07 = 32px)
+.order-table__toolbar {
+  display: flex;
+  gap: $spacing-05;
+  padding: $spacing-05 $spacing-07;
+  background: $layer-01;      // 테마 토큰 — 라이트/다크가 같은 이름 뒤에서 갈린다
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+// 타이포도 크기·행간·자간을 직접 쓰지 않고 이름 붙은 스케일을 호출한다
+.order-table__title {
+  @include type-style('heading-03');
+  color: $text-primary;
+}
+
+.order-table__caption {
+  @include type-style('body-compact-01');
+  color: $text-secondary;
+}
+```
+
+토큰 이름이 v10과 v11에서 크게 갈렸다 — v10의 `$ui-01`·`$text-01`이 v11에서 `$layer-01`·`$text-primary`로 바뀌었으므로 버전이 안 맞으면 컴파일 단계에서 죽는다. 그리고 스케일을 통째로 빌리면 그 안에 박힌 판단(2x 그리드, 엔터프라이즈 밀도)도 같이 딸려 온다.

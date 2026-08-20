@@ -35,3 +35,40 @@ Design Tokens Community Group(W3C Community Group)이 내는 Draft Community Gro
 ## 인용 포인트
 - 토큰 중간 포맷을 자체 설계하자는 제안에 대해, 이미 진행 중인 커뮤니티 표준이 있고 도구 생태계가 그쪽으로 수렴 중이라는 근거로 쓸 수 있다.
 - 다만 드래프트 상태라는 점 때문에 "지금 전면 채택"의 근거로는 약하다 — 이 한계 자체를 논의에 올리는 것이 정직하다.
+
+## 코드 예시
+
+자체 중간 포맷을 만들기 전에 확인할 것 — 그룹 상속, alias 참조, 복합 타입이 이미 포맷에 정의돼 있다.
+
+```json
+{
+  "color": {
+    "$type": "color",
+    "brand": { "core": { "$value": "#0f62fe" } },
+    "action": {
+      "primary": {
+        "$value": "{color.brand.core}",
+        "$description": "기본 버튼 배경 — 값이 아니라 의미를 참조한다"
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "md": { "$value": "16px" }
+  },
+  "text": {
+    "heading": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "IBM Plex Sans",
+        "fontSize": "24px",
+        "fontWeight": 600,
+        "lineHeight": 1.3,
+        "letterSpacing": "0px"
+      }
+    }
+  }
+}
+```
+
+드래프트라서 세부가 흔들린다 — dimension을 `"16px"` 문자열로 쓸지 `{ "value": 16, "unit": "px" }` 객체로 쓸지가 개정마다 갈렸고, 이 파일을 읽는 도구(Style Dictionary, Figma 플러그인)마다 지원하는 타입 범위도 다르다. 포맷을 맞추기 전에 실제로 쓸 변환기의 동작을 먼저 확인해야 한다.

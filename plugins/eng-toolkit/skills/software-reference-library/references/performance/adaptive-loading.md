@@ -35,3 +35,32 @@ https://web.dev/articles/adaptive-loading-cds-2019
 ## 인용 포인트
 - "풀 경험이 기본값이어야 한다"는 암묵적 가정을 뒤집는 프레임 — 코어 경험 우선 설계 제안의 근거.
 - 대규모 서비스(Facebook·eBay·Tinder)가 이미 쓰는 패턴이라는 점 — 도입 설득용.
+
+## 코드 예시
+
+"풀 경험이 기본값"을 뒤집어, 네트워크·메모리·CPU 신호로 코어 경험과 풀 경험을 가르는 분기점.
+
+```js
+// 세 신호 모두 없을 수 있다 — 없으면 "느리지 않다"가 아니라 정책상 기본값을 정해야 한다
+const conn = navigator.connection; // Chromium 계열만
+const slowNet = conn
+  ? conn.saveData || /^(slow-)?2g$/.test(conn.effectiveType)
+  : false;
+const lowMem = (navigator.deviceMemory ?? 8) <= 2;   // GB, 상한 8로 뭉개짐
+const lowCpu = (navigator.hardwareConcurrency ?? 8) <= 4;
+
+const core = slowNet || lowMem || lowCpu;
+
+if (core) {
+  document.documentElement.dataset.experience = 'core'; // CSS로 애니메이션·고화질 배경 차단
+} else {
+  import('./carousel.js').then(m => m.mount());          // 논-크리티컬 번들은 여기서만
+  document.querySelectorAll('a[data-prefetch]').forEach(a => {
+    const l = document.createElement('link');
+    l.rel = 'prefetch'; l.href = a.href;
+    document.head.append(l);
+  });
+}
+```
+
+`navigator.connection`·`deviceMemory` 는 Safari·Firefox에 없어 그쪽 사용자는 전부 "빠름"으로 분류된다 — 신호 분기는 최적화지 보장이 아니므로, 코어 경험 쪽이 기능적으로 온전해야 안전하다.

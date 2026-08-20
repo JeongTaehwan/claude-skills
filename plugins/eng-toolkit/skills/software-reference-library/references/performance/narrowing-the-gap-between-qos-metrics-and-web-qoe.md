@@ -34,3 +34,32 @@ Diego da Hora, Alemnew Sheferaw Asrese, Vassilis Christophides, Renata Teixeira,
 ## 인용 포인트
 - 페이지별 QoE 모델이 정확도를 크게 올린다 — 페이지 유형별로 다른 성능 임계값을 두자는 제안의 근거.
 - 단순 전문가 모델이 ML 모델과 비슷한 정확도 — 복잡한 모델 없이도 합리적 KPI 설정이 가능하다는 실용 논거.
+
+## 코드 예시
+
+논문의 두 발견을 그대로 옮긴 RUM 리포터 — 페이지 유형마다 다른 단일 메트릭·다른 임계값(ML 없이 전문가 규칙)으로 판정한다.
+
+```js
+import { onLCP, onINP } from "web-vitals";
+
+// 페이지 유형별 "무엇을 볼지"와 "어디까지 봐줄지"가 다르다
+const QOE_MODEL = {
+  landing:  { metric: "LCP", good: 2500 }, // 읽는 화면 — 보이는 시점이 전부
+  search:   { metric: "LCP", good: 3000 },
+  checkout: { metric: "INP", good: 200 },  // 조작하는 화면 — 반응성이 전부
+};
+
+const pageType = document.body.dataset.pageType ?? "landing";
+const model = QOE_MODEL[pageType];
+
+function report({ name, value }) {
+  if (name !== model.metric) return; // 그 페이지의 대표 메트릭만 본다
+  const body = JSON.stringify({ pageType, name, value, ok: value <= model.good });
+  navigator.sendBeacon("/rum", body);
+}
+
+onLCP(report);
+onINP(report);
+```
+
+임계값은 페이지 성격에 대한 우리 팀의 가설일 뿐이다 — 논문처럼 실제 사용자 평점으로 대조하지 않으면, 유형별로 나눴다는 사실만으로 정확해지지는 않는다.

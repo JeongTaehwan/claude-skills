@@ -34,3 +34,30 @@ Bing과 Google이 각자 독립적으로 수행한 지연 주입 실험을 합�
 ## 인용 포인트
 - Bing 2초 지연 → 사용자당 쿼리 -1.8%, 매출 -4.3% — 성능 투자 ROI 설득의 대표 수치(원출처로 인용).
 - 점진적 렌더링이 체감 피해를 줄인다 — 스트리밍/헤더 우선 전송 설계의 초기 실증 근거.
+
+## 코드 예시
+
+발표의 실무 힌트인 "헤더 먼저 보내기" 그대로 — 느린 검색 결과를 기다리는 동안 브라우저가 CSS·JS 를 이미 받게 만든다.
+
+```js
+import http from "node:http";
+
+http.createServer(async (req, res) => {
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.flushHeaders(); // 헤더를 즉시 내보낸다
+
+  // 1) 셸부터 전송 — 브라우저는 여기서 CSS/JS 다운로드를 시작한다
+  res.write(`<!doctype html><html lang="ko"><head>
+    <link rel="stylesheet" href="/app.css">
+    <script src="/app.js" defer></script>
+  </head><body><header>검색</header><main>`);
+
+  // 2) 느린 백엔드는 그 다음에 기다린다
+  const results = await search(req.url);
+  res.write(renderResults(results));
+
+  res.end("</main></body></html>");
+}).listen(3000);
+```
+
+앞단의 gzip 미들웨어나 리버스 프록시가 응답을 버퍼링하면 조기 플러시가 통째로 삼켜진다 — 코드만 보고 "적용했다"고 할 수 없고, 실제로 첫 청크가 언제 나가는지 확인해야 한다.

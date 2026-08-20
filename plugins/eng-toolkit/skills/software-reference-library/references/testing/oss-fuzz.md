@@ -38,3 +38,29 @@ https://github.com/google/oss-fuzz
 ## 인용 포인트
 - "2025년 5월 기준 1,000개 프로젝트에서 13,000건 이상의 취약점과 50,000건 이상의 버그" — 퍼징 도입 제안서에 바로 넣을 수 있는 규모 근거.
 - 단발 퍼징이 아니라 **지속 실행 + 자동 리포팅**이 성과의 조건이라는 점은, 사내 도입 시 "한 번 돌려 보자"를 경계하는 논거가 된다.
+
+## 코드 예시
+
+등록 실물의 핵심인 `build.sh` — 하네스를 엔진에 묶지 않고 `$LIB_FUZZING_ENGINE` 으로 받아 `$OUT` 에 떨구는 규격.
+
+```bash
+#!/bin/bash -eu
+# projects/myparser/build.sh — OSS-Fuzz 빌드 컨테이너 안에서 실행된다
+
+# 새니타이저·커버리지 플래그는 이미 $CFLAGS/$CXXFLAGS 에 주입되어 있다
+./autogen.sh
+./configure --disable-shared
+make -j"$(nproc)"
+
+# $LIB_FUZZING_ENGINE 은 실행할 엔진(libFuzzer / AFL++ / Honggfuzz)에 맞게 치환된다
+$CXX $CXXFLAGS -I. \
+  "$SRC/myparser/tests/fuzz/parse_fuzzer.cc" \
+  -o "$OUT/parse_fuzzer" \
+  $LIB_FUZZING_ENGINE ./.libs/libmyparser.a
+
+# 시드 코퍼스와 사전은 하네스와 같은 이름 규칙으로 $OUT 에 둔다
+zip -j "$OUT/parse_fuzzer_seed_corpus.zip" "$SRC"/myparser/tests/corpus/*
+cp "$SRC/myparser/tests/fuzz/parse.dict" "$OUT/parse_fuzzer.dict"
+```
+
+이 스크립트만으로는 등록이 되지 않는다 — 언어·연락처·돌릴 새니타이저와 엔진을 적은 `project.yaml` 과 Dockerfile 이 같은 디렉터리에 함께 있어야 하고, 하네스가 특정 엔진 전용 API 에 의존하면 다른 엔진 빌드에서 깨진다.

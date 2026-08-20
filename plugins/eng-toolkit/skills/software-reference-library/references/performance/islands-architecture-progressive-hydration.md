@@ -35,3 +35,35 @@ Astro 문서는 섬 모델의 정의 — 정적 HTML의 바다 위에 떠 있는
 ## 인용 포인트
 - "기본값을 '전부 하이드레이션'에서 '아무것도 하지 않음'으로 뒤집는다" — 콘텐츠 사이트의 프레임워크 선정·구조 논쟁에서의 핵심 논거.
 - JS 비용은 코드 최적화 이전에 아키텍처 선택으로 줄일 수 있다는 프레임.
+
+## 코드 예시
+
+"기본값을 '전부 하이드레이션'에서 '아무것도 하지 않음'으로 뒤집는다" — 같은 페이지에서 섬마다 살아나는 시점을 따로 지정한 형태.
+
+```astro
+---
+// Astro: 컴포넌트는 기본적으로 서버에서 HTML 로만 렌더된다. JS 는 0바이트
+import ProductInfo from '../components/ProductInfo.astro';
+import AddToCart   from '../components/AddToCart.jsx';
+import Reviews     from '../components/Reviews.jsx';
+import Chat        from '../components/Chat.jsx';
+---
+<ProductInfo product={product} />   <!-- 인터랙션 없음 → 하이드레이션 자체가 없다 -->
+
+<AddToCart sku={product.sku} client:load />      <!-- 즉시. 첫 화면의 유일한 핵심 동작 -->
+<Reviews id={product.id} client:visible />       <!-- 뷰포트에 들어올 때만 JS 를 받는다 -->
+<Chat client:idle />                             <!-- 메인 스레드가 한가해진 뒤 -->
+<Search client:media="(min-width: 768px)" />     <!-- 모바일에서는 아예 안 받는다 -->
+```
+
+```js
+// 프레임워크가 없을 때의 같은 아이디어 — 뷰포트 진입 시점에 섬을 살린다
+new IntersectionObserver((entries, io) => {
+  for (const e of entries) if (e.isIntersecting) {
+    io.unobserve(e.target);
+    import(`./islands/${e.target.dataset.island}.js`).then(m => m.hydrate(e.target));
+  }
+}).observe(document.querySelector('[data-island="reviews"]'));
+```
+
+섬으로 자르면 섬 사이에 상태를 공유할 수 없다 — 장바구니 개수를 헤더와 버튼이 함께 보는 식의 요구가 생기면 전역 스토어나 커스텀 이벤트가 필요해지고, 그 순간 "섬은 독립적"이라는 전제가 흔들린다.

@@ -41,3 +41,36 @@ GoF 디자인 패턴을 생성·구조·행위 세 갈래로 정리한 카탈로
 - 패턴별 "장단점" 절은 리뷰에서 과설계를 지적할 때 그대로 근거가 된다 — 도입 이득과 복잡도 비용이 같은 페이지에 병기되어 있다는 점이 설득에 유리하다.
 - 비슷한 패턴 간 관계도(Strategy와 State의 차이 등)는 용어가 뒤섞여 논의가 겉도는 회의를 정리하는 데 쓸 만하다.
 - 다이어그램과 예제를 여러 언어로 제공하므로, 팀 언어에 맞춰 그대로 인용 가능.
+
+## 코드 예시
+
+쿠폰 종류가 늘 때마다 `if (type === ...)` 가 붙던 자리 — 카탈로그의 Strategy 항목이 정확히 이 문제를 문제 상황으로 서술한다.
+
+```ts
+interface DiscountPolicy {
+  readonly code: string;
+  discountFor(amountKrw: number): number; // 할인액(원)
+}
+
+const RATE_10: DiscountPolicy = {
+  code: "RATE_10",
+  discountFor: (amount) => Math.floor(amount * 0.1),
+};
+
+const FIXED_3000: DiscountPolicy = {
+  code: "FIXED_3000",
+  discountFor: (amount) => Math.min(3000, amount), // 결제액을 넘지 않는다
+};
+
+const POLICIES = new Map<string, DiscountPolicy>(
+  [RATE_10, FIXED_3000].map((p) => [p.code, p]),
+);
+
+export function applyCoupon(amountKrw: number, code: string): number {
+  const policy = POLICIES.get(code);
+  if (!policy) throw new Error(`unknown coupon: ${code}`); // 모르는 코드는 통과 금지
+  return amountKrw - policy.discountFor(amountKrw);
+}
+```
+
+Strategy 가 뽑아낸 축은 "종류가 늘어난다" 하나뿐이다 — 쿠폰 두 장의 적용 순서, 최대 할인 한도, 할인분을 누가 부담하는지는 여전히 이 밖에 있고, 조합 규칙이 생기는 순간 전략을 하나 더 만드는 게 아니라 조합 자체를 모델링해야 한다. 분기 두 개를 없애려고 파일 다섯 개를 만드는 건 카탈로그가 각 패턴 장단점 절에서 경고하는 쪽이다.

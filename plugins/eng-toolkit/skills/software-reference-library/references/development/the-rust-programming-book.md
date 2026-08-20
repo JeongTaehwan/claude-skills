@@ -37,3 +37,34 @@ Rust 공식 입문서. 문법 나열이 아니라 소유권·빌림·수명이�
 ## 인용 포인트
 - "메모리 안전과 성능을 동시에 얻는다"는 Rust 도입 논거의 원전. 도입 제안서에 근거로 걸기 좋다.
 - 소유권 규칙 3줄(값에는 소유자가 하나, 한 번에 하나, 소유자가 사라지면 값도 사라진다)은 팀 온보딩 문서에 그대로 옮겨 쓸 수 있는 요약이다.
+
+## 코드 예시
+
+온보딩 문서에 옮겨 쓰라는 소유권 규칙 3줄이 실제 코드에서 어떻게 보이는지, 그리고 그 규칙이 동시성까지 그대로 이어지는 지점.
+
+```rust
+use std::sync::{Arc, Mutex};
+
+fn main() {
+    // 규칙: 값에는 소유자가 하나, 한 번에 하나
+    let s = String::from("order-1042");
+    let moved = s;
+    // println!("{s}");   // error[E0382]: borrow of moved value: `s`
+    println!("{moved}");
+
+    // 빌림(&)이면 소유권이 넘어가지 않는다 — items 는 뒤에서도 살아 있다
+    let items = vec![12_000u32, 3_000, 8_000];
+    let total: u32 = items.iter().sum();
+    println!("{total} / {items:?}");
+
+    // 동시성도 같은 규칙 위에 있다. 공유하려면 Arc 로 소유권을 나누고 Mutex 로 감싼다.
+    // Mutex 를 빼면 두 스레드가 같은 값을 &mut 로 들게 되어 컴파일 자체가 거부된다
+    let stock = Arc::new(Mutex::new(10u32));
+    let cloned = Arc::clone(&stock);
+    let h = std::thread::spawn(move || { *cloned.lock().unwrap() -= 1; });
+    h.join().unwrap();
+    assert_eq!(*stock.lock().unwrap(), 9);
+}
+```
+
+컴파일러가 걸러 주는 건 **데이터 경합**이지 논리적 경합이 아니다. Mutex 두 개를 스레드마다 다른 순서로 잠그면 Rust 에서도 그대로 데드락이 나고, `lock()` 이 돌려주는 `Result` 를 매번 `unwrap()` 하는 위 코드는 다른 스레드가 패닉한 뒤(poisoned) 함께 죽는다 — "fearless" 는 경합 없음이지 무사고가 아니다.

@@ -36,3 +36,42 @@ cache-first / network-first / stale-while-revalidate / cache-only / network-only
 ## 인용 포인트
 - "전략은 앱 단위가 아니라 리소스 단위로 고른다" — SW 설계 리뷰에서 일괄 전략을 반려하는 근거.
 - 전략 이름 5개를 설계 문서·리뷰의 공용 어휘로 채택하자는 제안의 출처.
+
+## 코드 예시
+
+"전략은 앱 단위가 아니라 리소스 단위로 고른다"를 Workbox 라우팅으로 그대로 옮긴 서비스 워커.
+
+```js
+import { registerRoute } from "workbox-routing";
+import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
+import { ExpirationPlugin } from "workbox-expiration";
+
+// 폰트: 거의 안 변한다 → 네트워크를 아예 건너뛴다
+registerRoute(
+  ({ request }) => request.destination === "font",
+  new CacheFirst({ cacheName: "fonts" })
+);
+
+// 이미지: cache-first + 개수·수명 상한으로 저장소 폭주를 막는다
+registerRoute(
+  ({ request }) => request.destination === "image",
+  new CacheFirst({
+    cacheName: "images",
+    plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 })],
+  })
+);
+
+// HTML 문서: 최신성 우선, 3초 안에 응답 없으면 캐시로 폴백
+registerRoute(
+  ({ request }) => request.mode === "navigate",
+  new NetworkFirst({ cacheName: "pages", networkTimeoutSeconds: 3 })
+);
+
+// 잘 안 변하는 설정 API: 즉답 + 백그라운드 갱신
+registerRoute(
+  ({ url }) => url.pathname.startsWith("/api/config"),
+  new StaleWhileRevalidate({ cacheName: "config" })
+);
+```
+
+stale-while-revalidate로 매핑한 라우트는 항상 **한 세대 낡은 값**을 먼저 보여준다 — 가격·재고·주문 상태처럼 낡은 값이 곧 사고인 엔드포인트가 이 목록에 섞여 들어가는 것이 이 파일에서 가장 흔한 사고다.

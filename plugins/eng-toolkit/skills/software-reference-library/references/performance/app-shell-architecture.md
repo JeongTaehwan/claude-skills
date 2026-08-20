@@ -24,7 +24,7 @@ UI의 최소 뼈대(셸)를 서비스 워커로 캐시해 재방문 시 네트�
 ## 이럴 땐 아니다
 - 첫 방문(캐시가 없는 상태)의 첫 페인트가 문제라면 `performance/critical-css.md`와 `performance/critical-rendering-path.md`
 - 라우트 단위 로딩 우선순위 전략은 `performance/prpl-pattern.md`
-- 캐시를 언제 채우고 언제 읽을지의 구체 레시피는 `performance/offline-cookbook.md`
+- 캐시를 언제 채우고 언제 읽을지의 구체 레시피는 `performance/the-offline-cookbook.md`
 
 ## 무엇이 들어있나
 셸의 정의 — UI가 기동하는 데 필요한 최소한의 HTML·CSS·JS 뼈대 — 와 그것을 서비스 워커로 캐시해 두는 아키텍처. 재방문 시 셸은 캐시에서 즉시 그려지고(네트워크 0), 동적 콘텐츠만 네트워크에서 채워진다. 저속·불안정 망에서 "화면 전체가 네트워크 인질"이 되는 구조를 "콘텐츠만 인질"로 좁히는 것이 핵심 효과다.
@@ -34,3 +34,33 @@ UI의 최소 뼈대(셸)를 서비스 워커로 캐시해 재방문 시 네트�
 ## 인용 포인트
 - 캐시 설계의 단위를 "리소스별"이 아니라 "셸 vs 콘텐츠"로 나누는 프레임의 출처.
 - 재방문 첫 페인트를 네트워크에서 분리한다는 목표 설정 — 저속 대응 아키텍처 제안의 근거.
+
+## 코드 예시
+
+캐시 단위를 "리소스별"이 아니라 "셸 vs 콘텐츠"로 가른 서비스 워커 — 내비게이션은 무조건 캐시된 셸로 응답하고, 콘텐츠 API만 네트워크를 탄다.
+
+```js
+// sw.js
+const SHELL = 'shell-v3';
+const SHELL_FILES = ['/app-shell.html', '/css/shell.css', '/js/app.js'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(SHELL).then(c => c.addAll(SHELL_FILES)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  // 셸 버전이 바뀌면 옛 셸을 반드시 지운다 — 안 지우면 낡은 UI가 영구히 남는다
+  e.waitUntil(caches.keys().then(ks =>
+    Promise.all(ks.filter(k => k !== SHELL).map(k => caches.delete(k)))));
+});
+
+self.addEventListener('fetch', e => {
+  if (e.request.mode === 'navigate') {
+    e.respondWith(caches.match('/app-shell.html')); // 네트워크 0, 즉시 페인트
+  }
+  // 콘텐츠(/api/*)는 가로채지 않고 그대로 네트워크로 — 인질이 되는 범위를 여기로 좁힌다
+});
+```
+
+셸을 캐시에서 즉시 그리면 첫 페인트는 빨라지지만 의미 있는 콘텐츠는 여전히 네트워크 뒤에 있다 — LCP가 콘텐츠 안에 있는 화면이라면 지표는 그대로일 수 있고, 셸 HTML은 오프라인에서도 응답하므로 인증 만료 같은 상태를 셸 안에 하드코딩하면 안 된다.

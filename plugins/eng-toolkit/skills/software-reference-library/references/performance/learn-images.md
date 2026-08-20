@@ -33,3 +33,29 @@ https://web.dev/learn/images
 ## 인용 포인트
 - "같은 품질, 30~50% 적은 바이트" — 포맷 전환 작업의 기대 효과 산정에 인용.
 - 단편 팁이 아니라 공식 코스라는 점 — 팀의 이미지 컨벤션(포맷·폴백·전달) 수립의 기준 문서로 지정하기 좋다.
+
+## 코드 예시
+
+"같은 품질, 30~50% 적은 바이트"를 인용하기 전에 자사 이미지로 확인하는 절차 — 폴백 체인에 쓸 파일을 만들면서 실제 절감률을 찍는다.
+
+```js
+import sharp from 'sharp';
+import { statSync } from 'node:fs';
+
+const src = 'src/images/hero.jpg';
+const out = {};
+
+// 같은 원본에서 세 포맷을 뽑는다. quality 숫자는 포맷마다 의미가 달라 그대로 비교하면 안 된다
+await sharp(src).jpeg({ quality: 80, mozjpeg: true }).toFile((out.jpg = 'dist/hero.jpg'));
+await sharp(src).webp({ quality: 75 }).toFile((out.webp = 'dist/hero.webp'));
+await sharp(src).avif({ quality: 50 }).toFile((out.avif = 'dist/hero.avif')); // AVIF 는 같은 화질이 더 낮은 수치에서 나온다
+
+const base = statSync(out.jpg).size;
+for (const [fmt, path] of Object.entries(out)) {
+  const size = statSync(path).size;
+  console.log(fmt, (size / 1024).toFixed(1) + 'kB',
+              fmt === 'jpg' ? '' : `${Math.round((1 - size / base) * 100)}% 절감`);
+}
+```
+
+절감률은 이미지 내용에 크게 좌우된다 — 사진은 AVIF 가 크게 이기지만 평평한 색면·텍스트가 많은 그래픽은 차이가 작거나 역전되고, AVIF 인코딩은 JPEG 보다 훨씬 느려서 빌드 시간과 온디맨드 변환 비용을 같이 계산해야 한다.

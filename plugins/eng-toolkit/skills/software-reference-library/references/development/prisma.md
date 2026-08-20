@@ -42,3 +42,30 @@ ORM 의 설계 중심은 `schema.prisma` 다. 여기에 데이터 소스·모델
 ## 인용 포인트
 - "스키마 파일이 단일 진실 원천이고 클라이언트 타입은 그로부터 생성된다"는 구조는, 스키마 변경 절차를 코드 리뷰 대상으로 승격하자는 제안의 근거가 된다.
 - 마이그레이션 드리프트 감지 기능은 "프로덕션 DB 에 수동 DDL 금지" 규칙을 강제할 기술적 수단으로 제시할 수 있다.
+
+## 코드 예시
+
+"프로덕션 DB 에 수동 DDL 금지"를 규칙이 아니라 CI 가 잡아내는 실패로 바꾸는 부분.
+
+```bash
+# 개발: 스키마를 고치면 마이그레이션 SQL 이 생성되고 클라이언트가 재생성된다
+npx prisma migrate dev --name add_coupon_stock
+
+# 배포: 새 마이그레이션을 만들지 않고, 이미 커밋된 것만 적용한다
+npx prisma migrate deploy
+
+# 드리프트 점검 — 누군가 콘솔로 DDL 을 날렸으면 여기서 걸린다
+npx prisma migrate status
+
+# 무엇이 어긋났는지 SQL 로 뽑는다. 차이가 있으면 종료 코드 2 라서 CI 게이트로 쓸 수 있다
+npx prisma migrate diff \
+  --from-migrations ./prisma/migrations \
+  --to-schema-datamodel ./prisma/schema.prisma \
+  --shadow-database-url "$SHADOW_DATABASE_URL" \
+  --exit-code
+
+# ORM 이 실제로 내보내는 SQL 을 본다 — 관계 로딩이 몇 쿼리로 풀리는지는 로그로만 알 수 있다
+#   new PrismaClient({ log: ["query"] })
+```
+
+`migrate dev` 는 드리프트를 발견하면 개발 DB 를 리셋할 수 있다 — 프로덕션에 쓰면 안 되는 명령이고, 문서도 그렇게 못 박는다. 그리고 `migrate diff` 가 잡는 건 "스키마가 어긋났다"까지다. 생성된 그 마이그레이션이 배포 중에 ACCESS EXCLUSIVE 락을 잡는지는 이 도구가 말해 주지 않으니 `development/postgresql.md` 쪽 락 표와 함께 봐야 한다.

@@ -39,3 +39,29 @@ HTTP Archive 가 수백만 개 실제 사이트를 크롤링한 데이터로 매
 - "중앙값 사이트의 JS 전송량이 얼마다" 류의 분포 수치는, 성능 예산을 정할 때 임의의 숫자가 아니라 업계 기준에 맞춘 목표임을 보여 준다.
 - 특정 기술의 채택률 추이는 도입 제안에서 "실험적이지 않다"를 입증하는 데 쓸 수 있다.
 - 데이터 출처와 방법론이 공개돼 있어, 인용했을 때 반박 가능성이 낮은 근거가 된다.
+
+## 코드 예시
+
+리포트를 읽는 데서 멈추지 않고, 원본 데이터셋에서 우리 조건으로 다시 집계하는 경로가 열려 있다 (BigQuery).
+
+```sql
+-- 성능 예산을 임의 숫자가 아니라 업계 분포에 맞춘다
+SELECT
+  client,
+  APPROX_QUANTILES(CAST(JSON_VALUE(summary, '$.bytesJS') AS INT64), 100)[OFFSET(50)] AS p50_js,
+  APPROX_QUANTILES(CAST(JSON_VALUE(summary, '$.bytesJS') AS INT64), 100)[OFFSET(75)] AS p75_js,
+  APPROX_QUANTILES(CAST(JSON_VALUE(summary, '$.bytesJS') AS INT64), 100)[OFFSET(90)] AS p90_js
+FROM `httparchive.all.pages`
+WHERE date = '2025-06-01'      -- 파티션을 반드시 고정한다. 안 하면 스캔량이 폭발한다
+  AND is_root_page
+GROUP BY client;
+
+-- 특정 기술의 채택 추이 — "이건 실험적이지 않다"의 근거가 되는 형태
+SELECT date, COUNT(DISTINCT page) AS pages
+FROM `httparchive.all.pages`, UNNEST(technologies) AS t
+WHERE client = 'mobile' AND is_root_page AND t.technology = 'Next.js'
+GROUP BY date
+ORDER BY date;
+```
+
+`is_root_page` 조건이 이 데이터의 성격을 그대로 드러낸다 — 크롤러는 홈페이지를 기계적으로 방문할 뿐이라, 로그인 이후 화면이나 주문·결제 플로우는 표본에 아예 없다. 커머스 내부 화면의 목표치를 여기서 끌어오면 근거처럼 보이는 오답이 되고, 실사용자 판정이 필요하면 CrUX 쪽 데이터셋을 따로 봐야 한다.

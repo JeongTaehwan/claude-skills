@@ -40,3 +40,26 @@ Papers We Love 는 저장소이자 오프라인/온라인 밋업 조직이다 �
 ## 인용 포인트
 - 사내 논문 스터디를 제안할 때, 이미 검증된 커리큘럼이 존재한다는 점이 착수 비용을 낮추는 논거가 된다.
 - "우리가 지금 겪는 문제는 이미 수십 년 전에 논문으로 정리됐다"는 주장을 할 때, 해당 분야 디렉터리를 그대로 근거로 제시할 수 있다.
+
+## 코드 예시
+
+주제 디렉터리와 각 README 가 목록이라는 구조를 알면, 검색 사이트를 헤매는 대신 저장소 안에서 커리큘럼을 뽑을 수 있다.
+
+```bash
+git clone --depth=1 https://github.com/papers-we-love/papers-we-love.git
+cd papers-we-love
+
+# 주제 디렉터리 자체가 커리큘럼의 뼈대다
+ls -d */
+
+# 한 분야의 논문 목록은 그 디렉터리 README 에 있다
+less distributed_systems/README.md
+
+# 개념 이름만 알 때 — 어느 분야의 고전인지부터 찾는다
+grep -ril 'consensus' --include=README.md .
+
+# 저장소에 실물 PDF 가 들어온 것과 외부 링크만 있는 것을 구분한다
+find distributed_systems -name '*.pdf' | sort
+```
+
+`--depth=1` 로 받아도 PDF 가 함께 들어 있어 저장소가 가볍지 않다. 그리고 이건 큐레이션이라 최신 연구 추적용이 아니고 분야별 밀도도 고르지 않다 — 분산 시스템 디렉터리가 두껍다는 이유로 그 분야만 잘 다뤄진다고 읽으면 안 된다.

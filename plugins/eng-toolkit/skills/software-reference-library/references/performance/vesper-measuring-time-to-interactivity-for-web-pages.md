@@ -34,3 +34,39 @@ Ravi Netravali, Vikram Nathan, James Mickens, Hari Balakrishnan — USENIX NSDI 
 ## 인용 포인트
 - 기존 메트릭은 실제 로드 시간을 24–64% 과소/과대평가 — 시각 메트릭만으로 성능을 판정하는 대시보드의 맹점 지적.
 - Ready Index 기준 최적화로 인터랙티브 도달 중앙값 29–32% 단축 — "최적화 목표 메트릭을 인터랙티브 기준으로 바꾸자"는 제안의 근거.
+
+## 코드 예시
+
+"보이는 것"과 "동작하는 것"의 간극을 대시보드에 실제로 남기는 계측 — 시각 메트릭 옆에 LCP 이후의 입력 지연과 롱태스크를 나란히 쌓는다.
+
+```js
+let lcpTime = 0;
+
+// 보이는 시점
+new PerformanceObserver((list) => {
+  for (const e of list.getEntries()) lcpTime = e.startTime; // 마지막 값이 최종 LCP
+}).observe({ type: "largest-contentful-paint", buffered: true });
+
+// 동작하는 시점: 입력이 핸들러에 닿기까지 밀린 시간
+new PerformanceObserver((list) => {
+  for (const e of list.getEntries()) {
+    if (!e.interactionId) continue;
+    track("input_delay", {
+      lcpMs: Math.round(lcpTime),
+      atMs: Math.round(e.startTime),
+      // LCP 뒤에 들어온 입력이 밀렸다면 "보이는데 안 눌리는" 구간의 증거
+      delayMs: Math.round(e.processingStart - e.startTime),
+      afterPaint: e.startTime > lcpTime,
+    });
+  }
+}).observe({ type: "event", durationThreshold: 40, buffered: true });
+
+// 그 구간을 만드는 범인
+new PerformanceObserver((list) => {
+  for (const t of list.getEntries()) {
+    if (t.startTime > lcpTime) track("longtask_after_lcp", { ms: Math.round(t.duration) });
+  }
+}).observe({ type: "longtask", buffered: true });
+```
+
+이 계측은 **실제로 눌린 입력만** 본다 — 화면이 뜬 뒤 안 눌려서 그냥 떠난 사용자의 간극은 데이터에 아예 남지 않으므로, 필드 지표는 논문의 Ready Index처럼 "핸들러가 준비된 시점"을 입력과 무관하게 재지 못한다. 그래서 이 값이 좋아도 문제가 없다는 증명은 되지 않는다.

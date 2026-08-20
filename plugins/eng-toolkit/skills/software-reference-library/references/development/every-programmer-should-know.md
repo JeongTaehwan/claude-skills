@@ -38,3 +38,26 @@ https://github.com/mtdvio/every-programmer-should-know
 ## 인용 포인트
 - 자릿수 감각(메모리 vs 디스크 vs 네트워크) 자료는 성능 개선 우선순위를 정할 때 "느낌"을 "비교"로 바꿔 준다.
 - Falsehoods 계열은 주소·이름·시간·통화를 다루는 스키마 리뷰에서, 특정 가정을 빼자고 주장할 때의 근거로 바로 쓰인다.
+
+## 코드 예시
+
+Falsehoods 계열이 걷어내라고 하는 가정들 — 이름의 구조, 부동소수 금액, 통화 없는 숫자, 타임존 없는 시각 — 을 스키마 단계에서 미리 뺀 형태.
+
+```sql
+CREATE TABLE customer (
+    id             bigserial PRIMARY KEY,
+
+    -- 성/이름으로 쪼개지 않는다: 분리 가능·순서·글자 수 가정이 전부 반례가 있다
+    display_name   text NOT NULL,
+
+    -- 금액은 최소 단위 정수로. float/double 은 여기 오면 안 된다
+    balance_minor  bigint NOT NULL DEFAULT 0,
+    -- 통화 코드 없이 떠다니는 금액을 만들지 않는다
+    currency       char(3) NOT NULL,
+
+    -- 시각은 항상 타임존 포함. 로컬 시간은 보여 줄 때 만든다
+    created_at     timestamptz NOT NULL DEFAULT now()
+);
+```
+
+스키마가 막아 주는 것은 여기까지다 — 앱 코드가 `balance_minor / 100.0` 을 하는 순간 부동소수가 다시 들어오고, `char(3)` 도 ISO 4217 을 전제한 가정이라 소수점 자릿수가 다른 통화를 만나면 그 가정부터 다시 확인해야 한다.

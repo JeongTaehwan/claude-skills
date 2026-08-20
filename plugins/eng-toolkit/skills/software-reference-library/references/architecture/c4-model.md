@@ -38,3 +38,37 @@ Simon Brown이 만든 아키텍처 다이어그램 표기법 — 그림을 예�
 - "그림 한 장은 추상화 수준 하나만 담는다" — 리뷰에서 다이어그램을 반려할 때 취향 싸움이 아닌 규칙으로 제시할 수 있는 문장.
 - 레벨을 청중에 매핑하는 방식(Context=비개발 이해관계자, Container=개발팀 전체, Component=해당 서비스 담당자)은 문서 구조를 정할 때 그대로 인용 가능.
 - 범례 없는 다이어그램을 금지하는 규칙 하나만 팀 컨벤션으로 도입해도 즉시 효과가 있다.
+
+## 코드 예시
+
+"모델 하나에서 여러 뷰를 뽑는다"와 "모든 박스에 타입·기술을 적는다"를 강제하는 Structurizr DSL — Context 와 Container 가 같은 정의에서 나온다.
+
+```structurizr
+workspace "커머스 플랫폼" {
+    model {
+        customer = person "구매자"
+        pg = softwareSystem "PG사" "카드 승인 및 정산 파일 제공" "External"
+
+        shop = softwareSystem "커머스 플랫폼" {
+            web   = container "웹 프론트"     "Next.js 14"
+            api   = container "주문 API"      "Kotlin, Spring Boot"
+            db    = container "주문 DB"       "PostgreSQL 15" "Database"
+            queue = container "이벤트 브로커" "Kafka"
+
+            web -> api   "주문 생성·조회" "REST/HTTPS"
+            api -> db    "읽기·쓰기"      "JDBC"
+            api -> queue "OrderPaid 발행"
+        }
+
+        customer -> web "주문한다"
+        api -> pg "결제 승인 요청" "HTTPS"
+    }
+    views {
+        systemContext shop "Context" { include *; autolayout lr }
+        container     shop "Containers" { include *; autolayout lr }
+        theme default
+    }
+}
+```
+
+여기서 `container` 는 Docker 가 아니라 "따로 배포되어 따로 죽는 것"이라는 뜻이고, 이 오독이 팀에서 가장 자주 난다. DSL 이 보장하는 건 두 뷰가 서로 어긋나지 않는다는 것뿐 — 박스가 실제 배포 단위와 맞는지, 기술 문자열이 아직 사실인지는 여전히 사람이 지켜야 한다.

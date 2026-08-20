@@ -24,7 +24,7 @@ Spotify·Duolingo·Amazon 같은 실제 제품의 온보딩·리텐션·결제 �
 - 다크 패턴과 정당한 설득의 경계를 팀에서 논의할 때 (Ethics 카테고리)
 
 ## 이럴 땐 아니다
-- 개선안을 실제로 검증하는 실험 설계·통계 함정은 `planning/online-controlled-experiments-at-large-scale.md`, `planning/a-dirty-dozen-12.md`
+- 개선안을 실제로 검증하는 실험 설계·통계 함정은 `planning/online-controlled-experiments-at-large-scale.md`, `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 원리 자체를 짧게 참조하려면 `design/laws-of-ux.md`
 - 사용성 문제 자체를 진단하는 평가 방법은 `design/nn-g-10-usability-heuristics.md`, `design/nn-g-discount-usability.md`
 - 어떤 지표를 목표로 삼을지는 `planning/heart.md`, `planning/north-star-metric.md`
@@ -37,3 +37,29 @@ Ethics 카테고리는 같은 심리학 장치가 다크 패턴으로 넘어가�
 ## 인용 포인트
 - 퍼널 개선 제안이 "감"으로 치부될 때, 동종 제품의 실제 화면 흐름과 그 뒤의 원리를 함께 제시하면 논의가 구체화된다.
 - 재고 부족 표시나 카운트다운 같은 압박 장치를 도입하자는 요구에 대해, Ethics 사례를 근거로 선을 긋는 논의를 열 수 있다.
+
+## 코드 예시
+
+케이스에서 빌린 장치(희소성)를 그대로 얹지 않고, 표시 조건을 실측 데이터에 묶어 Ethics 쪽 선을 코드에 박은 것.
+
+```ts
+const LOW_STOCK_THRESHOLD = 5;
+
+export function scarcitySignal(item: Item) {
+  // 실측 재고가 아니면 아무것도 표시하지 않는다 — 없는 희소성을 만들지 않는다
+  if (item.stockSource !== 'inventory' || item.stock == null) return null;
+  if (item.stock > LOW_STOCK_THRESHOLD) return null;
+  return { kind: 'lowStock' as const, remaining: item.stock };
+}
+
+export function promoDeadline(promo: Promo): Date | null {
+  // 서버가 준 실제 만료 시각만 쓴다.
+  // 새로고침하면 다시 시작하는 카운트다운은 여기서 만들 수 없다
+  return promo.endsAt ? new Date(promo.endsAt) : null;
+}
+
+// 가설은 실험이 판정한다 — 케이스 스터디는 출처지 인과의 근거가 아니다
+track('scarcity_signal_shown', { itemId: item.id, remaining: item.stock, variant });
+```
+
+임계값을 20으로 올리거나 재고를 인위적으로 낮게 잡으면 같은 압박이 그대로 생긴다 — 코드가 막는 건 명백한 조작뿐이고, 어디까지가 설득이고 어디부터 다크 패턴인지는 여전히 사람이 정하는 선이다.

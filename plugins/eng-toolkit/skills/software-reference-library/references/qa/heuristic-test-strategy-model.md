@@ -39,3 +39,34 @@ https://www.satisfice.com/download/heuristic-test-strategy-model
 ## 인용 포인트
 - "테스트 전략은 문서가 아니라 사고의 결과물이며, 이 모델은 템플릿이 아니라 가이드워드다" — 테스트 계획서를 양식 채우기로 만들려는 압력에 대한 반론.
 - 제품 요소를 구조·기능·데이터·인터페이스·플랫폼·운영·시간으로 나누는 SFDIPOT은, 기능 목록만 훑던 테스트 범위 논의에 데이터·플랫폼·시간 축을 추가하는 근거로 바로 쓸 수 있다.
+
+## 코드 예시
+
+SFDIPOT 가이드워드를 PG 교체라는 한 변경에 대고 훑은 결과 — 채울 양식이 아니라, 훑은 뒤 무엇이 비었는지 눈에 보이게 남기는 기록이다.
+
+```yaml
+# test-strategy/pg-migration.yaml — 가이드워드는 팀 버전으로 잘라 씀
+change: 결제 게이트웨이 A → B 교체
+product_elements:            # SFDIPOT
+  structure:   [PG SDK 버전, 웹훅 수신 엔드포인트]
+  function:    [승인, 부분취소, 전액환불, 정기결제]
+  data:        [기존 빌링키 마이그레이션, 통화·소수점 처리]
+  interfaces:  [웹훅 서명 검증, 관리자 정산 화면]
+  platform:    [PG 샌드박스 가용 시간, TLS 버전]
+  operations:  [야간 정산 배치, CS 환불 수동 처리]
+  time:        [승인-취소 사이 자정 경계, 웹훅 재전송 지연]
+risks:                       # 제품 요소 × 품질 기준 교차에서 도출
+  - element: data
+    criterion: 신뢰성
+    risk: 빌링키 이관 실패 시 정기결제 조용히 중단
+    technique: 도메인 테스트 + 이관 후 전수 대사
+  - element: time
+    criterion: 정확성
+    risk: 자정 경계 취소가 전일 정산에 반영
+    technique: 시나리오 테스트 (시간 고정)
+not_covered:                 # 안 본 것을 적는 칸이 이 문서의 핵심
+  - criterion: 성능
+    reason: B사 부하 테스트 승인 대기
+```
+
+가이드워드를 다 훑었다는 것과 위험을 다 찾았다는 것은 다르다 — 목록은 떠올리기를 돕는 장치일 뿐이고, `not_covered` 를 비워 두면 이 파일은 그냥 채운 양식이 된다.

@@ -41,3 +41,35 @@ https://lamport.azurewebsites.net/pubs/paxos-simple.pdf
 - 쿼럼 설계 근거로: 왜 노드 수를 홀수로 두고 과반수를 요구하는지를 "두 과반수는 반드시 겹친다"는 한 문장으로 설명할 수 있다.
 - "합의 시스템에 리더를 두는 건 성능 때문만이 아니라 진행성 때문"이라는 점은, 리더 선출 없이 만든 자체 구현을 검토할 때 지적 근거가 된다.
 - 자체 분산 락/선출 로직을 직접 짜자는 제안에 대한 제동: 저자 본인이 "Paxos made simple"이라는 제목으로 다시 써야 했을 만큼 정밀한 영역이라는 사실 자체가 근거다.
+
+## 코드 예시
+
+안전성 전부가 acceptor 쪽 두 규칙에 들어 있다 — 약속한 번호보다 낮은 제안은 거절하고, 이미 수락한 값이 있으면 promise 에 실어 보낸다.
+
+```python
+class Acceptor:
+    def __init__(self):
+        self.promised_n = 0        # 이 번호 미만은 받지 않겠다는 약속
+        self.accepted_n = 0
+        self.accepted_v = None     # 이미 수락한 값 (있다면)
+
+    def prepare(self, n: int):
+        if n <= self.promised_n:
+            return ("nack", self.promised_n)
+        self.promised_n = n
+        # 이미 수락한 값을 함께 돌려주는 것이 핵심 — 제안자는 이걸 무시할 수 없다
+        return ("promise", self.accepted_n, self.accepted_v)
+
+    def accept(self, n: int, v):
+        if n < self.promised_n:
+            return ("nack", self.promised_n)
+        self.promised_n, self.accepted_n, self.accepted_v = n, n, v
+        return ("accepted", n, v)
+
+def choose_value(promises, my_value):
+    # 과반수의 promise 중 가장 높은 번호로 수락된 값이 있으면 그것을 이어받는다.
+    seen = [(n, v) for _, n, v in promises if v is not None]
+    return max(seen)[1] if seen else my_value
+```
+
+세 필드는 응답 전에 안정 저장소에 있어야 하고, 이 코드에는 진행성이 없다 — 두 제안자가 번갈아 번호를 올리면 영원히 아무것도 선택되지 않는다. 리더를 하나 두는 이유가 그것이다.

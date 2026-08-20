@@ -34,3 +34,37 @@ https://nextjs.org/docs/app/api-reference/components/font
 ## 인용 포인트
 - "폰트가 늦게 와도 화면이 안 튄다" — 폰트 최적화를 속도 문제가 아니라 안정성(CLS) 문제로 프레이밍할 때.
 - 외부 `<link>` 폰트 대비 커넥션 왕복 제거 — 셀프 호스팅 전환 제안의 근거.
+
+## 코드 예시
+
+외부 `<link>` 를 지우고 빌드 타임 셀프 호스팅으로 바꾸는 형태 — `adjustFontFallback` 이 스왑 순간의 문단 밀림을 막는다.
+
+```jsx
+// app/layout.jsx
+import { Noto_Sans_KR } from "next/font/google";
+import localFont from "next/font/local";
+
+const notoSans = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",          // 폰트 도착 전에도 텍스트를 먼저 보여준다
+  adjustFontFallback: true, // 폴백 폰트 메트릭을 맞춰 스왑 시 시프트를 없앤다
+  variable: "--font-sans",
+});
+
+const brand = localFont({
+  src: "./fonts/Brand-Bold.woff2",
+  display: "swap",
+  variable: "--font-brand",
+});
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="ko" className={`${notoSans.variable} ${brand.variable}`}>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+`display: "swap"` 은 시프트를 없애는 게 아니라 폴백으로 먼저 그리게 하는 것이고, 시프트를 지우는 쪽은 `adjustFontFallback` 이다 — 한글 서브셋은 자동 서브셋팅 대상이 아니라 파일이 여전히 크다는 점도 그대로 남는다.

@@ -42,3 +42,33 @@ FRP 자체는 널리 구현되지 않았지만, "이 상태는 본질인가 파�
 - 설계 리뷰의 판정 질문: "이 필드는 본질적 상태인가, 다른 데이터로부터 유도 가능한 파생 값인가." 유도 가능한 걸 저장하면 동기화 버그가 따라온다 — 주문 총액, 쿠폰 잔여 수량, 집계 카운터가 대표적이다.
 - 불변 객체·이벤트 소싱·함수형 도입 제안의 근거로: 복잡성의 1순위 원인이 상태라는 진단이 출처 있는 주장이 된다.
 - 캐시/인덱스 추가 논의에서 "이건 부수적 층에 격리해야 하고 도메인 로직이 그것에 의존하면 안 된다"는 경계를 세울 때.
+
+## 코드 예시
+
+FRP의 세 층 — 본질적 상태 / 유도되는 로직 / 성능을 위한 부수적 층 — 을 관계형 모델 위에 그대로 그은 형태.
+
+```sql
+-- 1) 본질적 상태: 사용자가 입력했고 다른 것으로 유도할 수 없는 것만 저장한다.
+CREATE TABLE order_lines (
+  order_id   TEXT    NOT NULL,
+  sku        TEXT    NOT NULL,
+  quantity   INT     NOT NULL CHECK (quantity > 0),
+  unit_price INT     NOT NULL CHECK (unit_price >= 0),
+  PRIMARY KEY (order_id, sku)
+);
+-- orders 에 total_amount 컬럼은 두지 않는다 — 유도 가능하므로 상태가 아니다.
+
+-- 2) 본질적 로직: 파생 값은 저장이 아니라 유도로 표현한다.
+CREATE VIEW order_totals AS
+SELECT order_id,
+       SUM(quantity * unit_price) AS total_amount
+  FROM order_lines
+ GROUP BY order_id;
+
+-- 3) 부수적 층: 성능만을 위한 것. 로직은 이것의 존재를 몰라야 한다.
+CREATE MATERIALIZED VIEW order_totals_cached AS SELECT * FROM order_totals;
+CREATE UNIQUE INDEX ON order_totals_cached (order_id);
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY order_totals_cached;
+```
+
+3층을 만드는 순간 갱신 시점이라는 새 상태가 생긴다 — 화면이 `order_totals_cached` 를 직접 읽기 시작하면 부수적 층이 도메인 계약으로 승격되고, 논문이 격리하라던 오염이 되돌아온다.

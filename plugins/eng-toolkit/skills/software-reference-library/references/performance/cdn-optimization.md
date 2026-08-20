@@ -34,3 +34,27 @@ CDN의 1차 효용인 물리적 근접 — RTT는 결국 거리의 함수라 코
 ## 인용 포인트
 - "RTT는 광속의 문제라 코드로 못 줄인다 — 거리를 줄이는 것이 CDN" — 인프라 예산을 성능 항목으로 정당화하는 문장.
 - 적중률은 기본값이 아니라 설계의 결과라는 점 — "CDN 쓰고 있다"와 "CDN이 일하고 있다"를 구분하는 근거.
+
+## 코드 예시
+
+"CDN 쓰고 있다"와 "CDN이 일하고 있다"를 가르는 두 가지 — 브라우저/엣지 수명을 분리하는 헤더와, 적중률을 실제로 확인하는 명령.
+
+```
+# 원 서버 응답 헤더. max-age(브라우저)와 s-maxage(엣지)를 따로 준다
+Cache-Control: public, max-age=60, s-maxage=86400, stale-while-revalidate=600
+Vary: Accept-Encoding          # Vary 에 User-Agent·Cookie 를 넣으면 캐시 키가 폭발한다
+```
+
+```bash
+# 같은 URL 을 두 번 쳐서 MISS → HIT 로 넘어가는지, Age 가 자라는지 본다
+for i in 1 2; do
+  curl -sSI "https://cdn.example.com/app.js" \
+    | grep -iE '^(age|cache-control|x-cache|cf-cache-status|vary):'
+  echo '---'
+done
+
+# 캐시 키 파편화 확인: 마케팅 파라미터만 다른 URL 이 별도 오브젝트가 되는가
+curl -sSI "https://cdn.example.com/app.js?utm_source=kakao" | grep -i 'x-cache\|cf-cache-status'
+```
+
+두 번째 요청이 HIT 여도 그건 내가 방금 쓴 엣지 하나의 이야기다 — 적중률은 PoP 별로 따로 쌓이고 사용자는 수십 개 PoP 에 흩어져 있으므로, 진짜 수치는 CDN 대시보드의 전역 hit ratio 로 봐야 한다.

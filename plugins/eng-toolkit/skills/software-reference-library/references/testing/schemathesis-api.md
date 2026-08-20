@@ -35,3 +35,28 @@ OpenAPI(2.0~3.2)나 GraphQL 스키마를 읽어서 **테스트 케이스 자체�
 
 ## 인용 포인트
 - 도입 논거는 "테스트 개수를 늘리자"가 아니라 "이미 있는 스키마를 검증에 재사용하자"로 세우는 것이 통과율이 높다. 스펙 문서 유지 비용을 회수하는 명분이 되기 때문이다.
+
+## 코드 예시
+
+"스키마가 이미 테스트 명세다"를 CI 한 단계로 옮긴 형태 — 케이스는 한 줄도 쓰지 않고, 스키마 URL 과 검사 항목만 지정한다 (schemathesis 3.x 기준).
+
+```yaml
+# .github/workflows/api-contract.yml
+- name: schemathesis
+  run: |
+    pip install schemathesis
+    st run https://staging.example.com/openapi.json \
+      --base-url https://staging.example.com \
+      --checks all \
+      -H "Authorization: Bearer ${{ secrets.STAGING_TOKEN }}" \
+      --hypothesis-max-examples 50 \
+      --junit-xml reports/schemathesis.xml
+# 실패 시 재현용 curl 명령이 출력에 그대로 찍힌다
+- uses: actions/upload-artifact@v4
+  if: always()
+  with:
+    name: schemathesis-report
+    path: reports/schemathesis.xml
+```
+
+CLI 이름과 옵션은 메이저 버전마다 바뀐다(4.x 는 `schemathesis run` 과 `--max-examples` 계열) — 도입 시 설치한 버전의 `--help` 를 먼저 확인할 것. 더 중요한 한계는 이 도구가 검증하는 것이 **스펙과 구현의 일치**일 뿐이라는 점이다. 스펙 자체가 틀렸으면 초록불이 뜨고, 금액이 맞는지 같은 도메인 정확성은 여전히 사람이 쓴 단언이 필요하다. 그리고 데이터를 변형시키는 요청을 실제로 던지므로 운영 환경에는 돌리지 않는다.

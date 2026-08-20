@@ -34,3 +34,31 @@ Fiona Fui-Hoon Nah — Behaviour & Information Technology 23(3), 2004. 웹 사�
 ## 인용 포인트
 - 피드백 유무가 견딜 수 있는 대기 시간을 유의하게 늘린다 — 로딩 표시 도입의 실증 근거.
 - 피드백 없는 대기 한계 약 2초, 15초 초과는 거의 아무도 안 견딤 — 스켈레톤·낙관적 UI·타임아웃 정책의 수치 근거(단, 인용 전 원문 확인).
+
+## 코드 예시
+
+"피드백 없는 대기 한계 약 2초, 15초 초과는 거의 아무도 안 견딤"을 로딩 표시 임계값과 타임아웃 두 숫자로 옮긴 형태.
+
+```js
+const TOLERABLE_MS = 2000;   // 이 시점부터는 피드백이 있어야 대기가 연장된다
+const HARD_LIMIT_MS = 15000; // 이 너머는 성공해도 안 본다 — 끊고 재시도를 준다
+
+async function loadWithFeedback(url, showSpinner, hideSpinner) {
+  const ac = new AbortController();
+  const spinner = setTimeout(showSpinner, TOLERABLE_MS);
+  const kill = setTimeout(() => ac.abort(), HARD_LIMIT_MS);
+  try {
+    const res = await fetch(url, { signal: ac.signal });
+    return await res.json();
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('TIMEOUT'); // 재시도 버튼으로 연결
+    throw e;
+  } finally {
+    clearTimeout(spinner);
+    clearTimeout(kill);
+    hideSpinner();
+  }
+}
+```
+
+2초 지연 표시는 빠른 응답에서 스피너가 깜빡이는 것을 막을 뿐 대기 자체를 줄이지 않는다 — 그리고 이 수치는 2004년 데스크톱 웹 실험 기반이므로, 인용해 요구사항에 박기 전에 원문의 실험 조건을 확인해야 한다.

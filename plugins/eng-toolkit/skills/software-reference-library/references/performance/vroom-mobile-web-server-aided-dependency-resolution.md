@@ -34,3 +34,28 @@ Vaspol Ruamviboonsuk, Ravi Netravali, Muhammed Uluyol, Harsha V. Madhyastha — 
 ## 인용 포인트
 - 서버 제공 의존성 힌트로 중앙값 PLT 약 절반(5초 이상) 단축 — preload·Early Hints·서버 푸시 도입 제안의 학술 근거.
 - 리소스 발견과 처리의 분리로 CPU와 네트워크를 동시에 활용한다 — "힌트는 단순한 선요청이 아니라 파이프라인 구조 변경"이라는 설명 프레임.
+
+## 코드 예시
+
+"리소스 발견과 처리를 분리한다"는 논문의 핵심을 오늘날의 표준 기능으로 옮긴 것 — HTML 본문이 준비되기 전에 서버가 의존성을 먼저 알려 주는 103 Early Hints.
+
+```http
+# 1) 본문 생성을 기다리지 않고 먼저 나가는 힌트 응답
+HTTP/2 103 Early Hints
+Link: </assets/app.a1b2c3.css>; rel=preload; as=style
+Link: </assets/app.a1b2c3.js>; rel=modulepreload
+Link: <https://cdn.example.com>; rel=preconnect; crossorigin
+
+# 2) 그 사이 서버는 DB 를 조회하고, 준비되면 본문을 보낸다
+HTTP/2 200 OK
+Content-Type: text/html; charset=utf-8
+Link: </assets/hero.a1b2c3.avif>; rel=preload; as=image; fetchpriority=high
+Cache-Control: private, max-age=0, must-revalidate
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <link rel="stylesheet" href="/assets/app.a1b2c3.css" />
+```
+
+힌트 목록은 해시가 박힌 실제 빌드 산출물과 **손으로 동기화되지 않는다** — 빌드 매니페스트에서 자동 생성하지 않으면 배포 한 번에 낡은 힌트가 되고, 아무도 안 쓰는 파일을 라스트마일에서 먼저 받아 오는 순수 손해로 뒤집힌다. 103은 HTTP/2 이상에서만 의미가 있고 이해 못 하는 중간 프록시는 그냥 무시한다.

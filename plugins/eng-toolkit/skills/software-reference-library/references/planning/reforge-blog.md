@@ -24,7 +24,7 @@ https://www.reforge.com/blog
 
 ## 이럴 땐 아니다
 - 지표를 무엇으로 정할지 자체가 문제라면 `planning/north-star-metric.md`, `planning/heart.md`
-- 성장 실험의 통계적 신뢰도·함정이 문제라면 `planning/trustworthy-online-controlled-experiments.md`, `planning/a-dirty-dozen-12.md`
+- 성장 실험의 통계적 신뢰도·함정이 문제라면 `planning/trustworthy-online-controlled-experiments.md`, `planning/a-dirty-dozen-twelve-common-metric-interpretation-pitfalls-i.md`
 - 제품 발견(무슨 문제를 풀지) 단계라면 `planning/teresa-torres-opportunity-solution-tree.md`, `planning/svpg-marty-cagan.md`
 
 ## 무엇이 들어있나
@@ -36,3 +36,37 @@ Reforge의 일관된 입장은 "퍼널은 성장을 설명하지 못한다"는 �
 ## 인용 포인트
 - "퍼널 대신 루프" — 성장 로드맵이 캠페인 나열로 흐를 때 논의 프레임을 바꾸는 데 쓰기 좋다.
 - 리텐션 곡선의 평탄화(flattening) 유무 — "우리 제품이 실제로 붙는가"를 판정하는 기준으로 인용할 수 있다.
+
+## 코드 예시
+
+"리텐션이 낮다"를 단일 숫자에서 곡선으로 바꾸는 쿼리 — 초기 급락과 평탄화 구간은 개입 수단이 다르므로, 먼저 어느 쪽인지 보이게 만들어야 논의가 캠페인 나열로 돌아가지 않는다.
+
+```sql
+-- 첫 주문 주차를 코호트로 잡고, 이후 주차별 재구매 잔존율을 곡선으로
+WITH cohorts AS (
+  SELECT customer_id, date_trunc('week', min(ordered_at))::date AS cohort_week
+  FROM orders
+  GROUP BY customer_id
+),
+sizes AS (
+  SELECT cohort_week, count(*) AS cohort_size   -- 분모는 코호트 크기로 고정
+  FROM cohorts GROUP BY cohort_week
+),
+activity AS (
+  SELECT c.cohort_week,
+         c.customer_id,
+         (date_trunc('week', o.ordered_at)::date - c.cohort_week) / 7 AS week_no
+  FROM orders o
+  JOIN cohorts c USING (customer_id)
+)
+SELECT a.cohort_week,
+       a.week_no,
+       count(DISTINCT a.customer_id) AS retained,
+       round(100.0 * count(DISTINCT a.customer_id) / s.cohort_size, 1) AS retention_pct
+FROM activity a
+JOIN sizes s USING (cohort_week)
+GROUP BY a.cohort_week, a.week_no, s.cohort_size
+ORDER BY a.cohort_week, a.week_no;
+```
+
+곡선이 평탄해 보여도 최근 코호트는 관측 주차가 짧아 아직 떨어질 구간이 남아 있다 — 코호트마다 관측 길이가 다르다는 사실을 지우고 평균 내면 없는 평탄화가 생긴다.

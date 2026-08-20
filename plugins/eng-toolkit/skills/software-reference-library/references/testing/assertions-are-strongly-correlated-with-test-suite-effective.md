@@ -37,3 +37,32 @@ https://people.ece.ubc.ca/amesbah/resources/papers/fse15.pdf
 ## 인용 포인트
 - "커버리지는 실행을 재지만 어서션은 검증을 잰다" — 커버리지 게이트에 어서션 관점의 리뷰 기준을 덧붙이자고 제안할 때의 한 줄.
 - 상관이 테스트 스위트 크기를 통제한 뒤에도 유지된다는 점 — "테스트 개수를 늘리자"는 대응이 왜 대안이 아닌지에 대한 반론 근거.
+
+## 코드 예시
+
+커버리지상으로는 동일하지만 검출력이 다른 두 테스트 — 실행만 하는 쪽과 결과를 단언하는 쪽.
+
+```js
+// before — 라인 커버리지는 올라가지만, 금액이 틀려도 재고가 안 빠져도 통과한다
+test('주문 생성 API', async () => {
+  const res = await api.post('/orders', { sku: 'A-1', quantity: 2 });
+  expect(res.status).toBe(201);
+});
+
+// after — 같은 코드를 실행하되 결과의 실질을 단언한다
+test('주문 생성 시 금액이 계산되고 재고가 차감된다', async () => {
+  const before = await getStock('A-1');
+
+  const res = await api.post('/orders', { sku: 'A-1', quantity: 2 });
+
+  expect(res.status).toBe(201);
+  expect(res.body).toMatchObject({
+    status: 'PENDING',
+    currency: 'KRW',
+    totalAmount: 24000, // 단가 12000 × 2
+  });
+  expect(await getStock('A-1')).toBe(before - 2);
+});
+```
+
+어서션을 늘리는 것 자체가 목적이 되면 구현 세부(내부 호출 횟수, 필드 순서)를 박제해 깨지기 쉬운 테스트가 된다 — 논문이 말하는 것은 개수가 아니라 "무엇을 검증하는가"다.

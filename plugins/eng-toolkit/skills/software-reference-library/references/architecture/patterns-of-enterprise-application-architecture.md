@@ -40,3 +40,33 @@ Distribution 범주에서 저자가 내세우는 "분산에 대한 제1법칙 �
 - 재고/쿠폰 차감 설계에서 낙관적 잠금을 제안할 때: Optimistic Offline Lock의 원전 정의와 "충돌이 드물 때만 유효하다"는 적용 조건을 근거로 든다.
 - "Repository를 두자"는 논의에서 각자 다른 뜻으로 말하고 있을 때, 원전 정의(컬렉션처럼 보이는 인터페이스 뒤에 질의를 캡슐화)로 합의점을 잡는다.
 - Domain Model을 과하게 도입하려는 제안에 대해, 저자 본인이 도메인 복잡도가 낮으면 Transaction Script가 낫다고 적어둔 대목이 유효한 제동 장치가 된다.
+
+## 코드 예시
+
+Optimistic Offline Lock — 조회와 수정이 서로 다른 요청이라 DB 트랜잭션으로는 못 막는 충돌을, 버전 필드로 감지한다.
+
+```python
+# 요청 1: 편집 화면을 그린다. version 을 클라이언트로 함께 내려보낸다.
+def load_for_edit(conn, order_id: str) -> dict:
+    row = conn.execute(
+        "SELECT id, status, version FROM orders WHERE id = %s", (order_id,)
+    ).fetchone()
+    return {"id": row.id, "status": row.status, "version": row.version}
+
+class ConcurrentModification(Exception):
+    pass
+
+# 요청 2(수 분 뒤): 그 사이 남이 고쳤는지 version 으로 판정한다.
+def save(conn, order_id: str, new_status: str, seen_version: int) -> int:
+    cur = conn.execute(
+        """UPDATE orders
+              SET status = %s, version = version + 1
+            WHERE id = %s AND version = %s""",
+        (new_status, order_id, seen_version),
+    )
+    if cur.rowcount == 0:                 # 0행 = 내가 본 이후 누가 바꿨다
+        raise ConcurrentModification(order_id)
+    return seen_version + 1
+```
+
+낙관적 잠금은 충돌을 **감지**할 뿐 해결하지 않는다 — 사용자에게 다시 시키는 화면이 없으면 충돌은 예외 로그로만 남고, 재고처럼 충돌이 흔한 자원에서는 이 패턴 자체가 틀린 선택이다.

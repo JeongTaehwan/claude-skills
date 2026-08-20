@@ -36,3 +36,34 @@ https://research.google/pubs/state-of-mutation-testing-at-google/
 ## 인용 포인트
 - "뮤테이션 테스트가 실무에서 못 쓰이는 이유는 계산 비용이 아니라 노이즈다"라는 진단, 그리고 그 해법이 diff 한정 + arid 노드 제외라는 점. 도입 제안서의 뼈대로 그대로 쓸 수 있다.
 - 결과를 코드 리뷰에 얹었다는 배치 선택은, 새 품질 지표를 도입할 때 "어디에 보여 줄 것인가"를 함께 설계해야 한다는 일반 교훈으로 확장된다.
+
+## 코드 예시
+
+논문의 세 가지 선택(전수 포기 → diff 한정, 무의미한 뮤턴트 제외, 결과를 리뷰 자리에 노출)을 파이프라인 한 개로 옮긴 형태 — StrykerJS 기준.
+
+```yaml
+# .github/workflows/mutation.yml
+on: pull_request
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }        # --since 가 base 와 비교하려면 히스토리가 필요
+      - run: npm ci
+      # 전수 실행 포기: 이 PR 이 건드린 파일의 뮤턴트만
+      - run: npx stryker run --since=origin/${{ github.base_ref }} --incremental
+      # 별도 대시보드가 아니라 개발자가 이미 보는 자리에 띄운다
+      - if: always()
+        run: gh pr comment ${{ github.event.number }} --body-file reports/mutation/summary.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+```js
+// 노이즈 제거 — 변형해도 의미 없는 코드(arid node)는 애초에 뮤턴트를 만들지 않는다
+// Stryker disable next-line all
+logger.debug(`order ${id} priced at ${amount}`);
+```
+
+`--since` 는 diff 안의 뮤턴트만 보므로, 이 게이트가 초록불이어도 **손대지 않은 기존 코드의 테스트 실효성은 전혀 말해 주지 않는다.** 그리고 `Stryker disable` 을 남발하면 노이즈 대신 사각지대가 생기므로, 로깅·디버그 보조처럼 판정 기준이 분명한 곳에만 붙이고 리뷰에서 그 근거를 물어야 한다.

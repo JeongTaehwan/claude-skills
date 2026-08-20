@@ -40,3 +40,37 @@ Cypress 팀이 실제 지원 과정에서 반복해서 본 안티패턴을 "이�
 - 임의 `cy.wait(ms)` 를 공식 문서가 안티패턴으로 규정한다는 사실은, "일단 대기 시간 늘려서 넘기자"는 임시방편을 막는 근거가 된다.
 - 테스트 전용 셀렉터 속성 권고는 마크업 리팩터링 때마다 E2E 가 깨지는 비용을 팀에 설명할 때 인용하기 좋다.
 - 테스트 간 상태 공유 금지 원칙은 CI 병렬화를 도입하기 전 정리해야 할 부채 목록의 근거가 된다.
+
+## 코드 예시
+
+문서가 안티패턴으로 지목한 셋 — 임의 대기, 구조 결합 셀렉터, UI 로그인 — 을 한 스펙에서 걷어낸 before/after.
+
+```js
+// before
+it('주문을 생성한다', () => {
+  cy.visit('/login');
+  cy.get('.form-group > input.email').type('a@example.com'); // 스타일에 결합
+  cy.get('.btn.btn-primary').click();
+  cy.visit('/cart');
+  cy.get('.checkout').click();
+  cy.wait(3000); // 느리면서 동시에 불안정
+  cy.get('.order-id').should('exist');
+});
+
+// after
+it('주문을 생성한다', () => {
+  // 로그인은 UI 가 아니라 프로그래밍적으로, 세션은 캐시한다
+  cy.session('buyer', () => {
+    cy.request('POST', '/api/login', { email: 'a@example.com', password: 'pw' });
+  });
+
+  cy.intercept('POST', '/api/orders').as('createOrder'); // 기다릴 대상을 명시
+  cy.visit('/cart');
+  cy.get('[data-cy=checkout]').click();
+
+  cy.wait('@createOrder').its('response.statusCode').should('eq', 201);
+  cy.get('[data-cy=order-id]').should('be.visible');
+});
+```
+
+`cy.wait('@alias')` 는 요청이 끝난 시점까지만 보장한다 — 응답 뒤 렌더링이나 후속 폴링이 있으면 결국 `should()` 의 재시도에 기대게 되므로, 단언 대상을 화면에 실제 나타나는 것으로 잡아야 한다.

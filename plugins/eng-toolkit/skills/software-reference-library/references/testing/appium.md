@@ -34,3 +34,35 @@ iOS·Android·모바일 웹·데스크톱·TV까지 하나의 WebDriver 프로�
 프로토콜 장에서는 W3C WebDriver를 기준으로 삼되 WebDriver BiDi, 구형 JSON Wire, 그리고 모바일 고유 동작을 위한 Appium 확장 명령까지 함께 지원한다는 점을 명시한다. 이 때문에 Selenium을 써 본 사람은 문법이 익숙하지만, 앱 고유 제스처나 컨텍스트 전환(네이티브 ↔ 웹뷰) 명령은 Appium 확장 쪽을 따로 봐야 한다.
 
 즉 이 문서를 읽는 요령은 "Appium 사용법"을 찾는 게 아니라, 내 대상 플랫폼의 드라이버 문서로 갈아타는 진입점으로 쓰는 것이다.
+
+## 코드 예시
+
+"Appium 은 얇은 서버, 실제 조작은 드라이버"라는 구조와, 앱 자동화 고유 동작인 네이티브↔웹뷰 컨텍스트 전환을 옮긴 것.
+
+```python
+# 서버와 별개로 드라이버를 먼저 깔아야 한다 (Appium 2 부터 분리됨)
+#   $ appium driver install uiautomator2
+#   $ appium            # 기본 http://127.0.0.1:4723
+
+from appium import webdriver
+from appium.options.android import UiAutomator2Options
+from appium.webdriver.common.appiumby import AppiumBy
+
+options = UiAutomator2Options()
+options.platform_name = "Android"
+options.device_name = "emulator-5554"
+options.app = "/builds/shop-release.apk"
+
+driver = webdriver.Remote("http://127.0.0.1:4723", options=options)
+try:
+    driver.find_element(AppiumBy.ACCESSIBILITY_ID, "checkout-button").click()
+
+    # 간편결제 화면이 웹뷰면 컨텍스트를 바꿔야 셀렉터가 먹는다
+    print(driver.contexts)  # ['NATIVE_APP', 'WEBVIEW_com.example.shop']
+    driver.switch_to.context("WEBVIEW_com.example.shop")
+    driver.find_element(AppiumBy.CSS_SELECTOR, "#pay-confirm").click()
+finally:
+    driver.quit()
+```
+
+`contexts` 목록은 웹뷰가 실제로 붙은 뒤에야 채워지므로, 화면 전환 직후 바로 읽으면 `NATIVE_APP` 만 보이고 조용히 실패한다 — 컨텍스트가 나타날 때까지 대기하는 코드가 실무에서는 거의 항상 필요하다.

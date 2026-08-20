@@ -36,3 +36,27 @@ https://github.com/public-apis/public-apis
 
 ## 인용 포인트
 - 없음 — 팀 설득이나 문서 근거로 쓸 자료가 아니라 탐색 도구다.
+
+## 코드 예시
+
+표의 CORS·Auth 열이 프로토타입 구조를 가른다는 것, 그리고 그 열이 "검증된 카탈로그"가 아니라는 것을 붙이기 전에 직접 확인하는 절차.
+
+```bash
+API="https://api.example.com/v1/rates"   # 목록에서 고른 후보로 바꾼다
+
+# 1) 아직 살아 있는가 — 죽은 엔드포인트가 섞여 있는 것이 이 목록의 정상 상태다
+curl -sS -o /dev/null -w '%{http_code}  %{time_total}s\n' "$API"
+
+# 2) 브라우저에서 직접 부를 수 있는가 — 프리플라이트에 응답하는지
+curl -sS -i -X OPTIONS "$API" \
+  -H 'Origin: http://localhost:5173' \
+  -H 'Access-Control-Request-Method: GET' | grep -i '^access-control-'
+
+# 3) 실제 GET 응답에 허용 헤더가 붙는지 (브라우저가 보는 건 이쪽이다)
+curl -sS -D - -o /dev/null -H 'Origin: http://localhost:5173' "$API" \
+  | grep -i 'access-control-allow-origin'
+
+# 헤더가 없으면 서버 프록시 경유가 확정된다 — 데모 아키텍처가 여기서 갈린다
+```
+
+표의 CORS 열은 "허용/불허" 두 값뿐이라, `*` 인지 특정 오리진만인지는 위처럼 직접 봐야 알 수 있다. 그리고 이 확인을 통과했다고 프로덕션 의존성으로 올리면 안 된다 — 여기 실린 상당수는 SLA 도 수명 보장도 없는 개인·커뮤니티 운영이다.

@@ -37,3 +37,32 @@ ISO 사이트는 유료 판매 페이지이며 본문 전체를 볼 수는 없�
 ## 인용 포인트
 - 규제 대응 문서에서 "테스트 프로세스는 조직 수준 / 테스트 관리 / 동적 테스트의 계층으로 정의한다"는 구조를 빌려오면, 심사자가 익숙한 언어로 설명할 수 있다.
 - 반대로 사내에서 문서 과잉 도입에 제동을 걸 때는 "이 표준은 국제 표준이지만 테스팅 커뮤니티의 공개 반대 청원 대상이었다"는 사실 자체가 강한 반론 근거가 된다.
+
+## 코드 예시
+
+심사자가 요구하는 산출물 이름(테스트 계획, 테스트 설계 명세, 사건 보고)을 워드 파일이 아니라 저장소 안의 구조화된 데이터로 두고, 문서를 리포트로 생성하는 형태.
+
+```yaml
+# testdocs/settlement/test-plan.yaml
+document_type: Test Plan          # 29119-3 산출물 명칭을 그대로 씀
+scope: 정산 배치 v3 — 일별 마감, 부분환불 반영
+test_items: [settlement-batch 3.2.0, admin-report 1.8.0]
+risks:
+  - id: R-01
+    description: 부분환불이 마감 이후 반영되어 정산액 불일치
+    likelihood: medium
+    impact: high
+    mitigation: TD-02
+test_design_specs:
+  - id: TD-02
+    document_type: Test Design Specification
+    feature: 마감 경계 부분환불
+    technique: 경계값 분석                # 명세 기반 기법
+    cases: [TC-021, TC-022, TC-023]
+    traces_to: [REQ-SET-14, R-01]         # 요구사항·위험 추적성
+exit_criteria:
+  - 위험도 high 항목의 케이스 전건 통과
+  - 미해결 Incident Report 중 severity 1 없음
+```
+
+`traces_to` 가 채워졌다는 것이 그 케이스가 위험을 실제로 건드린다는 뜻은 아니다 — 이 표준이 비판받은 지점이 정확히 여기이고, 추적성 칸을 채우는 작업이 결함 찾기를 대신하기 시작하면 목적이 뒤집힌다.

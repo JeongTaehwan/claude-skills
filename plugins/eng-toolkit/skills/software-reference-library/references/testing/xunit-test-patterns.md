@@ -45,3 +45,34 @@ Gerard Meszaros가 테스트 코드의 패턴과 안티패턴에 이름을 붙�
 - Test Double 5종 분류는 팀 테스트 컨벤션 문서에 그대로 옮겨 쓸 수 있는 가장 널리 통용되는 정의다. "목/스텁을 각자 다르게 부르지 말자"는 합의의 근거로 쓴다.
 - Overspecified Software는 "테스트는 구현이 아니라 동작을 검증한다"는 리뷰 지적을 취향이 아니라 알려진 안티패턴으로 만들어 준다.
 - 테스트 스멜에 이름이 있다는 사실 자체가 논거다 — 코드 리뷰에서 프로덕션 코드 냄새만 지적하고 테스트 코드는 통과시키는 관행을 바꾸는 데 쓴다.
+
+## 코드 예시
+
+Overspecified Software 에 이름을 붙이면 고칠 대상이 보인다 — 더블의 종류를 Mock 에서 Fake 로 바꾸는 것만으로 "리팩터링하면 다 깨지는" 성질이 사라진다 (Java, Mockito).
+
+```java
+// before — Mock 이 호출 절차를 단언한다. 구현을 바꾸면 동작이 같아도 깨진다
+@Test
+void 주문_생성() {
+    service.create(cmd);
+
+    verify(repo).findBySku("A-1");
+    verify(repo).save(any(Order.class));
+    verify(repo).flush();
+    verifyNoMoreInteractions(repo);   // 호출 목록 전체를 고정해 버렸다
+}
+
+// after — Fake(단순하지만 진짜로 동작함)를 쓰고, 관찰 가능한 결과만 단언한다
+@Test
+void 주문_생성() {
+    var repo = new InMemoryOrderRepository();          // Fake
+    var service = new OrderService(repo, Clock.fixed(NOW, UTC));
+
+    Order order = service.create(cmd);
+
+    assertEquals(OrderStatus.CREATED, order.status());
+    assertEquals(2, repo.findBySku("A-1").orElseThrow().quantity());
+}
+```
+
+`verify` 가 항상 틀린 것은 아니다 — 결제 승인 호출이나 메일 발송처럼 **관찰 가능한 결과가 시스템 밖에만 남는** 부수효과는 호출 검증이 유일한 오라클이다. 문제는 반환값으로 확인할 수 있는 것까지 호출로 확인할 때다. 그리고 Fake 를 쓰면 그 Fake 자체가 실제 저장소와 어긋날 수 있어, 진짜 엔진을 쓰는 통합 테스트가 어딘가에 한 겹 있어야 한다.

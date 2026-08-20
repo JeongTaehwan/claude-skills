@@ -34,3 +34,30 @@ https://web.dev/articles/browser-level-image-lazy-loading
 ## 인용 포인트
 - "지연 로드는 라이브러리가 아니라 HTML 속성이다" — 커스텀 lazy load 코드를 걷어내자는 근거.
 - LCP 이미지 lazy 금지 — 전체 이미지에 일괄 적용한 코드를 리뷰에서 지적할 때 인용.
+
+## 코드 예시
+
+"전체 이미지에 lazy 일괄 적용"이 왜 리뷰에서 걸리는지 — 같은 목록 안에서 첫 화면 이미지와 그 아래 이미지의 속성이 달라야 한다.
+
+```html
+<!-- LCP 후보(첫 화면 히어로): lazy 금지, 오히려 우선순위를 올린다 -->
+<img src="/hero-800.webp"
+     width="800" height="450"
+     fetchpriority="high"
+     alt="주문 요약">
+
+<!-- 스크롤 아래 목록: lazy + 치수 명시. width/height 가 없으면 로드 순간 CLS 가 난다 -->
+<img src="/item-320.webp"
+     width="320" height="320"
+     loading="lazy" decoding="async"
+     alt="상품 이미지">
+```
+
+```js
+// 서버 렌더 목록에서 "첫 N개만 eager" 를 규칙으로 못 박는다
+const eager = index < 4;
+attrs.loading = eager ? 'eager' : 'lazy';
+if (index === 0) attrs.fetchpriority = 'high';
+```
+
+로드를 시작하는 뷰포트 거리 임계값은 스펙이 정한 고정값이 아니라 브라우저가 연결 속도에 따라 조정하므로, 빠른 회선의 개발 환경에서 "제때 로드된다"를 확인해도 저속 환경의 동작을 증명한 게 아니다.

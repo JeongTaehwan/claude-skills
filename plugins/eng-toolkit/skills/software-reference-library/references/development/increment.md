@@ -35,3 +35,24 @@ Issue 10(테스팅, 2019년 8월)에는 Charity Majors의 프로덕션 테스팅
 ## 인용 포인트
 - "테스트를 프로덕션까지 밀어낸다"는 주장을 팀에 설득할 때 Charity Majors의 글이 출발점으로 쓰인다 — 관측성 투자와 테스트 예산을 같은 표에 놓는 논거가 된다.
 - 아카이브 전체가 무료라 사내 스터디 자료로 배포 부담이 없다.
+
+## 코드 예시
+
+테스팅 호에 실린 접근 중 팀에 소개하기 가장 쉬운 것 — 속성 기반 테스트. 예제를 나열하는 대신 "무엇이 항상 참이어야 하는가"를 적고 입력은 도구가 만든다.
+
+```python
+from hypothesis import given, strategies as st
+
+@given(
+    total=st.integers(min_value=0, max_value=10_000_000),
+    people=st.integers(min_value=1, max_value=20),
+)
+def test_split_bill(total, people):
+    shares = split_bill(total, people)
+
+    assert len(shares) == people
+    assert sum(shares) == total          # 1원도 잃거나 만들지 않는다
+    assert max(shares) - min(shares) <= 1  # 나머지는 최대 1원 차이로만 흩어진다
+```
+
+이 테스트가 반례를 찾으면 Hypothesis 가 최소 입력까지 줄여서 보여 준다. 다만 이것도 여전히 배포 전 테스트다 — 같은 호의 프로덕션 테스팅 쪽 주장은, 실제 트래픽·데이터에서만 드러나는 실패는 이런 테스트로 못 잡으니 관측성에 예산을 나눠야 한다는 것이다.

@@ -36,3 +36,33 @@ Xiao Sophia Wang, Aruna Balasubramanian, Arvind Krishnamurthy, David Wetherall �
 - 캐싱해도 대부분의 객체가 크리티컬 패스 밖이라 PLT 감소는 비례하지 않는다 — 캐시 투자 대비 효과가 낮게 나왔을 때의 표준 설명.
 - 동기 JS가 HTML 파싱을 막아 PLT를 크게 늘린다 — async/defer 도입의 1차 근거.
 - 계산이 크리티컬 패스의 최대 35% — "느린 건 네트워크 탓"이라는 단정을 교정할 때.
+
+## 코드 예시
+
+"느린 건 네트워크 탓"을 검증하는 최소 계측 — 로드 구간에서 계산(파싱·JS 실행)이 실제로 얼마를 먹는지 재서 논문의 35%와 대볼 수 있게 만든다.
+
+```js
+// 1) 계산 쪽: 메인 스레드를 50ms 이상 막은 작업의 총합
+let blockingMs = 0;
+new PerformanceObserver(list => {
+  for (const t of list.getEntries()) blockingMs += t.duration - 50;
+}).observe({ type: 'longtask', buffered: true });
+
+addEventListener('load', () => {
+  const nav = performance.getEntriesByType('navigation')[0];
+  const resources = performance.getEntriesByType('resource');
+
+  // 2) 캐시에서 온 객체 비율 — 적중률이 높은데도 PLT 가 안 줄면 논문의 세 번째 발견이다
+  const fromCache = resources.filter(r => r.transferSize === 0 && r.decodedBodySize > 0).length;
+
+  console.log({
+    plt: Math.round(nav.loadEventEnd),
+    computeMs: Math.round(blockingMs),                       // 계산이 먹은 시간
+    cacheHitRatio: (fromCache / resources.length).toFixed(2), // 적중률
+    parserBlockedScripts: resources.filter(
+      r => r.initiatorType === 'script' && r.renderBlockingStatus === 'blocking').length,
+  });
+});
+```
+
+이 계측은 시간의 총합일 뿐 크리티컬 패스가 아니다 — 논문이 한 일은 객체 간 의존 그래프를 세워 "이 객체가 늦어지면 PLT 가 늦어지는가"를 가른 것이므로, 여기 찍힌 큰 숫자가 곧 줄일 수 있는 시간이라는 보장은 없다.

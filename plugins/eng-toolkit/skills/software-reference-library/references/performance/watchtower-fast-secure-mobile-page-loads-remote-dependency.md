@@ -34,3 +34,33 @@ Ravi Netravali, Anirudh Sivaraman, James Mickens, Hari Balakrishnan — ACM Mobi
 ## 인용 포인트
 - 프록시 경유는 조건에 따라 오히려 느려진다 — "엣지/프록시를 넣으면 무조건 빨라진다"는 제안을 심사할 때의 반례 근거.
 - 조건 모델 기반 선택적 활성화로 21.2–41.3% 개선 — 최적화를 상시 적용이 아니라 조건부로 적용하자는 설계 논거.
+
+## 코드 예시
+
+"최적화를 상시 적용이 아니라 조건부로"를 서버 분기로 옮긴 것 — 네트워크 클라이언트 힌트로 조건을 읽고, 도움이 될 때만 원격 렌더 경로를 켠다.
+
+```js
+// 네트워크 힌트를 받겠다고 선언하고, 분기했으면 캐시 키에도 반영한다
+app.use((req, res, next) => {
+  res.set("Accept-CH", "ECT, RTT, Downlink, Save-Data");
+  res.set("Vary", "ECT, RTT, Save-Data");
+  next();
+});
+
+function shouldRemoteRender(req) {
+  if (killSwitch.enabled) return false;
+  const ect = req.get("ECT");                // "slow-2g" | "2g" | "3g" | "4g"
+  const rtt = Number(req.get("RTT"));        // ms, 25ms 단위로 반올림
+  if (!ect) return false;                    // 힌트가 없으면 기본 경로
+  return ect === "slow-2g" || ect === "2g" || rtt >= 300;
+}
+
+app.get("/p/:id", async (req, res) => {
+  const remote = shouldRemoteRender(req);
+  // 결정 자체를 기록해야 나중에 조건 모델이 맞았는지 검증할 수 있다
+  metrics.increment("remote_render.decision", { remote: String(remote), ect: req.get("ECT") });
+  res.send(remote ? await renderViaProxy(req) : await renderLocally(req));
+});
+```
+
+이 조건식은 논문의 조건 모델이 아니라 **추측**이고, 서버는 자기가 안 고른 쪽의 결과를 볼 수 없다 — 결정을 로그로 남기고 일부 트래픽을 반대로 흘려 비교하지 않으면, 논문이 경고한 바로 그 실패(가장 느린 사용자를 더 느리게 만드는 분기)를 켜 놓고도 알아채지 못한다.

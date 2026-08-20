@@ -23,7 +23,7 @@ https://github.com/Netflix/chaosmonkey
 - 장애 훈련(게임데이) 시나리오를 만들 때 가장 단순한 시작점을 찾을 때
 
 ## 이럴 땐 아니다
-- 실험을 어떤 원칙과 순서로 설계해야 하는지가 먼저면 `testing/principles-of-chaos-engineering.md`
+- 실험을 어떤 원칙과 순서로 설계해야 하는지가 먼저면 `infrastructure/principles-of-chaos-engineering.md`
 - 도구 지형 전반을 훑고 싶으면 `qa/awesome-chaos-engineering.md`
 - 부하를 견디는지가 문제라면 카오스가 아니라 부하 도구 — `testing/k6-io-docs.md`, `testing/apache-jmeter.md`
 
@@ -37,3 +37,30 @@ Chaos Monkey가 하는 일 자체는 단순하다. 지정된 그룹 안에서 �
 ## 인용 포인트
 - 업무 시간대에만 실행한다는 설계 — "운영에서 일부러 죽인다"에 대한 반발을 통제 가능한 실험으로 바꿔 설명할 때의 핵심 디테일.
 - 정기적 인스턴스 종료가 복구 자동화를 강제한다는 인과 — 카오스 도입의 목적이 장애 발견이 아니라 아키텍처 압력임을 설명하는 논거.
+
+## 코드 예시
+
+"무작위 파괴가 아니라 통제된 실험"이라는 주장이 설정 파일 어디에 박혀 있는지 — 업무 시간대 제한과 leashed 모드.
+
+```toml
+# chaosmonkey.toml
+[chaosmonkey]
+enabled = true
+
+# leashed = true 면 "죽였을 것이다"만 기록하고 실제로는 종료하지 않는다.
+# 도입 첫 주는 여기서 시작해 대상 목록이 예상과 맞는지 먼저 본다.
+leashed = true
+
+# 스케줄러가 하루치 종료 계획을 미리 뽑는다
+schedule_enabled = true
+
+# 사람이 대응할 수 있는 시간대에만 실행 — 반발을 가라앉히는 핵심 디테일
+start_hour = 10
+end_hour = 15
+time_zone = "Asia/Seoul"
+
+# 참여 대상은 계정 단위로 옵트인
+accounts = ["prod"]
+```
+
+이 설정은 "언제 죽일지"만 통제할 뿐, 죽은 뒤 무엇을 정상으로 볼지는 정하지 않는다 — 실험 전에 정상 상태 지표(주문 성공률, 미처리 메시지 수)를 먼저 정해 두지 않으면 종료 로그만 쌓이고 배우는 게 없다.

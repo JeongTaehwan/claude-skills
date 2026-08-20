@@ -42,3 +42,34 @@ Google 이 2014년부터 내부에서 써 온 API 설계 규약 — REST 와 gRP
 - "동사를 URL 에 넣을지 말지"의 논쟁을, "이 동작을 리소스로 표현할 수 있는가"라는 선행 질문으로 대체하는 프레임은 설계 리뷰에서 즉시 쓸 수 있다.
 - 표준 메서드 집합을 먼저 고정하면 인증·페이지네이션·에러 처리 같은 공통 관심사를 일괄 적용할 수 있다는 논거는, 엔드포인트별 자유 설계에 대한 반론이 된다.
 - REST 와 gRPC 를 같은 설계 원칙 아래 둘 수 있다는 점은, 두 프로토콜을 병행 제공해야 하는 상황의 설계 근거로 유용하다.
+
+## 코드 예시
+
+"주문 취소를 어떤 URL 로 할까"를 리소스 이름 + 표준 메서드 문제로 바꾼 형태 — 정의 하나가 gRPC 와 REST 경로를 동시에 만든다.
+
+```protobuf
+service OrderService {
+  // 표준 메서드로 덮이는 것은 여기서 끝낸다
+  rpc GetOrder(GetOrderRequest) returns (Order) {
+    option (google.api.http) = { get: "/v1/{name=orders/*}" };
+  }
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {
+    option (google.api.http) = { get: "/v1/orders" };
+  }
+
+  // 리소스로 표현할 수 없다고 판단한 뒤에만 커스텀 메서드(`:동사`)로 뺀다
+  rpc CancelOrder(CancelOrderRequest) returns (Order) {
+    option (google.api.http) = {
+      post: "/v1/{name=orders/*}:cancel"
+      body: "*"
+    };
+  }
+}
+
+message Order {
+  string name = 1;          // "orders/1234" — 이름 자체가 전역 식별자
+  string display_name = 2;
+}
+```
+
+`:cancel` 이 편해 보인다고 먼저 손대면 이 가이드의 순서를 뒤집는 것이다 — 취소를 별도 리소스의 생성으로 볼 수 없는지가 선행 질문이다. 또 이 한 파일이 REST 경로까지 만들어 주려면 트랜스코딩 게이트웨이가 앞에 있어야 하며, 그게 없으면 주석에 가깝다.

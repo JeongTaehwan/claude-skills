@@ -34,3 +34,35 @@ Product UI(제품 인터페이스 컴포넌트·패턴), Brand UI(마케팅·브
 
 ## 인용 포인트
 - 제품 UI와 브랜드 UI를 분리한 구성은, "마케팅 페이지와 제품 화면의 디자인 규칙을 나누자"는 제안의 실제 사례로 제시할 수 있다.
+
+## 코드 예시
+
+"테마 전환이 색 값 치환이 아니라 역할 매핑 교체"라는 구조 — 원시 값 층과 기능 층을 갈라 놓으면 테마가 아래층을 건드리지 않는다.
+
+```css
+/* 1층: 원시 값. 여기에는 용도가 없다 */
+:root {
+  --base-gray-0: #ffffff;
+  --base-gray-9: #1f2328;
+  --base-green-5: #1a7f37;
+  --base-green-3: #3fb950;
+}
+/* 2층: 기능적 역할. 화면이 참조하는 건 이쪽뿐이다 */
+:root,
+[data-color-mode="light"] {
+  --fgColor-default: var(--base-gray-9);
+  --bgColor-default: var(--base-gray-0);
+  --fgColor-success: var(--base-green-5);
+}
+[data-color-mode="dark"] {
+  --fgColor-default: var(--base-gray-0);
+  --bgColor-default: var(--base-gray-9);
+  --fgColor-success: var(--base-green-3);
+}
+.state-label--merged {
+  color: var(--fgColor-success);
+  background: var(--bgColor-default);
+}
+```
+
+고대비 테마를 얹는 순간 2층 블록이 테마 수만큼 복제된다 — Primer가 이 파일을 손으로 쓰지 않고 빌드로 생성하는 이유가 여기 있다. 토큰 이름도 Primer 세대에 따라 갈렸으니(`--color-fg-default` 계열 vs `--fgColor-*` 계열) 참고할 버전을 먼저 확인해야 한다.

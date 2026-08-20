@@ -29,7 +29,7 @@ https://abseil.io/resources/swe-book/html/ch14.html
 - 마이크로서비스 환경에서 계층을 나누는 구체적 설계는 `qa/testing-strategies-in-a-microservice-architecture.md`
 - 불안정한 테스트를 실제로 제거하는 기법이 급하면 `testing/eradicating-non-determinism-in-tests.md`, 실증 데이터는 `testing/an-empirical-analysis-of-flaky-tests.md`
 - 서비스 간 계약 검증을 E2E 대신 값싸게 하려면 `testing/pact.md`
-- 장애 주입을 실제로 돌리는 도구·원칙은 `testing/principles-of-chaos-engineering.md`, `testing/chaos-monkey.md`
+- 장애 주입을 실제로 돌리는 도구·원칙은 `infrastructure/principles-of-chaos-engineering.md`, `testing/chaos-monkey.md`
 - 부하 테스트 도구가 필요하면 `testing/k6-io-docs.md`, `testing/gatling.md`
 
 ## 무엇이 들어있나
@@ -45,3 +45,35 @@ https://abseil.io/resources/swe-book/html/ch14.html
 - "설정 변경이 대형 장애의 가장 잦은 원인인데, 단위 테스트는 배포 설정과 바이너리의 호환성을 검증할 수 없다" — E2E/통합 계층을 유지해야 하는 이유를 비용 논의에서 위험 논의로 옮길 때.
 - "소유자가 지정되지 않은 큰 테스트는 썩는다" — 불안정한 스위트를 정리할 때 삭제·인수인계 결정을 강제하는 근거.
 - prober와 카나리 분석을 테스트의 한 종류로 명시한 점은, 모니터링 예산을 테스트 전략 안에서 정당화할 때 쓸 수 있다.
+
+## 코드 예시
+
+큰 테스트의 운영 지침 셋을 한 파일에 넣은 것 — 소유자를 명시하고, `sleep` 대신 이벤트로 기다리고, 요청 ID 로 실패한 실행의 서버 로그를 찾을 수 있게 한다.
+
+```typescript
+// e2e/checkout.spec.ts
+// .github/CODEOWNERS: /e2e/checkout.spec.ts  @payments-team   ← 주인 없는 큰 테스트는 썩는다
+import { test, expect } from '@playwright/test'
+
+test('카드 승인 후 주문이 결제완료로 확정된다', async ({ page }, testInfo) => {
+  const requestId = `e2e-${testInfo.testId}`
+  testInfo.annotations.push({ type: 'owner', description: 'payments-team' })
+  await page.setExtraHTTPHeaders({ 'X-Request-Id': requestId })   // 서버 로그 상관관계
+
+  await page.goto('/checkout')
+
+  // sleep 이 아니라 실제 이벤트를 기다린다
+  const approved = page.waitForResponse(
+    r => r.url().includes('/payments/approve') && r.status() === 200,
+  )
+  await page.getByRole('button', { name: '결제하기' }).click()
+  await approved
+
+  await expect(page.getByTestId('order-status'))
+    .toHaveText('결제완료', { timeout: 20_000 })   // 조정 가능한 타임아웃
+
+  testInfo.attach('request-id', { body: requestId })  // 실패 리포트에 남긴다
+})
+```
+
+이 테스트가 사는 환경이 공유 스테이징이면 위 조치들로도 불안정은 남는다 — 다른 팀의 배포가 같은 순간에 들어오는 것은 대기 방식으로 해결되지 않고, 밀폐성을 얼마에 살지는 별도 결정이다.

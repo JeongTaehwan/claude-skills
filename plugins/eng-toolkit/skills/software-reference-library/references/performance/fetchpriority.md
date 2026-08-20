@@ -32,3 +32,26 @@ https://web.dev/articles/fetch-priority
 ## 인용 포인트
 - "브라우저 우선순위 추론은 휴리스틱이고, LCP 이미지는 그 휴리스틱이 틀리는 대표 사례" — high 보정 근거.
 - 좁은 대역폭에서는 무엇을 올리는 것만큼 무엇을 낮추는(low) 것이 효과적이라는 관점.
+
+## 코드 예시
+
+"좁은 대역폭에서는 올리는 것만큼 내리는 것이 효과적" — 같은 페이지에서 우선순위를 올릴 것과 양보시킬 것을 함께 지정한다.
+
+```html
+<!-- LCP 이미지: 브라우저 기본 추론은 이미지 우선순위를 낮게 시작한다. 그 휴리스틱을 보정 -->
+<img src="/hero.webp" width="1200" height="675" fetchpriority="high" alt="">
+
+<!-- 캐러셀 2번째 이후 슬라이드: 첫 화면에 안 보이므로 대역폭을 양보 -->
+<img src="/slide-2.webp" width="1200" height="675" fetchpriority="low" loading="lazy" alt="">
+
+<!-- 지금 당장 필요 없는 스크립트도 낮춘다 -->
+<script src="/js/reviews.js" defer fetchpriority="low"></script>
+```
+
+```js
+// fetch() 에도 같은 힌트를 준다 — 백그라운드 동기화가 LCP 리소스와 경쟁하지 않게
+fetch('/api/recommendations', { priority: 'low' });
+fetch('/api/cart', { priority: 'high' });   // 화면을 막고 있는 데이터
+```
+
+`fetchpriority` 는 힌트일 뿐 요청 순서를 보장하지 않는다 — 브라우저는 이걸 다른 신호와 함께 저울질하고, 한 페이지에서 `high` 를 남발하면 상대 순위가 사라져 아무것도 앞당겨지지 않는다.

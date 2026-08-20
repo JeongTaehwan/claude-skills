@@ -34,3 +34,28 @@ https://github.com/woltapp/blurhash
 ## 인용 포인트
 - 이미지 플레이스홀더를 "추가 요청 없이 API 응답에 실어 보내는" 구조 제안의 표준 근거.
 - 백엔드 협업(업로드 시 해시 생성·저장)이 필요한 작업임을 명시할 때 — 프론트 단독으로는 완성되지 않는 패턴이라는 점.
+
+## 코드 예시
+
+"추가 요청 없이 API 응답에 실어 보낸다" — 업로드 시점에 백엔드가 해시를 만들어 저장하고, 클라이언트가 네트워크 없이 그리는 양쪽.
+
+```js
+// 서버: 업로드 시 1회. sharp 로 축소한 raw 픽셀을 blurhash 에 넘긴다
+import sharp from 'sharp';
+import { encode, decode } from 'blurhash';
+
+const { data, info } = await sharp(buffer)
+  .raw().ensureAlpha().resize(32, 32, { fit: 'inside' })
+  .toBuffer({ resolveWithObject: true });
+const hash = encode(new Uint8ClampedArray(data), info.width, info.height, 4, 3);
+await db.photo.update({ where: { id }, data: { blurhash: hash } }); // 20~30자, 이미지 행에 저장
+
+// 클라이언트: 응답의 hash 만으로 즉시 캔버스에 그린다 — 요청 0회
+const pixels = decode(photo.blurhash, 32, 32);
+const ctx = canvas.getContext('2d');
+const img = ctx.createImageData(32, 32);
+img.data.set(pixels);
+ctx.putImageData(img, 0, 0); // CSS 로 확대하면 블러가 된다
+```
+
+인코딩은 반드시 업로드 시 1회여야 한다 — 조회 때마다 돌리면 플레이스홀더를 그리려고 원본을 다시 읽는 자기모순이 되고, 디코딩도 32×32 같은 작은 크기로만 해야 메인 스레드를 잡아먹지 않는다.

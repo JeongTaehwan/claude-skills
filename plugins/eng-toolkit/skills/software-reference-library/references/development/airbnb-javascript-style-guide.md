@@ -39,3 +39,24 @@ React 스타일 가이드가 별도 디렉터리로 함께 들어 있다.
 ## 인용 포인트
 - "우리 팀 취향"이 아니라 "널리 쓰이는 기준선"으로 규칙을 제시하면 논쟁이 개인 대 개인에서 벗어난다.
 - 규칙마다 이유가 붙어 있으므로, 예외를 허용할 때도 "이 이유가 우리 맥락에는 해당 없다"는 형태로 근거 있게 뺄 수 있다.
+
+## 코드 예시
+
+"베이스로 깔고 팀 결정으로 덮는다"를 그대로 옮긴 설정 — 끄는 규칙마다 이유를 주석으로 남겨야 다음 논쟁이 다시 취향 싸움으로 돌아가지 않는다.
+
+```json
+{
+  "extends": ["airbnb-base", "prettier"],
+  "rules": {
+    "no-plusplus": "off",
+    "import/prefer-default-export": "off",
+    "no-restricted-syntax": ["error", "WithStatement"]
+  }
+}
+```
+
+```bash
+npm i -D eslint eslint-config-airbnb-base eslint-plugin-import eslint-config-prettier
+```
+
+`prettier` 를 뒤에 둬야 포매팅 규칙 충돌이 꺼진다. 그리고 `airbnb-base` 는 peer dependency(`eslint-plugin-import` 등)를 직접 설치해야 동작하고, React 규칙까지 필요하면 `airbnb-base` 가 아니라 `airbnb` 다.

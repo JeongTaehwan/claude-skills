@@ -37,3 +37,31 @@ https://nextjs.org/docs/app/guides/package-bundling
 ## 인용 포인트
 - "번들 다이어트는 측정부터" — 감으로 라이브러리를 빼는 접근을 멈추게 할 때의 근거.
 - Turbopack 분석기는 v16.1부터라는 버전 조건 — 도구 선택 논의에서 빌드 파이프라인(Webpack/Turbopack)별로 도구가 다름을 인용.
+
+## 코드 예시
+
+"측정 → 처방"을 한 파일에 붙여 둔 형태 — 분석기는 `ANALYZE=true` 일 때만 켜지고, 아이콘·유틸 라이브러리는 부분 임포트로 강제된다.
+
+```js
+// next.config.js
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true", // 평소 빌드에는 영향 없음
+});
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    // 통째로 끌려오는 배럴 임포트를 개별 모듈 임포트로 바꿔 준다
+    optimizePackageImports: ["lucide-react", "date-fns", "lodash-es"],
+  },
+};
+
+module.exports = withBundleAnalyzer(nextConfig);
+```
+
+```bash
+ANALYZE=true npx next build   # Webpack: 트리맵 리포트가 열린다
+npx next experimental-analyze # Turbopack 통합 분석기 (v16.1+)
+```
+
+`optimizePackageImports` 는 배럴 파일이 원인일 때만 듣는다 — 라이브러리 자체가 무거운 경우엔 숫자가 거의 안 움직이므로, 재측정 없이 "적용했으니 줄었다"고 적으면 안 된다.

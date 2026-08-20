@@ -35,3 +35,32 @@ App Router의 지연 로딩 가이드. `next/dynamic`이 React.lazy와 Suspense�
 ## 인용 포인트
 - `next/dynamic` = React.lazy + Suspense 래퍼라는 한 줄 정의 — 별도 마법이 아니라 표준 메커니즘의 프레임워크 통합이라는 점.
 - "초기 화면에 없는 무거운 UI는 분리"라는 적용 기준 — 무엇을 dynamic으로 감쌀지 리뷰에서 다툴 때의 판단선.
+
+## 코드 예시
+
+"초기 화면에 없는 것은 초기 번들에도 없다" — 모달을 여는 순간까지 주소검색 위젯의 다운로드를 미룬다.
+
+```jsx
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+
+// 임포트 시점이 아니라 렌더 시점에 청크를 받는다
+const AddressSearchModal = dynamic(() => import("./AddressSearchModal"), {
+  ssr: false, // window·주소검색 SDK 의존 위젯이라 서버 렌더를 생략
+  loading: () => <p>주소 검색을 불러오는 중…</p>,
+});
+
+export default function ShippingForm() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)}>주소 찾기</button>
+      {open && <AddressSearchModal onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+```
+
+버튼을 누른 뒤에야 청크 요청이 시작되므로, 저속 회선에서는 이 분리가 초기 로딩을 줄인 대신 첫 클릭의 대기를 만든다 — 자주 눌리는 UI라면 hover·focus 시점 프리페치를 함께 얹어야 한다.

@@ -35,3 +35,30 @@ Mike Cohn이 만든 테스트 피라미드 개념의 짧은 원전 정의와, �
 ## 인용 포인트
 - "아이스크림 콘"이라는 이름은 팀에 현재 상태를 인식시키는 데 놀랍도록 잘 먹힌다. 테스트 개수를 층별로 세어 그 모양을 그려 붙이면 논쟁 없이 문제가 공유된다.
 - 피라미드의 근거가 "층 이름"이 아니라 "실행 비용과 취약성"이라는 점은, E2E를 줄이자는 제안을 취향이 아닌 비용 논거로 만들어 준다.
+
+## 코드 예시
+
+"우리 스위트가 지금 어떤 모양인가"를 논쟁 없이 보여 주는 최소 계측 — 층별 케이스 수와 실행 시간을 세어 그대로 그린다.
+
+```bash
+#!/usr/bin/env bash
+# tools/pyramid-shape.sh — 케이스 수와 소요 시간을 층별로 집계
+set -euo pipefail
+
+for layer in unit integration e2e; do
+  case $layer in
+    unit)        dir=test/unit ;;
+    integration) dir=test/integration ;;
+    e2e)         dir=e2e ;;
+  esac
+
+  cases=$(grep -rhoE '\b(test|it)\(' "$dir" | wc -l)
+  # CI 가 남긴 JUnit XML 에서 층별 실행 시간 합계(초)
+  secs=$(xmllint --xpath 'sum(//testsuite/@time)' "reports/$layer.xml" 2>/dev/null || echo 0)
+
+  bar=$(printf '#%.0s' $(seq 1 $(( cases / 10 + 1 ))))
+  printf '%-12s %5d cases %8.1fs  %s\n' "$layer" "$cases" "$secs" "$bar"
+done
+```
+
+개수는 모양을 보여 줄 뿐 무게를 보여 주지는 않는다 — 단위 테스트 2,000 개가 전부 게터를 검증하고 있어도 이 그림은 건강한 피라미드로 나오고, 그래서 옆 칸의 실행 시간과 함께 읽어야 한다.

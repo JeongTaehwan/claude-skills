@@ -36,3 +36,28 @@ Guillermo Rauch의 2016년 트윗 한 줄을 세 조각으로 나눠 각각 왜 
 - "you get diminishing returns on your tests as the coverage increases much beyond 70%" — 커버리지 100% 요구에 대한 가장 짧은 반론.
 - 원 출처가 Guillermo Rauch(2016)의 트윗이라는 점 — 인용할 때 Dodds 글과 원 트윗을 함께 표기하면 신뢰도가 올라간다.
 - 목이 "통합에 대한 확신을 대가로 속도를 산다"는 구도 — 목 남용을 지적하는 리뷰 코멘트의 프레임.
+
+## 코드 예시
+
+"70% 를 크게 넘기면 수익이 급감한다"를 게이트 설계로 옮긴 것 — 목표치를 계속 올리는 대신 하한을 두고 **하락만** 막는다.
+
+```bash
+#!/usr/bin/env bash
+# tools/coverage-gate.sh — istanbul json-summary 리포터 산출물을 비교
+set -euo pipefail
+
+FLOOR=70          # 이 아래로는 내려가지 않는다
+TOLERANCE=0.5     # 리팩터링으로 인한 소폭 변동은 허용
+
+pct() { jq -r '.total.lines.pct' "$1"; }
+base=$(pct coverage/base/coverage-summary.json)   # 머지 대상 브랜치에서 미리 생성
+head=$(pct coverage/coverage-summary.json)
+
+awk -v b="$base" -v h="$head" -v f="$FLOOR" -v t="$TOLERANCE" 'BEGIN {
+  if (h < f)     { printf "FAIL 하한 미달: %.1f%% < %.1f%%\n", h, f; exit 1 }
+  if (b - h > t) { printf "FAIL 커버리지 하락: %.1f%% → %.1f%%\n", b, h; exit 1 }
+  printf "OK %.1f%% (base %.1f%%) — 상향은 게이트가 아니라 판단의 영역\n", h, b
+}'
+```
+
+하락을 막는 것도 결국 라인 수를 세는 일이다 — 삭제된 코드나 새로 추가된 설정 파일 하나로 비율이 흔들리고, 그때 게이트를 통과시키려 의미 없는 테스트를 붙이는 압력은 목표치 방식과 똑같이 생긴다.

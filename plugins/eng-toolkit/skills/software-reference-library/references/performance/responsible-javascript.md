@@ -36,3 +36,29 @@ Jeremy Wagner의 A Book Apart 책(2021) — 가장 확실한 성능 개선은 "J
 ## 인용 포인트
 - "JS 1KB는 이미지 1KB보다 비싸다" — 전송 후에도 파싱·실행 비용을 치르기 때문. 번들 예산을 이미지 예산과 별도로 잡자는 제안의 논거.
 - 가장 빠른 요청은 하지 않는 요청이고, 가장 빠른 JS는 보내지 않는 JS라는 프레이밍 — 최적화 논의를 "어떻게 잘 보낼까"에서 "보내야 하나"로 되돌리는 데 쓴다.
+
+## 코드 예시
+
+"번들 예산을 이미지 예산과 별도로 잡자"는 제안을 CI가 강제할 수 있는 형태로 옮긴 Lighthouse 성능 예산 파일(`budget.json`).
+
+```json
+[
+  {
+    "path": "/*",
+    "resourceSizes": [
+      { "resourceType": "script", "budget": 170 },
+      { "resourceType": "third-party", "budget": 60 },
+      { "resourceType": "image", "budget": 500 },
+      { "resourceType": "total", "budget": 900 }
+    ],
+    "resourceCounts": [
+      { "resourceType": "third-party", "budget": 5 }
+    ],
+    "timings": [
+      { "metric": "interactive", "budget": 5000 }
+    ]
+  }
+]
+```
+
+`budget` 단위는 KiB이고 재는 값은 **전송 크기**다 — 즉 이 파일은 이 책의 핵심 논지인 파싱·실행 비용을 직접 재지 못한다. `script` 한도를 `image`보다 훨씬 빡빡하게 잡는 것으로만 그 비대칭을 반영할 수 있고, 저사양 기기의 실제 CPU 시간은 `interactive` 같은 시간 예산으로 따로 걸어야 한다.

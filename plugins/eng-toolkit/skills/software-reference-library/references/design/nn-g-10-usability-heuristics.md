@@ -35,3 +35,40 @@ Jakob Nielsen이 1994년에 정리한 10개 사용성 원칙 — 30년 넘게 UI
 ## 인용 포인트
 - "휴리스틱은 구체적 가이드라인이 아니라 경험 법칙"이라는 원문의 자기 규정은, 이 목록을 기계적 통과/실패 기준으로 쓰려는 시도를 막을 때 쓸 수 있다.
 - "시스템 상태의 가시성"은 결제 처리 중 로딩·진행 표시가 왜 필수인지를 설명하는 가장 짧은 근거다.
+
+## 코드 예시
+
+휴리스틱을 리뷰 코멘트가 아니라 코드로 강제한 형태 — 삭제 하나에 #3(사용자 통제와 자유), #1(상태의 가시성), #9(오류 복구 지원)가 동시에 걸린다.
+
+```js
+const UNDO_WINDOW_MS = 6000;
+
+// #3 — 확인 대화상자로 막는 대신, 실행하고 되돌릴 길을 남긴다
+function deleteItem(item) {
+  list.removeRow(item.id); // 즉시 반영: 기다리게 하지 않는다
+  const commit = setTimeout(
+    () => api.delete(item.id).catch(() => failed(item)),
+    UNDO_WINDOW_MS,
+  );
+
+  // #1 — 무슨 일이 일어났는지, 얼마나 되돌릴 수 있는지를 같이 보여준다
+  toast({
+    live: 'status',
+    text: `'${item.name}' 삭제됨`,
+    action: { label: '실행 취소', run: () => { clearTimeout(commit); list.restoreRow(item); } },
+    duration: UNDO_WINDOW_MS,
+  });
+}
+
+// #9 — 실패 메시지는 원인과 다음 행동을 함께 준다
+function failed(item) {
+  list.restoreRow(item);
+  toast({
+    live: 'alert',
+    text: `'${item.name}' 삭제 실패 (네트워크). 다시 시도해 주세요.`,
+    action: { label: '다시 시도', run: () => deleteItem(item) },
+  });
+}
+```
+
+되돌리기 창이 클라이언트 타이머에 얹혀 있어서, 탭을 닫거나 화면을 벗어나면 commit이 통째로 증발한다 — 서버 쪽 soft delete로 받쳐야 "취소했는데 지워졌다"가 안 생긴다. 결제·발송처럼 되돌릴 수 없는 액션에는 이 패턴 대신 #5(오류 예방)의 확인 단계가 맞다.

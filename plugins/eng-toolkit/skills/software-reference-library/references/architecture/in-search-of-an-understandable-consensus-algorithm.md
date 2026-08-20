@@ -36,3 +36,33 @@ Raft는 합의를 리더 선출 / 로그 복제 / 안전성 세 하위 문제로
 ## 인용 포인트
 - "이해 가능성을 1차 설계 목표로 삼았다"는 프레이밍은, 팀 설계 논의에서 "동작하지만 아무도 못 읽는 구조"를 반대할 때 인용하기 좋다.
 - 강한 리더 모델로 상태 공간을 줄였다는 설명은, 복잡한 동시성 설계를 단순화하자고 설득할 때의 전형적 사례로 쓰인다.
+
+## 코드 예시
+
+"강한 리더 모델"이 실제로 안전성을 만드는 지점은 §5.4.1 선거 제약 하나다 — 커밋된 로그를 가진 후보만 리더가 될 수 있게 하는 투표 판정.
+
+```python
+def handle_request_vote(state, term, candidate_id, last_log_index, last_log_term):
+    # 1. 낡은 term 의 요청은 즉시 거절
+    if term < state.current_term:
+        return (state.current_term, False)
+    if term > state.current_term:
+        state.current_term, state.voted_for = term, None  # 새 term 이면 투표 초기화
+
+    # 2. 한 term 에 한 표 (이것이 리더 둘을 막는다)
+    if state.voted_for not in (None, candidate_id):
+        return (state.current_term, False)
+
+    # 3. 선거 제약 §5.4.1 — 후보 로그가 내 로그보다 최신이어야 한다.
+    #    term 을 먼저 비교하고, 같을 때만 길이를 본다.
+    my_term = state.log[-1].term if state.log else 0
+    my_index = len(state.log)
+    up_to_date = (last_log_term, last_log_index) >= (my_term, my_index)
+    if not up_to_date:
+        return (state.current_term, False)
+
+    state.voted_for = candidate_id
+    return (state.current_term, True)
+```
+
+`current_term` 과 `voted_for` 는 응답을 보내기 **전에** 디스크에 내려가 있어야 한다 — 이 코드가 감추는 건 그 영속화이고, 빠뜨리면 재시작한 노드가 같은 term 에 두 번 투표해 리더가 둘이 된다.

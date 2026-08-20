@@ -36,3 +36,34 @@ API 레퍼런스가 본체다. 타입별 체이닝(`Joi.string().email().require
 
 ## 인용 포인트
 - 검증 규칙을 스키마로 외부화하면 "입력 계약"이 리뷰 가능한 산출물이 된다 — 검증 코드 분산을 정리하자는 제안의 근거.
+
+## 코드 예시
+
+스키마 하나를 런타임 방어와 테스트 픽스처 검증 양쪽에서 재사용해, 픽스처가 계약에서 조용히 벗어나는 것을 막는 형태.
+
+```js
+const Joi = require('joi');
+
+// 주문 생성 입력 계약 — "쿠폰 코드가 null 이면?" 같은 경계가 여기 명시된다
+const createOrderSchema = Joi.object({
+  sku: Joi.string().pattern(/^[A-Z0-9-]+$/).required(),
+  quantity: Joi.number().integer().min(1).required(),
+  couponCode: Joi.string().allow(null).default(null),
+  channel: Joi.string().when('couponCode', {
+    is: Joi.string().required(), // 쿠폰이 실제로 들어온 경우에만
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+});
+
+// (1) 런타임 방어 — 에러를 모아서 한 번에 돌려준다
+const { value, error } = createOrderSchema.validate(req.body, { abortEarly: false });
+if (error) return res.status(400).json({ details: error.details });
+
+// (2) 같은 스키마로 테스트 픽스처를 검증한다
+test('주문 픽스처가 입력 계약을 만족한다', () => {
+  expect(createOrderSchema.validate(orderFixture).error).toBeUndefined();
+});
+```
+
+`validate` 는 기본적으로 값을 변환(convert)해 돌려주므로 문자열 `"2"` 가 숫자 `2` 로 통과한다 — 이후 코드는 반드시 원본이 아니라 반환된 `value` 를 써야 하고, 변환을 원치 않으면 `{ convert: false }` 를 명시해야 한다.
