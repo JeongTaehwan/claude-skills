@@ -1,7 +1,7 @@
 {
   "name": "eng-toolkit",
-  "description": "구현 전 설계 판단 절차(implementation-design), 6개 도메인 레퍼런스 312개 라이브러리(software-reference-library), 사람·검증 AI·구현 AI 역할 분리 파이프라인(role-isolation-pipeline), 저속 네트워크 화면 최적화 플레이북(slow-network-ux), 브랜치 main 최신화·충돌 해결 루틴(main-sync), develop 대상 MR 충돌 해결(mr-conflict-resolve)",
-  "version": "0.5.0",
+  "description": "구현 전 설계 판단 절차(implementation-design), 6개 도메인 레퍼런스 312개 라이브러리(software-reference-library), 사람·검증 AI·구현 AI 역할 분리 파이프라인(role-isolation-pipeline), 저속 네트워크 화면 최적화 플레이북(slow-network-ux), 브랜치 main 최신화·충돌 해결 루틴(main-sync), develop 대상 MR 충돌 해결(mr-conflict-resolve), 같은 코드가 환경마다 다르게 도는 원인을 찾는 env-divergence",
+  "version": "0.6.0",
   "author": {
     "name": "JeongTaehwan",
     "url": "https://github.com/JeongTaehwan"
