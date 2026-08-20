@@ -16,6 +16,13 @@ for skill in "$SKILLS"/*/; do
   echo "  skill  $name"
 done
 
+# 감사 도구를 ~/.claude 아래에 설치한다.
+# macOS 가 ~/Documents 를 TCC 로 보호해서, launchd 무인 실행은 저장소를 읽지 못한다.
+# 그래서 스크립트도 대상 스킬도 보호 대상이 아닌 ~/.claude 쪽 사본을 쓴다.
+mkdir -p "$DEST/skill-audit/reports"
+cp "$REPO/scripts/audit.py" "$DEST/skill-audit/audit.py"
+echo "  tool   skill-audit/audit.py"
+
 # CLAUDE.md 는 매 세션 로드되는 계층이라 덮어쓰기 전에 확인한다.
 if [ -e "$DEST/CLAUDE.md" ] && ! cmp -s "$REPO/memory/CLAUDE.md" "$DEST/CLAUDE.md"; then
   echo

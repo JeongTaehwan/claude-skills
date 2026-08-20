@@ -24,6 +24,9 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 기본값은 저장소 안의 스킬이지만, --skills-dir 로 바꿀 수 있다.
+# macOS 는 ~/Documents 를 TCC 로 보호하므로 launchd 가 띄운 프로세스는 저장소를 읽지 못한다.
+# 무인 실행에서는 ~/.claude/skills (보호 대상 아님) 를 가리켜야 한다.
 SKILLS = os.path.join(REPO, "plugins", "eng-toolkit", "skills")
 PROJECTS = os.path.expanduser("~/.claude/projects")
 STATE_DEFAULT = os.path.join(REPO, "reports", "state.json")
@@ -276,10 +279,23 @@ def main():
     ap.add_argument("--date")
     ap.add_argument("--dry-run", action="store_true",
                     help="상태 파일을 갱신하지 않는다 (미리보기)")
+    ap.add_argument("--force", action="store_true",
+                    help="오늘 리포트가 이미 있어도 다시 점검한다")
+    ap.add_argument("--skills-dir", help="스킬 디렉터리 (기본: 저장소 안). "
+                    "launchd 무인 실행에서는 ~/.claude/skills 를 준다 — "
+                    "macOS 가 ~/Documents 를 막기 때문이다.")
     ap.add_argument("--list", action="store_true", help="열린 항목 나열하고 종료")
     ap.add_argument("--ack", metavar="KEY"); ap.add_argument("--wontfix", metavar="KEY")
     ap.add_argument("--reopen", metavar="KEY"); ap.add_argument("--note", default="")
     a = ap.parse_args()
+
+    global SKILLS
+    if a.skills_dir:
+        SKILLS = os.path.expanduser(a.skills_dir)
+    if not os.path.isdir(SKILLS):
+        print(f"스킬 디렉터리를 읽을 수 없습니다: {SKILLS}", file=sys.stderr)
+        print("경로가 맞는지, macOS 파일 접근 권한에 막히지 않았는지 확인하세요.", file=sys.stderr)
+        return 2
 
     state = load_state(a.state)
     today = a.date or datetime.now().strftime("%Y-%m-%d")
@@ -302,6 +318,16 @@ def main():
             print(f"[{r.get('status'):<12}] {r.get('runs_seen',1):>2}회  {k}")
             print(f"{'':17}{r.get('detail','')}" + (f"  · 메모: {r['note']}" if r.get("note") else ""))
         return 0
+
+    # 같은 날 두 번 도는 것을 막는다. launchd 가 아침에 기계 점검을 돌리고
+    # 앱 스케줄러가 나중에 판단 층을 얹는 2층 구조라, 그대로 두면 state.json 의
+    # 연속 횟수(runs_seen)가 하루에 두 번 올라가 '4회 방치' 판정이 절반 속도로 앞당겨진다.
+    if a.out and not a.force:
+        existing = os.path.join(a.out, f"{today}.md")
+        if os.path.exists(existing):
+            print(f"오늘 리포트가 이미 있습니다: {existing}")
+            print("기계 점검은 건너뜁니다. 다시 돌리려면 --force.")
+            return 0
 
     urlmap = all_urls()
     current, skipped, checked = [], [], set()
