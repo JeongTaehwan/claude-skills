@@ -5,9 +5,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "기초 CS 개념 정리라 낡을 성질이 아님",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "JaeYeopHan/Interview_Question_for_Beginner",
    "where": [
     "software-reference-library/references/development/interview-question-for-beginner.md"
@@ -18,9 +18,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "학습 경로 큐레이션. 커밋 빈도가 품질 신호가 아님",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "ProductHired/open-product-management",
    "where": [
     "software-reference-library/references/planning/open-product-management.md"
@@ -31,9 +31,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "큐레이션 저장소",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "Team-Neighborhood/I-want-to-study-Data-Science",
    "where": [
     "software-reference-library/references/development/i-want-to-study-data-science.md"
@@ -44,9 +44,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "네이티브 loading=lazy 로 대체 가능한지 검토",
    "runs_seen": 3,
-   "status": "open",
+   "status": "acknowledged",
    "subject": "aFarkas/lazysizes",
    "where": [
     "slow-network-ux/references/github.md"
@@ -57,9 +57,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "awesome 리스트",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "dastergon/awesome-chaos-engineering",
    "where": [
     "software-reference-library/references/qa/awesome-chaos-engineering.md"
@@ -70,9 +70,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "알고리즘 구현체. 완결돼서 커밋이 없는 것",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "evanw/thumbhash",
    "where": [
     "slow-network-ux/references/github.md"
@@ -83,9 +83,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "원칙 모음. 내용이 완결된 성격",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "goldbergyoni/javascript-testing-best-practices",
    "where": [
     "software-reference-library/references/testing/javascript-testing-best-practices.md"
@@ -96,9 +96,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_archived",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "후속은 AFL++. 퍼징을 실제로 도입할 때 교체",
    "runs_seen": 3,
-   "status": "open",
+   "status": "acknowledged",
    "subject": "google/AFL",
    "where": [
     "software-reference-library/references/testing/afl.md"
@@ -109,9 +109,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_archived",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "가이드 내용은 유효. 저장소만 동결됐고 코드리뷰 기준 자체는 안 바뀐다",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "google/eng-practices",
    "where": [
     "software-reference-library/references/development/google-engineering-practices.md"
@@ -122,9 +122,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_archived",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "archived. 이미지 플레이스홀더 대체재 검토 필요",
    "runs_seen": 3,
-   "status": "open",
+   "status": "acknowledged",
    "subject": "joe-bell/plaiceholder",
    "where": [
     "slow-network-ux/references/github.md"
@@ -135,9 +135,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "awesome 리스트",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "ligurio/awesome-software-quality",
    "where": [
     "software-reference-library/references/qa/awesome-software-quality.md"
@@ -148,9 +148,9 @@
    "first_seen": "2026-08-19",
    "kind": "repo_stale",
    "last_seen": "2026-08-20",
-   "note": "",
+   "note": "알고리즘 구현체. 완결돼서 커밋이 없는 것",
    "runs_seen": 3,
-   "status": "open",
+   "status": "wontfix",
    "subject": "woltapp/blurhash",
    "where": [
     "slow-network-ux/references/github.md"
