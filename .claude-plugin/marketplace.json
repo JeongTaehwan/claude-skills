@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "taehwan-skills",
-  "description": "개인 Claude Code 스킬 모음 — 구현 전 설계 판단, 6개 도메인 레퍼런스 라이브러리, 역할 분리 협업 파이프라인, 주간 자동 점검",
+  "description": "개인 Claude Code 스킬 모음 — 구현 전 설계 판단, 7개 도메인 레퍼런스 라이브러리, 역할 분리 협업 파이프라인, 주간 자동 점검",
   "owner": {
     "name": "JeongTaehwan",
     "url": "https://github.com/JeongTaehwan"
@@ -9,9 +9,9 @@
   "plugins": [
     {
       "name": "eng-toolkit",
-      "description": "구현 요청에 설계 판단을 먼저 적용하는 implementation-design, 개발·기획·설계·디자인·QA·테스트 6개 도메인 레퍼런스 312개를 페르소나·사용상황과 함께 항목별 파일로 정리한 software-reference-library, 사람·검증 AI·구현 AI 역할 분리 파이프라인 role-isolation-pipeline, 느린 네트워크에서도 화면이 빠르게 보이게 하는 플레이북 slow-network-ux, 브랜치 main 최신화·충돌 해결 루틴 main-sync, develop 대상 MR 충돌 해결 mr-conflict-resolve",
+      "description": "구현 요청에 설계 판단을 먼저 적용하는 implementation-design, 개발·기획·설계·디자인·QA·테스트·성능 7개 도메인 레퍼런스 420개를 페르소나·사용상황과 함께 항목별 파일로 정리한 software-reference-library, 사람·검증 AI·구현 AI 역할 분리 파이프라인 role-isolation-pipeline, 느린 네트워크에서도 화면이 빠르게 보이게 하는 플레이북 slow-network-ux, 브랜치 main 최신화·충돌 해결 루틴 main-sync, develop 대상 MR 충돌 해결 mr-conflict-resolve",
       "source": "./plugins/eng-toolkit",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "category": "productivity",
       "tags": [
         "engineering",

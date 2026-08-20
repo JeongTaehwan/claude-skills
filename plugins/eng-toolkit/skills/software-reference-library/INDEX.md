@@ -1,6 +1,6 @@
 # 전체 색인
 
-자료 312개, 도메인 6개. 항목마다 파일 하나이고, 각 파일에 **페르소나(누가 드는가)** 와 **이럴 때 연다 / 이럴 땐 아니다** 가 들어 있다.
+자료 420개, 도메인 7개. 항목마다 파일 하나이고, 각 파일에 **페르소나(누가 드는가)** 와 **이럴 때 연다 / 이럴 땐 아니다** 가 들어 있다.
 
 | 도메인 | 개수 | 무엇을 다루나 | 색인 |
 |---|---|---|---|
@@ -10,6 +10,7 @@
 | **디자인** | 29 | 화면과 상호작용을 만든다 | [references/design/_index.md](references/design/_index.md) |
 | **QA** | 31 | 품질을 어떻게 보증할지 정한다 | [references/qa/_index.md](references/qa/_index.md) |
 | **테스트** | 54 | 실제로 검증한다 | [references/testing/_index.md](references/testing/_index.md) |
+| **성능** | 108 | 느린 네트워크·저사양에서도 화면이 빠르게 보이게 한다 | [references/performance/_index.md](references/performance/_index.md) |
 
 ## 전체 목록
 
@@ -343,3 +344,113 @@
 - [`testing/wiremock-http`](references/testing/wiremock-http.md) — **WireMock — HTTP 목 서버** · 코드에 목 객체를 심는 대신 **실제 HTTP 서버를 띄워** 스텁 응답을 돌려주는 도구 — 클라이언트 라이브러리·직렬화·타임아웃·재시도까지 실제 네트워크 경로를 그대로 태운 채…
 - [`testing/xunit-test-patterns`](references/testing/xunit-test-patterns.md) — **xUnit Test Patterns** · Gerard Meszaros가 테스트 코드의 패턴과 안티패턴에 이름을 붙여 사전으로 만든 사이트 — Test Double(더미·스텁·스파이·목·페이크)이라는 용어 자체가 여기서…
 
+### 성능 (performance)
+
+- [`performance/network-information-api`](references/performance/network-information-api.md) — **Network Information API** · navigator.connection으로 연결 품질(effectiveType·rtt·saveData) 읽기 — Chromium 전용, feature detection 필수
+- [`performance/save-data-header`](references/performance/save-data-header.md) — **Save-Data 요청 헤더** · 데이터 절약 사용자의 Save-Data: on 힌트로 서버가 JS 없이 경량 응답 분기, Vary 필수
+- [`performance/prefers-reduced-data`](references/performance/prefers-reduced-data.md) — **prefers-reduced-data 미디어 쿼리** · CSS만으로 데이터 절약 선호 감지 — Experimental, 기본 활성 브라우저 없음, 병기용
+- [`performance/adaptive-loading`](references/performance/adaptive-loading.md) — **Adaptive Loading — 적응형 로딩 패턴** · 빠른 쪽엔 풀 경험, 느린 쪽엔 코어 경험 — 신호별 분기 전략의 원전(Osmani, CDS 2019)
+- [`performance/perceived-performance`](references/performance/perceived-performance.md) — **Perceived Performance — 체감 성능** · 객관 시간과 별개인 체감 속도 — 스켈레톤·즉각 피드백·점진 표시가 통하는 원리
+- [`performance/app-shell-architecture`](references/performance/app-shell-architecture.md) — **App Shell 아키텍처** · UI 뼈대를 SW로 캐시해 재방문 시 즉시 그리고 콘텐츠만 네트워크에서 채우는 원전(2015)
+- [`performance/prpl-pattern`](references/performance/prpl-pattern.md) — **PRPL 패턴** · Preload·Render·Pre-cache·Lazy load — 라우트 단위 로딩 우선순위 전략 한 장 정리
+- [`performance/rail-model`](references/performance/rail-model.md) — **RAIL 모델** · Response 100ms·프레임 10ms·Load 5초의 고전 예산 — 수치는 CWV로 대체됐다는 주의 포함
+- [`performance/useoptimistic`](references/performance/useoptimistic.md) — **useOptimistic — React 낙관적 UI 훅** · 서버 응답 전 결과를 미리 반영하고 완료·실패 시 자동 복원되는 낙관적 UI 공식 훅
+- [`performance/critical-rendering-path`](references/performance/critical-rendering-path.md) — **Critical Rendering Path** · DOM→CSSOM→렌더 트리→레이아웃→페인트 파이프라인과 CSS·동기 JS가 렌더를 막는 원리
+- [`performance/critical-css`](references/performance/critical-css.md) — **Critical CSS 추출·인라인** · above-the-fold CSS만 head에 인라인, 나머지는 비동기 — CSS 왕복 없이 첫 페인트
+- [`performance/rel-preload`](references/performance/rel-preload.md) — **rel="preload" — 리소스 사전 로드** · 늦게 발견되는 폰트·LCP 이미지를 미리 받는 선언 — as 의무·crossorigin 함정·남용 부작용
+- [`performance/preconnect-dns-prefetch`](references/performance/preconnect-dns-prefetch.md) — **preconnect · dns-prefetch — 연결 사전 수립** · 교차 출처 DNS+TCP+TLS 왕복 선제거 — RTT 클수록 효과, 중요 출처 소수에만
+- [`performance/fetchpriority`](references/performance/fetchpriority.md) — **fetchpriority — Fetch Priority API** · 브라우저 우선순위 추론을 high/low로 보정 — LCP 이미지 high가 대표 사용법
+- [`performance/early-hints`](references/performance/early-hints.md) — **103 Early Hints** · 본 응답 전 103으로 preconnect·preload 힌트 선송신 — SSR 사고 시간과 로딩을 겹치기
+- [`performance/responsive-images`](references/performance/responsive-images.md) — **반응형 이미지 (srcset · sizes · picture)** · 해상도·뷰포트별 후보를 선언하고 브라우저가 고르는 표준 — 아트 디렉션·포맷 폴백 포함
+- [`performance/learn-images`](references/performance/learn-images.md) — **Learn Images — 이미지 포맷·압축 코스** · AVIF>WebP>JPEG 압축 효율과 picture 폴백 — 동일 품질에서 30~50% 바이트 절감 근거
+- [`performance/browser-level-image-lazy-loading`](references/performance/browser-level-image-lazy-loading.md) — **브라우저 내장 이미지 lazy loading** · loading="lazy"로 JS 없이 지연 로드 — 임계값은 연결 속도 따라 변동, LCP에는 금지
+- [`performance/lqip-blur-up`](references/performance/lqip-blur-up.md) — **LQIP · blur-up — Next.js Image placeholder** · 초저해상도 블러를 먼저 보여주고 원본 교체 — 관용 패턴의 사실상 canonical 구현
+- [`performance/video-preload-poster`](references/performance/video-preload-poster.md) — **비디오 preload · poster** · preload 3값 트레이드오프와 poster — 비자동재생 비디오는 none+poster 권장
+- [`performance/code-splitting`](references/performance/code-splitting.md) — **코드 분할** · 동적 import()로 라우트·컴포넌트 단위로 번들을 쪼개 지금 필요한 코드만 보내는 기법
+- [`performance/tree-shaking`](references/performance/tree-shaking.md) — **트리 셰이킹** · ESM 정적 구조로 미사용 export 제거 — sideEffects·CJS 변환 함정까지 다루는 가이드
+- [`performance/performance-budgets-101`](references/performance/performance-budgets-101.md) — **성능 예산 101** · 번들 KB·요청 수·지표에 수치 상한을 걸어 회귀를 막는 방법론, budget.json CI 강제로 연결
+- [`performance/efficiently-load-third-party-javascript`](references/performance/efficiently-load-third-party-javascript.md) — **서드파티 JavaScript 효율적 로딩** · 못 빼는 서드파티 스크립트의 async/defer·지연 주입·파사드 완화 전략
+- [`performance/http-caching`](references/performance/http-caching.md) — **HTTP 캐싱 가이드 — MDN** · private/shared·ETag 재검증·해시 파일명+immutable까지 HTTP 캐싱 전체 그림
+- [`performance/stale-while-revalidate`](references/performance/stale-while-revalidate.md) — **stale-while-revalidate** · 만료 캐시를 즉시 응답하고 뒤에서 재검증 — 신선도 대신 지연을 숨기는 절충 전략
+- [`performance/service-worker-caching-strategies`](references/performance/service-worker-caching-strategies.md) — **서비스 워커 캐싱 전략 (Workbox)** · SW 5대 전략의 정의와 리소스 유형별 선택 기준을 정리한 Workbox 공식 문서
+- [`performance/the-offline-cookbook`](references/performance/the-offline-cookbook.md) — **The Offline Cookbook** · 캐시를 언제 채우고 언제 읽을지 조합한 Jake Archibald의 오프라인·불안정망 레시피
+- [`performance/http2-high-performance-browser-networking`](references/performance/http2-high-performance-browser-networking.md) — **HTTP/2 — High Performance Browser Networking** · 멀티플렉싱·HPACK이 HTTP/1.1 HoL을 없애는 원리 — 샤딩·스프라이트 철거의 근거
+- [`performance/http3-quic`](references/performance/http3-quic.md) — **HTTP/3 · QUIC (RFC 9114 · RFC 9000)** · UDP 위 1-RTT/0-RTT 핸드셰이크와 스트림별 독립 손실 복구의 IETF 표준 원문
+- [`performance/http-compression`](references/performance/http-compression.md) — **HTTP 압축 — MDN** · gzip·Brotli·zstd 협상 동작과 "텍스트 필수, 기압축 포맷 금지" 원칙
+- [`performance/cdn-optimization`](references/performance/cdn-optimization.md) — **CDN 최적화** · 엣지 근접으로 RTT를 줄이고 캐시 키·s-maxage·엣지 기능으로 적중률 올리는 전략
+- [`performance/rendering-on-the-web`](references/performance/rendering-on-the-web.md) — **Rendering on the Web** · SSR/SSG/CSR/스트리밍/점진적 하이드레이션을 지표 트레이드오프 축으로 비교하는 기준 문서
+- [`performance/react-suspense-streaming`](references/performance/react-suspense-streaming.md) — **React Suspense 스트리밍** · Suspense 경계로 준비된 UI부터 스트리밍 — 느린 데이터의 TTFB 인질극을 끊는 계약
+- [`performance/islands-architecture-progressive-hydration`](references/performance/islands-architecture-progressive-hydration.md) — **Islands 아키텍처 · 점진적 하이드레이션** · 정적 바다 위 인터랙티브 섬만 하이드레이션 — JS 비용을 구조로 줄이는 논거
+- [`performance/lab-vs-field-data`](references/performance/lab-vs-field-data.md) — **Lab vs Field 데이터** · Lighthouse와 실사용자 수치가 다른 이유와 데이터별 용도 분리 기준
+- [`performance/lighthouse-throttling`](references/performance/lighthouse-throttling.md) — **Lighthouse 스로틀링** · 시뮬레이트(기본 Slow 4G≈1.6Mbps/150ms+4x CPU)·applied·패킷 레벨 3방식의 정확도 차이
+- [`performance/chrome-devtools-network-throttling`](references/performance/chrome-devtools-network-throttling.md) — **Chrome DevTools 네트워크 스로틀링** · 대역폭·지연·패킷 손실 커스텀 프로필로 개발 중 2G/3G 환경을 재현하는 방법
+- [`performance/webpagetest`](references/performance/webpagetest.md) — **WebPageTest** · 실기기·지역·연결 프로필로 필름스트립·워터폴 실측 — 저속 검증의 최종 관문
+- [`performance/nextjs-image`](references/performance/nextjs-image.md) — **next/image — 자동 이미지 최적화** · 기기·뷰포트별 자동 리사이즈 + AVIF/WebP 변환, 지연 로딩 기본값으로 전송 바이트 절감
+- [`performance/nextjs-streaming-ssr`](references/performance/nextjs-streaming-ssr.md) — **Next.js 스트리밍 SSR — loading.js · Suspense · PPR** · 정적 셸+스켈레톤을 먼저 흘려보내 첫 페인트를 서버 데이터 속도와 분리
+- [`performance/nextjs-dynamic`](references/performance/nextjs-dynamic.md) — **next/dynamic — 코드 스플리팅** · 조건부 무거운 클라이언트 컴포넌트를 초기 번들에서 분리해 열 때만 로드
+- [`performance/nextjs-font`](references/performance/nextjs-font.md) — **next/font — 레이아웃 시프트 없는 폰트** · 빌드 타임 셀프 호스팅으로 폰트 서버 커넥션 제거, size-adjust 폴백으로 CLS 0
+- [`performance/nextjs-link-prefetch`](references/performance/nextjs-link-prefetch.md) — **Next.js Link prefetch 튜닝** · 뷰포트 자동 prefetch를 경로별로 켜고 꺼서 데이터 낭비 없이 내비게이션만 예열
+- [`performance/nextjs-isr`](references/performance/nextjs-isr.md) — **Next.js ISR / 정적 렌더링 — TTFB 절감** · 미리 렌더해 CDN 서빙, 재검증으로 갱신 — 서버 대기 없이 첫 바이트를 내보낸다
+- [`performance/nextjs-script`](references/performance/nextjs-script.md) — **next/script — 서드파티 스크립트 전략** · 분석·광고·채팅 스크립트를 strategy별로 격리해 핵심 콘텐츠 대역폭을 지킨다
+- [`performance/nextjs-bundle-analyzer`](references/performance/nextjs-bundle-analyzer.md) — **Next.js 번들 분석 — @next/bundle-analyzer** · Webpack·Turbopack 분석기로 번들 측정, optimizePackageImports로 부분 임포트
+- [`performance/nextjs-use-report-web-vitals`](references/performance/nextjs-use-report-web-vitals.md) — **useReportWebVitals — RUM 측정** · 실사용자 LCP/INP/CLS를 내장 훅으로 수집해 lab과 field 수치의 괴리를 확인
+- [`performance/react-adaptive-hooks`](references/performance/react-adaptive-hooks.md) — **react-adaptive-hooks** · 회선·기기 신호로 서빙을 분기하는 적응형 로딩 패턴의 원조. 정체 상태라 패턴만 베낀다
+- [`performance/react-use`](references/performance/react-use.md) — **react-use** · Network Information API를 래핑한 useNetworkState가 유지보수 상태로 제공되는 훅 모음
+- [`performance/quicklink`](references/performance/quicklink.md) — **quicklink** · 보이는 링크를 idle에 프리페치, Save-Data·2G 자동 차단 내장. MPA·정적 사이트용
+- [`performance/guess-js`](references/performance/guess-js.md) — **Guess.js** · GA 데이터로 다음 페이지를 예측해 프리페치하는 웹팩 플러그인. 정체 — 개념 학습용
+- [`performance/blurhash`](references/performance/blurhash.md) — **BlurHash** · 이미지를 20~30자 문자열로 인코딩해 API 응답에 실어 즉시 블러 미리보기를 그리는 표준격
+- [`performance/thumbhash`](references/performance/thumbhash.md) — **ThumbHash** · BlurHash 개선판 — 알파 지원·더 정확한 색 재현. 신규 도입이면 이쪽이 소스 판단
+- [`performance/plaiceholder`](references/performance/plaiceholder.md) — **plaiceholder (아카이브됨)** · 2023-05 아카이브. 쓰지 말고 sharp로 base64를 직접 만들어 blurDataURL에 주입
+- [`performance/sharp`](references/performance/sharp.md) — **sharp** · 리사이즈·WebP/AVIF·플레이스홀더 생성까지 서버 이미지 파이프라인의 사실상 표준
+- [`performance/lazysizes`](references/performance/lazysizes.md) — **lazysizes (대체됨)** · 네이티브 loading="lazy" 보급으로 존재 이유 소멸. 신규엔 쓰지 말 것
+- [`performance/unpic`](references/performance/unpic.md) — **unpic** · 30여 개 이미지 CDN URL을 통일 API로 다루고 srcset 자동 생성. ⭐400이나 활발
+- [`performance/workbox`](references/performance/workbox.md) — **Workbox** · 프리캐싱·SWR 등 캐싱 전략·오프라인 폴백을 모듈로 주는 서비스 워커 표준 라이브러리
+- [`performance/serwist`](references/performance/serwist.md) — **Serwist** · Workbox 포크·next-pwa 후계. @serwist/next가 App Router 공식 지원 — Next SW 1순위
+- [`performance/partytown`](references/performance/partytown.md) — **Partytown** · GA·GTM·픽셀을 웹 워커에서 실행해 메인 스레드를 비운다. 저사양 TBT/INP 개선
+- [`performance/webpack-bundle-analyzer`](references/performance/webpack-bundle-analyzer.md) — **webpack-bundle-analyzer** · 번들 내용물을 줌 가능한 트리맵으로 — 번들 다이어트의 첫 단계. Next는 공식 래퍼로
+- [`performance/size-limit`](references/performance/size-limit.md) — **size-limit** · 크기+다운로드·실행 시간을 계산해 한도 초과 시 CI 실패. 이 계열 최선의 유지보수
+- [`performance/bundlesize`](references/performance/bundlesize.md) — **bundlesize (대체됨)** · 사이즈 예산 CI의 원조이나 정체. size-limit 또는 bundlewatch로 이전
+- [`performance/web-vitals`](references/performance/web-vitals.md) — **web-vitals 라이브러리** · LCP·INP·CLS를 실사용자 환경에서 재는 ~2KB 공식 라이브러리. Next 훅 내장 통합
+- [`performance/lighthouse`](references/performance/lighthouse.md) — **Lighthouse** · 느린 4G·CPU 스로틀링 시뮬레이션 내장 자동 감사 — 랩 환경 저속 점검의 기본
+- [`performance/lighthouse-ci`](references/performance/lighthouse-ci.md) — **Lighthouse CI** · 커밋마다 Lighthouse를 돌려 회귀 차단, 지표별 성능 예산 assertion
+- [`performance/sitespeed-io`](references/performance/sitespeed-io.md) — **sitespeed.io** · 실브라우저 반복 측정 + Grafana 추이 + 스로틀링 시나리오의 자체 호스팅 인프라
+- [`performance/awesome-wpo`](references/performance/awesome-wpo.md) — **awesome-wpo** · WPO 도구·아티클·컨퍼런스를 망라한 대표 awesome 리스트 — 도구 탐색의 출발점
+- [`performance/react-loading-skeleton`](references/performance/react-loading-skeleton.md) — **react-loading-skeleton** · 컴포넌트 타이포·레이아웃에 자동 적응하는 스켈레톤을 한 줄로 — loading.tsx/Suspense용
+- [`performance/tanstack-virtual`](references/performance/tanstack-virtual.md) — **TanStack Virtual** · 마크업 통제를 유지하며 보이는 행만 렌더 — 긴 리스트 1순위, react-query와 동일 생태계
+- [`performance/react-window`](references/performance/react-window.md) — **react-window** · react-virtualized 경량 후속. 고정/가변 리스트·그리드 컴포넌트, 2025 v2로 재개
+- [`performance/polaris-faster-page-loads-fine-grained-dependency-tracking`](references/performance/polaris-faster-page-loads-fine-grained-dependency-tracking.md) — **Polaris (NSDI '16)** · 숨은 의존성까지 추적해 로드 순서를 스케줄링, PLT 중앙값 34% 단축 — 느린 망일수록 효과 큼
+- [`performance/speeding-up-web-page-loads-with-shandian`](references/performance/speeding-up-web-page-loads-with-shandian.md) — **Shandian (NSDI '16)** · 초기 로드에 안 쓰이는 CSS가 3/4 — 초기 상태만 먼저 보내 PLT 절반 이하로 단축
+- [`performance/prophecy-accelerating-mobile-page-loads-final-state-write-logs`](references/performance/prophecy-accelerating-mobile-page-loads-final-state-write-logs.md) — **Prophecy (NSDI '18)** · 서버가 JS힙·DOM 최종 상태를 사전 계산해 재생만 시킴 — PLT 53%·에너지 36% 절감
+- [`performance/vroom-mobile-web-server-aided-dependency-resolution`](references/performance/vroom-mobile-web-server-aided-dependency-resolution.md) — **Vroom (SIGCOMM '17)** · 서버가 의존성 힌트를 제공(push+preload)해 발견과 처리를 분리, PLT 약 절반 단축
+- [`performance/demystifying-page-load-performance-with-wprof`](references/performance/demystifying-page-load-performance-with-wprof.md) — **WProf (NSDI '13)** · 크리티컬 패스 분석의 원조 — 캐싱해도 PLT는 비례해 줄지 않음, 동기 JS가 파싱을 막음
+- [`performance/klotski-reprioritizing-web-content-mobile-user-experience`](references/performance/klotski-reprioritizing-web-content-mobile-user-experience.md) — **Klotski (NSDI '15)** · 전체를 빠르게 하는 대신 중요 콘텐츠를 시간 예산(2초) 안에 먼저 배달하는 우선순위 재조정
+- [`performance/watchtower-fast-secure-mobile-page-loads-remote-dependency`](references/performance/watchtower-fast-secure-mobile-page-loads-remote-dependency.md) — **WatchTower (MobiSys '19)** · 원격 프록시는 조건에 따라 오히려 느려짐 — 도움될 때만 켜서 21.2–41.3% 개선
+- [`performance/the-importance-of-percent-done-progress-indicators`](references/performance/the-importance-of-percent-done-progress-indicators.md) — **Percent-Done Progress Indicators (CHI '85)** · 진행률 표시기 연구의 시조 — 선호는 명확하나 대기 감내 가설은 유의하지 않았다고 정직 보고
+- [`performance/rethinking-the-progress-bar`](references/performance/rethinking-the-progress-bar.md) — **Rethinking the Progress Bar (UIST '07)** · 같은 시간이라도 진행 함수에 따라 체감이 다름 — 끝에서 빨라지게, 멈춤은 초반에
+- [`performance/faster-progress-bars-manipulating-perceived-duration`](references/performance/faster-progress-bars-manipulating-perceived-duration.md) — **Faster Progress Bars (CHI '10)** · 시각 효과만 바꿔도 체감 시간이 달라짐 — 뒤로 흐르며 감속하는 애니메이션이 11% 단축
+- [`performance/a-study-on-tolerable-waiting-time`](references/performance/a-study-on-tolerable-waiting-time.md) — **A Study on Tolerable Waiting Time (2004)** · 피드백 유무가 대기 감내를 유의하게 늘림 — 피드백 없는 한계 약 2초, 15초 초과는 이탈
+- [`performance/the-effect-of-skeleton-screens`](references/performance/the-effect-of-skeleton-screens.md) — **The Effect of Skeleton Screens (ECCE '18)** · 스켈레톤 vs 스피너 — 평균 점수는 스켈레톤 우세지만 통계적 유의차는 없었다
+- [`performance/response-times-the-3-important-limits`](references/performance/response-times-the-3-important-limits.md) — **Response Times: The 3 Important Limits (Nielsen)** · 0.1초/1초/10초 세 한계 — 논문 아닌 검증된 2차 정리, 실험 심리학 결과에 기반
+- [`performance/vesper-measuring-time-to-interactivity-for-web-pages`](references/performance/vesper-measuring-time-to-interactivity-for-web-pages.md) — **Vesper (NSDI '18)** · "로드 완료"를 인터랙티브 시점으로 재정의 — 기존 메트릭은 24–64% 과소/과대평가
+- [`performance/eyeorg-crowdsourcing-web-quality-of-experience`](references/performance/eyeorg-crowdsourcing-web-quality-of-experience.md) — **Eyeorg (CoNEXT '16)** · 사람이 느끼는 로드 시점을 크라우드소싱 — 신형 메트릭조차 인간 지각을 대표 못함
+- [`performance/narrowing-the-gap-between-qos-metrics-and-web-qoe`](references/performance/narrowing-the-gap-between-qos-metrics-and-web-qoe.md) — **QoS ↔ Web QoE (PAM '18)** · 3,400건 사용자 평점으로 검증 — 좋은 메트릭은 페이지 성격에 따라 다르다
+- [`performance/speed-index`](references/performance/speed-index.md) — **Speed Index (원 정의)** · 뷰포트 시각 완성도를 시간 적분한 정의의 원문 — 논문 아닌 공식 문서(1차 출처)
+- [`performance/speed-matters-for-google-web-search`](references/performance/speed-matters-for-google-web-search.md) — **Speed Matters for Google Web Search (2009)** · 400ms 지연이 검색 수 0.2~0.6% 감소, 제거 후에도 이월 효과 — Google 실험 보고서
+- [`performance/performance-related-changes-and-their-user-impact`](references/performance/performance-related-changes-and-their-user-impact.md) — **Bing 2초 지연 실험 (Velocity '09)** · Bing 2초 지연 = 쿼리 -1.8%·매출 -4.3% — 발표 영상이 현존 1차 기록(논문 아님)
+- [`performance/akamai-state-of-online-retail-performance-spring-2017`](references/performance/akamai-state-of-online-retail-performance-spring-2017.md) — **Akamai/SOASTA 리테일 성능 보고서 (2017)** · "100ms = 전환율 최대 -7%"의 원 보고서 — 상관관계 기반 벤더 리포트임을 밝히고 인용
+- [`performance/amazon-100ms-make-data-useful`](references/performance/amazon-100ms-make-data-useful.md) — **Amazon "100ms = 매출 1%" 출처 (2006)** · 가장 유명한 "아마존 100ms"의 실제 1차 출처 — 강연 슬라이드+블로그, 논문 아님
+- [`performance/flywheel-googles-data-compression-proxy-mobile-web`](references/performance/flywheel-googles-data-compression-proxy-mobile-web.md) — **Flywheel (NSDI '15)** · 수백만 사용자 압축 프록시 3년 운영 — 페이지 크기 50% 절감, 압축이 곧 속도는 아님
+- [`performance/dissecting-web-latency-in-ghana`](references/performance/dissecting-web-latency-in-ghana.md) — **Dissecting Web Latency in Ghana (IMC '14)** · 병목은 대역폭이 아니라 DNS·리다이렉트·TLS 왕복 — 캐싱만으로 체감 크게 개선
+- [`performance/the-gaius-experience-hyperlocal-mobile-web`](references/performance/the-gaius-experience-hyperlocal-mobile-web.md) — **GAIUS (ICTD '24)** · 경량 엣지+단순 명세 언어(MAML)로 페이지 재작성 — 2G/3G에서 유효, 3개국 실배포
+- [`performance/high-performance-browser-networking`](references/performance/high-performance-browser-networking.md) — **High Performance Browser Networking** · 네트워크 물리 계층부터 HTTP/2까지, 대역폭 아닌 RTT가 병목이라는 원리의 표준 참고서(무료 전문)
+- [`performance/designing-for-performance`](references/performance/designing-for-performance.md) — **Designing for Performance** · 성능을 디자인 의사결정 문제로 다루는 무료 공개 책 — 이미지·타이포·반응형 선택이 무게를 결정
+- [`performance/time-is-money-the-business-value-of-web-performance`](references/performance/time-is-money-the-business-value-of-web-performance.md) — **Time Is Money** · 로드 지연↔전환·이탈·매출 상관 실측 사례를 모은 얇은 설득용 책(유료)
+- [`performance/responsible-javascript`](references/performance/responsible-javascript.md) — **Responsible JavaScript** · "JS를 덜 보내는 것"이 최선이라는 관점 — 전송+파싱·실행 이중 비용과 감량 패턴(유료)
+- [`performance/web-performance-in-action`](references/performance/web-performance-in-action.md) — **Web Performance in Action** · 측정→병목 식별→자산별 최적화→검증까지 워크플로 전체를 실습으로 관통하는 핸드북(유료)
+- [`performance/image-optimization`](references/performance/image-optimization.md) — **Image Optimization — Addy Osmani** · AVIF/WebP·srcset·지연 로딩·LQIP·이미지 CDN을 LCP/CLS와 연결한 이미지 전담서(유료)
+- [`performance/learning-patterns`](references/performance/learning-patterns.md) — **Learning Patterns (patterns.dev)** · 렌더링(SSR/SSG/ISR/스트리밍/RSC)·로딩 패턴을 항목별로 정리한 무료 웹 북, Next.js 매핑 직결
+- [`performance/toss-smart-web-service-cache`](references/performance/toss-smart-web-service-cache.md) — **웹 서비스 캐시 똑똑하게 다루기 (토스)** · HTML max-age=0+s-maxage 1년, 해시 자산 1년 — 재방문 전송량을 없애는 토스의 캐시 이원화 전략
+- [`performance/toss-payments-faster-initial-rendering`](references/performance/toss-payments-faster-initial-rendering.md) — **조금만 신경써서 초기 렌더링 빠르게 하기 (토스페이먼츠)** · SSR 없이 CDN 배포+코드 스플리팅·트리 셰이킹으로 초기 렌더링을 당긴 토스페이먼츠 사례
+- [`performance/kakao-fe-performance-improvement`](references/performance/kakao-fe-performance-improvement.md) — **FE 성능개선기 1·2부 (카카오 Biz)** · 실서비스 주문/폼의 측정→병목→개선을 수치와 함께 공개한 2부작 진행 벤치마크
+- [`performance/woowahan-why-images-download-700mb`](references/performance/woowahan-why-images-download-700mb.md) — **왜 이미지만 700MB를 다운로드하는 거죠? (우아한형제들)** · 피드 이미지 700MB→5MB: IntersectionObserver 지연 로딩·리사이즈·포맷 최적화 실전 기록
+- [`performance/naver-d2-how-browsers-work`](references/performance/naver-d2-how-browsers-work.md) — **브라우저는 어떻게 동작하는가? (NAVER D2)** · 파싱→렌더 트리→레이아웃→페인트, 크리티컬 렌더링 패스 기초의 국내 표준 참고 글
