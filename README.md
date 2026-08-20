@@ -76,7 +76,7 @@ git clone https://github.com/JeongTaehwan/claude-skills.git
 cd claude-skills && ./sync.sh
 ```
 
-또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 세 개가 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 여섯 개가 전부 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
 
 ## 제거
 
