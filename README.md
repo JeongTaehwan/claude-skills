@@ -33,6 +33,16 @@ INDEX.md                         312개 전체 목록
 
 QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 검증하는 것*으로 나눴다.
 
+### `env-divergence` (스킬)
+같은 코드가 환경·배포마다 **에러 없이 조용히** 다른 값으로 돌 때 원인을 찾는 절차. "STAGE에선 되는데 운영에선 안 돼", "앱에선 보이는데 웹에선 안 보여" 같은 상황용.
+
+핵심은 **출력 계약**이다 — 내보내는 건 원인 한 문장 + 근거 한 줄 + 최소 수정뿐이고, 훑은 순서나 배제한 가설은 안 내보낸다. 절차가 낭독되면 지워진다.
+
+- `scripts/env-diff.py` — 환경변수 분기 자동 탐지. 같은 변수의 서로 다른 fallback, 미정의 참조, 정의 위치가 갈린 것, 죽은 설정
+- `references/nextjs.md` — Next.js 함정 (버전별 캐시 기본값, SSR/CSR 경계, 미들웨어, TZ·로케일·패키지 버전)
+
+에러 로그가 있거나 브라우저 차이만 있으면 **발동하지 않는다.**
+
 ### `role-isolation-pipeline` (스킬)
 사람 판단 / 검증 AI(타 벤더) 질문·리뷰 / Claude Code 구현으로 역할을 나누는 10단계 협업 파이프라인. 구현과 검증이 같은 모델이면 틀리는 방식도 같아서 검증이 자기확인이 된다는 문제를 벤더 분리로 막는다.
 
@@ -76,13 +86,13 @@ git clone https://github.com/JeongTaehwan/claude-skills.git
 cd claude-skills && ./sync.sh
 ```
 
-또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 여섯 개가 전부 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 일곱 개가 전부 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
 
 ## 제거
 
 ```bash
 rm ~/.claude/CLAUDE.md
-rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync
+rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync ~/.claude/skills/env-divergence
 ```
 
 ## 실제로 쓰이고 있는지 확인
