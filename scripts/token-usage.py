@@ -7,6 +7,9 @@
     python3 scripts/token-usage.py --project orbit # 프로젝트 필터
     python3 scripts/token-usage.py --sort output   # 출력 토큰 기준 정렬
 
+    python3 scripts/token-usage.py --record --note "무엇을 바꿨는지"   # 측정을 남긴다
+    python3 scripts/token-usage.py --trend                            # 남긴 것의 추이
+
 데이터 원본은 skill-usage.py 와 같은 ~/.claude/projects/*/*.jsonl 이다.
 
 집계할 때 반드시 알아야 하는 것이 하나 있다. **한 번의 API 응답이 jsonl 에는
@@ -15,11 +18,17 @@
 그래서 message.id 로 중복을 제거한다. 세션 재개·포크로 같은 응답이 다른 파일에
 복제되는 경우도 있어서 제거는 파일 단위가 아니라 전역으로 한다.
 
+--record 는 reports/token-metrics.jsonl 에 한 줄을 덧붙인다. 지우거나 고쳐 쓰지
+않는다 — 같은 날 같은 창으로 여러 번 돌렸으면 --trend 가 마지막 것만 보여준다.
+창(--days)을 반드시 함께 남기는데, 최근 7일 수치와 전체 기간 수치는 비교 대상이
+아니라서 창을 모르면 나중에 둘을 나란히 놓고 틀린 결론을 내게 된다.
+
 이 스크립트는 숫자만 낸다. 무엇을 줄일지는 숫자를 보고 사람이 정한다.
 """
 
 import argparse
 import glob
+import statistics
 import importlib.util
 import json
 import os
@@ -28,6 +37,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 
 PROJECTS = os.path.expanduser("~/.claude/projects")
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG = os.path.join(REPO, "reports", "token-metrics.jsonl")
 HOME = os.path.expanduser("~")
 
 # tool_use 의 input 에서 '무엇을 대상으로 했나'를 뽑을 때 보는 키. 앞쪽이 우선이다.
@@ -134,7 +145,7 @@ def new_session(project, path):
     return {"project": project, "path": path, "cwd": None,
             "in": 0, "cc": 0, "cr": 0, "out": 0,
             "msgs": 0, "prompts": 0, "side": 0,
-            "first": None, "last": None}
+            "first": None, "last": None, "ctx": []}
 
 
 def scan_totals(since, project_filter):
@@ -201,6 +212,8 @@ def scan_totals(since, project_filter):
                 s["cr"] += tcr
                 s["out"] += tout
                 s["msgs"] += 1
+                if tcc + tcr > 0:
+                    s["ctx"].append(tcc + tcr)
                 if entry.get("isSidechain"):
                     s["side"] += tin + tcc + tcr + tout
                 if ts:
@@ -336,6 +349,53 @@ def project_labels(sessions):
     return out
 
 
+def context_stats(sessions):
+    """응답 1회가 다시 읽는 컨텍스트의 분포.
+
+    바닥값은 '첫 응답' 이 아니라 세션 내 **최솟값**으로 잡는다. --days 로 자르면
+    첫 응답이 이미 커져 있는 세션이 섞여서 첫 값은 바닥이 아니다.
+    """
+    per_resp = []
+    floors = []
+    growth = []
+    for s in sessions.values():
+        c = s["ctx"]
+        if not c:
+            continue
+        per_resp.extend(c)
+        floors.append(min(c))
+        if len(c) > 20:
+            d = [c[i] - c[i - 1] for i in range(1, len(c))]
+            up = [x for x in d if x > 0]
+            if up:
+                growth.append(statistics.median(up))
+    if not per_resp:
+        return None
+    per_resp.sort()
+    n = len(per_resp)
+    return {
+        "median": per_resp[n // 2],
+        "mean": sum(per_resp) // n,
+        "p90": per_resp[int(n * 0.9)],
+        "max": per_resp[-1],
+        "floor_median": int(statistics.median(floors)) if floors else 0,
+        "growth_median": int(statistics.median(growth)) if growth else 0,
+        "responses": n,
+    }
+
+
+def print_context(cs, resp):
+    if not cs:
+        return
+    print("응답 1회가 다시 읽는 컨텍스트")
+    print(f"  중앙값 {cs['median']:>9,}   평균 {cs['mean']:>9,}   "
+          f"상위10% {cs['p90']:>9,}   최대 {cs['max']:>9,}")
+    print(f"  바닥값(세션 최솟값의 중앙값) {cs['floor_median']:>9,}"
+          f"   x 응답 {resp:,}개 = {fmt(cs['floor_median'] * resp)}")
+    print(f"  턴당 증가 중앙값 {cs['growth_median']:>9,}")
+    print()
+
+
 def print_projects(sessions, labels):
     agg = defaultdict(lambda: [0, 0, 0, 0, 0, 0])   # 세션, 응답, 합계, 출력, 캐시읽기, 캐시생성
     for s in sessions.values():
@@ -413,15 +473,21 @@ def print_detail(rank, key, s, since, labels):
     print()
 
 
-def print_skill_compare(sessions, since):
+def skill_split(sessions, since):
     fired = skill_sessions(since)
     if fired is None:
-        return
+        return None
     on, off = [], []
     for key, s in sessions.items():
         bucket = on if key in fired else off
         bucket.append((s["in"] + s["cc"] + s["cr"] + s["out"], s["out"], s["msgs"]))
+    return on, off
 
+
+def print_skill_compare(split):
+    if split is None:
+        return
+    on, off = split
     print("스킬 발동 세션 vs 미발동 세션   (판정은 skill-usage.py scan() 재사용)")
     for label, rows in (("발동  ", on), ("미발동", off)):
         if not rows:
@@ -436,6 +502,115 @@ def print_skill_compare(sessions, since):
 
 # ---------------------------------------------------------------- main
 
+def snapshot(args, sessions, cs, resp, split, dupes):
+    """한 번의 측정을 한 줄로 굳힌다.
+
+    `days` 를 반드시 같이 남긴다 — 최근 7일 수치와 전체 기간 수치는 비교 대상이
+    아니고, 창을 모르면 나중에 둘을 나란히 놓고 잘못된 결론을 낸다.
+    """
+    tot = {k: sum(s[k] for s in sessions.values()) for k in ("in", "cc", "cr", "out")}
+    row = {
+        "v": 1,
+        # 집계 창은 UTC 로 자르지만(jsonl 타임스탬프가 UTC 다) 로그의 날짜는 로컬로
+        # 남긴다. 사람이 "언제 쟀나" 로 찾는 값이라 로컬이 아니면 하루 어긋나 보인다.
+        "recorded": datetime.now().strftime("%Y-%m-%d"),
+        "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "days": args.days,
+        "project": args.project,
+        "sessions": len(sessions),
+        "responses": resp,
+        "prompts": sum(s["prompts"] for s in sessions.values()),
+        "dedup_dropped": dupes,
+        "tokens": {"input": tot["in"], "cache_creation": tot["cc"],
+                   "cache_read": tot["cr"], "output": tot["out"],
+                   "total": sum(tot.values())},
+        "context_per_response": None if not cs else {
+            "median": cs["median"], "mean": cs["mean"],
+            "p90": cs["p90"], "max": cs["max"]},
+        "floor_median": cs["floor_median"] if cs else None,
+        "growth_median": cs["growth_median"] if cs else None,
+        "note": args.note or "",
+    }
+    if split:
+        on, off = split
+        row["skill"] = {
+            "on_sessions": len(on), "off_sessions": len(off),
+            "on_avg_total": int(sum(r[0] for r in on) / len(on)) if on else 0,
+            "off_avg_total": int(sum(r[0] for r in off) / len(off)) if off else 0,
+        }
+    return row
+
+
+def record(args, sessions, cs, resp, split, dupes):
+    row = snapshot(args, sessions, cs, resp, split, dupes)
+    os.makedirs(os.path.dirname(LOG), exist_ok=True)
+    with open(LOG, "a") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    print(f"기록함 → {os.path.relpath(LOG, os.getcwd())}"
+          f"   ({row['recorded']}, 창 {row['days'] or '전체'})")
+    if not row["note"]:
+        print("  --note 로 이번에 무엇을 바꿨는지 남기면 나중에 원인을 짚을 수 있다.")
+
+
+def read_log():
+    if not os.path.exists(LOG):
+        return []
+    rows = []
+    for line in open(LOG, errors="ignore"):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except ValueError:
+            continue
+    return rows
+
+
+def print_trend(want_days):
+    rows = read_log()
+    if not rows:
+        print(f"기록이 없습니다: {LOG}")
+        print("  python3 scripts/token-usage.py --record --note \"무엇을 바꿨는지\"")
+        return 0
+
+    # 같은 날 같은 창으로 여러 번 돌렸으면 마지막 것만 본다. 원본 줄은 지우지 않는다.
+    latest = {}
+    for r in rows:
+        latest[(r.get("recorded"), r.get("days"), r.get("project"))] = r
+    keep = sorted(latest.values(), key=lambda r: (str(r.get("days")), r.get("recorded") or ""))
+
+    by_window = defaultdict(list)
+    for r in keep:
+        by_window[r.get("days")].append(r)
+
+    print(f"측정 기록 {len(rows)}줄 → 시점 {len(keep)}개   ({os.path.relpath(LOG, os.getcwd())})\n")
+    for days, group in sorted(by_window.items(), key=lambda kv: (kv[0] is not None, kv[0] or 0)):
+        if want_days is not None and days != want_days:
+            continue
+        print(f"창: {'전체 기간' if days is None else f'최근 {days}일'}")
+        print(f"  {'날짜':<12} {'세션':>5} {'응답':>6} {'합계':>9} "
+              f"{'컨텍스트/응답':>13} {'바닥값':>9}   비고")
+        prev = None
+        for r in group:
+            cs = r.get("context_per_response") or {}
+            med = cs.get("median") or 0
+            delta = ""
+            if prev is not None:
+                pm = (prev.get("context_per_response") or {}).get("median") or 0
+                if pm:
+                    pct = (med - pm) / pm * 100
+                    delta = f" ({pct:+.0f}%)"
+            print(f"  {r.get('recorded',''):<12} {r.get('sessions',0):>5} "
+                  f"{r.get('responses',0):>6} {fmt(r['tokens']['total']):>9} "
+                  f"{med:>13,}{delta:<8} {r.get('floor_median') or 0:>9,}   {r.get('note','')}")
+            prev = r
+        print()
+    print("컨텍스트/응답과 바닥값이 이 도구가 보는 두 축이다. 합계는 그 기간에 얼마나")
+    print("일했는지에 좌우되므로 그것만 보고 좋아졌다/나빠졌다를 판단하지 않는다.")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -444,7 +619,14 @@ def main():
     ap.add_argument("--project", help="프로젝트 디렉터리 이름에 이 문자열이 든 것만")
     ap.add_argument("--sort", choices=("total", "output", "input"), default="total",
                     help="상위 세션 정렬 기준 (기본 total)")
+    ap.add_argument("--record", action="store_true",
+                    help="이번 측정을 reports/token-metrics.jsonl 에 한 줄로 남긴다")
+    ap.add_argument("--note", help="--record 와 함께: 이번에 무엇을 바꿨는지")
+    ap.add_argument("--trend", action="store_true", help="남긴 기록의 추이만 본다")
     args = ap.parse_args()
+
+    if args.trend:
+        return print_trend(args.days)
 
     if not os.path.isdir(PROJECTS):
         print(f"세션 기록을 찾을 수 없습니다: {PROJECTS}", file=sys.stderr)
@@ -461,7 +643,10 @@ def main():
         return 0
 
     labels = project_labels(sessions)
+    resp = sum(s["msgs"] for s in sessions.values())
+    cs = context_stats(sessions)
     print_summary(sessions, daily, dupes, window)
+    print_context(cs, resp)
     print_projects(sessions, labels)
     print_daily(daily)
 
@@ -478,7 +663,11 @@ def main():
         for i, (key, s) in enumerate(ranked, 1):
             print_detail(i, key, s, since, labels)
 
-    print_skill_compare(sessions, since)
+    split = skill_split(sessions, since)
+    print_skill_compare(split)
+
+    if args.record:
+        record(args, sessions, cs, resp, split, dupes)
     return 0
 
 
