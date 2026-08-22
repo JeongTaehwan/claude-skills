@@ -16,6 +16,18 @@ for skill in "$SKILLS"/*/; do
   echo "  skill  $name"
 done
 
+# 훅 스크립트를 ~/.claude/hooks/ 로 복사한다.
+# settings.json 은 건드리지 않는다 — 매 세션 동작을 바꾸는 파일이라 등록은 사람이
+# 직접 한다. 붙일 조각은 hooks/settings-fragment.json 에 있다.
+mkdir -p "$DEST/hooks"
+for hook in "$REPO"/hooks/*.sh; do
+  [ -e "$hook" ] || continue
+  name=$(basename "$hook")
+  cp "$hook" "$DEST/hooks/$name"
+  chmod +x "$DEST/hooks/$name"
+  echo "  hook   $name"
+done
+
 # 감사 도구를 ~/.claude 아래에 설치한다.
 # macOS 가 ~/Documents 를 TCC 로 보호해서, launchd 무인 실행은 저장소를 읽지 못한다.
 # 그래서 스크립트도 대상 스킬도 보호 대상이 아닌 ~/.claude 쪽 사본을 쓴다.

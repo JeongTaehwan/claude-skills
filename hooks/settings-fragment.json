@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME\"/.claude/hooks/verify-on-stop.sh",
+            "timeout": 180,
+            "statusMessage": "verify 실행 중"
+          }
+        ]
+      }
+    ]
+  }
+}
