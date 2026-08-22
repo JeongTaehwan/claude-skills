@@ -35,6 +35,13 @@ mkdir -p "$DEST/skill-audit/reports"
 cp "$REPO/scripts/audit.py" "$DEST/skill-audit/audit.py"
 echo "  tool   skill-audit/audit.py"
 
+# 결정 이력(wontfix·확인함)을 새 컴퓨터에 처음 깔 때만 심는다.
+# 이미 있으면 절대 덮지 않는다 — 그쪽이 원본이고, 여기 보관본은 지난 주 사본이다.
+if [ ! -e "$DEST/skill-audit/state.json" ] && [ -e "$REPO/reports/state.json" ]; then
+  cp "$REPO/reports/state.json" "$DEST/skill-audit/state.json"
+  echo "  seed   skill-audit/state.json (없어서 저장소 보관본으로 시작)"
+fi
+
 # CLAUDE.md 는 매 세션 로드되는 계층이라 덮어쓰기 전에 확인한다.
 if [ -e "$DEST/CLAUDE.md" ] && ! cmp -s "$REPO/memory/CLAUDE.md" "$DEST/CLAUDE.md"; then
   echo

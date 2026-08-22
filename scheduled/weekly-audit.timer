@@ -1,0 +1,16 @@
+# 월요일 09:17. plist 의 StartCalendarInterval 과 같은 시각이다.
+#
+# Persistent=true 가 핵심이다. WSL 은 켜져 있는 시간이 들쭉날쭉해서 월요일
+# 09:17 에 아예 안 돌아가 있는 경우가 흔한데, 이 옵션이 있으면 놓친 실행을
+# 다음에 켤 때 이어서 돌린다. 없으면 그 주는 조용히 건너뛴다.
+
+[Unit]
+Description=claude-skills 주간 점검 — 매주 월 09:17
+
+[Timer]
+OnCalendar=Mon *-*-* 09:17:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

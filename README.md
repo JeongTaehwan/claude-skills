@@ -204,18 +204,39 @@ python3 scripts/token-usage.py --trend          # 남긴 것의 추이
 
 | 층 | 무엇이 | 언제 | 앱이 닫혀 있어도? |
 |---|---|---|---|
-| 기계 | launchd → `audit.py` | 월 09:17 | **돈다** |
+| 기계 | OS 스케줄러 → `audit.py` | 월 09:17 | **돈다** |
 | 판단 | 앱 스케줄 작업 | 월 09:24 | 안 돈다 (다음에 열 때 이어받음) |
+
+기계 층은 컴퓨터마다 스케줄러가 다르고 **둘 다 `scheduled/` 에 있다.**
+
+```bash
+# macOS
+cp scheduled/com.jeongtaehwan.claude-skills.weekly-audit.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.jeongtaehwan.claude-skills.weekly-audit.plist
+
+# Linux · WSL
+cp scheduled/weekly-audit.service scheduled/weekly-audit.timer ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now weekly-audit.timer
+```
+
+놓친 실행은 양쪽 다 이어서 돈다 — launchd 는 깨어날 때, systemd 는 `Persistent=true` 로 다음 부팅 때. **WSL 은 켜져 있는 시간이 들쭉날쭉해서 이 옵션이 없으면 그 주가 통째로 조용히 빠진다.**
 
 기계 층은 링크 썩음·GitHub 저장소 archived/정체·스킬 발동 횟수를 본다.
 판단 층은 그 리포트를 읽고 새 모델·Claude Code 변경 같은 외부 변화를 확인한 뒤
 결과를 저장소로 보관한다.
 
-### 경로가 둘로 갈린 이유
+### 왜 저장소가 아니라 `~/.claude` 를 보나
 
-macOS 는 `~/Documents` 를 TCC 로 보호한다. **launchd 가 띄운 프로세스는 권한 요청
-대화상자조차 못 띄우고 그냥 EPERM 을 받는다** — 저장소를 직접 보게 두면 매주 조용히
-실패한다. 그래서 기계 층은 보호 대상이 아닌 `~/.claude` 쪽 사본만 본다.
+**macOS 사정에서 나온 규약이다.** macOS 는 `~/Documents` 를 TCC 로 보호한다.
+**launchd 가 띄운 프로세스는 권한 요청 대화상자조차 못 띄우고 그냥 EPERM 을 받는다**
+— 저장소를 직접 보게 두면 매주 조용히 실패한다.
+
+Linux·WSL 에는 그 제약이 없지만 **같은 규약을 쓴다.** 두 컴퓨터가 리포트를 같은
+자리에 두어야 절차 문서가 하나로 유지되고, 저장소 체크아웃 위치가 달라도 상관없어진다.
+
+결정 이력(`state.json`)은 `sync.sh` 가 **없을 때만** 저장소 보관본으로 심는다.
+있으면 절대 덮지 않는다 — 그쪽이 원본이고 보관본은 지난주 사본이다. 이게 없으면
+새 컴퓨터에서 이미 wontfix 한 항목이 전부 "새로 생김"으로 다시 올라온다.
 
 ```
 ~/.claude/skills/                 점검 대상        (sync.sh 가 복사)
@@ -254,8 +275,13 @@ python3 scripts/audit.py --ack <키> --note "처리 중인 내용"
 ### 해제
 
 ```bash
+# macOS
 launchctl bootout gui/$(id -u)/com.jeongtaehwan.claude-skills.weekly-audit
 rm ~/Library/LaunchAgents/com.jeongtaehwan.claude-skills.weekly-audit.plist
+
+# Linux · WSL
+systemctl --user disable --now weekly-audit.timer
+rm ~/.config/systemd/user/weekly-audit.{service,timer}
 ```
 
 앱 스케줄 작업은 사이드바 "Scheduled" 에서 끈다.

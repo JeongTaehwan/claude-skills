@@ -4,16 +4,27 @@
 
 | 층 | 무엇이 돌리나 | 언제 | 하는 일 |
 |---|---|---|---|
-| 기계 | `launchd` (`com.jeongtaehwan.claude-skills.weekly-audit`) | 월 09:17 | `audit.py` — 링크·저장소·스킬 사용률. **앱이 닫혀 있어도 돈다** |
+| 기계 | OS 스케줄러 (아래 표) | 월 09:17 | `audit.py` — 링크·저장소·스킬 사용률. **앱이 닫혀 있어도 돈다** |
 | 판단 | 앱 스케줄 작업 (`weekly-skill-audit`) | 월 09:24 | 기계 층이 낸 리포트를 읽고 외부 변화 확인 + 저장소에 보관 |
+
+기계 층은 컴퓨터마다 스케줄러가 다르다. **둘 다 이 저장소의 `scheduled/` 에 있다.**
+
+| OS | 파일 | 설치 |
+|---|---|---|
+| macOS | `com.jeongtaehwan.claude-skills.weekly-audit.plist` | `~/Library/LaunchAgents/` 에 복사 후 `launchctl bootstrap` |
+| Linux · WSL | `weekly-audit.service` + `weekly-audit.timer` | `~/.config/systemd/user/` 에 복사 후 `systemctl --user enable --now weekly-audit.timer` |
+
+놓친 실행은 양쪽 다 이어서 돈다 — launchd 는 깨어날 때, systemd 는 `Persistent=true` 로 다음 부팅 때. **WSL 은 켜져 있는 시간이 들쭉날쭉해서 이 옵션이 없으면 그 주가 조용히 통째로 빠진다.**
 
 앱이 안 열려 있으면 판단 층만 밀리고 기계 점검은 그대로 남아 있다. 다음에 앱을 열 때 이어받으면 된다.
 
-## 왜 경로가 둘로 갈렸나
+## 왜 저장소가 아니라 `~/.claude` 를 보나
 
-macOS 는 `~/Documents` 를 TCC 로 보호한다. **launchd 가 띄운 프로세스는 권한 요청 대화상자조차 못 띄우고 그냥 EPERM 을 받는다** — 즉 저장소를 직접 보게 두면 매주 조용히 실패한다. 실제로 처음 그렇게 만들었다가 실행 로그에서 `Operation not permitted` 로 잡혔다.
+**이건 macOS 사정에서 나온 규약이다.** macOS 는 `~/Documents` 를 TCC 로 보호한다. **launchd 가 띄운 프로세스는 권한 요청 대화상자조차 못 띄우고 그냥 EPERM 을 받는다** — 즉 저장소를 직접 보게 두면 매주 조용히 실패한다. 실제로 처음 그렇게 만들었다가 실행 로그에서 `Operation not permitted` 로 잡혔다.
 
 그래서 기계 층은 보호 대상이 아닌 `~/.claude` 쪽 사본만 본다.
+
+Linux·WSL 에는 그 제약이 없어서 저장소를 직접 봐도 된다. **그런데도 같은 규약을 쓴다** — 두 컴퓨터가 리포트를 같은 자리에 두어야 절차 문서가 하나로 유지되고, 저장소 체크아웃 위치가 컴퓨터마다 달라도 상관없어진다.
 
 ```
 ~/.claude/skills/                    점검 대상 (sync.sh 가 저장소에서 복사)
@@ -42,7 +53,7 @@ ls -t ~/.claude/skill-audit/reports/*.md | head -3
 가장 최근 리포트를 읽는다. 오늘 날짜 리포트가 없으면 (예: 월요일에 맥이 꺼져 있었다) 직접 돌린다.
 
 ```bash
-/usr/bin/python3 ~/.claude/skill-audit/audit.py \
+python3 ~/.claude/skill-audit/audit.py \
   --skills-dir ~/.claude/skills \
   --out ~/.claude/skill-audit/reports \
   --state ~/.claude/skill-audit/state.json
@@ -82,10 +93,9 @@ ls -t ~/.claude/skill-audit/reports/*.md | head -3
 
 ### 4. 저장소로 보관
 
-기계 층이 만든 리포트는 `~/.claude` 에 있어서 git 에 안 남는다. 앱은 `~/Documents` 를 읽을 수 있으므로 여기서 옮긴다.
+기계 층이 만든 리포트는 `~/.claude` 에 있어서 git 에 안 남는다. 저장소 루트에서 옮긴다 — **체크아웃 경로는 컴퓨터마다 다르므로 여기에 적어두지 않는다.**
 
 ```bash
-cd /Users/jeongtaehwan/Documents/workspace/skills
 cp ~/.claude/skill-audit/reports/*.md reports/
 cp ~/.claude/skill-audit/state.json reports/state.json
 ```
@@ -107,7 +117,7 @@ cp ~/.claude/skill-audit/state.json reports/state.json
 
 ## 장애 대응
 
-**리포트가 안 생겼다** — launchd 로그를 본다.
+**리포트가 안 생겼다 (macOS)**
 
 ```bash
 tail -20 ~/Library/Logs/claude-skills-audit.log
@@ -116,7 +126,19 @@ launchctl print gui/$(id -u)/com.jeongtaehwan.claude-skills.weekly-audit | grep 
 
 `Operation not permitted` 가 보이면 경로가 `~/Documents` 를 가리키도록 되돌아간 것이다. plist 의 인자가 `~/.claude` 를 보고 있는지 확인한다.
 
-**저장소 건강이 전부 "조회 실패"** — `gh` 가 PATH 에 없거나 인증이 만료됐다. plist 의 `PATH` 에 `/opt/homebrew/bin` 이 있는지, `gh auth status` 가 통과하는지 본다.
+**리포트가 안 생겼다 (Linux · WSL)**
+
+```bash
+systemctl --user list-timers weekly-audit.timer   # 다음 예정 시각
+systemctl --user status weekly-audit.service      # 마지막 결과
+tail -20 ~/.claude/skill-audit/audit.log
+```
+
+타이머가 목록에 없으면 `enable --now` 를 안 한 것이다. `NEXT` 가 과거인데 안 돌았으면 `Persistent=true` 가 빠진 것이다.
+
+**저장소 건강이 전부 "조회 실패"** — `gh` 가 PATH 에 없거나 인증이 만료됐다. `gh auth status` 를 먼저 본다. macOS 는 launchd 기본 PATH 에 `/opt/homebrew/bin` 이 없어서 plist 에 넣어줘야 하고, Linux 는 대개 `/usr/bin/gh` 라 그럴 필요가 없다.
+
+**audit.py 가 오래 걸린다** — 정상이다. 링크 512개를 실제로 조회한다. `Type=oneshot` 이라 `systemctl --user start` 는 끝날 때까지 안 돌아온다.
 
 ---
 

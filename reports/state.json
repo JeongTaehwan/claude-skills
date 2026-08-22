@@ -1,184 +1,789 @@
 {
- "findings": {
-  "repo:JaeYeopHan/Interview_Question_for_Beginner:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2024-08-09 · ★21656",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "기초 CS 개념 정리라 낡을 성질이 아님",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "JaeYeopHan/Interview_Question_for_Beginner",
-   "where": [
-    "software-reference-library/references/development/interview-question-for-beginner.md"
-   ]
+  "findings": {
+    "link:http://localhost:3000/checkout": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "http://localhost:3000/checkout",
+      "where": [
+        "software-reference-library/references/testing/deque-axe.md"
+      ]
+    },
+    "link:http://localhost:3000/products": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "http://localhost:3000/products",
+      "where": [
+        "software-reference-library/references/performance/lighthouse-ci.md"
+      ]
+    },
+    "link:http://localhost:8080": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "http://localhost:8080",
+      "where": [
+        "software-reference-library/references/development/vite.md",
+        "software-reference-library/references/testing/rest-assured-api.md"
+      ]
+    },
+    "link:https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=$CRUX_KEY": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=$CRUX_KEY",
+      "where": [
+        "software-reference-library/references/performance/lab-vs-field-data.md"
+      ]
+    },
+    "link:https://developer.chrome.com/docs/devtools/networ…": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://developer.chrome.com/docs/devtools/networ…",
+      "where": [
+        "software-reference-library/INDEX.md"
+      ]
+    },
+    "link:https://example.com/app.js": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/app.js",
+      "where": [
+        "software-reference-library/references/performance/http-compression.md"
+      ]
+    },
+    "link:https://example.com/authors/kim": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/authors/kim",
+      "where": [
+        "software-reference-library/references/marketing/open-graph-protocol.md"
+      ]
+    },
+    "link:https://example.com/blog/merino-in-summer": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/blog/merino-in-summer",
+      "where": [
+        "software-reference-library/references/marketing/open-graph-protocol.md"
+      ]
+    },
+    "link:https://example.com/checkout": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/checkout",
+      "where": [
+        "software-reference-library/references/development/lighthouse.md"
+      ]
+    },
+    "link:https://example.com/en/products/merino-socks": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/en/products/merino-socks",
+      "where": [
+        "software-reference-library/references/marketing/moz-beginners-guide-to-seo.md"
+      ]
+    },
+    "link:https://example.com/img/socks-1x1.jpg": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/img/socks-1x1.jpg",
+      "where": [
+        "software-reference-library/references/marketing/schema-org-vocabulary.md"
+      ]
+    },
+    "link:https://example.com/index.html": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/index.html",
+      "where": [
+        "software-reference-library/references/performance/http-caching.md",
+        "software-reference-library/references/performance/toss-smart-web-service-cache.md"
+      ]
+    },
+    "link:https://example.com/logo.png": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/logo.png",
+      "where": [
+        "software-reference-library/references/marketing/google-structured-data-search-gallery.md",
+        "software-reference-library/references/marketing/mjml-email-framework.md",
+        "software-reference-library/references/marketing/react-email-docs.md",
+        "software-reference-library/references/marketing/schema-org-vocabulary.md"
+      ]
+    },
+    "link:https://example.com/og/merino-summer.png": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/og/merino-summer.png",
+      "where": [
+        "software-reference-library/references/marketing/open-graph-protocol.md"
+      ]
+    },
+    "link:https://example.com/orders/${orderId}": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/orders/${orderId}",
+      "where": [
+        "software-reference-library/references/marketing/react-email-docs.md"
+      ]
+    },
+    "link:https://example.com/orders/ORD-2026-1029?utm_source=transactional&utm_medium=email&utm_campaign=order_confirmation": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/orders/ORD-2026-1029?utm_source=transactional&utm_medium=email&utm_campaign=order_confirmation",
+      "where": [
+        "software-reference-library/references/marketing/mjml-email-framework.md"
+      ]
+    },
+    "link:https://example.com/p/42": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/p/42",
+      "where": [
+        "software-reference-library/references/performance/web-performance-in-action.md",
+        "software-reference-library/references/performance/webpagetest.md"
+      ]
+    },
+    "link:https://example.com/products": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/products",
+      "where": [
+        "software-reference-library/references/development/lighthouse.md"
+      ]
+    },
+    "link:https://example.com/products/merino-socks": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/products/merino-socks",
+      "where": [
+        "software-reference-library/references/marketing/google-search-essentials.md",
+        "software-reference-library/references/marketing/moz-beginners-guide-to-seo.md",
+        "software-reference-library/references/marketing/schema-org-vocabulary.md"
+      ]
+    },
+    "link:https://example.com/products/merino-socks#product": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/products/merino-socks#product",
+      "where": [
+        "software-reference-library/references/marketing/schema-org-vocabulary.md"
+      ]
+    },
+    "link:https://example.com/products/merino-socks?color=navy&amp;size=m": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/products/merino-socks?color=navy&amp;size=m",
+      "where": [
+        "software-reference-library/references/marketing/sitemaps-xml-protocol.md"
+      ]
+    },
+    "link:https://example.com/robots.txt": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/robots.txt",
+      "where": [
+        "software-reference-library/references/marketing/google-search-essentials.md"
+      ]
+    },
+    "link:https://example.com/roles": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/roles",
+      "where": [
+        "software-reference-library/references/security/rfc-7519-json-web-token.md"
+      ]
+    },
+    "link:https://example.com/schemas/order.json": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/schemas/order.json",
+      "where": [
+        "software-reference-library/references/development/json-schema.md"
+      ]
+    },
+    "link:https://example.com/sitemap.xml": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/sitemap.xml",
+      "where": [
+        "software-reference-library/references/marketing/rfc-9309-robots-exclusion-protocol.md",
+        "software-reference-library/references/marketing/sitemaps-xml-protocol.md"
+      ]
+    },
+    "link:https://example.com/sitemaps/products-000001.xml.gz": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/sitemaps/products-000001.xml.gz",
+      "where": [
+        "software-reference-library/references/marketing/sitemaps-xml-protocol.md"
+      ]
+    },
+    "link:https://example.com/sitemaps/products-000002.xml.gz": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/sitemaps/products-000002.xml.gz",
+      "where": [
+        "software-reference-library/references/marketing/sitemaps-xml-protocol.md"
+      ]
+    },
+    "link:https://example.com/u/9f3a1c2e": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://example.com/u/9f3a1c2e",
+      "where": [
+        "software-reference-library/references/marketing/can-spam-act-compliance-guide.md"
+      ]
+    },
+    "link:https://figma.com/file/.../Toast": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://figma.com/file/.../Toast",
+      "where": [
+        "software-reference-library/references/design/design-systems-repo.md"
+      ]
+    },
+    "link:https://fonts.gstatic.com": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://fonts.gstatic.com",
+      "where": [
+        "software-reference-library/references/performance/preconnect-dns-prefetch.md"
+      ]
+    },
+    "link:https://github.com/acme/checkout/.github/workflows/release.yml@refs/heads/main": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://github.com/acme/checkout/.github/workflows/release.yml@refs/heads/main",
+      "where": [
+        "software-reference-library/references/security/sigstore.md"
+      ]
+    },
+    "link:https://github.com/example/deploy.git": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://github.com/example/deploy.git",
+      "where": [
+        "software-reference-library/references/infrastructure/argo-cd.md"
+      ]
+    },
+    "link:https://github.com/example/orders": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://github.com/example/orders",
+      "where": [
+        "software-reference-library/references/infrastructure/oci-image-spec.md"
+      ]
+    },
+    "link:https://github.com/example/rfd/pull/142": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://github.com/example/rfd/pull/142",
+      "where": [
+        "software-reference-library/references/planning/rfd-requests-for-discussion.md"
+      ]
+    },
+    "link:https://react.dev/reference/react-dom/server/renderToPipeable…": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://react.dev/reference/react-dom/server/renderToPipeable…",
+      "where": [
+        "software-reference-library/INDEX.md"
+      ]
+    },
+    "link:https://token.actions.githubusercontent.com": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://token.actions.githubusercontent.com",
+      "where": [
+        "software-reference-library/references/security/sigstore.md"
+      ]
+    },
+    "link:https://us.i.posthog.com": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://us.i.posthog.com",
+      "where": [
+        "software-reference-library/references/marketing/posthog-product-analytics-docs.md"
+      ]
+    },
+    "link:https://www.googleapis.com/webmasters/v3/sites/${SITE}/searchAnalytics/query": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://www.googleapis.com/webmasters/v3/sites/${SITE}/searchAnalytics/query",
+      "where": [
+        "software-reference-library/references/marketing/google-search-console-docs.md"
+      ]
+    },
+    "link:https://www.webpagetest.org/result/$TEST_ID/": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://www.webpagetest.org/result/$TEST_ID/",
+      "where": [
+        "software-reference-library/references/performance/webpagetest.md"
+      ]
+    },
+    "link:https://www.youtube-nocookie.com": {
+      "detail": "HTTP 404",
+      "first_seen": "2026-08-23",
+      "kind": "dead_link",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "https://www.youtube-nocookie.com",
+      "where": [
+        "software-reference-library/references/performance/efficiently-load-third-party-javascript.md"
+      ]
+    },
+    "repo:JaeYeopHan/Interview_Question_for_Beginner:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2024-08-09 · ★21662",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "기초 CS 개념 정리라 낡을 성질이 아님",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "JaeYeopHan/Interview_Question_for_Beginner",
+      "where": [
+        "software-reference-library/references/development/interview-question-for-beginner.md"
+      ]
+    },
+    "repo:ProductHired/open-product-management:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2024-07-01 · ★4444",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "학습 경로 큐레이션. 커밋 빈도가 품질 신호가 아님",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "ProductHired/open-product-management",
+      "where": [
+        "software-reference-library/references/planning/open-product-management.md"
+      ]
+    },
+    "repo:Team-Neighborhood/I-want-to-study-Data-Science:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2022-03-28 · ★1807",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "큐레이션 저장소",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "Team-Neighborhood/I-want-to-study-Data-Science",
+      "where": [
+        "software-reference-library/references/development/i-want-to-study-data-science.md"
+      ]
+    },
+    "repo:aFarkas/lazysizes:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2024-04-03 · ★17718",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "네이티브 loading=lazy 로 대체 가능한지 검토",
+      "runs_seen": 3,
+      "status": "acknowledged",
+      "subject": "aFarkas/lazysizes",
+      "where": [
+        "software-reference-library/references/performance/lazysizes.md"
+      ]
+    },
+    "repo:acme/checkout:gone": {
+      "detail": "조회 실패 — 삭제·비공개·이름변경 가능",
+      "first_seen": "2026-08-23",
+      "kind": "repo_gone",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "acme/checkout",
+      "where": [
+        "software-reference-library/references/security/sigstore.md"
+      ]
+    },
+    "repo:dastergon/awesome-chaos-engineering:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2023-12-28 · ★6638",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "awesome 리스트",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "dastergon/awesome-chaos-engineering",
+      "where": [
+        "software-reference-library/references/qa/awesome-chaos-engineering.md"
+      ]
+    },
+    "repo:evanw/thumbhash:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2024-05-26 · ★4193",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "알고리즘 구현체. 완결돼서 커밋이 없는 것",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "evanw/thumbhash",
+      "where": [
+        "software-reference-library/references/performance/thumbhash.md"
+      ]
+    },
+    "repo:example/deploy.git:gone": {
+      "detail": "조회 실패 — 삭제·비공개·이름변경 가능",
+      "first_seen": "2026-08-23",
+      "kind": "repo_gone",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "example/deploy.git",
+      "where": [
+        "software-reference-library/references/infrastructure/argo-cd.md"
+      ]
+    },
+    "repo:example/orders:gone": {
+      "detail": "조회 실패 — 삭제·비공개·이름변경 가능",
+      "first_seen": "2026-08-23",
+      "kind": "repo_gone",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "example/orders",
+      "where": [
+        "software-reference-library/references/infrastructure/oci-image-spec.md"
+      ]
+    },
+    "repo:example/rfd:gone": {
+      "detail": "조회 실패 — 삭제·비공개·이름변경 가능",
+      "first_seen": "2026-08-23",
+      "kind": "repo_gone",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "example/rfd",
+      "where": [
+        "software-reference-library/references/planning/rfd-requests-for-discussion.md"
+      ]
+    },
+    "repo:goldbergyoni/javascript-testing-best-practices:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2024-06-27 · ★24629",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "원칙 모음. 내용이 완결된 성격",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "goldbergyoni/javascript-testing-best-practices",
+      "where": [
+        "software-reference-library/references/testing/javascript-testing-best-practices.md"
+      ]
+    },
+    "repo:google/AFL:archived": {
+      "detail": "archived · 마지막 커밋 2021-07-05 · ★4207",
+      "first_seen": "2026-08-19",
+      "kind": "repo_archived",
+      "last_seen": "2026-08-23",
+      "note": "후속은 AFL++. 퍼징을 실제로 도입할 때 교체",
+      "runs_seen": 3,
+      "status": "acknowledged",
+      "subject": "google/AFL",
+      "where": [
+        "software-reference-library/references/testing/afl.md"
+      ]
+    },
+    "repo:google/eng-practices:archived": {
+      "detail": "archived · 마지막 커밋 2024-09-19 · ★23306",
+      "first_seen": "2026-08-19",
+      "kind": "repo_archived",
+      "last_seen": "2026-08-23",
+      "note": "가이드 내용은 유효. 저장소만 동결됐고 코드리뷰 기준 자체는 안 바뀐다",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "google/eng-practices",
+      "where": [
+        "software-reference-library/references/development/google-engineering-practices.md"
+      ]
+    },
+    "repo:joe-bell/plaiceholder:archived": {
+      "detail": "archived · 마지막 커밋 2023-05-24 · ★2318",
+      "first_seen": "2026-08-19",
+      "kind": "repo_archived",
+      "last_seen": "2026-08-23",
+      "note": "archived. 이미지 플레이스홀더 대체재 검토 필요",
+      "runs_seen": 3,
+      "status": "acknowledged",
+      "subject": "joe-bell/plaiceholder",
+      "where": [
+        "software-reference-library/references/performance/plaiceholder.md"
+      ]
+    },
+    "repo:ligurio/awesome-software-quality:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2023-02-01 · ★2320",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "awesome 리스트",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "ligurio/awesome-software-quality",
+      "where": [
+        "software-reference-library/references/qa/awesome-software-quality.md"
+      ]
+    },
+    "repo:papers-we-love/papers-we-love.git:gone": {
+      "detail": "조회 실패 — 삭제·비공개·이름변경 가능",
+      "first_seen": "2026-08-23",
+      "kind": "repo_gone",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "papers-we-love/papers-we-love.git",
+      "where": [
+        "software-reference-library/references/development/papers-we-love.md"
+      ]
+    },
+    "repo:woltapp/blurhash:stale": {
+      "detail": "2년 이상 정체 · 마지막 커밋 2024-07-08 · ★17068",
+      "first_seen": "2026-08-19",
+      "kind": "repo_stale",
+      "last_seen": "2026-08-23",
+      "note": "알고리즘 구현체. 완결돼서 커밋이 없는 것",
+      "runs_seen": 3,
+      "status": "wontfix",
+      "subject": "woltapp/blurhash",
+      "where": [
+        "software-reference-library/references/performance/blurhash.md"
+      ]
+    },
+    "skill:main-sync:unused": {
+      "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
+      "first_seen": "2026-08-23",
+      "kind": "skill_unused",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "main-sync",
+      "where": []
+    },
+    "skill:mr-conflict-resolve:unused": {
+      "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
+      "first_seen": "2026-08-23",
+      "kind": "skill_unused",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "mr-conflict-resolve",
+      "where": []
+    },
+    "skill:slow-network-ux:unused": {
+      "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
+      "first_seen": "2026-08-23",
+      "kind": "skill_unused",
+      "last_seen": "2026-08-23",
+      "note": "",
+      "runs_seen": 1,
+      "status": "open",
+      "subject": "slow-network-ux",
+      "where": []
+    }
   },
-  "repo:ProductHired/open-product-management:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2024-07-01 · ★4437",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "학습 경로 큐레이션. 커밋 빈도가 품질 신호가 아님",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "ProductHired/open-product-management",
-   "where": [
-    "software-reference-library/references/planning/open-product-management.md"
-   ]
-  },
-  "repo:Team-Neighborhood/I-want-to-study-Data-Science:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2022-03-28 · ★1807",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "큐레이션 저장소",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "Team-Neighborhood/I-want-to-study-Data-Science",
-   "where": [
-    "software-reference-library/references/development/i-want-to-study-data-science.md"
-   ]
-  },
-  "repo:aFarkas/lazysizes:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2024-04-03 · ★17717",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "네이티브 loading=lazy 로 대체 가능한지 검토",
-   "runs_seen": 3,
-   "status": "acknowledged",
-   "subject": "aFarkas/lazysizes",
-   "where": [
-    "slow-network-ux/references/github.md"
-   ]
-  },
-  "repo:dastergon/awesome-chaos-engineering:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2023-12-28 · ★6634",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "awesome 리스트",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "dastergon/awesome-chaos-engineering",
-   "where": [
-    "software-reference-library/references/qa/awesome-chaos-engineering.md"
-   ]
-  },
-  "repo:evanw/thumbhash:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2024-05-26 · ★4192",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "알고리즘 구현체. 완결돼서 커밋이 없는 것",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "evanw/thumbhash",
-   "where": [
-    "slow-network-ux/references/github.md"
-   ]
-  },
-  "repo:goldbergyoni/javascript-testing-best-practices:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2024-06-27 · ★24624",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "원칙 모음. 내용이 완결된 성격",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "goldbergyoni/javascript-testing-best-practices",
-   "where": [
-    "software-reference-library/references/testing/javascript-testing-best-practices.md"
-   ]
-  },
-  "repo:google/AFL:archived": {
-   "detail": "archived · 마지막 커밋 2021-07-05 · ★4208",
-   "first_seen": "2026-08-19",
-   "kind": "repo_archived",
-   "last_seen": "2026-08-20",
-   "note": "후속은 AFL++. 퍼징을 실제로 도입할 때 교체",
-   "runs_seen": 3,
-   "status": "acknowledged",
-   "subject": "google/AFL",
-   "where": [
-    "software-reference-library/references/testing/afl.md"
-   ]
-  },
-  "repo:google/eng-practices:archived": {
-   "detail": "archived · 마지막 커밋 2024-09-19 · ★23310",
-   "first_seen": "2026-08-19",
-   "kind": "repo_archived",
-   "last_seen": "2026-08-20",
-   "note": "가이드 내용은 유효. 저장소만 동결됐고 코드리뷰 기준 자체는 안 바뀐다",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "google/eng-practices",
-   "where": [
-    "software-reference-library/references/development/google-engineering-practices.md"
-   ]
-  },
-  "repo:joe-bell/plaiceholder:archived": {
-   "detail": "archived · 마지막 커밋 2023-05-24 · ★2318",
-   "first_seen": "2026-08-19",
-   "kind": "repo_archived",
-   "last_seen": "2026-08-20",
-   "note": "archived. 이미지 플레이스홀더 대체재 검토 필요",
-   "runs_seen": 3,
-   "status": "acknowledged",
-   "subject": "joe-bell/plaiceholder",
-   "where": [
-    "slow-network-ux/references/github.md"
-   ]
-  },
-  "repo:ligurio/awesome-software-quality:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2023-02-01 · ★2321",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "awesome 리스트",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "ligurio/awesome-software-quality",
-   "where": [
-    "software-reference-library/references/qa/awesome-software-quality.md"
-   ]
-  },
-  "repo:woltapp/blurhash:stale": {
-   "detail": "2년 이상 정체 · 마지막 커밋 2024-07-08 · ★17066",
-   "first_seen": "2026-08-19",
-   "kind": "repo_stale",
-   "last_seen": "2026-08-20",
-   "note": "알고리즘 구현체. 완결돼서 커밋이 없는 것",
-   "runs_seen": 3,
-   "status": "wontfix",
-   "subject": "woltapp/blurhash",
-   "where": [
-    "slow-network-ux/references/github.md"
-   ]
-  },
-  "skill:role-isolation-pipeline:unused": {
-   "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
-   "first_seen": "2026-08-19",
-   "kind": "skill_unused",
-   "last_seen": "2026-08-20",
-   "note": "",
-   "runs_seen": 3,
-   "status": "open",
-   "subject": "role-isolation-pipeline",
-   "where": []
-  },
-  "skill:slow-network-ux:unused": {
-   "detail": "최근 30일 0회 · 마지막 발동 기록 없음",
-   "first_seen": "2026-08-19",
-   "kind": "skill_unused",
-   "last_seen": "2026-08-20",
-   "note": "",
-   "runs_seen": 3,
-   "status": "open",
-   "subject": "slow-network-ux",
-   "where": []
-  }
- },
- "last_run": "2026-08-20",
- "version": 1
+  "last_run": "2026-08-23",
+  "version": 1
 }
