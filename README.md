@@ -80,8 +80,14 @@ QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 
 ### `mr-conflict-resolve` (스킬)
 develop 대상 MR 충돌 시 `-dev` 브랜치를 만들어 develop 을 병합·해결하고 새 MR 을 올리는 절차. main 기준 브랜치를 develop 에 올릴 때 반복되는 상황용.
 
+### `verify.sh` (검증)
+저장소 자체의 검증 — 파이썬·셸·JSON 구문, 측정 로그 형식, 레퍼런스 검색 품질 회귀. 아래 Stop 훅이 이 파일을 찾아서 돌린다. **훅이 응답마다 부르므로 속도가 곧 매 턴의 지연이다** — 검사를 python3 한 번에 모아 0.76초로 맞춰 뒀다.
+
 ### `verify-on-stop.sh` (훅)
 Claude 가 응답을 마칠 때(Stop) 프로젝트의 `verify.sh` 를 돌리고, **실패했을 때만** 실패한 단계와 에러 요약을 되먹이는 훅. 통과하면 아무것도 출력하지 않는다 — Stop 훅의 exit 0 은 stdout 이 컨텍스트에 안 들어가므로 침묵이 토큰을 한 톨도 안 쓴다. 검증 스크립트가 없는 프로젝트에서는 아무 일도 하지 않는다.
+
+### `record-metrics-on-sessionend.sh` (훅)
+세션이 끝날 때 그 시점의 토큰 지표를 `reports/token-metrics.jsonl` 에 남긴다. **경로를 박아두지 않는다** — 작업 디렉터리에 `scripts/token-usage.py` 와 `reports/` 가 둘 다 있을 때만 도므로, 이 저장소에서 작업한 세션만 기록되고 다른 프로젝트에서는 아무 일도 하지 않는다.
 
 ### `memory/CLAUDE.md`
 **플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 15줄짜리 게이트만 들어있고, 걸리면 스킬을 읽으라고 넘긴다.
@@ -114,7 +120,7 @@ cd claude-skills && ./sync.sh
 ```bash
 rm ~/.claude/CLAUDE.md
 rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync
-rm -rf ~/.claude/hooks/verify-on-stop.sh ~/.claude/verify-logs
+rm -rf ~/.claude/hooks ~/.claude/verify-logs
 ```
 
 훅을 등록했다면 `~/.claude/settings.json` 의 `hooks.Stop` 항목도 지운다.
@@ -164,6 +170,8 @@ python3 scripts/token-usage.py --record --note "무엇을 바꿨는지"
 python3 scripts/token-usage.py --days 14 --record --note "..."
 python3 scripts/token-usage.py --trend          # 남긴 것의 추이
 ```
+
+`SessionEnd` 훅을 등록해 두면 **이 저장소에서 작업한 세션이 끝날 때마다 자동으로** 두 줄(전체 기간 + 최근 14일)이 쌓인다. 위 명령은 그 사이에 직접 남기고 싶을 때 쓴다.
 
 `reports/token-metrics.jsonl` 에 한 줄씩 덧붙인다. **지우거나 고쳐 쓰지 않는다** —
 같은 날 같은 창으로 여러 번 돌렸으면 `--trend` 가 마지막 것만 보여주고 원본 줄은
@@ -252,7 +260,14 @@ rm ~/Library/LaunchAgents/com.jeongtaehwan.claude-skills.weekly-audit.plist
 
 앱 스케줄 작업은 사이드바 "Scheduled" 에서 끈다.
 
-## 검증 훅 켜기
+## 훅 켜기
+
+훅은 둘이다.
+
+| 이벤트 | 스크립트 | 하는 일 |
+|---|---|---|
+| `Stop` (응답마다) | `verify-on-stop.sh` | `verify.sh` 를 돌리고 **실패했을 때만** 되먹인다 |
+| `SessionEnd` (세션당 한 번) | `record-metrics-on-sessionend.sh` | 토큰 지표를 로그에 남긴다 |
 
 `sync.sh` 가 스크립트를 `~/.claude/hooks/` 로 복사해두지만 **등록은 직접 해야 한다.**
 `hooks/settings-fragment.json` 의 내용을 `~/.claude/settings.json` 에 병합한다.
@@ -285,6 +300,14 @@ stderr 를 Claude 에게 보여주는 경로다. 되먹이는 것은 **실패한
 
 `verify.sh` 가 `==> 이름` 형태로 단계를 찍으면 마지막 것을 실패한 단계로 보고한다.
 안 찍어도 동작하고, 그때는 그 줄이 빠질 뿐이다.
+
+### 세션 종료 기록
+
+`SessionEnd` 는 무엇도 막지 못하고 출력이 Claude 에게 가지 않는다. 그래서 이 훅은 어떤 경우에도 조용히 `exit 0` 한다 — 실패해도 세션 종료를 방해하지 않는다.
+
+두 창을 남긴다. **전체 기간**은 항상 같은 뜻이라 비교가 안전하고, **최근 14일**은 최근 행동만 비춰서 "바꾼 게 먹혔나"에 답한다. 둘은 비교 대상이 아니므로 창을 필드로 함께 남기고 `--trend` 가 표를 나눈다.
+
+세션마다 두 줄이 붙으므로 **`git status` 가 매번 더러워진다.** 커밋할 때 같이 담으면 된다. JSONL 이라 두 컴퓨터에서 각각 쌓이면 끝줄이 충돌하는데, 해결은 양쪽 줄을 다 남기는 것이다.
 
 ### 무한 루프를 막는 법
 

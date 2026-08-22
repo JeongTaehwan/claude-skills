@@ -65,8 +65,20 @@ def load():
     return mod
 
 
+_ENTRIES = None
+
+
+def all_entries(mod):
+    """512개를 한 번만 읽는다. 이 테스트는 Stop 훅이 응답마다 부르므로
+    같은 1.4MB 를 다섯 번 읽으면 그만큼 매 턴 느려진다."""
+    global _ENTRIES
+    if _ENTRIES is None:
+        _ENTRIES = mod.load_all()
+    return _ENTRIES
+
+
 def run(mod, cases, verbose, label):
-    entries_all = mod.load_all()
+    entries_all = all_entries(mod)
     failed = 0
     for query, expect, limit, domain in cases:
         entries = [e for e in entries_all if e["domain"] == domain] if domain else entries_all
@@ -104,10 +116,10 @@ def main():
     print("\n동작 확인")
     checks = 0
     for name, fn in (
-        ("도메인 10개를 센다", lambda: len({e["domain"] for e in mod.load_all()}) == 10),
-        ("항목 512개를 읽는다", lambda: len(mod.load_all()) == 512),
+        ("도메인 10개를 센다", lambda: len({e["domain"] for e in all_entries(mod)}) == 10),
+        ("항목 512개를 읽는다", lambda: len(all_entries(mod)) == 512),
         ("절 파싱이 된다", lambda: all(
-            "한 줄" in e["secs"] and "페르소나" in e["secs"] for e in mod.load_all())),
+            "한 줄" in e["secs"] and "페르소나" in e["secs"] for e in all_entries(mod))),
         ("서술어를 거른다", lambda: mod.terms_of("느려서 죽는다 싶다") == ["느려서"]),
         ("조사를 뗀다", lambda: mod.match_weight("리뷰가", "코드 리뷰 규범") == 0.85),
     ):
