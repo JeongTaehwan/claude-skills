@@ -66,6 +66,16 @@ Claude 는 설치본 경로(`~/.claude/skills/software-reference-library/scripts
 
 QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 검증하는 것*으로 나눴다.
 
+### `env-divergence` (스킬)
+같은 코드가 환경·배포마다 **에러 없이 조용히** 다른 값으로 돌 때 원인을 찾는 절차. "STAGE에선 되는데 운영에선 안 돼", "앱에선 보이는데 웹에선 안 보여" 같은 상황용.
+
+핵심은 **출력 계약**이다 — 내보내는 건 원인 한 문장 + 근거 한 줄 + 최소 수정뿐이고, 훑은 순서나 배제한 가설은 안 내보낸다. 절차가 낭독되면 지워진다.
+
+- `scripts/env-diff.py` — 환경변수 분기 자동 탐지. 같은 변수의 서로 다른 fallback, 미정의 참조, 정의 위치가 갈린 것, 죽은 설정
+- `references/nextjs.md` — Next.js 함정 (버전별 캐시 기본값, SSR/CSR 경계, 미들웨어, TZ·로케일·패키지 버전)
+
+에러 로그가 있거나 브라우저 차이만 있으면 **발동하지 않는다.**
+
 ### `role-isolation-pipeline` (스킬)
 사람 판단 / 검증 AI(타 벤더) 질문·리뷰 / Claude Code 구현으로 역할을 나누는 10단계 협업 파이프라인. 구현과 검증이 같은 모델이면 틀리는 방식도 같아서 검증이 자기확인이 된다는 문제를 벤더 분리로 막는다.
 
@@ -88,6 +98,17 @@ Claude 가 응답을 마칠 때(Stop) 프로젝트의 `verify.sh` 를 돌리고,
 
 ### `record-metrics-on-sessionend.sh` (훅)
 세션이 끝날 때 그 시점의 토큰 지표를 `reports/token-metrics.jsonl` 에 남긴다. **경로를 박아두지 않는다** — 작업 디렉터리에 `scripts/token-usage.py` 와 `reports/` 가 둘 다 있을 때만 도므로, 이 저장소에서 작업한 세션만 기록되고 다른 프로젝트에서는 아무 일도 하지 않는다.
+
+### `drills/` (훈련)
+AI 코드를 비판적으로 검토하는 능력은 예방 스킬로는 안 는다 — Claude 가 먼저 잡아버리면 그 감각을 기를 기회가 없다. 그래서 **먼저 판정하고 그 다음에 답을 보는** 훈련 루프를 뒀다.
+
+재료는 실제 fix 커밋이다. 부모 커밋에 버그, fix 커밋에 정답이 있는 라벨링된 결함 데이터다.
+
+- `money-01-problems.md` — 금액·결제 10문제 (수정 전 코드 + 질문 3개, 정답 없음)
+- `money-01-answers.md` — 정답 (무엇이/언제/실제 수정/**왜 놓치기 쉬운가**)
+- `money-principles.md` — 이 코드베이스가 반복해서 틀린 것 + 금액 코드의 고정 원칙
+
+규칙 하나 — 세 가지를 **적어놓고** 답을 편다. "어떤 입력에서 드러나나"를 구체적 수치로 못 대면 틀린 것으로 친다.
 
 ### `memory/CLAUDE.md`
 **플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 15줄짜리 게이트만 들어있고, 걸리면 스킬을 읽으라고 넘긴다.
@@ -113,13 +134,13 @@ git clone https://github.com/JeongTaehwan/claude-skills.git
 cd claude-skills && ./sync.sh
 ```
 
-또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 여섯 개가 전부 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 일곱 개가 전부 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
 
 ## 제거
 
 ```bash
 rm ~/.claude/CLAUDE.md
-rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync
+rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync ~/.claude/skills/env-divergence
 rm -rf ~/.claude/hooks ~/.claude/verify-logs
 ```
 
