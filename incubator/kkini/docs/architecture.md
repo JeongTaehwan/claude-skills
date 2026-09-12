@@ -1,339 +1,380 @@
-# 설계 — 끼니(Kkini)
+# 설계 — 끼니(Kkini) v1
 
-> 상태: **미승인 초안** (2026-09-12). 설계 역할(architect)이 썼다. **여기서 아무것도 결정하지 않는다.**
-> `[제안]` 추천+이유 · `[미정 XX-OQ-NN]` 사람이 정해야 함 · `[추정]` 근거 못 대는 사실 진술.
-> 입력: `BRIEF.md`·`requirements.md`·`open-questions.md`·`research/market.md`(4·5절). 10절은 사람이 `decisions.md`로 승격할 ADR 초안, 11절은 서기가 병합할 새 질문이다.
+> 상태: **미승인 초안 (v1, 2026-09-12)**. 설계 역할(architect)이 썼다. **여기서 아무것도 결정하지 않는다.**
+> v0 설계(PWA 추천 · 카탈로그 200종 · 하루 1건 고정 · 입력 0회 · `Food` 모델)는 사람의 2차 진술로 전제가 사라져 **전면 폐기**했다. v0 본문은 git 이력에 남는다.
+> 입력: `BRIEF.md`(2차 진술·답1~5) · `requirements.md` v1 · `open-questions.md` 추천 답 · `research/ingredient-prices-and-delivery.md` · `research/market.md` 4·5절 · `prototype-expo/src/`. 표기: `[제안]` 추천+한 줄 이유 · `[미정 XX-OQ-NN]` 사람이 정해야 함 · `[추정]` 근거 못 대는 사실 진술. 10절은 사람이 `decisions.md`로 승격할 ADR 초안, 11절은 서기가 병합할 새 질문이다.
 
 ## 1. 결정 분기표 — 어떤 답이 설계의 어디를 바꾸는가
 
-기본선은 **open-questions.md의 `추천:`을 전부 따랐을 때의 설계**다. 표는 그 기본선이 다른 답에서 어디가 무너지는지만 적는다.
+기본선은 **`open-questions.md`의 `추천:`을 전부 따랐을 때의 설계**다. 아래 표는 그 기본선이 다른 답에서 어디가 무너지는지만 적는다.
 
-| 미정 | PM 추천(기본선) | 기본선일 때 설계 | 다른 답 | 그 답이 바꾸는 부분 |
+| 미정 | 추천(기본선) | 기본선일 때 설계 | 다른 답 | 그 답이 바꾸는 부분 |
 |---|---|---|---|---|
-| **KK-OQ-02** 갈래 범위 | A+B(외식 카테고리) | 후보 풀 1개, 음식에 `branches` 속성. 외부 데이터 0 | C(배달) 포함 | 3절 `Food`에 가게·딥링크 필드가 붙고 5절 카탈로그의 주인이 외부로 넘어간다. 6절 "외부 API 0개"와 7절 0원 구성이 함께 무너진다 |
-| | | | B를 **가게 단위**로 | 위치 권한 + 지역검색 API(카카오/네이버, market.md 4절 [상충] 쿼터)가 들어온다. 9절 전체를 다시 쓰고 위치기반서비스사업 신고 검토가 필요해진다(research 5-1) |
-| **KK-OQ-03** 플랫폼 | PWA | 2절 (a). 정적 호스팅 1벌, 심사 0, 오프라인 기본 | 네이티브 | 2절 (c)/(d)로 이동. 스토어 계정비·심사가 일정에 들어오고 NT가 기술적으로 가능해져 **requirements 4절의 NT 제외 근거가 사라진다** → PM 재검토 |
-| | | | 순수 웹(설치 없음) | `storage.persist()` 승인 확률이 낮아져 3.4절 축출 위험이 커진다 |
-| **KK-OQ-04** 운영비 상한 | 0원 | 6절 외부 API 0개, 7절 무료 티어만 | 월 1~3만원 허용 | 6절에 날씨 프록시 + OpenWeather 무료 1,000콜/일(market.md 4절 [22])이 들어오고, 8절에 유료 분석이 선택지로 생긴다 |
-| **MO-OQ-01** 카탈로그 주인 | 우리 고정 목록 200종 | 5절: 레포 내 JSON, 빌드 시 번들 | 외부 API | 오프라인이 불가능해지고 4절 필터가 네트워크 실패(DC-R06) 경로를 상시로 탄다. 5절 폐기 |
-| | | | 사용자 등록 | 첫 사용자 카탈로그가 0 → DC-R10이 성립하지 않는다. 4.6절 폐기 |
-| **PR-OQ-01** 데이터 주인 | 기기 로컬 | 3절 IndexedDB, 서버·인증 0. 8절 "수집 안 함", 9절 수집 항목 0개 | 서버 계정 | 2절 (b)로 이동. 인증·DB·탈퇴 처리·처리방침이 MVP에 들어오고(research 5-3) 7절 비용이 `[추정]` 구간으로 올라간다. 대신 8절 지표 4개가 전부 관측 가능해진다 |
-| | | | 로컬 + 익명 이벤트 | 8.2절 하위 결정. 3·9절은 유지되나 처리방침 게시가 안전선으로 올라온다 |
+| **KK-OQ-03** 플랫폼 | Expo(RN) `[제안]` | 2절 전체. AsyncStorage 1키(8절), 스토어 비용 0(9절), 애니메이션은 RN `Animated` | 웹/PWA | 2절 폐기. `Animated`→CSS, AsyncStorage→IndexedDB, **KK-OQ-07(저장소 축출)이 되살아난다**. 사람의 Expo Go 요청과 충돌 |
+| | | | 웹+Expo 두 벌 | `react-native-web` 의존 2개가 유지되고 8절 저장 실패 경로가 두 가지가 된다 |
+| **IN-OQ-01** 주소 저장 | 기기 로컬·동 단위 | 8.3절. 서버 0, 위치기반서비스사업 신고 논점에서 빠질 가능성(research 4절 `[추정]`) | 서버 저장 | 백엔드·인증·탈퇴 처리가 MVP에 들어오고 신고 여부를 **법률 자문으로 확정**해야 한다(미신고 시 3년 이하 징역/3천만원 이하 벌금, market.md 5-2). 9절 0원 구성이 무너진다 |
+| | | | 상세주소까지 | 최소수집 원칙(market.md 5-4)에서 벗어나고, 지금은 필터가 없으므로(MO-R07) 쓰지도 않는 정밀도를 받는다 |
+| **MO-OQ-03** 배달 데이터 | 매장 필터 **구현 안 함** | 6절. 자체 `DeliveryMenu` 목록 랜덤 + 가격대 안내 + 배달앱 열기. 외부 API 0 | 카카오/네이버 지역검색 | "근처 음식점"까지만 얻고 배달 가능 여부 필드가 없다(research 3절) — 답2의 필터는 여전히 불가. 쿼터·키 관리만 늘어난다 |
+| | | | 배달앱 웹 스크래핑 | ToS·안정성 리스크를 제품이 진다(market.md 4절). 6절을 서버 있는 구조로 다시 써야 한다 |
+| **CA-OQ-01** 단가 출처 | 고정 단가표(40~60종)·기준일 90일 | 3·4절. `Ingredient.asOf` 필수, 90일 경과는 "추정"(CA-R04) | KAMIS/공공데이터 자동 갱신 | 4절 계산은 그대로지만 갱신 잡·키·품목 매핑표가 추가된다. **무료 호출 한도를 1차 문서로 확인하지 못했다**(research 1절) → KK-OQ-04와 함께 결정해야 한다 |
+| | | | 단가 없이 가격대만 | 4절 전체 폐기. RC-R02(재료별 단가·소계)가 거짓이 되어 요구사항 재작성 |
+| **CA-OQ-02** 레시피 개수 | 20개 + 사람 검수 | 5.1절 필터·창 상한(C3 창 10건), 7절 작성 일정 | 5개 미만 | 반복 회피 창이 후보를 0개로 만든다(DC-R07이 상시 경로가 된다) |
+| | | | 100개 이상 | 7절 작성·검수가 MVP 일정의 대부분이 된다. 설계는 안 바뀌고 일정만 바뀐다 |
 
-기본선을 따를 때 함께 굳는 것: **KK-OQ-01**=앱이 갈래도 정한다(→ 후보 풀 1개), **DC-OQ-01**=1개+거절 1개(→ 4절이 1건만 반환), **DC-OQ-03**=같은 날 고정+거절 5회(→ 4.4절), **PR-OQ-02**=3상태(→ 3.1절 `Answered<T>`), **HI-OQ-02**=채택+확인된 섭취·창 14일(→ 4.7절).
+기본선을 따를 때 함께 굳는 것: **KK-OQ-01**=사용자가 갈래를 고른다(→ `Inputs.branch`), **DC-OQ-08**=총액 비교·허용폭 0(→ 4.5절), **IN-OQ-03**=기준 2인분·상한 6·10원 반올림(→ 4.1·4.2절), **PR-OQ-01/02**=기기 로컬·3상태(→ 3절 `Answered<T>`, 8절), **RE-OQ-02**=상한 없음(→ 5.3절), **HI-OQ-02**=카드에 나온 것 전부·창은 개수의 절반(→ 5.1절).
 
-## 2. 스택 후보 비교
+## 2. 스택 — v0의 PWA 추천을 Expo로 바꾼다
 
-| 축 | (a) PWA — Vite+TS+Svelte, IndexedDB, 정적 호스팅 | (b) Next.js + 관리형 DB(Supabase) | (c) Expo / React Native | (d) Flutter |
-|---|---|---|---|---|
-| 1인 유지 부담 | **가장 낮음.** 산출물이 정적 파일뿐, 런타임 장애 지점 0 | 중간. 서버 런타임·DB 스키마·인증 세션·프레임워크 메이저 업글이 유지 대상 | 높음. Expo SDK 업글 연 2~3회, 네이티브 의존성 깨짐 | 높음. Dart 생태계 별도 학습, 플러그인 유지 편차 큼 |
-| 알림(NT) 가능성 | Android·데스크톱은 Web Push 가능. **iOS는 홈 화면 추가한 PWA에서만** `[추정 — market.md 미수록]` | (a)와 동일(웹이므로). 발송 스케줄러는 서버가 있어 쉬움 | **온전히 가능**(APNs/FCM) | **온전히 가능** |
-| 오프라인 | **기본.** 카탈로그 번들 + IndexedDB면 네트워크 0으로 전 기능 동작 | 나쁨. SSR·DB 왕복이 기본 경로라 오프라인은 별도 캐시 설계가 추가 작업 | 좋음(로컬 DB) | 좋음(로컬 DB) |
-| 배포·심사 마찰 | **0.** push → 정적 배포, 심사 없음, 핫픽스 즉시 | 0에 가까움 | 높음. 스토어 계정·심사 대기·롤아웃 | 높음(동일) |
-| 월 운영비 | **0원**(7절) | 무료 티어 안이면 0원, 벗어나면 `[추정]` 월 3~6만원 | 0원 + 계정비 `[추정]` Apple $99/년, Google $25 1회 | 동일 |
-| **이걸 고르면 잃는 것** | iOS 알림의 확실성, 스토어 검색 유입. **그리고 브라우저가 저장소를 축출하면 기록이 조용히 0이 된다** | "서버가 없다"는 상태 자체. PR-OQ-01이 서버로 뒤집히고 처리방침·탈퇴 처리가 MVP에 들어온다(research 5-3) | 설치 마찰 — 퇴근길 19시에 스토어에서 내려받게 만든다. requirements 3.1 "끝내기"가 첫 순간에 깨진다 | (c)의 전부 + 웹 한 벌을 또 만들 여지. 1인 팀 기준 레퍼런스·에이전트 지원 밀도도 낮다 `[추정]` |
+**`[제안]` Expo(React Native) + TypeScript, 화면은 Expo Go로 확인한다.** v0 설계의 "(a) PWA 한 벌" 추천을 대체한다.
 
-**추천 `[제안]` — (a) PWA: Vite + TypeScript + Svelte, IndexedDB(Dexie), 정적 호스팅**
+근거 3개.
+1. **사람이 Expo Go 주소를 요청했다** — v0 시연 이후의 요청이고, `prototype-expo/`가 이미 그 전제로 만들어져 돈다(`package.json`: expo 57, RN 0.86). 설계가 PWA를 다시 추천하면 사람이 방금 본 화면과 문서가 어긋난다.
+2. **DC-R04가 "화면 중앙 등장 애니메이션 + 끝나기 전 버튼 잠금"을 요구사항으로 못 박았다.** 네이티브 드라이버에서 도는 transform·opacity와 완료 콜백이 기본으로 있는 쪽이 구현 위험이 낮다. 촉각 피드백(햅틱)은 **요구사항에 없으므로 설계에 넣지 않는다**(11절 요구사항 제안).
+3. 되돌리기 비용이 v0 판단보다 싸다 — MVP 기능에 서버가 필요한 요구사항이 0개이고(외부 API 0, 8절), 로직이 전부 순수 TS 함수라 화면 층을 바꿀 때 `engine`/`cost` 모듈은 그대로 옮겨진다.
 
-① MVP 기능(DC·RE·MO·PR·HI)에 서버가 필요한 요구사항이 **하나도 없다** — NT는 이미 제외고 카탈로그는 우리 소유다. ② "월 0원 + 심사 0 + 오프라인"을 동시에 만족하는 유일한 후보다(KK-OQ-04 추천이 0원이라 나머지는 기능을 빼야 들어온다). ③ 뒤집기 비용이 가장 싸다 — 서버가 필요해지면 (b)를 뒤에 붙이고 네이티브가 필요해지면 이 웹을 래핑한다. 반대 방향은 다시 만드는 일이다. (Svelte/React 중 어느 쪽이어도 결론은 안 바뀐다. 화면 5개 미만이라 런타임 크기 차이가 체감으로 안 넘어온다 `[추정]`.)
+**이걸 고르면 잃는 것**: 설치 마찰(스토어 배포 시) · 웹 링크 하나로 보여주는 유입 · 스토어 계정비(9절) · Expo SDK 연 2~3회 업글 부담 `[추정]`. 얻는 것: iOS 알림 가능성(NT는 여전히 범위 밖) · 브라우저 저장소 축출 문제 소멸(8절).
 
-## 3. 데이터 모델
+### 2.1 의존성 — 최소 목록
 
-### 3.1 공통 타입
+런타임 `expo`·`react`·`react-native` / 저장 `@react-native-async-storage/async-storage`(8절) / 서체 `expo-font` + `@expo-google-fonts/gowun-batang` + `@expo-google-fonts/ibm-plex-sans-kr`(로드 실패 시 시스템 폰트로 떨어진다 — `theme.ts`) / `expo-status-bar`. 개발 전용 `typescript`·`@types/react`, 그리고 `zod`(7절 검증 **스크립트 전용**, 앱 번들에 넣지 않는다).
+
+넣지 않는 것: `expo-haptics`(요구사항 없음) · `expo-clipboard`(6절, `[미정 MO-OQ-04]`가 열려 있다) · `react-native-reanimated`(2.2절) · `expo-router`(2.3절) · `react-native-web`(11절).
+
+### 2.2 애니메이션 — RN `Animated`로 충분하다 `[제안]`
+
+요구되는 동작은 DC-R04·RE-R02의 **카드 1개 등장(중앙·스케일·투명도)과 완료까지의 입력 잠금**뿐이다. `Animated.parallel([timing(opacity), spring(scale)])`에 `useNativeDriver: true`면 transform·opacity는 UI 스레드에서 돌고, 잠금은 `.start(() => setLocked(false))` 콜백 한 줄이다. 설정 파일 변경 0. `react-native-reanimated`는 Expo Go에 포함돼 있을 가능성이 높지만 `[추정]` **babel 플러그인 설정과 worklet 규칙이 따라온다** — 제스처로 끌어당기는 카드나 레이아웃 애니메이션이 요구사항에 들어오면 그때 바꾼다.
+
+### 2.3 `expo-router`는 도입하지 않는다 `[제안]`
+
+화면은 5개(IN·DC·RC·HI·PR)이고 **딥링크·URL 요구사항이 0개**다(주소도 URL에 올라가면 안 된다, IN-R11). 라우터를 넣으면 파일 기반 라우팅 규약과 타입 생성이 따라오는데 얻는 것이 없다. `App.tsx`의 `screen` 상태 하나 + Android 하드웨어 백을 `BackHandler` 한 곳에서 처리하는 쪽이 싸다. 탭이나 공유 링크가 요구사항에 들어오면 재검토한다.
+
+## 3. 데이터 모델 (TypeScript)
+
+v0의 `Food`는 **폐기한다.** `budgetTier`(1인 예산 등급)는 실제 재료비 계산이 들어온 뒤 쓸 데가 없고, `seasons`·`weekdays`·`spicy`·`lateOk`는 v1 요구사항에 근거가 없으며, 갈래 `'out'`이 범위 밖이 됐다. 살리는 것은 `Answered<T>` 3상태와 "id 재사용 금지·`retiredAt`" 규약이다.
 
 ```ts
-type Branch = 'A' | 'B' | 'C';   // MO-R01: 목록은 3개 고정, MVP 활성은 [미정 KK-OQ-02]
-type KkiniDate = string;         // 'YYYY-MM-DD', 하루 경계 04:00 기기 로컬 [미정 KK-OQ-05]
-type Iso = string;               // ISO8601 + 오프셋
-
-// PR-OQ-02 추천: 미입력을 '제약 없음'으로 읽지 않는다. 3상태를 타입으로 강제한다.
-// unset=아직 모름 / declared([])=없다고 답함 / declared([...])=있다고 답함
-type Answered<T> = { status: 'unset' } | { status: 'declared'; value: T };
+export type Branch = 'home' | 'delivery';                     // MO-R01: 정확히 2개
+export type Iso = string; export type DateOnly = string;      // ISO 8601 / 'YYYY-MM-DD'
+export type RecipeUnit = 'g'|'ml'|'개'|'큰술'|'작은술'|'컵'|'대'|'쪽'|'줌'|'장'|'마리';
+export type PurchaseUnit = 'g'|'ml'|'개'|'단'|'봉'|'팩';
+export type Answered<T> = { status:'unset' } | { status:'declared'; value:T };   // v0에서 살린다 (PR-OQ-02)
+/* ── 카탈로그: 우리 소유, 앱과 함께 배포 (CA-R01) ───────────── */
+export interface RecipeIngredient {
+  ingredientId: string; qty: number; unit: RecipeUnit;
+  optional?: boolean;                     // 소계에서 빼고 "선택"으로 표시 (4.4)
+  scaling?: 'linear' | 'fixed';           // 기본 linear. fixed = 인분과 무관한 양 (4.3)
+  note?: string;                          // "송송 썬 것" 같은 표기. 계산에 쓰지 않는다
+}
+export interface RecipeStep { text: string; minutes?: number; wait?: boolean }  // wait: "대기 N분" (RC-OQ-01 추천)
+export interface Recipe {
+  id: string; name: string; tags: string[];      // id는 안정 slug, 재사용 금지 — MealLog.itemId가 과거 id를 가리킨다
+  branches: Branch[];                     // v1에서는 항상 ['home'] — 배달에는 레시피가 없다 (MO-R09)
+  servingsBase: number; servingsMax?: number;    // 기준 인분(추천 2) / 이 레시피의 상한, 없으면 IN 상한 6 (C10)
+  ingredients: RecipeIngredient[]; steps: RecipeStep[];   // steps는 1개 이상 (RC-R06)
+  cookMinutes: number; difficulty?: 1|2|3;       // 대기 시간은 steps[].wait로 분리(RC-R07). difficulty는 화면에 쓰지 않는다
+  allergens: string[];                    // PR-R02 매칭 키. [미정 PR-OQ-05] 교차검수 없으면 안전 보장이 거짓이다
+  reviewedAt: DateOnly; retiredAt?: Iso;  // RC-R09: 없으면 후보에 못 들어간다 / 뺄 때 삭제하지 않는다
+}
+export interface Ingredient {
+  id: string; name: string;
+  purchaseUnit: PurchaseUnit; purchaseQty: number; priceKrw: number;   // "간장 500ml 1병 3,200원" (C11)
+  asOf: DateOnly;                         // CA-R03 필수. 90일 경과면 추정 (CA-R04, CA-OQ-01 추천)
+  source: 'manual'|'kamis'|'data.go.kr'|'unknown'; isEstimate: boolean;   // 'unknown'이면 isEstimate 강제 true
+  pantry?: boolean;                       // 소금·기름·간장 등 비축 양념. 4.4의 처리 규칙 대상
+  gramsPerMl?: number;                    // 레시피 단위(ml)와 구매 단위(g)가 어긋날 때만 필요
+}
+export interface UnitConversion { unit: RecipeUnit; base: 'g'|'ml'; factor: number; isEstimate: boolean }
+export interface UnitOverride extends UnitConversion { ingredientId: string; note: string }   // 재료별 예외
+export interface DeliveryMenu {
+  id: string; name: string; category: string;        // 메뉴 단위 — "치킨", "마라탕" (MO-OQ-03 추천)
+  priceLowKrw: number; priceHighKrw: number;         // 1인 기준 예상 가격대 (MO-R06)
+  asOf: DateOnly; isEstimate: boolean;               // 배달 가격은 항상 추정이다 [제안]
+  tags: string[]; allergens: string[]; retiredAt?: Iso;
+}
+/* ── 사용자 쪽: 기기 로컬만 (PR-OQ-01 추천) ─────────────────── */
+export interface Inputs {
+  branch: Branch;                         // 매번 고른다 (IN-R07, IN-OQ-02 추천)
+  budgetKrw: Answered<number>;            // 총액 (DC-OQ-08 추천). unset이면 판정 없음 (IN-R10)
+  servings: number;                       // IN-R05. 기본 2, 상한 6 (IN-OQ-03 추천)
+  address?: string; savedAt: Iso;         // address는 Profile에서 읽어 온 사본 — 여기에 저장하지 않는다
+}
+export interface Profile {
+  absoluteExclusions: Answered<string[]>; dislikes: Answered<string[]>;  // 절대 제외(PR-R02) / 감점, 제외 아님
+  defaultBudgetKrw: Answered<number>; defaultServings: Answered<number>;
+  address: Answered<string>;              // 동·읍·면 단위 (IN-R14). 주소의 유일한 보관 위치
+  updatedAt: Iso;                         // PR-R05: 이 시각 이후 생성된 결정부터 적용
+}
+export type BudgetVerdict = 'within' | 'over' | 'unknown';   // DC-R08의 2값 + 예산 미입력(IN-R10)
+export type EstimateReason = '단가추정' | '기준일경과' | '환산추정' | '배달가격';
+export interface CostLine {
+  ingredientId: string; name: string; qty: number; unit: RecipeUnit;   // qty는 인분 환산된 값 (RC-R03)
+  unitPriceText: string;                  // "500ml 3,200원" — 화면이 다시 계산하지 않게 원문을 보관한다
+  subtotalKrw: number; isEstimate: boolean; optional: boolean;
+}
+export interface CostBreakdown {
+  lines: CostLine[]; totalKrw: number;    // RC-R04: Decision.costKrw와 반드시 같다
+  isEstimate: boolean; estimateReasons: EstimateReason[];
+}
+export interface Decision {               // C2 — 항상 정확히 1건
+  id: string; itemKind: 'recipe'|'delivery'; itemId: string; name: string;
+  branch: Branch; servings: number;
+  reason: string;                         // DC-R03. 5.4절 규칙으로만 만든다
+  costKrw: number | null;                 // 해 먹기=재료비 합계 / 시켜 먹기=가격대 하단
+  priceRangeKrw?: [number, number]; cost?: CostBreakdown;     // 앞은 시켜 먹기만, 뒤는 해 먹기만
+  budgetVerdict: BudgetVerdict; isEstimate: boolean;          // isEstimate: DC-R09
+  createdAt: Iso; shownAt: Iso | null; status: 'proposed'|'confirmed';   // shownAt: DC-R13
+  seed: number; catalogVersion: string;   // seed는 버그 재현용. 하루 시드가 아니다 (5.3)
+}
+export interface MealLog {
+  id: string; dateKey: DateOnly; decisionId: string;   // dateKey: C1 하루 1건의 키, 경계 04:00
+  itemKind: 'recipe'|'delivery'; itemId: string; name: string;   // 카탈로그에서 빠져도 이름은 남는다
+  branch: Branch; servings: number; costKrw: number | null; isEstimate: boolean;
+  recipeOpened: boolean;                  // HI-OQ-01 추천: 북극성 분자의 조건
+  confirm: { state: 'confirmed'|'unconfirmed'|'expired'; at: Iso|null }; confirmDeadline: Iso;  // HI-R07
+}
+export const SCHEMA_VERSION = 2;          // 1 = prototype-expo(Food 기반). 8.2 참조
+export const STORAGE_KEY = 'kkini.state';
+export interface KkiniState {
+  schemaVersion: number; catalogVersion: string; profile: Profile; lastInputs: Inputs | null;
+  decisions: Decision[]; mealLogs: MealLog[];         // decisions는 최근 60건만 보관 (8.1)
+}
 ```
 
-### 3.2 엔티티
+## 4. 재료비 계산
 
-```ts
-interface Food {                 // 카탈로그. 읽기 전용, 빌드 시 번들 → 사용자 데이터와 저장소 분리
-  id: string;                    // 안정 slug. 재사용 금지 — MealLog.foodId가 과거 id를 계속 가리킨다
-  name: string; branches: Branch[];   // branches = 갈래 가능 집합. ['A','B'] = 해 먹어도 사 먹어도 되는 것
-  tags: string[];                // '한식','국물','면','고기','채소' — 맥락 규칙이 본다
-  allergens: string[];           // PR-R02 절대 제외 매칭 키. 이 배열의 정확도가 곧 안전이다
-  cookTimeMin: number | null; cookDifficulty: 1|2|3 | null;   // 'A' ∈ branches 일 때만 값
-  budgetTier: 1 | 2 | 3;         // 1인 기준 예산 등급(1=저렴). 원화 금액을 카탈로그에 박지 않는다
-  context: {                     // 맥락 가점 근거. 전부 날짜·시각에서 계산 → 외부 API 불필요
-    seasons?: ('봄'|'여름'|'가을'|'겨울')[]; weekdays?: (0|1|2|3|4|5|6)[];
-    lateOk?: boolean;            // 21시 이후에도 성립하는가
-  };
-  retiredAt?: Iso;               // 뺄 때 삭제 대신 이걸 붙인다(기록의 이름 표시가 깨지지 않게)
-}
-interface Profile {              // PR-R01 다섯 항목. 전부 Answered<T>라 '미입력'과 '없음'이 구분된다(PR-R03)
-  absoluteExclusions: Answered<string[]>;  // 알레르기·못 먹는 것. Food.allergens와 같은 어휘
-  dislikes: Answered<string[]>;            // 감점 대상. 제외가 아니다(RE-R04)
-  budgetMaxKrw: Answered<number>; canCook: Answered<boolean>; partySize: Answered<number>;
-  updatedAt: Iso;                          // PR-R04: 이 시각 이후 생성된 결정부터 적용
-}
-interface Decision {             // C2 응답 모양 그대로. 필드를 늘리지 않는다
-  id: string; foodName: string; branch: Branch;
-  reason: string;                // DC-R03: 적용된 규칙에서 생성. 지어내지 않는다
-  createdAt: Iso; status: 'proposed' | 'adopted' | 'rejected';
-}
-interface StoredDecision extends Decision {  // 로컬 전용 확장. C2의 모양을 더럽히지 않으려 분리
-  foodId: string; catalogVersion: string;
-  kkiniDate: KkiniDate;          // C1 '하루 1건'의 키
-  shownAt: Iso | null;           // DC-R11, 지표 S1의 시작점
-  appliedRules: AppliedRule[];   // reason의 원본. 문장이 아니라 규칙으로 보관한다
-  seed: number;                  // 4.4절. 같은 카드를 재현할 수 있어야 버그를 재현한다
-}
-type RejectionReason = 'not_today' | 'ate_recently' | 'dislike' | 'cannot_cook_now';
-interface Rejection {            // RE-R03의 사유 4종 + 건너뜀
-  id: string; decisionId: string; foodId: string; rejectedAt: Iso;
-  kkiniDate: KkiniDate;          // RE-R02: 같은 날 재등장 차단의 키
-  reason: RejectionReason | null;  // null = 사유 건너뜀. 그래도 RE-R02는 적용된다
-}
-type ConfirmState = 'confirmed' | 'unconfirmed' | 'expired';  // expired = HI-R07 기한 경과 = 판정 불가
-interface MealLog {              // HI-R02/R03: 확인 여부를 boolean으로 뭉개지 않는다
-  id: string; kkiniDate: KkiniDate; decisionId: string; branch: Branch;
-  foodId: string; foodName: string;   // 카탈로그에서 빠져도 기록의 이름은 남아야 한다
-  adoptedAt: Iso;                // HI-OQ-01 추천: 이 시각이 '해결된 저녁'의 판정 근거
-  confirmDeadline: Iso;          // HI-R07: 생성 다음 날 12:00
-  confirm: { state: ConfirmState; at: Iso | null };
-}
-interface Settings {             // 상수를 코드에 박지 않는다. 값 자체는 전부 미정에 걸려 있다
-  schemaVersion: number; catalogVersion: string;
-  deviceSalt: string;            // 최초 실행 시 crypto.randomUUID(). 기기마다 다른 결정을 내기 위한 것
-  dayBoundaryHour: number; dinnerWindow: [number, number];  // [미정 KK-OQ-05] 추천 4 / [16,23]
-  recentWindowDays: number;      // [미정 HI-OQ-02] 추천 14
-  rejectLimitPerDay: number;     // [미정 DC-OQ-03] 추천 5
-  minSampleForPersonalReason: number;  // DC-R08 [제안] 3
-  analytics: 'off' | 'anonymous';      // 8절 하위 결정. 기본 'off'
-}
-```
+### 4.1 기본 환산표 `[추정]` — 전부 사람 검수 대상
 
-### 3.3 저장소 배치와 스키마 버전·마이그레이션
+| 단위 → 기준 | 값 (전부 `[추정]`) |
+|---|---|
+| 큰술 · 작은술 · 컵 → ml | 15 · 5 · 200 — 컵은 한국 계량컵 기준, 미국 240ml와 다르다 |
+| 대(대파) · 쪽(마늘) · 줌 → g | 100 · 5 · 30 — 재료별 예외로만 쓴다. "줌"이 가장 불확실하다 |
+| 개 · 장 · 마리 | 기본표에 두지 않는다. **재료별 예외(`UnitOverride`)만** 허용한다 |
 
-스토어 5개: `meta`(고정 키 1개, `Settings`) · `profile`(고정 키 1개) · `decisions`(인덱스 `kkiniDate`) · `rejections`(인덱스 `kkiniDate`,`foodId`) · `mealLogs`(인덱스 `kkiniDate`,`foodId`). HI-R06 삭제는 tombstone 없이 하드 삭제한다 — "즉시 반복 회피에서 빠진다"가 요구사항이다. **카탈로그는 IndexedDB에 넣지 않는다**(빌드 산출물로 읽기 전용) — 판본 갱신이 배포 한 번으로 끝나고 사용자 데이터 마이그레이션과 섞이지 않는다.
-
-- **버전은 `meta.schemaVersion` 하나만 본다.** `onupgradeneeded`는 스토어·인덱스 생성만 맡고 **레코드 모양 변환은 앱 부팅 시 코드로** 한다. 두 곳에 버전이 생기면 어긋난다.
-- 마이그레이션은 **순수 함수의 순서 배열**, `v`→`v+1` 한 칸씩, 건너뛰기 없음. 각 함수는 **멱등**이어야 한다(중간에 탭이 닫힐 수 있다).
-- **실행 전 스냅샷**: 전체를 JSON 한 덩어리로 `meta.backupBeforeV<n>`에 보관하고 정상 부팅 2회 뒤 지운다. 로컬 전용 구조에는 복구할 서버가 없다.
-- **필드는 추가만.** 의미가 바뀌면 새 필드를 만들고 옛 필드를 읽기 전용으로 둔다(`Decision`은 C2 계약이라 특히). **미래 버전 방어**: `meta.schemaVersion > CODE_VERSION`이면(캐시된 옛 배포를 연 경우) 마이그레이션을 돌리지 않고 "앱을 새로 고쳐 주세요"로 멈춘다. **옛 코드가 새 데이터를 덮어쓰는 것이 가장 비싼 사고다.**
-- **축출 대비**: 부팅 시 `navigator.storage.persist()`를 1회 요청하고 결과를 `meta`에 남긴다. 거부됐을 때 무엇을 할지는 요구사항에 없다 → 11절.
-
-## 4. 추천 로직 v0
-
-### 4.1 입력과 출력
-
-입력 `catalog, profile, logs, rejections, settings, now, branch`. 출력은 셋 중 하나 — `Decision` **정확히 1건**(C2, DC-R01) / `{kind:'empty', blockedBy}`(DC-R07) / `{kind:'error'}`(DC-R06).
+`isEstimate: true`가 붙은 환산 계수를 쓴 소계는 추정으로 전파된다(4.6). 국내외에 이 환산을 자동화해 보여주는 소비자 서비스 사례를 찾지 못했다(research 2절) — 즉 **선례 없이 우리가 숫자를 정하는 자리**이고, 여기가 계산의 가장 약한 고리다.
 
 ### 4.2 의사코드
 
 ```
-function decide(catalog, profile, logs, rejections, settings, now, branch):
-  today = kkiniDate(now, settings.dayBoundaryHour)
+cost(recipe, servings, inputs, catalog):
+  lines = []
+  for item in recipe.ingredients:
+    ing = catalog.ingredients[item.ingredientId]          # 없으면 7.2 검증에서 이미 막혔다
+    qty = scaleQty(item, recipe.servingsBase, servings)   # 4.3
+    if item.optional: lines += displayOnly(item, qty); continue   # 4.4
+    (amount, base, convEstimate) = toBase(item.unit, qty, ing)    # 4.1 기본표 → 재료별 예외가 이긴다
+    amount = toPurchaseBase(amount, base, ing)            # ml↔g는 ing.gramsPerMl 필요, 없으면 검증 실패
+    ratio  = amount / ing.purchaseQty                     # 구매 단위 대비 사용 비율
+    krw    = round10(ratio * ing.priceKrw)                # 소계에서 10원 단위 반올림
+    lines += CostLine(..., subtotalKrw=krw,
+                      isEstimate = ing.isEstimate or convEstimate or aged(ing.asOf))
+  total = sum(l.subtotalKrw for l in lines if not l.optional)   # 화면의 세로 합과 같아진다
+  return CostBreakdown(lines, total, any(l.isEstimate), reasons)
 
-  # 0. 하루 1건 고정 (C1, DC-OQ-03 추천) — 다시 열어도 같은 카드. 계산 자체를 하지 않는다
-  saved = decisions.findBy(kkiniDate=today, status in ['proposed','adopted']);  if saved: return saved
-
-  # 1. 후보 필터 — 순서 고정. 이 순서가 blockedBy 숫자의 의미를 정한다(DC-R07)
-  blocked = {}; c = catalog
-  c = keep(c, f => branch in f.branches && !f.retiredAt);   blocked.branch      = 걸러진 수
-  if profile.absoluteExclusions.status == 'declared':       # PR-R02: 0개가 되어도 풀지 않는다
-      c = keep(c, f => empty(f.allergens ∩ excl.value));    blocked.absolute    = 걸러진 수
-  c = keep(c, f => f.id ∉ rejections.where(kkiniDate=today).foodIds)
-                                                            blocked.todayReject = 걸러진 수
-  recent = logs.where(kkiniDate >= today - settings.recentWindowDays)   # C3 [미정 HI-OQ-02]
-  c = keep(c, f => f.id ∉ recent.foodIds);                  blocked.recent      = 걸러진 수
-  if empty(c): return { kind:'empty', blockedBy: blocked }               # DC-R07
-
-  # 2. 점수 — 감점은 이유 줄에 쓰지 않는다("싫은 걸 피했다"는 고른 이유가 아니다)
-  for f in c:
-    s = 0; applied = []
-    if profile.dislikes.declared and f.id in dislikes:      s -= 40
-    s -= 12 * rejectCount(f.id, last 30d, reason='dislike')          # RE-R04: 감점, 영구 제외 아님
-    s -= 6  * timesEaten(f.id, last 60d)                             # 반복 회피의 완만한 꼬리
-    if now.season  in f.context.seasons:    s += 15; applied += rule('season', 15)
-    if now.weekday in f.context.weekdays:   s += 10; applied += rule('weekday', 10)
-    if now.hour >= 21 and f.context.lateOk: s += 12; applied += rule('late', 12)
-    if profile.budgetMaxKrw.declared and budgetFits(f): s += 8; applied += rule('budget', 8)
-    if profile.canCook.declared and branch == 'A':                   # 못 만드는데 A 갈래면 사실상 제외
-        s += canCook ? 8 : -1000;  if canCook: applied += rule('cook', 8)
-    score[f.id] = s; rules[f.id] = applied
-
-  # 3. 선택 (4.3) — Math.random()과 Date.now()를 이 경로에 넣지 않는다
-  top = sortDesc(c, score).take(K)                          # K = 12 [제안]
-  rng = mulberry32(seed(settings.deviceSalt, today, branch, rejectCountToday))
-  pick = weightedRandom(top, w => exp(score[w] / τ), rng)   # τ = 20 [제안]
-
-  # 4. 이유 한 줄 (4.5)
-  reason = buildReason(rules[pick.id], confirmedLogCount, settings)
-  return persist(Decision{id, foodName:pick.name, branch, reason, createdAt:now, status:'proposed'})
+verdict(total, inputs.budgetKrw):                          # C12
+  if budget is unset: return 'unknown'                     # IN-R10: 판정 문구를 쓰지 않는다
+  return 'within' if total <= budget else 'over'           # DC-OQ-08 추천: 총액, 허용폭 0
 ```
 
-### 4.3 선택 규칙 — argmax인가 가중 무작위인가
+**반올림 `[제안]`**: 소계에서 10원 단위 반올림하고 합계는 **반올림된 소계의 합**이다. 합계에서만 반올림하면 화면의 세로 합과 합계가 어긋나 사용자가 우리 산수를 의심한다. 대가는 재료 수 × 최대 5원의 계통 오차이고, 애초에 단가가 추정인 값에서 그 오차는 무의미하다.
 
-| | argmax (최고점 1개) | 상위 K 가중 무작위 |
+### 4.3 인분 스케일 (C10) — 선형 + `fixed` 두 모드만 `[제안]`
+
+```
+scaleQty(item, base, servings):
+  if item.scaling == 'fixed': return item.qty            # 인분과 무관
+  return ceilPractical(item.qty * servings / base)       # 실용 단위로 올림 (IN-OQ-03 추천)
+```
+`ceilPractical`: g·ml은 5 단위 올림, 개·쪽·장·마리는 정수 올림, 큰술·작은술은 0.5 단위 올림. **"1인분 0.5개"를 데이터가 아니라 함수가 처리하는 자리**다(IN-OQ-03이 지적한 증상).
+
+양념까지 선형으로 두는 이유: 소금·간장을 sub-linear(√ 등)로 깎으면 **계수를 우리가 근거 없이 발명**하게 된다. 선형은 틀려도 틀리는 방향이 예측 가능하고(많은 인분에서 양념이 과다) 레시피 본문에서 "간을 보며 맞춘다"로 흡수된다. 팬 코팅용 기름·부침가루처럼 조리 도구에 매인 양만 작성자가 `scaling: 'fixed'`로 표시한다.
+
+### 4.4 양념·기본 재료(소금·기름·간장) `[제안]`
+
+**소계에 포함한다. 단 "쓴 만큼"만 넣는다.** 간장 2큰술 = 30ml, 500ml 3,200원 기준 192원 → 190원.
+
+- 근거: Mealime 지원문서가 "oils, spices 같은 필수 비축 양념은 처음 한 번만 사면 되므로 첫 장보기 비용이 부풀려 보인다"고 쓴다(research 2절 [13]) — 즉 그들은 **장바구니 총액**을 보여주다 이 불만을 얻었다. 우리 숫자는 장바구니가 아니라 사용량 비례이므로 같은 왜곡이 없다.
+- 대가: **빈 주방을 가진 사용자가 실제로 결제할 금액은 우리 숫자보다 훨씬 크다.** 병째 사야 하는 항목이 남기 때문이다. 화면이 이 사실을 쓰지 않으면 금액이 거짓말이 된다(RC-R10과 같은 계열의 문제). 문구는 UX가 정하고, "쓴 만큼인가 장바구니인가"는 11절 미정으로 올린다.
+- `pantry: true` 재료는 소계에 남기되 화면에서 묶어 보여줄 수 있게 표시만 한다. 계산에서 빼지 않는다 — 빼면 합계가 예산 판정에서 유리하게 기울고, 그 편향을 사용자가 볼 수 없다.
+- `optional: true` 재료(고명 등)는 **소계에서 제외**하고 "선택"으로 표시한다. 넣으면 예산 판정이 안 만들 재료 때문에 초과로 뒤집힐 수 있다.
+
+### 4.5 예산 판정 (C12)
+
+`within` / `over` **둘뿐이다** — DC-R08이 "둘 중 하나"로 못 박았다. "근접"(예: 예산 90~100%) 밴드는 요구사항에 없으므로 설계에 넣지 않고 11절 요구사항 제안으로 올린다. `unknown`은 판정이 아니라 **판정 없음**이고 화면은 금액만 쓴다(IN-R10).
+시켜 먹기는 값이 범위다 → `priceLow*servings`와 `priceHigh*servings`가 예산을 사이에 두면 판정이 `within`도 `over`도 아니게 된다. `[제안]` 하단(`priceLow*servings`)으로 판정하고 화면에는 범위를 쓴다. 이 선택은 낙관 쪽으로 기울어 있으므로 11절 미정에 올린다.
+
+### 4.6 "추정" 전파 (C11 · DC-R09 · RC-R05)
+
+소계의 `isEstimate`는 ① 단가가 추정(`source==='unknown'` 포함) ② `asOf`가 90일 초과(CA-R04, `[미정 CA-OQ-01]`) ③ **환산 계수가 추정**(4.1) 중 하나라도 참이면 참이다. 합계는 소계 하나라도 추정이면 추정이고, `estimateReasons`에 사유를 남겨 화면이 "왜 추정인지"를 말할 수 있게 한다. 배달 가격대는 항상 추정이다.
+
+## 5. 뽑기 엔진 v1
+
+v0의 `decide()`에서 **하루 1건 고정(0단계)과 날짜 시드는 폐기**한다 — 답5의 "다시 랜덤 돌리기"와 정면으로 충돌한다.
+
+### 5.1 필터 — 순서가 `blockedBy` 숫자의 의미를 정한다 (DC-R07)
+
+```
+pool = catalog.recipes                 # 갈래가 delivery면 catalog.deliveryMenus
+1. 사용 가능           : !retiredAt && reviewedAt 존재                (RC-R09)
+2. 갈래                : branch ∈ item.branches                       (MO-R01)
+3. 절대 제외           : allergens ∩ profile.absoluteExclusions == ∅   (PR-R02, 0개가 되어도 풀지 않는다)
+4. 인분 가능 범위      : servings <= (item.servingsMax ?? 6)
+5. 직전 결과 연속 금지 : id ∉ recentIds(창)                            (RE-R03, C3)
+if pool.isEmpty: return { kind:'empty', blockedBy }                    # DC-R07
+```
+1단계는 `blockedBy`에 세지 않는다(사용자 조건이 아니다). 창은 `min(floor(레시피수/2), 10)` `[제안]` — HI-OQ-02 추천을 따르면서 개수가 줄어도 후보가 0이 되지 않게 상한을 둔다. **예산은 이 목록에 없다**(PR-R03).
+
+### 5.2 가중치 — 예산 초과는 감점이지 제외가 아니다
+
+```
+for item in pool:
+  w = 1.0
+  if verdict(cost(item), budget) == 'over':  w *= 0.35     # [제안] 감점. 0으로 만들지 않는다 (PR-R03)
+  if item.tags ∩ profile.dislikes != ∅:      w *= 0.4      # 감점 (PR-R03과 같은 원칙)
+  w *= 0.5 ** eatenCount(item, 최근 30일)                   # 반복 회피 — 먹을수록 서서히 깎인다
+  if hour >= 20 && item.cookMinutes > 40:    w *= 0.5      # [제안] 조리 시간 vs 시각
+  weights[item] = max(w, 0.02)                             # 하한 — 어떤 후보도 영구히 죽지 않는다
+```
+계수는 전부 `[제안]`이고 근거는 "순서"뿐이다 — 예산 초과가 싫음보다 덜 무겁고, 둘 다 알레르기와 달리 제외가 아니라는 것. 마지막 줄(시각)은 **사람이 말하지 않은 축**이다(requirements 2.2가 `[제안]`으로만 갖고 있다) → 11절 미정. 뺄 수 있게 한 줄로 격리해 둔다.
+
+### 5.3 선택 — 무작위
+
+```
+seed = randomSeed32()                 # 매 뽑기마다 새로. 하루 시드가 아니다 (DC-OQ-03 폐기)
+rng  = mulberry32(seed)               # v0 코드 재사용
+pick = weightedRandom(pool, weights, rng)
+decision.seed = seed                  # 같은 카드를 재현할 수 있어야 버그를 재현한다
+```
+상한 없음(RE-R04, RE-OQ-02 추천). 상위 K 절단과 softmax(v0 4.3)는 **쓰지 않는다** — 답5가 요구한 것은 랜덤이고, K를 두면 사용자가 같은 상위 목록을 순회한다. `Math.random()`을 직접 부르지 않는 이유는 재현성 하나뿐이다.
+
+### 5.4 이유 한 줄 (DC-R03)
+
+**적용된 사실 조각을 `·`로 잇는다.** 규칙 이름이나 가중치를 문장으로 옮기지 않는다.
+```
+조각 = [예산 판정 문구(있을 때만), "{cookMinutes}분", "{servings}인분 기준"]
+reason = 조각.join(' · ')      →  "예산 안 · 25분 · 2인분 기준"
+```
+`unknown`이면 예산 조각을 뺀다(IN-R10). 감점으로 밀린 항목은 쓰지 않는다 — 뽑힌 것에 적용되지 않은 규칙이다.
+
+**콜드 스타트**: v1은 입력 3개가 항상 있으므로 **이유 줄이 비는 경우가 없다.** DC-R11의 "아직 취향을 모른다"는 이유 줄이 아니라 카드 **보조 줄**로 내린다(확인된 기록 3건 미만일 때). 그 결과 DC-OQ-06("적용 규칙 0개일 때 무슨 문구를 쓰나")은 **전제가 약해진다** — 11절에 올린다.
+
+## 6. 시켜 먹기 (가벼운 형태)
+
+- 후보: `catalog/delivery-menus.json`에서 5.1의 1·2·3·5단계만 적용해 **무작위**(MO-R05). 가중치는 예산 감점만 쓴다.
+- 카드: 메뉴명 + 예상 가격대 + 배달앱 버튼으로 끝난다(MO-R04). 레시피 경로가 없다는 것을 화면이 말한다(MO-R09).
+- 배달앱 열기: `Linking.openURL('https://www.baemin.com')` 같은 **웹 URL**만 쓴다. `baemin://` 류 비공식 스킴은 실존 여부 자체가 확인되지 않았으므로(research 3절 [18]) 전제하지 않는다. 앱이 설치돼 있으면 OS가 알아서 앱으로 보낸다 `[추정]`. 클립보드 복사(MO-OQ-04 추천)는 의존성이 하나 늘고 질문이 LATER로 열려 있어 **구현하지 않는다**.
+- 주소: `Profile.address`(동 단위)를 기기 로컬에만 둔다(IN-OQ-01 추천, 8.3). 결정 계산에 **쓰지 않는다**.
+- **매장 필터는 구현하지 않는다 `[미정 MO-OQ-03]`.** 카카오·네이버 지역검색에는 배달 가능 여부 필드가 없고 배달앱 공식 API가 없다(research 3절). 주소가 있어도 필터가 없으므로 화면은 "주소로 매장을 걸러주지는 못해요"를 쓴다(MO-R07, 6.9 상태 어휘). **거른 척하는 UI를 만들지 않는다.**
+
+## 7. 카탈로그 작성·운영 (CA)
+
+### 7.1 파일 배치
+
+```
+catalog/
+  recipes/<id>.json          # 1건 1파일. 파일명 == Recipe.id (충돌을 파일시스템이 막는다)
+  ingredients.json           # Ingredient[]  — 단가표 (CA-OQ-01 추천: 40~60종)
+  units.json                 # { base: UnitConversion[], overrides: UnitOverride[] }
+  delivery-menus.json        # DeliveryMenu[]
+  version.json               # { catalogVersion, builtAt } — Decision.catalogVersion의 출처
+```
+JSON을 앱이 직접 import한다(Metro가 지원). 앱 안에 편집 화면을 두지 않는다(CA-R06).
+
+### 7.2 검증 스크립트 — 게이트로 쓴다
+
+`scripts/validate-catalog.ts`(dev 전용, `zod`). "TypeScript 타입은 런타임에 존재하지 않으므로 외부 입력은 반드시 런타임 검증이 필요하다"는 zod의 논지를 그대로 적용한다 — 손으로 쓰는 JSON은 외부 입력이다. `.safeParse()`로 전건을 모아 보고하고 1건이라도 실패하면 비정상 종료한다.
+
+막는 것: ① `ingredientId`가 `ingredients.json`에 없음 ② `(재료, 단위)` 조합의 환산 경로가 없음(ml↔g인데 `gramsPerMl` 없음 포함) ③ `asOf`·`reviewedAt` 누락·파싱 실패(CA-R03, RC-R09) ④ `allergens`가 고정 어휘 밖 ⑤ `servingsBase < 1`, `steps` 0개(RC-R06) ⑥ `Recipe.id` 중복·재사용. **계산 불가는 앱 런타임이 아니라 여기서 죽는다** — DC-R06(실패) 경로를 데이터 오류로 오염시키지 않기 위해서다.
+
+### 7.3 누가 쓰고 누가 검수하는가 `[제안]`
+
+| 산출물 | 작성 | 검수 |
 |---|---|---|
-| 같은 날 재현 | 저절로 됨 | 시드 필요(4.4) |
-| 문제 | 카탈로그·프로필이 고정이면 **점수도 고정**이다. 매일 1등이 나오고 반복 회피로 빠지면 2등이 나온다 → 사용자는 **고정된 순위표를 14칸씩 걸어간다.** 거절하면 정확히 2등이 나오므로 "거절 = 목록의 다음 항목 보기"가 되어 requirements 3.1(스크롤하면 진 것)과 같은 행동이 된다 | 저점수 후보가 뽑힐 위험. K와 τ를 잘못 잡으면 "그냥 랜덤"이 되어 DC-R03의 이유 줄이 공허해진다 |
-| 검증 | 쉬움 | 시드 고정 테스트로 동일하게 쉬움 |
+| 레시피 본문·단계·시간 | 구현 역할(에이전트) 초안 | **사람 필수** — RC-R08이 "생성 모델이 쓴 본문을 사람 검수 없이 싣지 않는다"고 요구한다 |
+| `allergens` 태그 | 본문 작성자 | **작성자와 다른 주체**(사람 또는 타 벤더 검증 AI). 자기 검수가 되면 PR-R02가 거짓이 된다 `[미정 PR-OQ-05]` |
+| 단가·`asOf` | 사람이 한 번 조사 | 사람. 출처 없는 값은 `source:'unknown'` + `isEstimate:true`로만 들어간다(CA-R03) |
+| 환산표(4.1) | 설계가 초안(전부 `[추정]`) | **사람 필수** — 이 표가 틀리면 모든 금액이 같은 방향으로 틀린다 |
 
-`[제안]` **상위 K=12를 자른 뒤 softmax 가중 무작위.** argmax의 고정 순위표 문제는 제품 가치와 정면 충돌하고, K로 자르면 무작위의 단점(저점수 튀어나옴)은 사라진다. K·τ의 실제 값은 카탈로그가 채워진 뒤 조정할 값이다 → 11절.
+MVP 개수 `[제안]`: CA-OQ-02 추천을 따라 **레시피 20개**로 시작한다. 재료는 20개 × 평균 8종에서 중복을 걷어 **고유 40~60종** `[추정]`이고, 이것이 CA-OQ-01 추천의 단가표 크기와 맞는다. 20개면 5.1의 창(10건)에서 후보가 0이 되지 않는다. KAMIS·공공데이터포털 자동 갱신은 **후속**이다 — 무료 호출 한도를 1차 문서로 확인하지 못했고(research 1절, WebFetch 차단), 양념·공산품은 커버 범위 자체가 불확실하다(research 1절 결론 2). 갱신을 붙일 때 바뀌는 것은 `Ingredient.source`·`asOf` 채우는 주체뿐이고 4절 계산은 그대로다.
 
-### 4.4 결정론 — 같은 날 다시 열면 같은 결정 (DC-OQ-03 추천)
+## 8. 저장·오프라인·개인정보
 
-1. **1차 장치는 저장이다.** 오늘 `kkiniDate`의 결정이 있으면 재계산하지 않고 그대로 반환한다(0단계). 이것만으로 "고정"은 충족된다.
-2. **2차 장치는 시드다.** 저장이 비었거나 갈래가 바뀌었을 때(MO-R04) 같은 입력이면 같은 답이 나와야 한다.
-   `seed = xmur3(deviceSalt + '|' + kkiniDate + '|' + branch + '|' + rejectCountToday)` → `mulberry32(seed)`.
-   `deviceSalt`가 없으면 **모든 기기가 같은 날 같은 음식을 받는다** — 반드시 넣는다. `rejectCountToday`가 시드에 들어가 거절 1회마다 다른 난수열이 되고, 되돌아가도 같은 순서가 재현된다.
-3. PR-R04와의 관계: 프로필을 바꿔도 **이미 저장된 오늘 결정은 그대로 둔다.** 재계산 트리거는 갈래 변경(MO-R04)과 거절(RE-R02)뿐이다.
+### 8.1 AsyncStorage
 
-### 4.5 이유 한 줄 생성 (DC-R03)
+키 1개(`kkini.state`)에 `KkiniState`를 JSON으로 넣는다. 읽기·쓰기를 전부 try/catch로 감싸고 실패해도 화면은 뜬다 — `prototype-expo/src/storage.ts`의 구조를 **그대로 살린다**(`loadState`가 `{ state, storageOk }`를 돌려주고 저장 실패는 던지지 않고 `false`). 결정은 최근 60건만 보관해 키 하나가 무한히 커지지 않게 한다 `[제안]`.
 
-규칙은 문장이 아니라 구조로 보관한다 — `interface AppliedRule { code: RuleCode; weight: number }`. 승자에 실제로 붙은 **가점 규칙만** 후보다.
+### 8.2 스키마 버전·마이그레이션
 
-```
-buildReason(applied, confirmedLogCount, settings):
-  if confirmedLogCount < settings.minSampleForPersonalReason:      # DC-R08 (기본 3)
-      applied = applied.filter(code in ['season','weekday','late'])  # 개인화 근거 제외
-  if empty(applied): return NO_RULE_PHRASE                          # 아래 주의 참조
-  winner = applied.maxBy(weight, tiebreak: code 사전순)             # 동점 처리도 결정론이어야 한다
-  return PHRASE[winner.code]
-```
+`SCHEMA_VERSION = 2`. 버전 1은 프로토타입의 `Food` 기반 상태이고 **마이그레이션하지 않는다** — 보존 가치가 없고, 없던 필드를 채우는 것이 아니라 모델 자체가 다르다. 2 이후는 **필드 추가만** 허용하고, 없는 키는 기본값으로 채운다(storage.ts의 기존 방식). 파괴적 변경이 필요하면 버전을 올리고 마이그레이션 함수를 하나 더 쓴다. `[미정 KK-OQ-07]`(저장소 축출)은 Expo를 고르면 **전제가 달라진다** — AsyncStorage는 브라우저 IndexedDB처럼 조용히 축출되지 않는다 `[추정]`. 남는 실패 경로는 디스크 꽉 참·OS 정리·앱 삭제이고, 이는 `storageOk=false` 배너 하나로 덮인다. `[미정 KK-OQ-06]`(내보내기/가져오기)은 그대로 남는다 — 기기를 바꾸면 기록이 0이 된다.
 
-`season` "요즘 계절에 맞는 걸로 골랐다" · `weekday` "{요일}에 어울리는 걸로 골랐다" · `late` "지금 시각에도 무리 없는 걸로 골랐다" · `budget` "정해 둔 예산 안에서 골랐다" · `cook` "직접 해 먹을 수 있다고 저장해 둬서 그쪽으로 골랐다" · **0개(DC-R03)** "특별한 이유는 없다 — 그냥 오늘의 하나".
-
-주의: DC-R03의 0개 문구와 DC-OQ-02 추천의 콜드 스타트 문구("아직 취향을 몰라서 오늘은 무작위")가 **같은 상태에 두 문장을 배정한다.** 어느 쪽인지 문서에 없다 → 11절.
-
-### 4.6 콜드 스타트 (DC-R08, DC-R10)
-
-프로필 전 항목 `unset` + 기록 0건일 때:
-
-- **필터**: 절대 제외가 `unset`이라 걸러지는 것이 없다(PR-R02는 "선언된 제외"에만 걸린다). 후보 = 갈래에 맞는 전부. PR-OQ-02 추천을 그대로 따른 결과이고, 대신 카드 옆에 "못 먹는 음식이 있으면 먼저 알려주세요"를 띄운다. 다른 답("모름은 위험")을 고르면 알레르겐 태그가 붙은 음식을 첫날 후보에서 빼야 하는데, **뺀 이유를 사용자에게 설명할 수 없다**(DC-R03 위반).
-- **점수**: 개인 신호가 전부 0이라 맥락 가점(`season`/`weekday`/`late`)만 살아 있다. 이 셋은 기록 0건이어도 **날짜와 시각만으로 계산된다** — 콜드 스타트에서 진짜 이유를 댈 수 있는 유일한 근거다.
-- **선택**: 4.3과 같은 경로. 사실상 "맥락 가점이 실린 준무작위".
-- **이유 줄**: 맥락 규칙이 1개 이상이면 그 문구, 0개면 4.5절 주의의 미정에 걸린다. 기록 1~2건 구간도 `< 3`이라 개인화 문구는 안 나온다 → **개인화는 3건째 확인부터 켜진다.**
-
-### 4.7 후보 고갈 계산 — 200종 / 창 14일 / 하루 거절 5회
-
-```
-후보(b) = N_b − |E_b ∪ W_b ∪ J_b| ≥ N_b − E_b − W − J
-  N_b = 갈래 b가 가능한 음식 수 (A와 B의 합집합이 200, 교집합 있음)
-  E_b = 절대 제외에 걸린 수    W = 최근 창에 걸린 수    J = 오늘 거절 수 (≤ 5)
-```
-
-`[제안]` 카탈로그 설계 제약으로 **N_A ≥ 120, N_B ≥ 120**을 둔다(합이 200을 넘는 건 겹치기 때문). 이 값이 없으면 아래 계산이 성립하지 않는다 → 11절.
-
-| C3(HI-OQ-02)의 답 | W 최댓값 | 후보 0 조건 | N_b=120일 때 | 판정 |
-|---|---|---|---|---|
-| **채택+확인된 섭취, 14일** (PM 추천) | 하루 1건(C1)×14 = **14** | `N_b ≤ E_b + 19` | `E_b ≥ 101` = 갈래 카탈로그의 **84.2%**를 알레르기로 지워야 발생 | 사실상 안 일어난다 `[추정]`. 최소 요구치 `N_b ≥ 20` |
-| 채택 + **거절까지**, 14일 | 14 + 5×14 = **84** | `N_b ≤ E_b + 89` | `E_b ≥ 31` = **25.8%** | 갑각류·견과·유제품·밀을 함께 제외하면 도달 가능 `[추정]` → DC-OQ-05 화면이 상시로 뜬다. 최소 `N_b ≥ 90` |
-| 확인된 섭취만, 14일 | 확인율 r×14 ≤ 14 | 1행보다 느슨 | 더 안전 | 대신 확인을 안 하는 사용자는 반복 회피가 거의 작동하지 않아 "어제 먹은 게 또 나온다" |
-
-결론: **PM 추천대로면 후보 0은 사실상 발생하지 않고 DC-OQ-05는 안전 규정으로만 존재한다.** 단 이 결론은 `N_b ≥ 120`에 전적으로 의존한다 — 갈래 B가 60종뿐이면 `E_b ≥ 41`(68%)에서 마르고, 갈래를 바꿀 때마다(MO-R04) 한쪽만 빈손이 되는 현상이 생긴다.
-
-## 5. 카탈로그
-
-- **위치·형식** `[제안]`: 레포 안 `catalog/foods.v1.json`(단일 배열) + `catalog/foods.schema.json`. 빌드 시 검증하고 **정적 모듈로 번들**한다 — 런타임 fetch를 하지 않아야 오프라인이 성립한다(2절 (a)의 핵심 이점). 메타(`version`,`generatedAt`,`count`)는 배열 파일에 섞지 말고 `catalog/manifest.json`으로 분리한다(섞으면 diff가 매번 통째로 흔들린다).
-- **판본 관리**: `catalogVersion`은 `YYYY.MM.DD-n` 형태의 단조 증가 문자열. **`Food.id`는 절대 재사용하지 않는다** — `MealLog.foodId`가 과거 id를 계속 가리킨다. 음식을 뺄 때는 삭제 대신 `retiredAt`을 붙인다.
-- **누가 늘리는가**: 사람이 PR로. 에이전트는 후보 목록을 제안할 수 있으나 **`allergens` 태그는 사람이 검수한다** — 이 필드가 틀리면 PR-R02의 안전 보장이 무너진다 → 11절.
-- **갈래 A와 B가 같은 목록을 공유하는 방법**: 목록을 나누지 않고 `branches` 집합 하나로 표현한다. `['A','B']`=김치찌개·비빔밥처럼 양쪽 다 되는 것(대다수) / `['B']`=회·곱창처럼 집에서 만들기 비현실적인 것(`cookTimeMin`은 `null`) / `['A']`=간단한 집밥처럼 외식 카테고리로 성립하지 않는 것. 갈래 전환(MO-R04)은 **같은 배열의 필터 하나를 바꾸는 일**이고 음식이 두 갈래에 중복 등록되는 일이 없다. KK-OQ-01을 "앱이 갈래도 정한다"로 답할 때 이 구조가 그대로 쓰인다.
-
-## 6. 외부 의존과 한도
-
-**MVP 외부 API 0개** `[제안]`. MVP 요구사항 중 외부 데이터가 필요한 것이 하나도 없다 — 계절·요일·시각은 기기 시계에서 나오고 카탈로그는 우리 것이다(5절).
-
-### 6.1 날씨를 선택적으로 붙일 때
-
-market.md 4절은 기상청 API 한도를 1차 확인하지 못했고(WebFetch 차단), 대안인 **OpenWeather 무료 티어는 일 1,000콜·분당 60콜**이다([22], market.md 4절).
-
-| 방식 | 문제 | 판정 |
-|---|---|---|
-| 클라이언트가 직접 호출 | **API 키가 번들 JS에 그대로 들어가 공개된다.** 정적 호스팅에는 키를 숨길 곳이 없다. 유출되면 일 1,000콜이 남에게 소진되고 앱은 상시 실패(DC-R06) 경로를 탄다 | 쓰지 않는다 |
-| 무료 서버리스 프록시(Workers 등) | 키는 숨겨지지만 **"서버 0개"라는 전제가 깨진다.** 게다가 1,000콜/일은 **전 사용자 합계**라 하루 1회씩만 열어도 DAU 1,000에서 한도다 `[추정 계산]`. 좌표를 넘기면 9절 위치 항목이 되살아난다 | KK-OQ-04에 유료 상한이 생긴 뒤 재검토 |
-| 사용자가 직접 입력 | 콜 0·키 0이지만 DC-R04(입력 0회)와 충돌한다 | 쓰지 않는다 |
-
-`[제안]` **붙이지 않는다.** 대신 `Food.context.seasons`로 계절 가점만 쓴다 — 날씨의 상당 부분은 계절이고 계절은 날짜에서 공짜로 나온다 `[추정]`.
-
-### 6.2 위치를 MVP에서 쓰지 않는 근거 (research 5절)
-
-① requirements 3.3이 갈래 B를 **메뉴 카테고리까지만** 다루기로 했으므로(NB 제외) 위치가 필요한 요구사항이 없다. ② 위치를 서버로 전송·저장하면 위치기반서비스사업 신고 대상이 될 수 있고, 미신고 운영은 **3년 이하 징역 또는 3천만원 이하 벌금** 대상이다(research 5-1·5-2) — 1인 프로젝트도 예외가 아니다. ③ `[제안]` **Geolocation 권한 프롬프트 자체를 띄우지 않는다** — "요청했으나 거부당했다"는 상태를 안 만들면 처리할 분기도 설명할 문구도 없다.
-
-## 7. 월 운영비 추정
-
-### 7.1 추천안(PWA + 기기 로컬) 기준 — 0원
-
-| 항목 | 서비스 | 무료 한도 | 출처 |
-|---|---|---|---|
-| 정적 호스팅 | Cloudflare Pages | 대역폭 무제한, 빌드 월 500회 | `[추정]` — market.md 미수록 |
-| 대안 / 도메인 | Netlify·GitHub Pages / `*.pages.dev` 서브도메인 | 월 100GB·빌드 300분 / 저장 1GB·월 100GB soft / 서브도메인 0원(커스텀은 연 1.5만원 내외) | `[추정]` |
-| DB·인증·서버 / 외부 API / 스토어 계정 | **없음** | — | 3·6·2절 |
-| **합계** | | **월 0원** | |
-
-호스팅 무료 티어 수치는 **research/market.md에 없다** — 4절은 국내 데이터 API만 다뤘다. 전부 `[추정]`이며 KK-OQ-04를 "0원"으로 확정하기 전에 리서치로 확인해야 한다 → 11절.
-
-### 7.2 서버 구성(PR-OQ-01을 서버로 답할 때) `[추정]`
-
-Supabase 무료(DB 500MB, 월간 활성 5만, **7일 무활동 시 프로젝트 일시정지**) → Pro 약 $25/월. Vercel Hobby는 무료지만 **상업적 이용 제한 조항**이 있어 수익화 시 Pro 약 $20/월. 초기엔 0원도 가능하지만 벗어나면 **월 3~6만원 구간**이다. 숨은 비용이 더 크다 — 처리방침 작성·게시, 탈퇴 시 데이터 파기 절차(research 5-3·5-4, 방치 시 과태료 최대 3천만원), 그리고 그 둘을 유지하는 1인의 시간.
-
-## 8. 지표 수집 — 기기 로컬 구조에서 7절 지표를 어떻게 보는가
-
-**전제**: PR-OQ-01 추천(기기 로컬)을 따르면 **북극성과 S1~S4를 개발자가 볼 방법이 기본적으로 없다.** requirements 7절도 이 점을 명시했다. 이것은 PR-OQ-01의 **하위 결정**이다.
-
-| 안 | 볼 수 있는 것 | 개인정보 함의 | 비용 |
-|---|---|---|---|
-| **8.1 수집 안 함** `[제안]` | 아무것도 못 본다. 목표값(S1 60초, S2 중앙값 1회)은 **검증 불가로 명시하고 접는다** | 수집 0. 처리방침 법적 의무 없음 `[추정 — research 5-3의 반대해석]` | 0원 |
-| 8.2 익명 이벤트만 | 카드 노출·채택·거절 **횟수**. 사용자 단위 코호트(S4)는 여전히 불가 | 쿠키리스 도구도 **IP를 처리**한다 — "수집 0"이라 단정할 수 없다 `[추정]`. 처리방침 게시가 안전선 | Cloudflare Web Analytics 0원(커스텀 이벤트 제한적 `[추정]`) / Umami Cloud 월 1만 이벤트까지 0원 `[추정]` / Plausible 월 $9~ `[추정]` → **KK-OQ-04 0원 상한 위반** |
-| 8.3 서버 | 7절 전부 | PR-OQ-01이 뒤집힌다. 처리방침·탈퇴 처리 필수 | 7.2절 |
-
-`[제안]` **8.1로 시작한다.** 8.2는 얻는 것(횟수 몇 개)에 비해 잃는 것(수집 0이라는 단순명료한 상태, 처리방침 유지 부담)이 크고 S4는 어차피 못 본다. 다만 **"지표를 수집하지 않기로 했다"를 결정으로 명시**해야 한다 — 조용히 안 하는 것과 정하고 안 하는 것은 다르다.
-
-## 9. 개인정보 최소선 (research 5절 → 설계 항목)
+### 8.3 개인정보 최소선
 
 | 항목 | 설계 | 근거 |
 |---|---|---|
-| 저장 위치 | 기기 IndexedDB만. 서버 0개, 전송 0회 | 3절, PR-OQ-01 추천 |
-| 수집 항목 | **0개.** 이름·이메일·생년월일·전화번호·위치를 어느 화면에서도 요청하지 않는다 | research 5-4 "필요 최소한" |
-| 민감 정보 / 위치 | 알레르기·싫어하는 음식은 민감할 수 있으나 **기기를 떠나지 않는다.** 위치는 권한 프롬프트조차 띄우지 않고 GPS 상시 추적 없음 | 3.3절 · research 5-1·5-2 · 6.2절 |
-| 처리방침 | 수집 0이면 법적 의무 없음 `[추정]`. 그래도 **"아무것도 수집하지 않는다"를 한 페이지로 게시** 권장 | research 5-3(하나라도 수집하면 의무) |
-| 삭제·탈퇴 | 서버 탈퇴 절차 없음. 대신 **기기 데이터 전체 삭제 버튼**이 필요한데 요구사항에 없다 | research 5-4, → 11절 |
-| 재검토 조건 | 8.2 또는 8.3 또는 6.1(날씨 프록시)을 켜는 순간 이 표 전체를 다시 쓴다 | research 5-1 "구조가 정해지면 재검토" |
+| 서버 | 없다. 외부 API 0개, 네트워크 호출 0(폰트 번들 제외) | CA-R01, KK-OQ-04 추천 |
+| 집주소·위치 | 기기 로컬(AsyncStorage), **동·읍·면 단위**, 서버 전송 0, 다른 화면에 표시 안 함. GPS와 위치 권한은 쓰지 않는다 | IN-R11·R13·R14, research 4절, market.md 5-5(a) |
+| 지표 | 보내지 않는다 → requirements 7절 북극성·S1~S5는 **개발자가 관측 불가**임을 명시 | PR-OQ-01·PR-OQ-04 추천 |
+| 처리방침 | **집주소를 기기에만 저장해도 "수집"에 해당하므로 게시하는 쪽이 안전** `[추정]` | research 4절: "신고 여부와 별개", 개인정보보호법 제30조 |
+| 삭제 수단 | 주소 개별 삭제(PR-R07) + 기록 개별 삭제(HI-R06). 전체 삭제 버튼은 `[미정 PR-OQ-06]` | — |
+| 재검토 | 서버가 하나라도 생기는 순간 이 표와 1절 IN-OQ-01 행을 다시 쓴다 | research 4절 "구조가 정해지면 재검토" |
+
+## 9. 월 운영비
+
+| 단계 | 비용 | 근거 |
+|---|---|---|
+| Expo Go 개발·시연 | **0원** | `expo start`는 로컬 실행이고 EAS 빌드·서버·외부 API가 없다 |
+| 카탈로그·단가 | 0원 | 사람이 조사한 고정 표(CA-OQ-01 추천). 유료 시세 API 없음 |
+| 스토어 배포(할 때) | Apple 개발자 $99/년 · Google Play $25 1회 `[추정]`. EAS Build 무료 한도는 `[미확인]` | 두 금액 모두 출처를 `docs/research/`에 갖고 있지 않다 — 11절 리서치 질문 |
+
+**Expo Go 단계에 머무는 동안은 0원이다.** 스토어 배포를 MVP 범위에 넣는지는 11절 미정.
 
 ## 10. 결정 제안 — 사람이 `decisions.md`로 승격할 ADR 초안
 
 > 번호는 사람이 승격하며 매긴다. 형식은 `templates/docs/decisions.md`를 따랐다.
+> **v0 설계 제안 중 폐기**: "PWA 한 벌"(→ 아래 1) · "카탈로그 JSON 200종 + `Food.branches`"(→ 3) · "오늘의 결정 저장 고정 + 날짜 시드 상위K softmax"(→ 4). **유지**: "미입력 제약 3상태(`Answered<T>`)" · "사용자 데이터 기기 로컬·지표 수집 0"(→ 5로 주소를 더해 갱신).
 
-### 플랫폼은 설치 없는 PWA 한 벌로 간다 `[KK-OQ-03 · KK-OQ-04]`
+### 1. 플랫폼은 Expo(React Native) 한 벌로 간다 `[KK-OQ-03]`
 
-- 결정: Vite + TypeScript + Svelte(또는 React)로 PWA를 만들고 정적 호스팅 무료 티어에 배포한다. 네이티브 앱과 스토어 배포는 하지 않는다.
-- 이유: MVP 기능 목록에 서버가 필요한 요구사항이 0개이고(NT는 이미 제외), "월 0원 + 심사 마찰 0 + 오프라인 동작"을 동시에 만족하는 유일한 선택지다. 뒤집기 비용도 가장 싸다 — 나중에 서버나 네이티브 래핑을 뒤에 붙일 수 있다.
-- 버린 대안: **Next.js+Supabase** — 서버가 생기는 순간 PR-OQ-01이 서버로 뒤집히고 처리방침·탈퇴 처리가 MVP에 들어온다. **Expo/Flutter** — 설치 마찰이 "퇴근길에 즉시 끝낸다"는 핵심 가치를 첫 순간에 깨고 심사 대기가 1인 일정에 들어온다.
+- 결정: Expo + TypeScript로 만들고 개발·시연은 Expo Go로 한다. 스토어 배포는 MVP 범위에 넣지 않는다. 웹(PWA) 판은 만들지 않는다.
+- 이유: 사람이 v0 시연 이후 Expo Go 주소를 요청했고 `prototype-expo/`가 이미 그 전제로 돈다. DC-R04의 중앙 등장 애니메이션과 입력 잠금이 요구사항이라 네이티브 드라이버가 있는 쪽이 위험이 낮다. 로직이 순수 TS라 화면 층을 바꿀 때 엔진·계산 모듈은 그대로 옮겨진다.
+- 버린 대안: **PWA**(v0 추천) — 사람이 방금 본 화면과 문서가 어긋나고 KK-OQ-07(저장소 축출)이 되살아난다. **Flutter** — Dart 학습과 프로토타입 폐기 비용을 새로 낸다. **웹+Expo 두 벌** — 저장 실패 경로와 테마 축이 두 가지가 된다. **알려진 대가**: 링크 하나로 보여주는 유입이 없고, 배포 단계에서 스토어 계정비와 심사가 일정에 들어온다.
 
-### 사용자 데이터는 기기에만 두고, 지표는 수집하지 않는다 `[PR-OQ-01]`
+### 2. 재료비는 "쓴 만큼"의 비례 계산이고 장바구니 총액이 아니다 `[C10 · C11 · C12]`
 
-- 결정: 프로필·결정·거절·기록을 전부 기기 IndexedDB에 저장한다. 계정·로그인·서버 DB를 만들지 않는다. 익명 분석을 포함해 어떤 이벤트도 외부로 보내지 않고, requirements 7절의 북극성과 S1~S4는 **관측 불가로 명시**한다.
-- 이유: 백엔드·인증·처리방침·탈퇴 처리가 통째로 사라져 1인 유지 부담과 운영비가 둘 다 0에 수렴한다. 수집 항목 0개는 research 5절의 법적 리스크를 회피하는 가장 단순한 구조다. 로컬 전용에서 익명 분석으로 얻을 수 있는 건 횟수 몇 개뿐이고 코호트(S4)는 어차피 불가능하다.
-- 버린 대안: **서버 계정** — 기기 교체 복원과 지표 관측을 얻지만 MVP에 인증 화면·DB 운영·고지 의무가 들어온다. **익명 이벤트만 수집** — 0원 도구라도 IP 처리 때문에 "수집 0"이라는 상태를 잃는다 `[추정]`.
-- 알려진 대가: 기기를 바꾸거나 브라우저 저장소가 비워지면 기록이 0이 된다. 목표값(S1 60초, S2 1회)은 목표가 아니라 설계 의도로만 남는다.
+- 결정: `(레시피 단위 → 환산표 → 구매 단위 비율) × 단가`로 소계를 내고, 소계에서 10원 단위 반올림한 뒤 그 합을 합계로 쓴다. 인분은 선형 스케일(+`fixed` 예외)이고, 양념·기본 재료도 사용량 비례로 소계에 포함한다. 예산 판정은 총액 비교·허용폭 0의 2값이다.
+- 이유: 사용량 비례는 Mealime이 장바구니 총액으로 겪은 왜곡(첫 장보기 비용이 부풀려 보인다, research 2절 [13])을 피한다. 소계에서 반올림하면 화면의 세로 합과 합계가 일치해 RC-R02·RC-R04가 사용자 눈에도 참이 된다. 양념을 빼면 합계가 예산 판정에서 유리하게 기울고 그 편향이 보이지 않는다.
+- 버린 대안: **장바구니 총액** — 병째 계산하면 한 끼 재료비가 몇 배로 뛴다 `[추정]`. **양념 제외** — 위 편향. **비선형(√) 양념 스케일** — 근거 없는 계수를 발명한다. **합계에서만 반올림** — 세로 합 불일치. **알려진 대가**: 빈 주방을 가진 사용자의 실제 결제액은 이 숫자보다 크다. 화면이 이 전제를 쓰지 않으면 금액이 거짓말이 된다(11절).
 
-### 카탈로그는 레포 안의 JSON 200종이고, 갈래는 음식의 속성이다 `[MO-OQ-01 · KK-OQ-02]`
+### 3. 카탈로그는 레포 안의 JSON이고, 검증 스크립트를 통과하지 못한 레시피는 존재하지 않는다 `[CA-OQ-01 · CA-OQ-02 · MO-OQ-01]`
 
-- 결정: `catalog/foods.v1.json`을 레포에 두고 빌드 시 번들한다. 외부 API를 쓰지 않는다. 갈래 A/B는 별도 목록이 아니라 `Food.branches` 집합으로 표현한다. `Food.id`는 재사용하지 않고 뺄 때는 삭제 대신 `retiredAt`을 붙인다.
-- 이유: 오프라인 동작·운영비 0·판본 고정을 한 번에 얻는다. 갈래를 속성으로 두면 목록이 하나뿐이라 중복 등록과 갈래 간 불일치가 원천적으로 생기지 않고, 갈래 전환(MO-R04)이 필터 하나 바꾸는 일이 된다.
-- 버린 대안: **외부 API** — 오프라인이 불가능해지고 쿼터·요금·갱신 주기가 요구사항에 들어온다(market.md 4절은 국내 API 한도조차 1차 확인에 실패했다). **사용자 직접 등록** — 첫 사용자의 카탈로그가 0이라 DC-R10이 성립하지 않는다.
+- 결정: `catalog/recipes/*.json` + `ingredients.json` + `units.json` + `delivery-menus.json`을 레포에 두고 앱과 함께 배포한다. `scripts/validate-catalog.ts`(zod)가 참조 무결성·환산 경로·`asOf`·`reviewedAt`를 검사하고, 실패하면 빌드를 세운다. 사람 검수 없는 레시피와 출처 없는 단가는 후보에 들어가지 않는다.
+- 이유: 오프라인 동작·운영비 0·판본 고정을 한 번에 얻는다. 손으로 쓰는 JSON은 외부 입력이라 런타임 검증이 필요하고(zod), 계산 불가를 앱 실행 중이 아니라 빌드에서 죽이면 DC-R06(실패 상태)이 데이터 오류로 오염되지 않는다.
+- 버린 대안: **v0의 `foods.v1.json` 200종** — 레시피 본문을 직접 쓰게 된 뒤로 200종은 작성 비용이 성립하지 않는다. **외부 레시피/시세 API** — 오프라인 불가 + 한도를 1차 문서로 확인 못 함(research 1절). **앱 내 편집 화면** — MVP에 관리자 기능이 생긴다(CA-R06).
 
-### 오늘의 결정은 저장으로 고정하고, 선택은 날짜 시드 가중 무작위로 한다 `[DC-OQ-01 · DC-OQ-03]`
+### 4. 뽑기는 "필터 → 가중치 → 무작위"이고, 하루 고정·날짜 시드·거절 상한은 폐기한다 `[DC-OQ-03 폐기 · RE-OQ-02]`
 
-- 결정: 오늘 `kkiniDate`의 결정이 저장돼 있으면 재계산하지 않고 그대로 반환한다. 새로 계산할 때는 `(deviceSalt, kkiniDate, branch, 오늘거절수)`로 시드를 만들고 점수 상위 K개 중 softmax 가중 무작위로 1개를 고른다. 선택 경로에 `Math.random()`과 `Date.now()`를 쓰지 않는다.
-- 이유: 저장 고정만으로 "같은 날 같은 결정"(DC-OQ-03)이 성립한다. argmax를 쓰면 카탈로그·프로필이 고정인 동안 점수도 고정이라 사용자가 매일 같은 순위표를 걸어가게 되고 거절이 곧 "목록의 다음 항목 보기"가 되어 제품 가치와 정면 충돌한다. 시드는 갈래 변경·거절 시 재현성과 버그 재현을 보장한다.
-- 버린 대안: **argmax** — 위 이유. **순수 무작위** — DC-R03의 이유 줄을 댈 근거가 사라진다.
+- 결정: 절대 제외 → 갈래 → 인분 가능 범위 → 직전 결과 연속 금지로 후보를 걸러 낸 뒤, 예산 초과·싫음·최근 먹음·시각을 **곱셈 감점**으로만 반영하고 가중 무작위로 1건을 고른다. 뽑기마다 새 시드를 만들어 `Decision.seed`에 남긴다. 상한은 없다.
+- 이유: 답5가 "다시 랜덤 돌리기"를 요구했다 — 하루 고정과 날짜 시드는 같은 입력에서 같은 답을 주므로 그 요구와 정면으로 충돌한다. 상위 K + softmax(v0)를 쓰면 사용자가 같은 상위 목록을 순회하게 되어 목록 스크롤과 구별되지 않는다. 예산은 필터가 아니라 감점이어야 예산이 낮은 날 후보가 0개가 되지 않는다(PR-R03).
+- 버린 대안: **v0의 날짜 시드 + 하루 1건 저장 고정** — 위 이유. **순수 균등 무작위** — 예산·싫음·반복 회피를 반영할 자리가 없어진다. **예산을 필터로** — DC-R07이 상시 경로가 된다.
 
-### 미입력 제약은 3상태로 저장하고, 타입으로 강제한다 `[PR-OQ-02]`
+### 5. 사용자 데이터와 집주소는 기기에만 두고, 지표는 수집하지 않는다 `[PR-OQ-01 · IN-OQ-01 · PR-OQ-04]`
 
-- 결정: 프로필 다섯 항목을 전부 `Answered<T> = {status:'unset'} | {status:'declared', value:T}`로 저장한다. `unset`(아직 모름)·`declared([])`(없다고 답함)·`declared([...])`(있다고 답함)이 서로 다른 값이다.
-- 이유: PR-R03("아직 입력 안 함"과 "제약 없음"은 다른 말)을 **화면 문구가 아니라 타입 수준에서** 강제한다. 빈 배열로 저장하면 구현자가 언젠가 "제약 없음"으로 읽고, 그 순간 알레르기 사용자에게 위험한 추천이 나간다.
-- 버린 대안: **nullable 필드** — `null`이 "모름"인지 "없음"인지 코드마다 다르게 읽힌다. **입력 강제** — PR-R05(필수 0개)와 DC-R04(입력 0회)를 동시에 깬다.
+- 결정: 프로필·입력·결정·기록·**집주소**를 AsyncStorage 1키에만 저장한다. 서버·계정·외부 API를 만들지 않고 익명 이벤트도 보내지 않는다. 주소는 동·읍·면 단위까지만 받고, 위치 권한은 요청하지 않는다. requirements 7절 지표는 **관측 불가로 명시**한다.
+- 이유: 주소가 데이터에 들어온 뒤로 서버 저장의 법적 부담이 이득보다 크다 — 위치를 서버에 저장하면 위치기반서비스사업 신고 논점이 생기고 미신고는 3년 이하 징역/3천만원 이하 벌금 대상이다(market.md 5-1·5-2). 기기 내 저장·전송 0이면 신고 대상에서 빠질 가능성이 있다(research 4절 `[추정]`).
+- 버린 대안: **서버 계정** — 기기 교체 복원과 지표를 얻지만 인증·DB·탈퇴·법률 자문이 MVP에 들어온다. **익명 이벤트만** — 0원 도구라도 IP 처리 때문에 "수집 0"이라는 상태를 잃는다 `[추정]`. **알려진 대가**: 기기를 바꾸면 기록이 0이 된다(`[미정 KK-OQ-06]`). 처리방침 게시 의무는 수집 항목이 주소 하나여도 남는다 `[추정]`.
 
 ## 11. 미정 제안
 
-→ docs/open-questions.md DC-OQ-06, DC-OQ-07, KK-OQ-06, KK-OQ-07, KK-OQ-08, KK-OQ-09, MO-OQ-02, PR-OQ-04, PR-OQ-05, PR-OQ-06 으로 이동 (2026-09-12)
+> 서기가 `docs/open-questions.md`로 병합한다. ID는 붙이지 않았다.
+
+| 질문 | 막히는 것 | 등급 |
+|---|---|---|
+| 재료비가 "쓴 만큼(사용량 비례)"인가 "장보기 총액"인가 | 4.4절 계산식과 예산 판정, 그리고 카드 금액 옆 문구가 전부 갈린다. 빈 주방 사용자에게는 두 숫자가 몇 배 차이 난다 | BLOCKER |
+| 4.1절 환산 계수(큰술·컵·대·쪽·줌)를 누가 검수하고, 검수 전 숫자를 화면에 쓸 수 있는가 | 이 표가 틀리면 모든 금액이 같은 방향으로 틀린다. 선례를 찾지 못해(research 2절) 우리가 정하는 숫자다 | BLOCKER |
+| 시켜 먹기 가격대가 예산을 걸칠 때 판정을 어느 쪽으로 쓰는가 | DC-R08이 2값인데 범위 값은 세 경우가 나온다. 4.5절은 낙관(하단 기준)으로 임시 제안했다 | BLOCKER |
+| DC-OQ-06(적용 규칙 0개일 때 이유 문구)의 전제가 아직 유효한가 | v1은 입력 3개가 항상 있어 이유 줄이 비지 않는다(5.4). 질문이 "표본 부족 문구를 어디에 두는가"로 바뀌어야 할 수 있다 | LATER |
+| 예산 판정에 "근접" 밴드(예: 90~100%)를 넣는가 — **요구사항 제안** | DC-R08이 2값으로 못 박아 설계에 넣지 않았다. 넣으려면 요구사항과 6.9 상태 어휘를 먼저 고쳐야 한다 | LATER |
+| 5.2절 "조리 시간 vs 시각" 감점을 쓰는가 — **요구사항 제안** | 사람이 말하지 않은 축이다(requirements 2.2가 `[제안]`으로만 갖고 있다). 쓰면 이유 줄에도 조각이 하나 늘어난다 | LATER |
+| 스토어 배포를 MVP 범위에 넣는가, EAS Build 무료 한도는 얼마인가 — **리서치** | 9절 비용을 `[추정]`으로만 쓸 수 있다. 배포를 넣으면 심사 대기가 일정에 들어온다 | LATER |
+| 웹 타깃(`react-native-web`)을 유지하는가 | 유지하면 의존 2개와 저장 실패 경로가 늘고 KK-OQ-07(축출)이 되살아난다. 버리면 링크 시연을 잃는다 | LATER |
+| 레시피별 인분 상한(`servingsMax`)을 데이터로 두는가 | 없으면 6인분 통마리 요리처럼 성립하지 않는 조합이 후보에 남는다(5.1의 4단계) | LATER |
+| 촉각 피드백(햅틱)을 카드 등장에 넣는가 — **요구사항 제안** | 요구사항에 없어 설계에서 뺐다. 넣으려면 `expo-haptics` 1개가 늘고 DC-R04에 문장이 붙는다 | LATER |
