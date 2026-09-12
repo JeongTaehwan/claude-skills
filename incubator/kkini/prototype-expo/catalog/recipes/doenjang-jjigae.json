@@ -1,0 +1,112 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "doenjang-jjigae",
+  "name": "된장찌개",
+  "tags": [
+    "한식",
+    "국물",
+    "채소"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "doenjang",
+      "qty": 2,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "gochujang",
+      "qty": 0.5,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "tofu",
+      "qty": 0.5,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "zucchini",
+      "qty": 0.5,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "potato",
+      "qty": 1,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "onion",
+      "qty": 0.5,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "green-onion",
+      "qty": 0.5,
+      "unit": "대"
+    },
+    {
+      "ingredientId": "green-chili",
+      "qty": 1,
+      "unit": "개",
+      "optional": true,
+      "note": "매운맛용"
+    },
+    {
+      "ingredientId": "minced-garlic",
+      "qty": 0.5,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "dried-anchovy",
+      "qty": 10,
+      "unit": "g",
+      "note": "국물용"
+    },
+    {
+      "ingredientId": "dried-kelp",
+      "qty": 3,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "water",
+      "qty": 600,
+      "unit": "ml"
+    }
+  ],
+  "steps": [
+    {
+      "text": "냄비에 물 600ml·멸치·다시마를 넣고 중불로 8분 끓여 육수를 낸다. 끓기 시작하고 5분 뒤 다시마만 건진다.",
+      "minutes": 8
+    },
+    {
+      "text": "멸치를 건져내고 된장과 고추장을 체에 대고 풀어 넣는다. 덩어리째 넣으면 끝까지 안 풀린다.",
+      "minutes": 2
+    },
+    {
+      "text": "감자와 양파를 넣고 중불에서 6분 끓인다. 감자가 가장 늦게 익으므로 먼저 넣는다.",
+      "minutes": 6
+    },
+    {
+      "text": "애호박을 넣고 3분 더 끓인다.",
+      "minutes": 3
+    },
+    {
+      "text": "두부와 다진 마늘을 넣고 3분 끓인다.",
+      "minutes": 3
+    },
+    {
+      "text": "대파와 청양고추를 넣고 1분 뒤 불을 끈다.",
+      "minutes": 1
+    }
+  ],
+  "cookMinutes": 25,
+  "difficulty": 1,
+  "allergens": [
+    "대두"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}

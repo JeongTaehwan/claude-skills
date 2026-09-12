@@ -1,0 +1,75 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "gyeranmari",
+  "name": "계란말이",
+  "tags": [
+    "한식",
+    "간편"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "egg",
+      "qty": 4,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "carrot",
+      "qty": 0.2,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "green-onion",
+      "qty": 0.3,
+      "unit": "대"
+    },
+    {
+      "ingredientId": "salt",
+      "qty": 0.3,
+      "unit": "작은술"
+    },
+    {
+      "ingredientId": "cooking-oil",
+      "qty": 1,
+      "unit": "큰술",
+      "scaling": "fixed",
+      "note": "팬 코팅용"
+    }
+  ],
+  "steps": [
+    {
+      "text": "당근과 대파를 아주 곱게 다진다. 굵으면 말 때 계란이 찢어진다.",
+      "minutes": 4
+    },
+    {
+      "text": "계란을 풀고 소금을 넣어 섞은 뒤 체에 한 번 걸러 알끈을 없앤다.",
+      "minutes": 3
+    },
+    {
+      "text": "다진 채소를 계란물에 섞는다.",
+      "minutes": 1
+    },
+    {
+      "text": "사각팬에 기름을 얇게 두르고 약불로 달군다. 계란물의 1/3을 부어 반쯤 익으면 한쪽에서 말아 온다.",
+      "minutes": 3
+    },
+    {
+      "text": "남은 계란물을 두 번에 나눠 부으며 같은 방향으로 계속 만다. 불은 끝까지 약불이다.",
+      "minutes": 4
+    },
+    {
+      "text": "불을 끄고 1분 식힌 뒤 2cm 폭으로 썬다.",
+      "minutes": 2
+    }
+  ],
+  "cookMinutes": 15,
+  "difficulty": 2,
+  "allergens": [
+    "계란"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}

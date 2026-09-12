@@ -4,7 +4,7 @@
 
 > 상태: **기획 단계 — 미승인 초안** (2026-09-12). 정식 코드는 없고, 추천 답을 전제로 한 클릭 가능한 프로토타입만 있다.
 >
-> **앱 보기(웹):** https://claude.ai/code/artifact/02eba43d-0a55-4d03-acd4-4bcffd89b44a (프로토타입 v0, 폰 폭 기준) · 로컬은 `prototype/index.html`을 열면 된다.
+> **앱 보기(웹):** https://claude.ai/code/artifact/02eba43d-0a55-4d03-acd4-4bcffd89b44a (프로토타입 v1의 Expo 웹 번들, 폰 폭 기준). 네이티브와 100% 같지는 않다.
 >
 > **폰에서 보기(Expo Go):**
 > ```bash
@@ -30,8 +30,7 @@
 | `docs/architecture.md` | v1. Expo 스택, 레시피·재료 단가·환산표 모델, 재료비 계산, 뽑기 엔진, 카탈로그 운영, 결정 제안 | 초안 (v1) |
 | `docs/review/2026-09-12-planning.md` | 문서 검증 보고서 — 문서 간 모순, 근거 없는 확정, 판정 불가 문장. H 3건 / M 5건 / L 3건 | 지적만, 수정은 사람이 정한다 |
 | `docs/domain.md` · `docs/decisions.md` · `docs/test-cases.md` | 사람·검증 AI가 채우는 파일. 아직 골격만 | 비어 있음 |
-| `prototype/` | 클릭 가능한 프로토타입 — 단일 HTML + 카탈로그 200종. 미정 항목은 open-questions.md의 추천 답을 전제. 정식 구현 아님 | 스모크 테스트 통과 |
-| `prototype-expo/` | 같은 프로토타입의 React Native(Expo) 판. Expo Go로 폰에서 실행. KK-OQ-03(플랫폼)이 Expo로 닫히면 이쪽이 출발점 | 타입·번들 검사 통과 |
+| `prototype-expo/` | **v1 프로토타입** (Expo). 입력 → 가운데 등장 애니메이션 → 카드(재료비·예산 판정) → 레시피 상세, 시켜 먹기 가벼운 흐름. `catalog/`에 레시피 20개 초안·재료 단가 54종·환산표·배달 메뉴 26종. 검수 전 초안 배지 상시 표시. 정식 구현 아님 | 검증 6단계 통과 |
 | `AGENTS.md` | 타 벤더 검증 AI용 계약 (테스트 케이스·코드 리뷰) | 전제 채움 |
 | `CLAUDE.md` · `.claude/agents/` | Claude Code 팀 운영 규칙과 역할별 에이전트 정의 | 사용 중 |
 
@@ -56,7 +55,7 @@
 | 2 (병렬) | `architect` 설계 | opus | `docs/architecture.md` |
 | 3 | `scribe` 서기 | haiku | 미정 제안 병합, 집계, `docs/README.md` |
 | 4 | `reviewer` 문서 검증 | sonnet | `docs/review/` — 지적만, 수정은 사람이 정한다 |
-| 5 | `developer` 구현 | opus | `prototype/` — 추천 답 기준 프로토타입, 스모크 테스트까지 |
+| 5 | `developer` 구현 | opus | `prototype-expo/` — 추천 답 기준 프로토타입, 카탈로그 초안, 검증 6단계 |
 
 운영 규칙은 `CLAUDE.md`에 있다. 파이프라인 자체(역할 3분리, 10단계, 게이트, 문서 체계)는
 [`JeongTaehwan/claude-skills`](https://github.com/JeongTaehwan/claude-skills)의 `role-isolation-pipeline` 스킬이 정의한다.

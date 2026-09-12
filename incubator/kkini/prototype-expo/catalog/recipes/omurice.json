@@ -1,0 +1,97 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "omurice",
+  "name": "오므라이스",
+  "tags": [
+    "양식",
+    "밥"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "cooked-rice",
+      "qty": 2,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "egg",
+      "qty": 4,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "onion",
+      "qty": 0.5,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "carrot",
+      "qty": 0.2,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "spam",
+      "qty": 100,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "ketchup",
+      "qty": 4,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "salt",
+      "qty": 0.3,
+      "unit": "작은술"
+    },
+    {
+      "ingredientId": "black-pepper",
+      "qty": 0.2,
+      "unit": "작은술"
+    },
+    {
+      "ingredientId": "cooking-oil",
+      "qty": 2,
+      "unit": "큰술",
+      "scaling": "fixed",
+      "note": "팬 코팅용"
+    }
+  ],
+  "steps": [
+    {
+      "text": "양파·당근·스팸을 0.5cm 큐브로 잘게 썬다.",
+      "minutes": 5
+    },
+    {
+      "text": "팬에 기름을 두르고 중불에서 양파·당근을 3분 볶고 스팸을 넣어 2분 더 볶는다.",
+      "minutes": 5
+    },
+    {
+      "text": "밥과 케첩 3큰술을 넣고 센불에서 3분 볶아 케첩밥을 만든 뒤 접시에 덜어 둔다.",
+      "minutes": 3
+    },
+    {
+      "text": "계란 4개를 풀고 소금·후춧가루를 섞어 체에 한 번 거른다.",
+      "minutes": 3
+    },
+    {
+      "text": "팬을 약불로 달구고 기름을 두른 뒤 계란물의 절반을 부어 반숙으로 익힌다. 표면이 촉촉할 때 불을 끈다.",
+      "minutes": 3
+    },
+    {
+      "text": "계란 위에 케첩밥을 올리고 양쪽을 접어 덮은 뒤 접시에 뒤집어 담는다. 남은 케첩을 위에 뿌린다.",
+      "minutes": 4
+    }
+  ],
+  "cookMinutes": 25,
+  "difficulty": 2,
+  "allergens": [
+    "계란",
+    "대두",
+    "토마토"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}
