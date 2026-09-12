@@ -1,16 +1,15 @@
-// 끼니 Expo 프로토타입 — 먹은 기록 화면 (HI)
-// requirements.md 6.5절 / ux/flows.md 3절 "HI — 먹은 기록" / open-questions.md 추천 답 기준.
-// requirements.md 미승인 초안(2026-09-12) 전제 — 정식 구현 아님.
+// 끼니 v1 프로토타입 — 먹은 기록 (HI)
+// requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입. 정식 구현 아님.
 //
-// HI-R03 날짜·음식·갈래·확인 여부 네 가지를 보여준다. 확인 여부를 감추지 않는다.
-// HI-R04 기록이 0건일 때는 "아직 기록이 없다" — "0회 먹음"으로 쓰지 않는다.
-// HI-R06 기록은 개별 삭제할 수 있다. 삭제하면 반복 회피 계산에서도 즉시 빠진다.
-// HI-R07 확인 기한은 결정 생성 후 다음 날 정오까지다.
-// HI-OQ-03 추천 — 그 확인 버튼은 결정 카드가 아니라 이 화면에 있다.
+// HI-R02 확인하지 않은 결정은 "확인 안 됨"으로 표시한다 — "안 먹음"이 아니다.
+// HI-R03 날짜·음식·갈래·인분·금액·확인 여부를 보여준다. 확인 여부를 감추지 않는다.
+// HI-R04 0건이면 "아직 기록이 없다". "0회 먹음"으로 쓰지 않는다.
+// HI-R06 개별 삭제할 수 있고, 삭제하면 반복 회피 계산에서 즉시 빠진다.
+// HI-R07 확인 기한은 결정 생성 후 다음 날 정오까지다 (HI-OQ-03 UX 가정: 목록 행에도 확인 버튼).
 
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BRANCH_LABEL, COPY, KkiniState, MealLog, iso } from '../engine';
+import { BRANCH_LABEL, COPY, KkiniState, MealLog, iso, money } from '../engine';
 import { ff, useTheme } from '../theme';
 import { Btn } from '../components/Btn';
 import { StateBox } from '../components/StateBox';
@@ -24,9 +23,9 @@ export function History({ state, mutate }: Props) {
   const { c, fontsLoaded, font } = useTheme();
 
   const logs = state.mealLogs.slice().sort((a, b) =>
-    a.kkiniDate < b.kkiniDate ? 1
-      : a.kkiniDate > b.kkiniDate ? -1
-        : new Date(b.adoptedAt).getTime() - new Date(a.adoptedAt).getTime()
+    a.dateKey < b.dateKey ? 1
+      : a.dateKey > b.dateKey ? -1
+        : Date.parse(b.confirmDeadline) - Date.parse(a.confirmDeadline)
   );
 
   function confirmLog(m: MealLog) {
@@ -48,43 +47,44 @@ export function History({ state, mutate }: Props) {
         먹은 기록
       </Text>
       <Text style={[styles.sub, { color: c.muted, fontFamily: ff(font.sansRegular, fontsLoaded) }]}>
-        날짜 · 음식 · 갈래 · 확인 여부
+        날짜 · 음식 · 갈래 · 인분 · 금액 · 확인 여부
       </Text>
 
       <View testID="history-live" accessibilityLiveRegion="polite">
         {!logs.length ? (
-          <StateBox testID="history-empty" title={COPY.hiEmpty} sub={COPY.hiEmptySub} />
+          <StateBox
+            testID="history-empty"
+            title={COPY.hiEmpty}
+            sub={`카드에서 "${COPY.hiConfirm}"를 누르면 여기에 쌓인다`}
+          />
         ) : (
           <View testID="history-list">
             {logs.map((m) => {
-              const p = m.kkiniDate.split('-');
+              const p = m.dateKey.split('-');
               const confirmed = m.confirm.state === 'confirmed';
-              const canConfirm =
-                m.confirm.state === 'unconfirmed' &&
-                Date.now() <= new Date(m.confirmDeadline).getTime();
+              const canConfirm = m.confirm.state === 'unconfirmed' &&
+                Date.now() <= Date.parse(m.confirmDeadline);
               return (
-                <View
-                  key={m.id}
-                  testID="log-row"
-                  style={[styles.row, { borderBottomColor: c.line }]}
-                >
-                  <View style={styles.rowMain}>
-                    <View style={styles.rowTop}>
-                      {/* HI-R03 ① 날짜 */}
+                <View key={m.id} testID="log-row" style={[styles.row, { borderBottomColor: c.line }]}>
+                  <View style={styles.main}>
+                    <View style={styles.top}>
                       <Text style={[styles.date, { color: c.muted, fontFamily: ff(font.sansRegular, fontsLoaded) }]}>
                         {+p[1]}/{+p[2]}
                       </Text>
-                      {/* HI-R03 ② 음식 */}
                       <Text style={[styles.name, { color: c.ink, fontFamily: ff(font.serifRegular, fontsLoaded) }]}>
-                        {m.foodName}
+                        {m.name}
                       </Text>
                     </View>
-                    <View style={styles.rowMeta}>
-                      {/* HI-R03 ③ 갈래 */}
+                    <View style={styles.metaRow}>
                       <Text style={[styles.meta, { color: c.muted, fontFamily: ff(font.sansRegular, fontsLoaded) }]}>
                         {BRANCH_LABEL[m.branch]}
                       </Text>
-                      {/* HI-R03 ④ 확인 여부 — "확인 안 됨"은 "안 먹음"이 아니다 (HI-R02 / 6.6) */}
+                      <Text style={[styles.meta, { color: c.muted, fontFamily: ff(font.sansRegular, fontsLoaded) }]}>
+                        {m.servings}인분
+                      </Text>
+                      <Text style={[styles.meta, { color: c.muted, fontFamily: ff(font.sansRegular, fontsLoaded) }]}>
+                        {m.costKrw !== null ? money(m.costKrw, m.isEstimate) : '금액 없음'}
+                      </Text>
                       <Text
                         testID={confirmed ? 'log-confirmed' : 'log-unconfirmed'}
                         style={[styles.meta, { color: confirmed ? c.good : c.warn, fontFamily: ff(font.sansRegular, fontsLoaded) }]}
@@ -93,16 +93,11 @@ export function History({ state, mutate }: Props) {
                       </Text>
                     </View>
                   </View>
-                  <View style={styles.rowActs}>
+                  <View style={styles.acts}>
                     {canConfirm ? (
-                      <Btn
-                        testID="log-confirm-btn"
-                        label={COPY.hiAdopt}
-                        onPress={() => confirmLog(m)}
-                        small
-                      />
+                      <Btn testID="log-confirm-btn" label={COPY.hiConfirm} onPress={() => confirmLog(m)} small />
                     ) : null}
-                    <Btn testID="log-delete-btn" label="삭제" onPress={() => deleteLog(m)} small />
+                    <Btn testID="log-delete-btn" label={COPY.hiDelete} onPress={() => deleteLog(m)} small />
                   </View>
                 </View>
               );
@@ -124,18 +119,15 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', marginBottom: 4 },
   sub: { fontSize: 13, marginBottom: 14 },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth
   },
-  rowMain: { flex: 1, gap: 4 },
-  rowTop: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
-  rowMeta: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  main: { flex: 1, gap: 4 },
+  top: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
+  metaRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   date: { fontSize: 13, minWidth: 38, fontVariant: ['tabular-nums'] },
   name: { fontSize: 17, flexShrink: 1 },
-  meta: { fontSize: 12 },
-  rowActs: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  meta: { fontSize: 12, fontVariant: ['tabular-nums'] },
+  acts: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   note: { fontSize: 12, lineHeight: 18, marginTop: 14 }
 });

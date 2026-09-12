@@ -1,10 +1,10 @@
-// 끼니 Expo 프로토타입 — 저장 (PR-OQ-01 추천: 기기 로컬)
-// requirements.md 6절 / architecture.md 3.3절 / open-questions.md 추천 답 기준.
-// requirements.md 미승인 초안(2026-09-12) 전제 — 정식 구현 아님.
+// 끼니 v1 프로토타입 — 저장 (PR-OQ-01 추천: 기기 로컬)
+// requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입. 정식 구현 아님.
 //
-// 정식 구현은 architecture 3.3의 IndexedDB(Dexie) 스토어 5개 + 마이그레이션이다.
-// 프로토타입은 AsyncStorage 키 하나로 줄였다. 읽기·쓰기 전부 try/catch로 감싸고
-// 실패해도 화면은 뜬다 ([미정 KK-OQ-07] 저장 보장 불가 시의 대응이 요구사항에 없다).
+// architecture.md v1 8.1·8.2절을 따른다 — 키 1개(kkini.state)에 KkiniState를 JSON으로 넣고,
+// 읽기·쓰기를 전부 try/catch로 감싸고 실패해도 화면은 뜬다(saveState가 false를 돌려준다).
+// SCHEMA_VERSION = 2. 버전 1(v0의 Food 기반 상태)은 **마이그레이션하지 않는다** — 모델 자체가 다르다.
+// 2 이후는 필드 추가만 허용하고 없는 키는 기본값으로 채운다.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KkiniState, SCHEMA_VERSION, STORAGE_KEY, freshState } from './engine';

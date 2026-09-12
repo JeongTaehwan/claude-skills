@@ -1,0 +1,74 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "godeungeo-gui",
+  "name": "고등어구이",
+  "tags": [
+    "한식",
+    "구이",
+    "해산물"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "mackerel",
+      "qty": 2,
+      "unit": "마리"
+    },
+    {
+      "ingredientId": "salt",
+      "qty": 1,
+      "unit": "작은술"
+    },
+    {
+      "ingredientId": "cooking-oil",
+      "qty": 1,
+      "unit": "큰술",
+      "scaling": "fixed",
+      "note": "팬 코팅용"
+    },
+    {
+      "ingredientId": "lettuce",
+      "qty": 100,
+      "unit": "g",
+      "optional": true,
+      "note": "곁들임"
+    }
+  ],
+  "steps": [
+    {
+      "text": "고등어를 흐르는 물에 씻어 키친타월로 물기를 완전히 닦는다. 물기가 남으면 기름이 튀고 껍질이 붙는다.",
+      "minutes": 4
+    },
+    {
+      "text": "양면에 소금을 고루 뿌리고 10분 둔다.",
+      "minutes": 10,
+      "wait": true
+    },
+    {
+      "text": "팬에 식용유를 두르고 중강불로 2분 달군다.",
+      "minutes": 2
+    },
+    {
+      "text": "껍질 쪽을 먼저 아래로 놓고 5분 굽는다. 이때 뒤집지 않는다.",
+      "minutes": 5
+    },
+    {
+      "text": "뒤집어 중불에서 4분 더 굽는다. 가장 두꺼운 부분을 젓가락으로 눌러 국물이 맑게 나오면 다 익은 것이다.",
+      "minutes": 4
+    },
+    {
+      "text": "불을 끄고 1분 두었다가 접시에 옮긴다. 상추를 곁들인다.",
+      "minutes": 1
+    }
+  ],
+  "cookMinutes": 20,
+  "difficulty": 1,
+  "allergens": [
+    "생선"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}

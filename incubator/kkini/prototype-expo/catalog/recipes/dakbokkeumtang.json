@@ -1,0 +1,116 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "dakbokkeumtang",
+  "name": "닭볶음탕",
+  "tags": [
+    "한식",
+    "국물",
+    "고기"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "chicken-chunk",
+      "qty": 700,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "potato",
+      "qty": 2,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "onion",
+      "qty": 1,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "carrot",
+      "qty": 0.5,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "green-onion",
+      "qty": 1,
+      "unit": "대"
+    },
+    {
+      "ingredientId": "gochujang",
+      "qty": 1.5,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "gochugaru",
+      "qty": 2,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "soy-sauce",
+      "qty": 4,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "sugar",
+      "qty": 1,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "garlic",
+      "qty": 4,
+      "unit": "쪽",
+      "note": "굵게 다져서"
+    },
+    {
+      "ingredientId": "ginger",
+      "qty": 5,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "water",
+      "qty": 600,
+      "unit": "ml"
+    }
+  ],
+  "steps": [
+    {
+      "text": "닭은 찬물에 10분 담가 핏물을 뺀 뒤 흐르는 물에 씻는다.",
+      "minutes": 10,
+      "wait": true
+    },
+    {
+      "text": "끓는 물에 닭을 넣고 2분 데쳐 건진 뒤 한 번 더 씻는다. 이 과정을 빼면 국물이 탁해진다.",
+      "minutes": 5
+    },
+    {
+      "text": "고추장·고춧가루·간장·설탕·다진 마늘·생강을 섞어 양념장을 만든다.",
+      "minutes": 4
+    },
+    {
+      "text": "냄비에 닭·양념장·물 600ml를 넣고 센불로 끓인다.",
+      "minutes": 5
+    },
+    {
+      "text": "끓으면 중불로 낮추고 15분 끓인다. 뜨는 거품은 걷어낸다.",
+      "minutes": 15
+    },
+    {
+      "text": "감자와 당근을 넣고 10분 더 끓인다. 감자가 젓가락에 들어갈 때까지.",
+      "minutes": 10
+    },
+    {
+      "text": "양파를 넣고 3분, 대파를 넣고 1분 끓인 뒤 불을 끈다.",
+      "minutes": 4
+    }
+  ],
+  "cookMinutes": 45,
+  "difficulty": 2,
+  "allergens": [
+    "대두",
+    "닭고기"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}

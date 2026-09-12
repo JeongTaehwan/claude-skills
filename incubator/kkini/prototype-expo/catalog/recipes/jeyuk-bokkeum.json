@@ -1,0 +1,125 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "jeyuk-bokkeum",
+  "name": "제육볶음",
+  "tags": [
+    "한식",
+    "고기",
+    "볶음"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "pork-shoulder",
+      "qty": 400,
+      "unit": "g",
+      "note": "앞다리살 또는 뒷다리살"
+    },
+    {
+      "ingredientId": "onion",
+      "qty": 1,
+      "unit": "개"
+    },
+    {
+      "ingredientId": "green-onion",
+      "qty": 1,
+      "unit": "대"
+    },
+    {
+      "ingredientId": "green-chili",
+      "qty": 1,
+      "unit": "개",
+      "optional": true
+    },
+    {
+      "ingredientId": "gochujang",
+      "qty": 2,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "gochugaru",
+      "qty": 1,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "soy-sauce",
+      "qty": 1.5,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "sugar",
+      "qty": 1,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "minced-garlic",
+      "qty": 1,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "mirin",
+      "qty": 1,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "sesame-oil",
+      "qty": 1,
+      "unit": "작은술"
+    },
+    {
+      "ingredientId": "cooking-oil",
+      "qty": 1,
+      "unit": "큰술",
+      "scaling": "fixed",
+      "note": "팬 코팅용"
+    },
+    {
+      "ingredientId": "sesame-seed",
+      "qty": 1,
+      "unit": "작은술",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "text": "고추장·고춧가루·간장·설탕·다진 마늘·미림을 한 그릇에 섞어 양념장을 만든다.",
+      "minutes": 4
+    },
+    {
+      "text": "돼지고기를 0.5cm 두께로 썰어 양념장에 버무리고 15분 재운다.",
+      "minutes": 15,
+      "wait": true
+    },
+    {
+      "text": "양파는 굵게, 대파는 어슷하게, 청양고추는 송송 썬다.",
+      "minutes": 4
+    },
+    {
+      "text": "팬에 식용유를 두르고 센불로 달군 뒤 고기를 펴 넣는다. 1분간 건드리지 않아야 겉면이 지져진다.",
+      "minutes": 2
+    },
+    {
+      "text": "중불로 낮추고 5분 볶아 고기를 8할쯤 익힌다.",
+      "minutes": 5
+    },
+    {
+      "text": "양파를 넣고 3분, 대파·청양고추를 넣고 1분 더 볶는다.",
+      "minutes": 4
+    },
+    {
+      "text": "불을 끄고 참기름과 통깨를 넣어 섞는다.",
+      "minutes": 1
+    }
+  ],
+  "cookMinutes": 30,
+  "difficulty": 1,
+  "allergens": [
+    "대두",
+    "돼지고기"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}

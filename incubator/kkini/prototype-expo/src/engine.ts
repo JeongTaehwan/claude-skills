@@ -1,266 +1,395 @@
-// 끼니 Expo 프로토타입 — 결정 엔진 (순수 함수)
-// requirements.md 6절 / architecture.md 3·4절 / open-questions.md 추천 답 기준.
-// requirements.md는 미승인 초안(2026-09-12)이고 BLOCKER 21건이 미정이다.
-// 이 파일은 open-questions.md의 `추천:` 답을 전제로 한 프로토타입이며 정식 구현이 아니다.
-// prototype/index.html(HTML 판)의 로직을 1:1로 옮겼다 — 화면만 네이티브다.
+// 끼니 v1 프로토타입 — 엔진 (순수 함수)
+// requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입. 정식 구현 아님.
+// architecture.md v1 3절(데이터 모델) · 4절(재료비 계산) · 5절(뽑기 엔진) · 6절(시켜 먹기)를 1:1로 옮겼다.
 //
 // 전제한 추천 답
-//   KK-OQ-01 앱이 갈래까지 정한다            KK-OQ-02 A(해 먹기)+B(나가서 먹기)만
-//   KK-OQ-03 PWA → 여기서는 Expo(RN)         KK-OQ-04 운영비 0원 → 외부 API 0개
-//   KK-OQ-05 하루 경계 04:00, 저녁 16~23시    DC-OQ-01 1개 + 거절 버튼 1개
-//   DC-OQ-02 콜드스타트도 바로 카드           DC-OQ-03 같은 날 고정 + 거절 상한 5회
-//   DC-OQ-04 수동 재시도                     DC-OQ-05 후보 0개여도 제약을 풀지 않는다
-//   MO-OQ-01 우리가 소유한 고정 목록          PR-OQ-01 기기 로컬 (AsyncStorage)
-//   PR-OQ-02 미입력은 "아직 모름"(3상태)      HI-OQ-01 채택 탭으로 판정
-//   HI-OQ-02 채택+확인된 섭취, 창 14일        HI-OQ-03 확인 버튼은 기록 화면
+//   KK-OQ-01 사용자가 갈래를 고른다        KK-OQ-03 Expo(RN)      KK-OQ-04 운영비 0원
+//   KK-OQ-05 하루 경계 04:00               IN-OQ-01 주소는 기기 로컬·동 단위
+//   IN-OQ-02 예산·인분·주소 저장, 갈래는 매번
+//   IN-OQ-03 기준 2인분·상한 6인분·비례 환산 후 실용 단위 올림·금액 10원 반올림
+//   DC-OQ-05 후보 0개여도 제약을 풀지 않는다  DC-OQ-06 "아직 취향을 몰라서 오늘은 무작위로 골랐다"
+//   DC-OQ-08 총액 재료비 vs 입력 예산, 허용폭 0
+//   RE-OQ-02 다시 돌리기 상한 없음          RC-OQ-01 손질~완성 총시간 + 대기 별도
+//   MO-OQ-03 매장 필터 미구현               CA-OQ-01 고정 단가표·90일 경과 시 추정
+//   CA-OQ-02 레시피 20개                    HI-OQ-01 확인 탭 + 레시피 열람
+//   HI-OQ-02 카드에 나온 것 전부, 창 = 레시피 수의 절반  PR-OQ-01/02 기기 로컬 · 3상태
+//
+// v0에서 살린 것: Answered<T> 3상태 · mulberry32 · weightedRandom · id 재사용 금지 규약.
+// v0에서 폐기한 것: Food 타입 · 하루 시드 고정 · 거절 상한 5회 · 거절 사유 수집 · 갈래 'out'.
 
-/* ── 타입 (architecture.md 3.1·3.2) ─────────────────────────── */
+/* ── 타입 (architecture v1 3절) ─────────────────────────────── */
 
-export type Branch = 'home' | 'out' | 'delivery';   // MO-R01: 목록은 3개 고정
-export type Season = '봄' | '여름' | '가을' | '겨울';
-export type KkiniDate = string;   // 'YYYY-MM-DD', 하루 경계 04:00 기기 로컬
+export type Branch = 'home' | 'delivery';          // MO-R01: 정확히 2개
 export type Iso = string;
+export type DateOnly = string;                     // 'YYYY-MM-DD'
+export type RecipeUnit = 'g' | 'ml' | '개' | '큰술' | '작은술' | '컵' | '대' | '쪽' | '줌' | '장' | '마리';
+export type PurchaseUnit = 'g' | 'ml' | '개' | '단' | '봉' | '팩';
+export type Answered<T> = { status: 'unset' } | { status: 'declared'; value: T };   // v0에서 살린다
 
-export interface Food {
-  id: string;                  // 안정 slug. 재사용 금지 — MealLog.foodId가 과거 id를 계속 가리킨다
-  name: string;
-  branches: Branch[];          // 갈래 가능 집합. ['home','out'] = 해 먹어도 사 먹어도 되는 것
-  tags: string[];              // 맥락 규칙·싫어하는 것이 본다
-  cookMinutes: number | null;  // 'home' ∈ branches 일 때만 값
-  difficulty: 1 | 2 | 3 | null;
-  budgetTier: 1 | 2 | 3;       // 1인 기준 예산 등급(1=저렴). 원화 금액을 카탈로그에 박지 않는다
-  seasons: Season[];
-  allergens: string[];         // PR-R02 절대 제외 매칭 키. 이 배열의 정확도가 곧 안전이다
-  spicy: number;
-  weekdays?: number[];         // JS getDay() 규약
-  lateOk?: boolean;            // 21시 이후에도 성립하는가
-  retiredAt?: Iso;             // 뺄 때 삭제 대신 이걸 붙인다
+export interface RecipeIngredient {
+  ingredientId: string;
+  qty: number;
+  unit: RecipeUnit;
+  optional?: boolean;                 // 소계에서 빼고 "선택"으로 표시 (architecture 4.4)
+  scaling?: 'linear' | 'fixed';       // 기본 linear. fixed = 인분과 무관한 양 (4.3)
+  note?: string;                      // 표기용. 계산에 쓰지 않는다
+}
+export interface RecipeStep { text: string; minutes?: number; wait?: boolean }
+export interface Recipe {
+  id: string; name: string; tags: string[];
+  branches: Branch[];                 // v1에서는 항상 ['home'] — 배달에는 레시피가 없다 (MO-R09)
+  servingsBase: number; servingsMax?: number;
+  ingredients: RecipeIngredient[]; steps: RecipeStep[];
+  cookMinutes: number; difficulty?: 1 | 2 | 3;
+  allergens: string[];                // PR-R02 매칭 키. [미정 PR-OQ-05] 교차검수 없으면 안전 보장이 거짓이다
+  author?: string;
+  reviewedAt: DateOnly | null;        // RC-R09. 프로토타입은 전부 null이다 (README 편차 참조)
+  retiredAt?: Iso;
+}
+export interface Ingredient {
+  id: string; name: string;
+  purchaseUnit: PurchaseUnit; purchaseQty: number; priceKrw: number;
+  asOf: DateOnly;                     // CA-R03 필수
+  source: 'manual' | 'kamis' | 'data.go.kr' | 'unknown';
+  isEstimate: boolean;
+  pantry?: boolean; gramsPerMl?: number;
+}
+export interface UnitConversion { unit: RecipeUnit; base: 'g' | 'ml'; factor: number; isEstimate: boolean }
+export interface UnitOverride extends UnitConversion { ingredientId: string; note: string }
+export interface UnitTable { base: UnitConversion[]; overrides: UnitOverride[] }
+export interface DeliveryMenu {
+  id: string; name: string; category: string;
+  priceLowKrw: number; priceHighKrw: number;
+  asOf: DateOnly; isEstimate: boolean;
+  tags: string[]; allergens: string[]; retiredAt?: Iso;
 }
 
-// PR-OQ-02 추천: 미입력을 '제약 없음'으로 읽지 않는다. 3상태를 타입으로 강제한다.
-export type Answered<T> = { status: 'unset' } | { status: 'declared'; value: T };
-
+export interface Inputs {
+  branch: Branch;                     // 매번 고른다 (IN-R07, IN-OQ-02 추천)
+  budgetKrw: Answered<number>;        // 총액 (DC-OQ-08 추천). unset이면 판정 없음 (IN-R10)
+  servings: number;                   // IN-R05. 기본 2, 상한 6 (IN-OQ-03 추천)
+  address?: string;                   // Profile.address의 사본 — 여기에 저장하지 않는다
+  savedAt: Iso;
+}
 export interface Profile {
-  absoluteExclusions: Answered<string[]>;   // 알레르기·못 먹는 것
-  dislikes: Answered<string[]>;             // 감점 대상. 제외가 아니다 (RE-R04)
-  budgetMaxKrw: Answered<number>;
-  canCook: Answered<boolean>;
-  partySize: Answered<number>;
-  updatedAt: Iso;                           // PR-R04: 이 시각 이후 생성된 결정부터 적용
+  absoluteExclusions: Answered<string[]>;   // PR-R02 절대 제외
+  dislikes: Answered<string[]>;             // 감점, 제외 아님 (PR-R03)
+  defaultBudgetKrw: Answered<number>; defaultServings: Answered<number>;
+  address: Answered<string>;                // 동·읍·면 단위 (IN-R14). 주소의 유일한 보관 위치
+  updatedAt: Iso;                           // PR-R05
 }
 
-export type RuleCode = 'season' | 'weekday' | 'late' | 'budget' | 'cook';
-export interface AppliedRule { code: RuleCode; weight: number }
-
-export interface StoredDecision {
-  id: string;
-  foodId: string;
-  foodName: string;
-  branch: Branch;
-  reason: string;                  // DC-R03: 적용된 규칙에서 생성. 지어내지 않는다
-  reasonSecondary: string | null;  // review #1 처리 — 아래 buildReason 주석 참조
-  createdAt: Iso;
-  status: 'proposed' | 'adopted' | 'rejected';
-  kkiniDate: KkiniDate;            // C1 '하루 1건'의 키
-  shownAt: Iso | null;             // DC-R11, 지표 S1의 시작점
-  appliedRules: AppliedRule[];     // reason의 원본. 문장이 아니라 규칙으로 보관한다
-  seed: number;                    // 같은 카드를 재현할 수 있어야 버그를 재현한다
-  catalogVersion: string;
+export type BudgetVerdict = 'within' | 'over' | 'unknown';
+export type EstimateReason = '단가추정' | '기준일경과' | '환산추정' | '배달가격';
+export interface CostLine {
+  ingredientId: string; name: string; qty: number; unit: RecipeUnit;
+  unitPriceText: string;              // "500ml 3,200원" — 화면이 다시 계산하지 않게 원문을 보관한다
+  subtotalKrw: number; isEstimate: boolean; optional: boolean; pantry: boolean;
 }
-
-export type RejectionReason = 'not_today' | 'ate_recently' | 'dislike' | 'cannot_cook_now';
-export interface Rejection {
-  id: string;
-  decisionId: string;
-  foodId: string;
-  rejectedAt: Iso;
-  kkiniDate: KkiniDate;                 // RE-R02: 같은 날 재등장 차단의 키
-  reason: RejectionReason | null;       // null = 사유 건너뜀. 그래도 RE-R02는 적용된다
+export interface CostBreakdown {
+  lines: CostLine[]; totalKrw: number;      // RC-R04: Decision.costKrw와 반드시 같다
+  isEstimate: boolean; estimateReasons: EstimateReason[];
 }
-
-export type ConfirmState = 'confirmed' | 'unconfirmed' | 'expired';  // expired = HI-R07 기한 경과
+export interface Decision {
+  id: string; itemKind: 'recipe' | 'delivery'; itemId: string; name: string;
+  branch: Branch; servings: number;
+  reason: string;                     // DC-R03. 5.4절 규칙으로만 만든다
+  subNote: string | null;             // DC-R11 표본 부족 보조 줄 (architecture 5.4)
+  costKrw: number | null;             // 해 먹기=재료비 합계 / 시켜 먹기=가격대 하단
+  priceRangeKrw?: [number, number];   // 시켜 먹기만
+  cost?: CostBreakdown;               // 해 먹기만
+  cookMinutes: number | null;
+  budgetVerdict: BudgetVerdict; isEstimate: boolean;
+  createdAt: Iso; shownAt: Iso | null; status: 'proposed' | 'confirmed';
+  seed: number; catalogVersion: string;
+  reviewed: boolean;                  // 검수 전 초안 배지 (RC-R09 편차)
+}
 export interface MealLog {
-  id: string;
-  kkiniDate: KkiniDate;
-  decisionId: string;
-  branch: Branch;
-  foodId: string;
-  foodName: string;             // 카탈로그에서 빠져도 기록의 이름은 남아야 한다
-  adoptedAt: Iso;               // HI-OQ-01 추천: 이 시각이 '해결된 저녁'의 판정 근거
-  confirmDeadline: Iso;         // HI-R07: 생성 다음 날 12:00
-  confirm: { state: ConfirmState; at: Iso | null };
+  id: string; dateKey: DateOnly; decisionId: string;
+  itemKind: 'recipe' | 'delivery'; itemId: string; name: string;
+  branch: Branch; servings: number; costKrw: number | null; isEstimate: boolean;
+  recipeOpened: boolean;              // HI-OQ-01 추천: 북극성 분자의 조건
+  confirm: { state: 'confirmed' | 'unconfirmed' | 'expired'; at: Iso | null };
+  confirmDeadline: Iso;               // HI-R07
 }
 
+export const SCHEMA_VERSION = 2;      // 1 = v0 prototype-expo(Food 기반). 마이그레이션하지 않는다 (8.2)
+export const STORAGE_KEY = 'kkini.state';
 export interface KkiniState {
-  schemaVersion: number;
-  catalogVersion: string;
-  deviceSalt: string;           // 기기마다 다른 결정을 내기 위한 것
-  profile: Profile;
-  branchByDate: Record<KkiniDate, Branch>;   // MO-R04: 바뀐 갈래는 그날 안에서 유지된다
-  decisions: StoredDecision[];
-  rejections: Rejection[];
+  schemaVersion: number; catalogVersion: string;
+  profile: Profile; lastInputs: Inputs | null;
+  decisions: Decision[];              // 최근 60건만 보관 (8.1)
   mealLogs: MealLog[];
-  devFailMode: boolean;
+  devFailMode: boolean;               // 개발용 — 실패 상태 미리보기
 }
 
-export interface BlockedBy { branch: number; absolute: number; todayReject: number; recent: number }
-export type DecideResult =
-  | { kind: 'decision'; decision: StoredDecision; isNew: boolean }
-  | { kind: 'empty'; blockedBy: BlockedBy }
-  | { kind: 'error' };
-
-/* ── 상수 (architecture.md 3.2 Settings) ───────────────────── */
-
-export const SCHEMA_VERSION = 1;
-export const STORAGE_KEY = 'kkini.v1';
+/* ── 상수 ───────────────────────────────────────────────────── */
 
 export const SETTINGS = {
-  dayBoundaryHour: 4,             // KK-OQ-05 추천
-  dinnerWindow: [16, 23] as [number, number],   // KK-OQ-05 추천
-  recentWindowDays: 14,           // HI-OQ-02 추천 (C3)
-  rejectLimitPerDay: 5,           // DC-OQ-03 추천 (RE-R05)
-  minSampleForPersonalReason: 3,  // DC-R08 [제안]
-  topK: 12,                       // architecture 4.3 [제안] K
-  tau: 20                         // architecture 4.3 [제안] τ  ([미정 DC-OQ-07])
+  dayBoundaryHour: 4,                 // KK-OQ-05 추천
+  servingsDefault: 2, servingsMin: 1, servingsMax: 6,   // IN-OQ-03 추천
+  agedDays: 90,                       // CA-R04 / CA-OQ-01 추천
+  minSampleForPersonalReason: 3,      // DC-R11 [제안]
+  recentWindowCap: 10,                // architecture 5.1: min(floor(레시피수/2), 10)
+  maxDecisions: 60,                   // 8.1
+  weightOverBudget: 0.35,             // 5.2 [제안] 예산 초과는 감점이지 제외가 아니다
+  weightDislike: 0.4,
+  weightEatenBase: 0.5,
+  weightLateSlow: 0.5,                // 5.2 마지막 줄 — 사람이 말하지 않은 축 [미정]
+  weightFloor: 0.02
 };
 
-export const BRANCH_LABEL: Record<Branch, string> = {
-  home: '해 먹기', out: '나가서 먹기', delivery: '배달·포장'
-};
-export const ACTIVE_BRANCHES: Branch[] = ['home', 'out'];   // KK-OQ-02 추천: C(배달)는 MVP 밖
-
-// 예산 등급별 1인 상한 (원) — architecture 3.2: 금액을 카탈로그에 박지 않는다
-export const TIER_KRW: Record<number, number> = { 1: 9000, 2: 16000, 3: 28000 };
-
+export const BRANCH_LABEL: Record<Branch, string> = { home: '해 먹기', delivery: '시켜 먹기' };
+export const BRANCHES: Branch[] = ['home', 'delivery'];   // MO-R01: 정확히 2개
+export const BUDGET_CHOICES = [10000, 15000, 20000, 30000, 50000];
 export const ALLERGENS = ['계란', '우유', '밀', '대두', '땅콩', '견과류', '갑각류', '조개류',
   '생선', '돼지고기', '소고기', '닭고기', '복숭아', '토마토'];
-
-export const DISLIKE_TAGS = ['국물', '면', '밥', '고기', '해산물', '채소', '분식', '한식',
-  '중식', '일식', '양식', '튀김', '구이', '볶음', '찜', '전', '조림', '나물', '죽', '간편'];
-
-/* 안정 testID·key를 위한 로마자 슬러그 (HTML 판의 id와 같은 값을 쓴다) */
 export const ALLERGEN_SLUG: Record<string, string> = {
   '계란': 'egg', '우유': 'milk', '밀': 'wheat', '대두': 'soy', '땅콩': 'peanut',
   '견과류': 'nuts', '갑각류': 'crustacean', '조개류': 'shellfish', '생선': 'fish',
   '돼지고기': 'pork', '소고기': 'beef', '닭고기': 'chicken', '복숭아': 'peach', '토마토': 'tomato'
 };
+export const DISLIKE_TAGS = ['한식', '중식', '일식', '양식', '분식', '국물', '면', '밥',
+  '고기', '해산물', '채소', '볶음', '구이', '전', '조림', '튀김', '치킨', '피자', '간편'];
 export const TAG_SLUG: Record<string, string> = {
+  '한식': 'hansik', '중식': 'jungsik', '일식': 'ilsik', '양식': 'yangsik', '분식': 'bunsik',
   '국물': 'gukmul', '면': 'myeon', '밥': 'bap', '고기': 'gogi', '해산물': 'haesanmul',
-  '채소': 'chaeso', '분식': 'bunsik', '한식': 'hansik', '중식': 'jungsik', '일식': 'ilsik',
-  '양식': 'yangsik', '튀김': 'twigim', '구이': 'gui', '볶음': 'bokkeum', '찜': 'jjim',
-  '전': 'jeon', '조림': 'jorim', '나물': 'namul', '죽': 'juk', '간편': 'ganpyeon'
+  '채소': 'chaeso', '볶음': 'bokkeum', '구이': 'gui', '전': 'jeon', '조림': 'jorim',
+  '튀김': 'twigim', '치킨': 'chicken', '피자': 'pizza', '간편': 'ganpyeon'
 };
 
-/* requirements 6.6 상태 어휘 표 — 모든 화면이 같은 말을 쓴다. 문구를 여기서만 정의한다 */
+/* requirements.md v1 6.9 상태 어휘 + ux/flows.md 6절 문구 표 — 문구를 여기서만 정의한다 */
 export const COPY = {
-  dcHeaderProposed: '오늘 저녁 추천',                       // DC-R09
-  dcLoading: '고르는 중',                                   // DC-R05 / 6.6
-  dcLoadingSub: '조건을 맞춰 보고 있다',
-  dcError: '지금은 정해줄 수 없다',                          // DC-R06 / 6.6
-  dcErrorSub: '조금 뒤에 다시 눌러 보면 된다',
-  dcErrorRetry: '재시도',                                   // flows 문구 표
-  dcEmpty: '조건에 맞는 게 없다',                            // DC-R07 / 6.6
-  dcEmptySub: '절대 제외는 후보가 0개가 되어도 풀지 않는다',
-  dcEmptyLink: '조건 고치기',                                // flows 문구 표
-  dcNoRule: '특별한 이유는 없다 — 그냥 오늘의 하나',          // DC-R03 원문
-  dcLowSample: '아직 취향을 모른다 — 오늘은 무작위로 골랐다',  // DC-R08 / 6.6 · review #1 처리
-  dcDecidedNote: '오늘 결정은 끝났다. 먹은 뒤 기록 화면에서 확인할 수 있다',
-  moInactive: '아직 없음',                                  // MO-R03
-  moPremiseHome: '집에 재료가 있다는 전제예요',               // MO-R05 · review #3 처리
-  prUnset: '아직 입력 안 함',                                // PR-R03 / PR-OQ-02
-  hiEmpty: '아직 기록이 없다',                               // HI-R04 / 6.6
-  hiEmptySub: '카드에서 "이걸로 먹었다"를 누르면 여기에 쌓인다',
-  hiUnconfirmed: '확인 안 됨',                               // HI-R02 / 6.6
+  // IN
+  inTitle: '오늘 저녁, 어떻게 할까',
+  inBranch: '갈래', inServings: '인분', inBudget: '예산', inAddress: '집주소',
+  inEmpty: '아직 입력 안 함',                                  // IN-R09
+  inLastValue: '(지난번 값)',                                  // [제안] IN-R08
+  inSubmit: '돌리기',                                          // [제안]
+  inAddressHelp: '배달 가능한 매장을 거르는 데만 써요',          // [제안] IN-R11
+  inAddressNone: '주소를 아직 몰라요',                          // 6.9
+  inBudgetHelp: '해 먹기 예산은 재료비 기준이에요',              // IN-R04
+  // DC
+  dcLoading: '고르는 중',                                      // DC-R05 / 6.9
+  dcError: '지금은 정해줄 수 없다',                             // DC-R06 / 6.9
+  dcErrorRetry: '다시 시도',                                   // [제안]
+  dcEmpty: '조건에 맞는 게 없다',                               // DC-R07 / 6.9
+  dcEmptyLink: '조건 고치기',                                   // [제안]
+  dcLowSample: '아직 취향을 모른다',                            // DC-R11 / 6.9
+  dcNoRule: '아직 취향을 몰라서 오늘은 무작위로 골랐다',          // DC-OQ-06 추천
+  dcWithin: '예산 안',                                         // DC-R08
+  dcEstimate: '추정',                                          // DC-R09 / RC-R05
+  dcRecipe: '레시피 보기',                                      // [제안] DC-R10
+  dcDraftBadge: '검수 전 초안',                                 // RC-R09 편차 (README 참조)
+  // RE / HI
+  reRoll: '다시 돌리기',                                       // RE-R01, 답5 원문
+  hiConfirm: '이걸로 먹었다',                                   // HI-R01 원문
+  hiEmpty: '아직 기록이 없다',                                  // HI-R04 / 6.9
+  hiUnconfirmed: '확인 안 됨',                                  // HI-R02 / 6.9
   hiConfirmed: '확인됨',
-  reReject: '다시 뽑기',                                     // flows 문구 표
-  reLimit: '오늘은 여기까지 — 다시 뽑기 5회를 다 썼다',        // flows 문구 표 (RE-R05, [미정 RE-OQ-01])
-  reSheetTitle: '왜 이 음식은 아닌가',
-  reSkip: '건너뛰기',                                        // flows 문구 표
-  hiAdopt: '이걸로 먹었다',                                  // HI-R01 원문
-  coldHint: '못 먹는 음식이 있으면 먼저 알려주세요 →',        // PR-OQ-02 추천
+  hiDelete: '삭제',                                            // [제안] HI-R06
+  // RC
+  rcTotal: '합계',                                             // [제안]
+  rcBuyNote: '없는 재료는 사야 해요',                            // [제안] RC-R10
+  rcBack: '뒤로',
+  rcOptional: '선택',
+  rcPantry: '양념',
+  rcWait: '대기',
+  // MO
+  moNoFilter: '주소로 매장을 걸러주지는 못해요',                  // MO-R07 / 6.9
+  moPriceLabel: '예상 가격대',                                  // MO-R06
+  moNoRecipe: '레시피는 없어요 — 바로 시켜 먹는 메뉴예요',        // [제안] MO-R09
+  moOpenApp: '배달앱에서 찾기',                                  // MO-OQ-04 추천
+  // PR
+  prUnset: '아직 입력 안 함',                                   // PR-R04 / PR-OQ-02 추천
   storageFail: '저장이 되지 않는다 — 이 화면은 보이지만 기록은 남지 않는다'
 };
 
-export const REJECT_REASONS: { code: RejectionReason | null; label: string }[] = [
-  { code: 'not_today', label: '오늘은 아님' },              // RE-R03: 사유 4종
-  { code: 'ate_recently', label: '최근에 먹음' },
-  { code: 'dislike', label: '안 좋아함' },
-  { code: 'cannot_cook_now', label: '지금은 못 만듦' },
-  { code: null, label: COPY.reSkip }                        // 건너뛰기
-];
+/* ux/flows.md 6절 이유 줄 예시 5개 — DC-R03: 적용된 규칙을 그대로 옮긴 문장만 쓴다 */
+const REASON = {
+  withinBudget: '재료비가 입력한 예산 안에 들어와서 골랐다',
+  recentAvoided: '최근 며칠 안에 안 먹은 메뉴라서 골랐다',
+  branchHome: '오늘 갈래가 해 먹기라서 레시피 중에서 골랐다',
+  branchDelivery: '오늘 갈래가 시켜 먹기라서 배달 메뉴 중에서 무작위로 골랐다'
+};
 
-export const WEEKDAY_NAME = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
-
-/* architecture 4.5 — 규칙 코드별 문구. 승자에 붙은 가점 규칙만 후보다 */
-export function phraseOf(rule: AppliedRule, now: Date): string {
-  switch (rule.code) {
-    case 'season':  return '요즘 계절에 맞는 걸로 골랐다';
-    case 'weekday': return WEEKDAY_NAME[now.getDay()] + '에 어울리는 걸로 골랐다';
-    case 'late':    return '지금 시각에도 무리 없는 걸로 골랐다';
-    case 'budget':  return '정해 둔 예산 안에서 골랐다';
-    case 'cook':    return '직접 해 먹을 수 있다고 저장해 둬서 그쪽으로 골랐다';
-    default:        return COPY.dcNoRule;
-  }
+/* ux/flows.md 3절 애니메이션 명세 — 값의 출처와 편차는 README에 적었다 */
+// ux/flows.md 3절의 세 숫자(1단계 360ms · 교체 간격 60→70→90→120→160→220ms(합 720ms) · 상한 700ms)는
+// 서로 산술이 맞지 않는다. 프로토타입은 표가 정의한 단계 길이(1단계 360ms·2단계 220ms·3단계 120ms,
+// 겹침 50ms → 합 650ms ≤ 700ms)를 지키는 쪽을 골랐고, 간격 목록은 그 안에 들어오는 앞 네 개만 썼다.
+// 220ms는 같은 표가 2단계(착지) 길이로 정의한 값이라 착지에 쓴다. 160ms는 쓰지 않는다 → README 미정.
+export const ANIM = {
+  loadingMs: 200,                                  // 0단계 (명세 200~600ms)
+  cycleIntervals: [60, 70, 90, 120],               // 1단계 슬롯 교체 간격 (합 340ms ≈ 명세 360ms)
+  landingMs: 220,                                  // 2단계 스프링 착지
+  detailMs: 120, detailOverlapMs: 50,              // 3단계 (2단계와 50ms 겹침)
+  reducedMs: 150                                   // reduce-motion 대체 (사이클링·3단계 생략)
+};
+export function animTotalMs(reduced: boolean): number {
+  if (reduced) return ANIM.reducedMs;
+  const cycle = ANIM.cycleIntervals.reduce((a, b) => a + b, 0);
+  return cycle + ANIM.landingMs + (ANIM.detailMs - ANIM.detailOverlapMs);
 }
 
 /* ── 유틸 ───────────────────────────────────────────────────── */
 
 function pad2(n: number): string { return n < 10 ? '0' + n : '' + n; }
 export function iso(d: Date): Iso { return d.toISOString(); }
-export function uid(prefix: string): string {
-  return prefix + '-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1e6).toString(36);
+export function uid(p: string): string {
+  return p + '-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1e6).toString(36);
 }
-
 /* C1 하루 1건의 키. 하루 경계 04:00 (KK-OQ-05 추천) */
-export function kkiniDate(d: Date): KkiniDate {
+export function dateKey(d: Date): DateOnly {
   const t = new Date(d.getTime() - SETTINGS.dayBoundaryHour * 3600000);
   return t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate());
 }
-export function todayKey(): KkiniDate { return kkiniDate(new Date()); }
-
-function dateFromKkini(s: KkiniDate): Date {
-  const p = s.split('-');
-  return new Date(+p[0], +p[1] - 1, +p[2]);
-}
-export function dayDiff(a: KkiniDate, b: KkiniDate): number {   // b - a, 일 단위
-  return Math.round((dateFromKkini(b).getTime() - dateFromKkini(a).getTime()) / 86400000);
-}
-export function seasonOf(d: Date): Season {
-  const m = d.getMonth() + 1;
-  if (m >= 3 && m <= 5) return '봄';
-  if (m >= 6 && m <= 8) return '여름';
-  if (m >= 9 && m <= 11) return '가을';
-  return '겨울';
-}
-/* HI-R07: 결정 생성 다음 날 정오 */
-export function nextNoon(d: Date): Date {
+export function todayKey(): DateOnly { return dateKey(new Date()); }
+export function nextNoon(d: Date): Date {           // HI-R07
   const t = new Date(d.getTime());
   t.setDate(t.getDate() + 1);
   t.setHours(12, 0, 0, 0);
   return t;
 }
-/* "<음식>으로/로 정했다" 조사 — 종성 없거나 ㄹ이면 '로' */
-export function ro(name: string): string {
-  const c = name.charCodeAt(name.length - 1);
-  if (c < 0xac00 || c > 0xd7a3) return '로';
-  const jong = (c - 0xac00) % 28;
-  return (jong === 0 || jong === 8) ? '로' : '으로';
+/* Hermes의 Intl 지원에 기대지 않고 직접 천 단위 콤마를 넣는다 */
+export function comma(n: number): string {
+  const neg = n < 0;
+  const s = String(Math.abs(Math.round(n)));
+  let out = '';
+  for (let i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 === 0) out += ',';
+    out += s[i];
+  }
+  return (neg ? '-' : '') + out;
+}
+export function round10(n: number): number { return Math.round(n / 10) * 10; }
+
+/* ux/flows.md 6절 재료비 표기 형식 */
+export function money(krw: number, isEstimate: boolean): string {
+  return isEstimate ? `약 ${comma(krw)}원 · ${COPY.dcEstimate}` : `${comma(krw)}원`;
+}
+export function moneyShort(krw: number, isEstimate: boolean): string {
+  return isEstimate ? `${comma(krw)}원 ${COPY.dcEstimate}` : `${comma(krw)}원`;
+}
+export function priceRange(low: number, high: number): string {
+  return `${comma(low)}~${comma(high)}원대`;
+}
+export function overBudgetText(budget: number): string { return `예산 ${comma(budget)}원 초과`; }
+
+export function unset<T>(): Answered<T> { return { status: 'unset' }; }
+export function declared<T>(v: T): Answered<T> { return { status: 'declared', value: v }; }
+export function answeredOr<T>(a: Answered<T>, fallback: T): T {
+  return a.status === 'declared' ? a.value : fallback;
 }
 
-/* architecture 4.4 — 결정론. Math.random()을 결정 경로에 넣지 않는다 */
-export function xmur3(str: string): () => number {
-  let h = 1779033703 ^ str.length;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
+/* ── 재료비 계산 (architecture 4절) ────────────────────────── */
+
+/* 4.1 환산: 재료별 예외가 기본표를 이긴다 */
+export function findConversion(units: UnitTable, ingredientId: string, unit: RecipeUnit): UnitConversion | null {
+  for (const o of units.overrides) if (o.ingredientId === ingredientId && o.unit === unit) return o;
+  for (const b of units.base) if (b.unit === unit) return b;
+  return null;
+}
+
+/* 4.3 ceilPractical — "1인분 0.5개"를 데이터가 아니라 함수가 처리하는 자리다 */
+export function ceilPractical(qty: number, unit: RecipeUnit): number {
+  if (unit === 'g' || unit === 'ml') return Math.ceil(qty / 5) * 5;
+  if (unit === '큰술' || unit === '작은술' || unit === '컵') return Math.ceil(qty * 2) / 2;
+  return Math.ceil(qty);                            // 개·쪽·장·마리·대·줌은 정수 올림
+}
+export function scaleQty(item: RecipeIngredient, base: number, servings: number): number {
+  if (item.scaling === 'fixed') return item.qty;    // 인분과 무관 (팬 코팅용 기름 등)
+  if (servings === base) return item.qty;           // 편차: 기준 인분에서는 작성자가 쓴 양이 이미 실용 단위다
+  return ceilPractical((item.qty * servings) / base, item.unit);
+}
+
+export function isAged(asOf: DateOnly, now: Date): boolean {   // CA-R04
+  const t = Date.parse(asOf + 'T00:00:00Z');
+  if (isNaN(t)) return true;
+  return (now.getTime() - t) / 86400000 > SETTINGS.agedDays;
+}
+
+/* 4.2 의사코드 그대로: 환산 → 소계 → 합계. 소계에서 10원 반올림한다 */
+export function cost(
+  recipe: Recipe, servings: number, ingredients: Ingredient[], units: UnitTable, now: Date
+): CostBreakdown {
+  const byId: Record<string, Ingredient> = {};
+  for (const i of ingredients) byId[i.id] = i;
+
+  const lines: CostLine[] = [];
+  const reasons: Record<string, boolean> = {};
+
+  for (const item of recipe.ingredients) {
+    const ing = byId[item.ingredientId];
+    const qty = scaleQty(item, recipe.servingsBase, servings);
+    if (!ing) {
+      // 7.2 검증에서 이미 막혔어야 한다. 런타임에 여기 오면 계산 불가 → 추정으로 남기고 0원 처리
+      lines.push({
+        ingredientId: item.ingredientId, name: item.ingredientId, qty, unit: item.unit,
+        unitPriceText: '단가 없음', subtotalKrw: 0, isEstimate: true,
+        optional: !!item.optional, pantry: false
+      });
+      reasons['단가추정'] = true;
+      continue;
+    }
+    const unitPriceText = `${comma(ing.purchaseQty)}${ing.purchaseUnit} ${comma(ing.priceKrw)}원`;
+    let convEstimate = false;
+    let subtotal = 0;
+
+    if (item.unit === ing.purchaseUnit) {
+      subtotal = round10((qty / ing.purchaseQty) * ing.priceKrw);   // 같은 단위 — 환산 없음
+    } else {
+      const conv = findConversion(units, item.ingredientId, item.unit);
+      if (!conv) {
+        convEstimate = true;
+        reasons['환산추정'] = true;
+      } else {
+        convEstimate = conv.isEstimate;
+        if (conv.isEstimate) reasons['환산추정'] = true;
+        let amount = qty * conv.factor;     // conv.base 단위의 양
+        let base: 'g' | 'ml' = conv.base;
+        if (base !== ing.purchaseUnit) {
+          // ml ↔ g 환산 — gramsPerMl이 없으면 계산 불가 (검증이 막는다)
+          if (ing.gramsPerMl) {
+            amount = base === 'ml' ? amount * ing.gramsPerMl : amount / ing.gramsPerMl;
+            base = base === 'ml' ? 'g' : 'ml';
+          } else {
+            convEstimate = true;
+            reasons['환산추정'] = true;
+          }
+        }
+        subtotal = round10((amount / ing.purchaseQty) * ing.priceKrw);
+      }
+    }
+
+    if (ing.isEstimate) reasons['단가추정'] = true;
+    if (isAged(ing.asOf, now)) reasons['기준일경과'] = true;
+
+    lines.push({
+      ingredientId: ing.id, name: ing.name, qty, unit: item.unit, unitPriceText,
+      subtotalKrw: subtotal,
+      isEstimate: ing.isEstimate || convEstimate || isAged(ing.asOf, now),
+      optional: !!item.optional,          // 4.4: optional은 소계에서 제외한다
+      pantry: !!ing.pantry                // 4.4: pantry는 계산에서 빼지 않는다
+    });
   }
-  return function () {
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    h ^= h >>> 16;
-    return h >>> 0;
+
+  let total = 0;
+  for (const l of lines) if (!l.optional) total += l.subtotalKrw;
+  const isEstimate = lines.some((l) => !l.optional && l.isEstimate);
+  return {
+    lines, totalKrw: total, isEstimate,
+    estimateReasons: Object.keys(reasons) as EstimateReason[]
   };
 }
+
+/* 4.5 예산 판정 (C12) — DC-OQ-08 추천: 총액 비교, 허용폭 0 */
+export function verdict(totalKrw: number, budget: Answered<number>): BudgetVerdict {
+  if (budget.status !== 'declared') return 'unknown';   // IN-R10: 판정 문구를 쓰지 않는다
+  return totalKrw <= budget.value ? 'within' : 'over';
+}
+
+/* ── 결정론 난수 (v0에서 살린다) ───────────────────────────── */
+
 export function mulberry32(a: number): () => number {
   return function () {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
@@ -269,70 +398,227 @@ export function mulberry32(a: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+export function randomSeed32(): number {
+  // 5.3: 매 뽑기마다 새 시드. 하루 시드가 아니다 (DC-OQ-03 폐기)
+  return Math.floor(Math.random() * 0xffffffff) >>> 0;
+}
+export function weightedRandom<T>(items: T[], weights: number[], rng: () => number): T {
+  let total = 0;
+  for (const w of weights) total += w;
+  if (!(total > 0)) return items[0];
+  let r = rng() * total;
+  for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
+  return items[items.length - 1];
+}
 
-/* ── 상태 만들기·조회 ───────────────────────────────────────── */
+/* ── 뽑기 엔진 (architecture 5절) ──────────────────────────── */
 
-export function unset<T>(): Answered<T> { return { status: 'unset' }; }
-export function declared<T>(v: T): Answered<T> { return { status: 'declared', value: v }; }
+export interface BlockedBy { branch: number; absolute: number; servings: number; recent: number }
+export type DrawResult =
+  | { kind: 'decision'; decision: Decision }
+  | { kind: 'empty'; blockedBy: BlockedBy }
+  | { kind: 'error' };
+
+export interface DrawContext {
+  recipes: Recipe[]; menus: DeliveryMenu[];
+  ingredients: Ingredient[]; units: UnitTable;
+  profile: Profile; inputs: Inputs;
+  logs: MealLog[]; recentIds: string[];
+  catalogVersion: string; now: Date;
+}
+
+export function recentWindow(recipeCount: number): number {
+  // architecture 5.1: min(floor(레시피수/2), 10) — 개수가 줄어도 후보가 0이 되지 않게 상한을 둔다
+  return Math.max(1, Math.min(Math.floor(recipeCount / 2), SETTINGS.recentWindowCap));
+}
+
+function eatenCount(logs: MealLog[], itemId: string, now: Date): number {
+  const cut = now.getTime() - 30 * 86400000;
+  return logs.filter((m) => m.itemId === itemId && Date.parse(m.confirm.at || m.confirmDeadline) >= cut).length;
+}
+
+export function draw(ctx: DrawContext): DrawResult {
+  const { profile, inputs, now } = ctx;
+  const branch = inputs.branch;
+  const blocked: BlockedBy = { branch: 0, absolute: 0, servings: 0, recent: 0 };
+
+  const excl = profile.absoluteExclusions.status === 'declared' ? profile.absoluteExclusions.value : null;
+  const window = recentWindow(ctx.recipes.length);
+  const recent = ctx.recentIds.slice(0, window);
+
+  type Cand = {
+    id: string; name: string; tags: string[]; allergens: string[];
+    kind: 'recipe' | 'delivery'; recipe?: Recipe; menu?: DeliveryMenu;
+    cookMinutes: number | null; servingsMax: number;
+  };
+
+  // 1단계 "사용 가능": !retiredAt && reviewedAt 존재 (RC-R09)
+  //   편차 — 프로토타입의 레시피는 전부 reviewedAt: null(검수 전)이라 이 조건을 지키면 후보가 0이 된다.
+  //   그래서 여기서는 retiredAt만 보고, 대신 카드·레시피에 "검수 전 초안" 배지를 항상 띄운다 (README 편차).
+  //   1단계는 사용자 조건이 아니므로 blockedBy에 세지 않는다.
+  const all: Cand[] = branch === 'home'
+    ? ctx.recipes.filter((r) => !r.retiredAt).map((r) => ({
+        id: r.id, name: r.name, tags: r.tags, allergens: r.allergens,
+        kind: 'recipe' as const, recipe: r,
+        cookMinutes: r.cookMinutes, servingsMax: r.servingsMax ?? SETTINGS.servingsMax
+      }))
+    : ctx.menus.filter((m) => !m.retiredAt).map((m) => ({
+        id: m.id, name: m.name, tags: m.tags, allergens: m.allergens,
+        kind: 'delivery' as const, menu: m,
+        cookMinutes: null, servingsMax: SETTINGS.servingsMax
+      }));
+
+  // 2단계 갈래 (MO-R01) — 후보 풀 자체를 갈래로 골랐으므로 레시피의 branches만 한 번 더 본다
+  let pool = all.filter((c) => (c.kind === 'recipe' ? c.recipe!.branches.indexOf(branch) >= 0 : true));
+  blocked.branch = all.length - pool.length;
+
+  // 3단계 절대 제외 (PR-R02) — 0개가 되어도 풀지 않는다 (DC-OQ-05 추천)
+  if (excl && excl.length) {
+    const before = pool.length;
+    pool = pool.filter((c) => !c.allergens.some((a) => excl.indexOf(a) >= 0));
+    blocked.absolute = before - pool.length;
+  }
+
+  // 4단계 인분 가능 범위
+  const b3 = pool.length;
+  pool = pool.filter((c) => inputs.servings <= c.servingsMax);
+  blocked.servings = b3 - pool.length;
+
+  // 5단계 직전 결과 연속 금지 (RE-R03, C3)
+  const b4 = pool.length;
+  pool = pool.filter((c) => recent.indexOf(c.id) < 0);
+  blocked.recent = b4 - pool.length;
+
+  if (!pool.length) return { kind: 'empty', blockedBy: blocked };   // DC-R07
+
+  // 재료비·가격대를 먼저 구한다 — 가중치가 예산 판정을 본다
+  const costs: Record<string, CostBreakdown | undefined> = {};
+  const verdicts: Record<string, BudgetVerdict> = {};
+  for (const c of pool) {
+    if (c.kind === 'recipe') {
+      const cb = cost(c.recipe!, inputs.servings, ctx.ingredients, ctx.units, now);
+      costs[c.id] = cb;
+      verdicts[c.id] = verdict(cb.totalKrw, inputs.budgetKrw);
+    } else {
+      // 4.5: 시켜 먹기는 값이 범위다 → 하단으로 판정하고 화면에는 범위를 쓴다
+      verdicts[c.id] = verdict(c.menu!.priceLowKrw * inputs.servings, inputs.budgetKrw);
+    }
+  }
+
+  // 5.2 가중치 — 예산 초과는 감점이지 제외가 아니다 (PR-R03)
+  const dislikes = profile.dislikes.status === 'declared' ? profile.dislikes.value : [];
+  const hour = now.getHours();
+  const weights = pool.map((c) => {
+    let w = 1.0;
+    if (verdicts[c.id] === 'over') w *= SETTINGS.weightOverBudget;
+    if (dislikes.length && c.tags.some((t) => dislikes.indexOf(t) >= 0)) w *= SETTINGS.weightDislike;
+    w *= Math.pow(SETTINGS.weightEatenBase, eatenCount(ctx.logs, c.id, now));
+    // 사람이 말하지 않은 축이다 (architecture 5.2 마지막 줄) — 뺄 수 있게 한 줄로 격리한다
+    if (hour >= 20 && c.cookMinutes !== null && c.cookMinutes > 40) w *= SETTINGS.weightLateSlow;
+    return Math.max(w, SETTINGS.weightFloor);
+  });
+
+  // 5.3 선택 — 무작위. 상위 K 절단과 softmax(v0)는 쓰지 않는다
+  const seed = randomSeed32();
+  const pick = weightedRandom(pool, weights, mulberry32(seed));
+
+  const confirmed = ctx.logs.filter((m) => m.confirm.state === 'confirmed').length;
+  const v = verdicts[pick.id];
+  const cb = costs[pick.id];
+
+  const reason = buildReason({
+    branch, verdict: v, hasLogs: ctx.logs.length > 0
+  });
+  // architecture 5.4: DC-R11은 이유 줄이 아니라 카드 보조 줄로 내린다
+  const subNote = confirmed < SETTINGS.minSampleForPersonalReason ? COPY.dcLowSample : null;
+
+  const decision: Decision = pick.kind === 'recipe'
+    ? {
+        id: uid('dec'), itemKind: 'recipe', itemId: pick.id, name: pick.name,
+        branch, servings: inputs.servings, reason, subNote,
+        costKrw: cb ? cb.totalKrw : null, cost: cb,
+        cookMinutes: pick.cookMinutes,
+        budgetVerdict: v, isEstimate: cb ? cb.isEstimate : true,
+        createdAt: iso(now), shownAt: null, status: 'proposed',
+        seed, catalogVersion: ctx.catalogVersion,
+        reviewed: !!pick.recipe!.reviewedAt
+      }
+    : {
+        id: uid('dec'), itemKind: 'delivery', itemId: pick.id, name: pick.name,
+        branch, servings: inputs.servings, reason, subNote,
+        costKrw: pick.menu!.priceLowKrw * inputs.servings,
+        priceRangeKrw: [pick.menu!.priceLowKrw * inputs.servings, pick.menu!.priceHighKrw * inputs.servings],
+        cookMinutes: null,
+        // ux/flows.md 4절 MO: 예산 판정·추정 배지를 쓰지 않는다 ("예상 가격대"가 이미 추정성을 말한다).
+        // DC-R08과 어긋나는 지점이라 README 미정에 올렸다.
+        budgetVerdict: 'unknown', isEstimate: true,
+        createdAt: iso(now), shownAt: null, status: 'proposed',
+        seed, catalogVersion: ctx.catalogVersion,
+        reviewed: true   // 배달 메뉴에는 레시피 본문이 없어 검수 대상이 아니다
+      };
+
+  return { kind: 'decision', decision };
+}
+
+/* 5.4 이유 한 줄 (DC-R03) — ux/flows.md 6절의 예시 문장만 쓴다. 지어내지 않는다 */
+export function buildReason(a: { branch: Branch; verdict: BudgetVerdict; hasLogs: boolean }): string {
+  if (a.branch === 'delivery') return REASON.branchDelivery;      // MO-R05
+  if (a.verdict === 'within') return REASON.withinBudget;         // DC-R08
+  if (a.hasLogs) return REASON.recentAvoided;                     // HI-OQ-02 추천 창
+  return REASON.branchHome;                                       // MO-R01 갈래 필터
+  // COPY.dcNoRule(DC-OQ-06 추천)은 v1에서 도달하지 않는다 — architecture 5.4가 예고한 결과다
+}
+
+/* ── 상태 헬퍼 ──────────────────────────────────────────────── */
 
 export function freshState(catalogVersion: string): KkiniState {
-  // deviceSalt가 없으면 모든 기기가 같은 날 같은 음식을 받는다 (architecture 4.4)
-  const salt = 'salt-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
   return {
     schemaVersion: SCHEMA_VERSION,
     catalogVersion,
-    deviceSalt: salt,
     profile: {
-      absoluteExclusions: unset<string[]>(),
-      dislikes: unset<string[]>(),
-      budgetMaxKrw: unset<number>(),
-      canCook: unset<boolean>(),
-      partySize: unset<number>(),
-      updatedAt: iso(new Date())
+      absoluteExclusions: unset<string[]>(), dislikes: unset<string[]>(),
+      defaultBudgetKrw: unset<number>(), defaultServings: unset<number>(),
+      address: unset<string>(), updatedAt: iso(new Date())
     },
-    branchByDate: {},
-    decisions: [],
-    rejections: [],
-    mealLogs: [],
-    devFailMode: false
+    lastInputs: null,
+    decisions: [], mealLogs: [], devFailMode: false
   };
 }
 
-export function currentBranch(state: KkiniState, day: KkiniDate = todayKey()): Branch {
-  const b = state.branchByDate[day];
-  return ACTIVE_BRANCHES.indexOf(b) >= 0 ? b : 'home';   // KK-OQ-01 추천: 앱이 정한다
+export function latestDecision(state: KkiniState): Decision | null {
+  return state.decisions.length ? state.decisions[state.decisions.length - 1] : null;
 }
-export function savedDecision(state: KkiniState, day: KkiniDate, branch: Branch): StoredDecision | null {
+/* HI-OQ-02 추천: 카드에 나온 것 전부를 최근 목록으로 본다 (최신 우선) */
+export function recentItemIds(state: KkiniState): string[] {
+  const ids: string[] = [];
   for (let i = state.decisions.length - 1; i >= 0; i--) {
-    const d = state.decisions[i];
-    if (d.kkiniDate === day && d.branch === branch &&
-        (d.status === 'proposed' || d.status === 'adopted')) return d;
+    const id = state.decisions[i].itemId;
+    if (ids.indexOf(id) < 0) ids.push(id);
   }
-  return null;
+  return ids;
 }
-export function adoptedToday(state: KkiniState, day: KkiniDate = todayKey()): StoredDecision | null {
-  for (const d of state.decisions) {
-    if (d.kkiniDate === day && d.status === 'adopted') return d;
+export function pushDecision(state: KkiniState, d: Decision): void {
+  state.decisions.push(d);
+  if (state.decisions.length > SETTINGS.maxDecisions) {
+    state.decisions = state.decisions.slice(-SETTINGS.maxDecisions);   // 8.1
   }
-  return null;
 }
-export function rejectionsToday(state: KkiniState, day: KkiniDate = todayKey()): Rejection[] {
-  return state.rejections.filter((r) => r.kkiniDate === day);
+export function makeMealLog(d: Decision, recipeOpened: boolean, now: Date): MealLog {
+  return {
+    id: uid('log'), dateKey: dateKey(now), decisionId: d.id,
+    itemKind: d.itemKind, itemId: d.itemId, name: d.name,
+    branch: d.branch, servings: d.servings, costKrw: d.costKrw, isEstimate: d.isEstimate,
+    recipeOpened,                                  // HI-OQ-01 추천
+    confirm: { state: 'unconfirmed', at: null },   // HI-R02: 미확인으로 시작
+    confirmDeadline: iso(nextNoon(new Date(d.createdAt)))   // HI-R07
+  };
 }
-export function confirmedLogCount(state: KkiniState): number {
-  return state.mealLogs.filter((m) => m.confirm.state === 'confirmed').length;
-}
-export function foodById(catalog: Food[], id: string): Food | null {
-  for (const f of catalog) if (f.id === id) return f;
-  return null;
-}
-
-/* HI-R07 기한이 지난 미확인 건은 판정 불가로 굳는다. 화면 문구는 그대로 "확인 안 됨"(6.6) */
+/* HI-R07 기한이 지난 미확인 건은 판정 불가로 굳는다. 문구는 그대로 "확인 안 됨"(6.9) */
 export function sweepExpired(state: KkiniState): boolean {
   const now = Date.now();
   let changed = false;
   for (const m of state.mealLogs) {
-    if (m.confirm.state === 'unconfirmed' && now > new Date(m.confirmDeadline).getTime()) {
+    if (m.confirm.state === 'unconfirmed' && now > Date.parse(m.confirmDeadline)) {
       m.confirm.state = 'expired';
       changed = true;
     }
@@ -340,212 +626,29 @@ export function sweepExpired(state: KkiniState): boolean {
   return changed;
 }
 
-/* ── 추천 로직 v0 — architecture 4.2 의사코드 ───────────────── */
-
-export function decide(
-  catalog: Food[], state: KkiniState, branch: Branch, now: Date
-): DecideResult {
-  const today = kkiniDate(now);
-
-  // 0. 하루 1건 고정 (C1, DC-OQ-03 추천) — 다시 열어도 같은 카드. 계산 자체를 하지 않는다
-  const saved = savedDecision(state, today, branch);
-  if (saved) return { kind: 'decision', decision: saved, isNew: false };
-
-  // 1. 후보 필터 — 순서 고정. 이 순서가 blockedBy 숫자의 의미를 정한다 (DC-R07)
-  //    review #6: 실제로 세는 것은 갈래·절대 제외·오늘 거절·최근 먹음 네 개뿐이다.
-  //    (ux/flows.md 와이어프레임의 "예산 초과"·"조리 불가"는 필터가 아니라 점수 가감이라 셀 수 없다)
-  const blocked: BlockedBy = { branch: 0, absolute: 0, todayReject: 0, recent: 0 };
-  let c = catalog.filter((f) => f.branches.indexOf(branch) >= 0 && !f.retiredAt);
-  blocked.branch = catalog.length - c.length;
-
-  const excl = state.profile.absoluteExclusions;
-  if (excl.status === 'declared') {   // PR-R02: 0개가 되어도 풀지 않는다 (DC-OQ-05 추천)
-    const before = c.length;
-    c = c.filter((f) => !f.allergens.some((a) => excl.value.indexOf(a) >= 0));
-    blocked.absolute = before - c.length;
-  }
-
-  const rejToday: Record<string, boolean> = {};
-  for (const r of rejectionsToday(state, today)) rejToday[r.foodId] = true;
-  const b1 = c.length;
-  c = c.filter((f) => !rejToday[f.id]);   // RE-R02: 같은 날 재등장 없음
-  blocked.todayReject = b1 - c.length;
-
-  const recent: Record<string, boolean> = {};   // C3 / HI-OQ-02 추천: 채택 + 확인된 섭취, 창 14일
-  for (const m of state.mealLogs) {
-    if (dayDiff(m.kkiniDate, today) < SETTINGS.recentWindowDays) recent[m.foodId] = true;
-  }
-  const b2 = c.length;
-  c = c.filter((f) => !recent[f.id]);
-  blocked.recent = b2 - c.length;
-
-  if (!c.length) return { kind: 'empty', blockedBy: blocked };   // DC-R07
-
-  // 2. 점수 — 감점은 이유 줄에 쓰지 않는다
-  const season = seasonOf(now), weekday = now.getDay(), hour = now.getHours();
-  const dislikes = state.profile.dislikes;
-  const budget = state.profile.budgetMaxKrw;
-  const canCook = state.profile.canCook;
-  const score: Record<string, number> = {};
-  const rules: Record<string, AppliedRule[]> = {};
-
-  for (const f of c) {
-    let s = 0;
-    const applied: AppliedRule[] = [];
-    // architecture 4.2는 dislikes를 음식 id 집합으로 썼다. 프로토타입은 PR 화면이 태그 다중 선택이라
-    // 태그 교집합으로 읽는다 (RE-R04와 같은 "감점, 제외 아님").
-    if (dislikes.status === 'declared' && f.tags.some((t) => dislikes.value.indexOf(t) >= 0)) {
-      s -= 40;
-    }
-    s -= 12 * rejectCount(state, f.id, now, 30, 'dislike');   // RE-R04: 감점, 영구 제외 아님
-    s -= 6 * timesEaten(state, f.id, now, 60);                // 반복 회피의 완만한 꼬리
-
-    if (f.seasons.indexOf(season) >= 0) { s += 15; applied.push({ code: 'season', weight: 15 }); }
-    if ((f.weekdays || []).indexOf(weekday) >= 0) { s += 10; applied.push({ code: 'weekday', weight: 10 }); }
-    if (hour >= 21 && f.lateOk) { s += 12; applied.push({ code: 'late', weight: 12 }); }
-    if (budget.status === 'declared' && TIER_KRW[f.budgetTier] <= budget.value) {
-      s += 8; applied.push({ code: 'budget', weight: 8 });
-    }
-    if (canCook.status === 'declared' && branch === 'home') {
-      // 못 만드는데 해 먹기 갈래면 사실상 제외한다(필터가 아니므로 blockedBy에는 안 잡힌다)
-      if (canCook.value) { s += 8; applied.push({ code: 'cook', weight: 8 }); } else { s -= 1000; }
-    }
-    score[f.id] = s;
-    rules[f.id] = applied;
-  }
-
-  // 3. 선택 — 상위 K를 자른 뒤 softmax 가중 무작위 (architecture 4.3 [제안])
-  const sorted = c.slice().sort((x, y) =>
-    (score[y.id] - score[x.id]) || (x.id < y.id ? -1 : 1)   // 동점도 결정론
-  );
-  const top = sorted.slice(0, SETTINGS.topK);
-  const seedStr = state.deviceSalt + '|' + today + '|' + branch + '|' + rejectionsToday(state, today).length;
-  const seed = xmur3(seedStr)();
-  const rng = mulberry32(seed);
-  const pick = weightedRandom(top, (f) => Math.exp(score[f.id] / SETTINGS.tau), rng);
-
-  // 4. 이유 한 줄 (architecture 4.5 + review #1 처리)
-  const reason = buildReason(rules[pick.id], confirmedLogCount(state), now);
-
-  const decision: StoredDecision = {
-    id: uid('dec'),
-    foodId: pick.id,
-    foodName: pick.name,
-    branch,
-    reason: reason.primary,
-    reasonSecondary: reason.secondary,
-    createdAt: iso(now),
-    status: 'proposed',
-    kkiniDate: today,
-    shownAt: null,                 // DC-R11에서 채운다
-    appliedRules: rules[pick.id],
-    seed,
-    catalogVersion: state.catalogVersion
-  };
-  return { kind: 'decision', decision, isNew: true };
-}
-
-export function weightedRandom(items: Food[], weightFn: (f: Food) => number, rng: () => number): Food {
-  let total = 0;
-  const w: number[] = [];
-  for (let i = 0; i < items.length; i++) { w[i] = weightFn(items[i]); total += w[i]; }
-  if (!(total > 0)) return items[0];
-  let r = rng() * total;
-  for (let j = 0; j < items.length; j++) { r -= w[j]; if (r <= 0) return items[j]; }
-  return items[items.length - 1];
-}
-
-function rejectCount(state: KkiniState, foodId: string, now: Date, days: number, reason: RejectionReason): number {
-  const cut = now.getTime() - days * 86400000;
-  return state.rejections.filter((r) =>
-    r.foodId === foodId && r.reason === reason && new Date(r.rejectedAt).getTime() >= cut
-  ).length;
-}
-function timesEaten(state: KkiniState, foodId: string, now: Date, days: number): number {
-  const cut = now.getTime() - days * 86400000;
-  return state.mealLogs.filter((m) =>
-    m.foodId === foodId && new Date(m.adoptedAt).getTime() >= cut
-  ).length;
-}
-
-/* review #1 — DC-R08("확인된 기록 3건 미만이면 '아직 취향을 모른다'를 명시한다")과
-   architecture 4.5/4.6(맥락 규칙이 걸리면 그 규칙 문구를 반환)이 같은 상태에 두 문장을 배정한다.
-   프로토타입 처리: 3건 미만이면 첫 줄은 무조건 DC-R08 문구로 두고,
-   맥락 규칙 문구는 두 번째 줄로 내린다. 둘 다 지어낸 문장이 아니므로 DC-R03도 지킨다.
-   정식 구현에서는 DC-OQ-06으로 사람이 하나를 골라야 한다. */
-export function buildReason(
-  applied: AppliedRule[] | undefined, confirmedCount: number, now: Date
-): { primary: string; secondary: string | null } {
-  const rs = applied || [];
-  const ctx = rs.filter((r) => r.code === 'season' || r.code === 'weekday' || r.code === 'late');
-  if (confirmedCount < SETTINGS.minSampleForPersonalReason) {
-    return {
-      primary: COPY.dcLowSample,
-      secondary: ctx.length ? phraseOf(winner(ctx), now) : null
-    };
-  }
-  if (!rs.length) return { primary: COPY.dcNoRule, secondary: null };   // DC-R03
-  return { primary: phraseOf(winner(rs), now), secondary: null };
-}
-function winner(rs: AppliedRule[]): AppliedRule {
-  return rs.slice().sort((a, b) =>
-    (b.weight - a.weight) || (a.code < b.code ? -1 : 1)   // 동점은 code 사전순
-  )[0];
-}
-
-/* ── 상태를 바꾸는 동작 (호출자가 저장한다) ─────────────────── */
-
-/* HI-R01 / HI-OQ-01 추천: 채택 탭이 "해결된 저녁"의 판정 근거다 */
-export function makeMealLog(d: StoredDecision, now: Date): MealLog {
-  return {
-    id: uid('log'),
-    kkiniDate: d.kkiniDate,
-    decisionId: d.id,
-    branch: d.branch,
-    foodId: d.foodId,
-    foodName: d.foodName,
-    adoptedAt: iso(now),
-    confirmDeadline: iso(nextNoon(new Date(d.createdAt))),   // HI-R07
-    confirm: { state: 'unconfirmed', at: null }              // HI-R02: 미확인으로 시작
-  };
-}
-
-export function makeRejection(d: StoredDecision, reason: RejectionReason | null, now: Date): Rejection {
-  return {
-    id: uid('rej'),
-    decisionId: d.id,
-    foodId: d.foodId,
-    rejectedAt: iso(now),
-    kkiniDate: d.kkiniDate,
-    reason
-  };
-}
-
 /* 개발용 — 첫 실행은 진짜 콜드 스타트다. 이 데이터는 사람이 버튼을 눌러야 들어간다 */
-export function makeSampleLogs(catalog: Food[]): MealLog[] {
-  const picks: [string, number, boolean][] = [
-    ['kimchi-jjigae', 3, true], ['gimbap', 5, true], ['jeyuk-bokkeum', 7, true],
-    ['tteokbokki', 9, true], ['bibimbap', 12, true],
-    ['janchi-guksu', 16, false], ['fried-chicken', 19, false]
+export function makeSampleLogs(recipes: Recipe[], menus: DeliveryMenu[]): MealLog[] {
+  const plan: [number, boolean, boolean][] = [
+    [3, true, true], [5, true, true], [7, true, true],
+    [9, true, false], [12, true, true], [16, false, false], [19, false, true]
   ];
   const logs: MealLog[] = [];
-  for (const [id, daysAgo, isConfirmed] of picks) {
-    const f = foodById(catalog, id);
-    if (!f) continue;
+  plan.forEach((p, i) => {
+    const isDelivery = i === 5;
+    const src = isDelivery ? menus[i % menus.length] : recipes[i % recipes.length];
     const when = new Date();
-    when.setDate(when.getDate() - daysAgo);
+    when.setDate(when.getDate() - p[0]);
     when.setHours(19, 30, 0, 0);
+    const servings = 2;
     logs.push({
-      id: uid('log'),
-      kkiniDate: kkiniDate(when),
-      decisionId: uid('dec'),
-      branch: f.branches.indexOf('home') >= 0 ? 'home' : 'out',
-      foodId: f.id,
-      foodName: f.name,
-      adoptedAt: iso(when),
-      confirmDeadline: iso(nextNoon(when)),
-      confirm: isConfirmed ? { state: 'confirmed', at: iso(when) } : { state: 'unconfirmed', at: null }
+      id: uid('log'), dateKey: dateKey(when), decisionId: uid('dec'),
+      itemKind: isDelivery ? 'delivery' : 'recipe', itemId: src.id, name: src.name,
+      branch: isDelivery ? 'delivery' : 'home', servings,
+      costKrw: isDelivery ? (src as DeliveryMenu).priceLowKrw * servings : 8000 + i * 700,
+      isEstimate: true, recipeOpened: p[2],
+      confirm: p[1] ? { state: 'confirmed', at: iso(when) } : { state: 'unconfirmed', at: null },
+      confirmDeadline: iso(nextNoon(when))
     });
-  }
+  });
   return logs;
 }

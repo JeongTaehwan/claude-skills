@@ -7,7 +7,7 @@
 
 ## `kkini/` → `JeongTaehwan/kkini`
 
-끼니(Kkini) — 매일 "오늘 저녁 뭐 먹지?"를 대신 끝내주는 앱. 기획 단계 + 클릭 가능한 프로토타입(`kkini/prototype/`).
+끼니(Kkini) — 예산·인분에 맞는 오늘 저녁 하나를 레시피까지 정해주는 앱. 기획 v1 + Expo 프로토타입(`kkini/prototype-expo/`).
 내용은 `kkini/README.md` 참조.
 
 옮기는 방법 (GitHub 에서 빈 private 레포 `kkini` 를 만든 뒤):

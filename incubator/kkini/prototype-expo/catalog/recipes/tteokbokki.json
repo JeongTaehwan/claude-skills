@@ -1,0 +1,101 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "tteokbokki",
+  "name": "떡볶이",
+  "tags": [
+    "분식"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "tteokbokki-tteok",
+      "qty": 400,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "fish-cake",
+      "qty": 150,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "green-onion",
+      "qty": 1,
+      "unit": "대"
+    },
+    {
+      "ingredientId": "egg",
+      "qty": 2,
+      "unit": "개",
+      "optional": true,
+      "note": "삶은 것"
+    },
+    {
+      "ingredientId": "gochujang",
+      "qty": 2,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "gochugaru",
+      "qty": 1.5,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "sugar",
+      "qty": 2,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "soy-sauce",
+      "qty": 1,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "minced-garlic",
+      "qty": 0.5,
+      "unit": "큰술"
+    },
+    {
+      "ingredientId": "water",
+      "qty": 500,
+      "unit": "ml"
+    }
+  ],
+  "steps": [
+    {
+      "text": "떡이 굳어 있으면 물에 10분 불린다. 어묵은 삼각으로, 대파는 어슷하게 썬다.",
+      "minutes": 10,
+      "wait": true
+    },
+    {
+      "text": "냄비에 물 500ml와 고추장·고춧가루·설탕·간장·다진 마늘을 넣고 센불로 끓인다.",
+      "minutes": 4
+    },
+    {
+      "text": "끓으면 떡을 넣고 중불에서 6분 끓인다. 바닥에 붙지 않게 가끔 젓는다.",
+      "minutes": 6
+    },
+    {
+      "text": "어묵을 넣고 4분 더 끓인다.",
+      "minutes": 4
+    },
+    {
+      "text": "국물이 주걱에 흐르지 않을 정도로 걸쭉해지면 대파를 넣고 1분 끓인다.",
+      "minutes": 2
+    },
+    {
+      "text": "불을 끄고 삶은 계란을 올린다.",
+      "minutes": 1
+    }
+  ],
+  "cookMinutes": 20,
+  "difficulty": 1,
+  "allergens": [
+    "밀",
+    "대두"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}

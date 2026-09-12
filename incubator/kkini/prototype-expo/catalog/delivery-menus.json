@@ -1,0 +1,476 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다. 가격대는 1인 기준 추정이고 매장·실제 가격을 약속하지 않는다 (MO-R04·R06).",
+  "asOf": "2026-09-12",
+  "items": [
+    {
+      "id": "dm-chicken-fried",
+      "name": "후라이드치킨",
+      "category": "치킨",
+      "priceLowKrw": 18000,
+      "priceHighKrw": 24000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "치킨",
+        "튀김"
+      ],
+      "allergens": [
+        "닭고기",
+        "밀",
+        "계란",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-chicken-yangnyeom",
+      "name": "양념치킨",
+      "category": "치킨",
+      "priceLowKrw": 19000,
+      "priceHighKrw": 26000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "치킨",
+        "튀김"
+      ],
+      "allergens": [
+        "닭고기",
+        "밀",
+        "계란",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-jokbal",
+      "name": "족발",
+      "category": "고기",
+      "priceLowKrw": 28000,
+      "priceHighKrw": 38000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "고기"
+      ],
+      "allergens": [
+        "돼지고기",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-bossam",
+      "name": "보쌈",
+      "category": "고기",
+      "priceLowKrw": 26000,
+      "priceHighKrw": 36000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "고기"
+      ],
+      "allergens": [
+        "돼지고기",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-pizza-combo",
+      "name": "콤비네이션피자",
+      "category": "피자",
+      "priceLowKrw": 19000,
+      "priceHighKrw": 28000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "피자"
+      ],
+      "allergens": [
+        "밀",
+        "우유",
+        "토마토",
+        "돼지고기"
+      ]
+    },
+    {
+      "id": "dm-pizza-cheese",
+      "name": "치즈피자",
+      "category": "피자",
+      "priceLowKrw": 17000,
+      "priceHighKrw": 25000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "피자"
+      ],
+      "allergens": [
+        "밀",
+        "우유",
+        "토마토"
+      ]
+    },
+    {
+      "id": "dm-jjajangmyeon",
+      "name": "짜장면",
+      "category": "중식",
+      "priceLowKrw": 7000,
+      "priceHighKrw": 9000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "중식",
+        "면"
+      ],
+      "allergens": [
+        "밀",
+        "대두",
+        "돼지고기"
+      ]
+    },
+    {
+      "id": "dm-jjamppong",
+      "name": "짬뽕",
+      "category": "중식",
+      "priceLowKrw": 8000,
+      "priceHighKrw": 11000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "중식",
+        "면",
+        "국물"
+      ],
+      "allergens": [
+        "밀",
+        "대두",
+        "갑각류",
+        "조개류"
+      ]
+    },
+    {
+      "id": "dm-tangsuyuk",
+      "name": "탕수육",
+      "category": "중식",
+      "priceLowKrw": 16000,
+      "priceHighKrw": 24000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "중식",
+        "튀김"
+      ],
+      "allergens": [
+        "돼지고기",
+        "밀",
+        "계란",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-maratang",
+      "name": "마라탕",
+      "category": "중식",
+      "priceLowKrw": 11000,
+      "priceHighKrw": 16000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "중식",
+        "국물"
+      ],
+      "allergens": [
+        "밀",
+        "대두",
+        "갑각류"
+      ]
+    },
+    {
+      "id": "dm-bossam-kimchi",
+      "name": "김치말이국수",
+      "category": "한식",
+      "priceLowKrw": 9000,
+      "priceHighKrw": 12000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "한식",
+        "면"
+      ],
+      "allergens": [
+        "밀",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-gamjatang",
+      "name": "감자탕",
+      "category": "한식",
+      "priceLowKrw": 12000,
+      "priceHighKrw": 17000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "한식",
+        "국물"
+      ],
+      "allergens": [
+        "돼지고기",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-sundaeguk",
+      "name": "순댓국",
+      "category": "한식",
+      "priceLowKrw": 9000,
+      "priceHighKrw": 12000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "한식",
+        "국물"
+      ],
+      "allergens": [
+        "돼지고기",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-budae-jjigae",
+      "name": "부대찌개",
+      "category": "한식",
+      "priceLowKrw": 11000,
+      "priceHighKrw": 15000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "한식",
+        "국물"
+      ],
+      "allergens": [
+        "돼지고기",
+        "소고기",
+        "밀",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-dakgalbi",
+      "name": "닭갈비",
+      "category": "한식",
+      "priceLowKrw": 13000,
+      "priceHighKrw": 18000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "한식",
+        "고기"
+      ],
+      "allergens": [
+        "닭고기",
+        "대두",
+        "밀"
+      ]
+    },
+    {
+      "id": "dm-jjimdak",
+      "name": "찜닭",
+      "category": "한식",
+      "priceLowKrw": 22000,
+      "priceHighKrw": 30000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "한식",
+        "고기"
+      ],
+      "allergens": [
+        "닭고기",
+        "대두",
+        "밀"
+      ]
+    },
+    {
+      "id": "dm-donkatsu",
+      "name": "돈카츠",
+      "category": "일식",
+      "priceLowKrw": 11000,
+      "priceHighKrw": 15000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "일식",
+        "튀김"
+      ],
+      "allergens": [
+        "돼지고기",
+        "밀",
+        "계란",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-chobap",
+      "name": "초밥",
+      "category": "일식",
+      "priceLowKrw": 15000,
+      "priceHighKrw": 25000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "일식",
+        "해산물"
+      ],
+      "allergens": [
+        "생선",
+        "대두",
+        "갑각류"
+      ]
+    },
+    {
+      "id": "dm-ramen",
+      "name": "일본라멘",
+      "category": "일식",
+      "priceLowKrw": 11000,
+      "priceHighKrw": 15000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "일식",
+        "면",
+        "국물"
+      ],
+      "allergens": [
+        "밀",
+        "대두",
+        "돼지고기",
+        "계란"
+      ]
+    },
+    {
+      "id": "dm-udon",
+      "name": "우동",
+      "category": "일식",
+      "priceLowKrw": 9000,
+      "priceHighKrw": 12000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "일식",
+        "면",
+        "국물"
+      ],
+      "allergens": [
+        "밀",
+        "대두",
+        "생선"
+      ]
+    },
+    {
+      "id": "dm-hamburger",
+      "name": "햄버거세트",
+      "category": "양식",
+      "priceLowKrw": 9000,
+      "priceHighKrw": 13000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "양식"
+      ],
+      "allergens": [
+        "밀",
+        "소고기",
+        "계란",
+        "우유",
+        "토마토"
+      ]
+    },
+    {
+      "id": "dm-pasta-tomato",
+      "name": "토마토파스타",
+      "category": "양식",
+      "priceLowKrw": 13000,
+      "priceHighKrw": 18000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "양식",
+        "면"
+      ],
+      "allergens": [
+        "밀",
+        "토마토",
+        "대두"
+      ]
+    },
+    {
+      "id": "dm-salad-chicken",
+      "name": "치킨샐러드",
+      "category": "양식",
+      "priceLowKrw": 10000,
+      "priceHighKrw": 14000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "양식",
+        "채소"
+      ],
+      "allergens": [
+        "닭고기",
+        "계란",
+        "우유",
+        "토마토"
+      ]
+    },
+    {
+      "id": "dm-tteokbokki-set",
+      "name": "떡볶이세트",
+      "category": "분식",
+      "priceLowKrw": 11000,
+      "priceHighKrw": 16000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "분식"
+      ],
+      "allergens": [
+        "밀",
+        "대두",
+        "계란"
+      ]
+    },
+    {
+      "id": "dm-gimbap-set",
+      "name": "김밥세트",
+      "category": "분식",
+      "priceLowKrw": 8000,
+      "priceHighKrw": 12000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "분식",
+        "밥"
+      ],
+      "allergens": [
+        "계란",
+        "대두",
+        "밀"
+      ]
+    },
+    {
+      "id": "dm-ssalguksu",
+      "name": "쌀국수",
+      "category": "기타",
+      "priceLowKrw": 11000,
+      "priceHighKrw": 15000,
+      "asOf": "2026-09-12",
+      "isEstimate": true,
+      "tags": [
+        "면",
+        "국물"
+      ],
+      "allergens": [
+        "소고기",
+        "생선"
+      ]
+    }
+  ]
+}

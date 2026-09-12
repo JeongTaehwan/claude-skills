@@ -1,10 +1,9 @@
-// 끼니 Expo 프로토타입 — 루트 (탭 3개 · 테마 · 폰트 · 상태)
-// requirements.md 6절 / architecture.md 3·4절 / open-questions.md 추천 답 기준.
-// requirements.md는 미승인 초안(2026-09-12)이고 BLOCKER 21건이 미정이다.
-// 이 앱은 open-questions.md의 `추천:` 답을 전제로 한 클릭 가능 프로토타입이며 정식 구현이 아니다.
-// prototype/index.html(HTML 판)과 로직·문구가 같고 화면만 네이티브 컴포넌트다.
+// 끼니 v1 프로토타입 — 루트 (탭 3개 · 테마 · 폰트 · 상태)
+// requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입. 정식 구현 아님.
+// architecture.md v1 8절(저장·스키마 버전 2)을 따른다.
 //
 // expo-router·react-navigation을 쓰지 않는다 — 탭 3개는 상태로 전환하는 하단 바다.
+// 오늘 탭 안의 IN → DC/MO → RC 전환은 Today.tsx가 상태로 관리한다.
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -20,7 +19,7 @@ import { IBMPlexSansKR_500Medium } from '@expo-google-fonts/ibm-plex-sans-kr/500
 import { IBMPlexSansKR_600SemiBold } from '@expo-google-fonts/ibm-plex-sans-kr/600SemiBold';
 
 import { CATALOG_VERSION } from './src/catalog';
-import { KkiniState, WEEKDAY_NAME, freshState, sweepExpired } from './src/engine';
+import { KkiniState, freshState, sweepExpired } from './src/engine';
 import { loadState, saveState } from './src/storage';
 import { FONT, GUTTER, MAX_WIDTH, ThemeCtx, ff, usePalette } from './src/theme';
 import { Today } from './src/screens/Today';
@@ -81,7 +80,18 @@ export default function App() {
   }, []);
 
   const now = new Date();
-  const dayMeta = `${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAY_NAME[now.getDay()]}`;
+  const WD = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+  const dayMeta = `${now.getMonth() + 1}월 ${now.getDate()}일 ${WD[now.getDay()]}`;
+
+  // 저장된 값을 다 읽기 전에 화면을 그리면 입력 칸이 "지난번 값" 대신 빈 값으로 초기화된다 (IN-R07·R08).
+  // 화면 컴포넌트가 mount 시점의 state로 초기 상태를 잡기 때문에, 로드가 끝난 뒤에 한 번만 마운트한다.
+  if (!loaded) {
+    return (
+      <ThemeCtx.Provider value={{ c, dark, fontsLoaded: !!fontsLoaded, font: FONT }}>
+        <SafeAreaView testID="boot" style={[styles.safe, { backgroundColor: c.bg }]} />
+      </ThemeCtx.Provider>
+    );
+  }
 
   return (
     <ThemeCtx.Provider value={{ c, dark, fontsLoaded: !!fontsLoaded, font: FONT }}>
@@ -128,6 +138,7 @@ export default function App() {
                   testID={`tab-${t.key}`}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: active }}
+                  aria-selected={active}
                   onPress={() => setTab(t.key)}
                   style={({ pressed }) => [styles.tab, { opacity: pressed ? 0.75 : 1 }]}
                 >

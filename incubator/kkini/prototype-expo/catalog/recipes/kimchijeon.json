@@ -1,0 +1,94 @@
+{
+  "_note": "requirements.md v1 미승인 초안 + open-questions.md 추천 답 기준 프로토타입 초안. 정식 구현 아님. 본문·재료·단계·알레르겐은 에이전트가 쓴 미검수 초안이고 reviewedAt은 null이다 — RC-R08/R09에 따라 사람 검수 전에는 실제 조리에 쓰면 안 된다.",
+  "id": "kimchijeon",
+  "name": "김치전",
+  "tags": [
+    "한식",
+    "전"
+  ],
+  "branches": [
+    "home"
+  ],
+  "servingsBase": 2,
+  "ingredients": [
+    {
+      "ingredientId": "kimchi",
+      "qty": 250,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "pancake-flour",
+      "qty": 150,
+      "unit": "g"
+    },
+    {
+      "ingredientId": "egg",
+      "qty": 1,
+      "unit": "개",
+      "optional": true
+    },
+    {
+      "ingredientId": "green-onion",
+      "qty": 0.5,
+      "unit": "대"
+    },
+    {
+      "ingredientId": "green-chili",
+      "qty": 1,
+      "unit": "개",
+      "optional": true
+    },
+    {
+      "ingredientId": "sugar",
+      "qty": 0.5,
+      "unit": "작은술"
+    },
+    {
+      "ingredientId": "cooking-oil",
+      "qty": 4,
+      "unit": "큰술",
+      "scaling": "fixed",
+      "note": "부침용"
+    },
+    {
+      "ingredientId": "water",
+      "qty": 120,
+      "unit": "ml"
+    }
+  ],
+  "steps": [
+    {
+      "text": "김치를 1cm 폭으로 잘게 썰고 김치 국물 2큰술을 따로 받아 둔다.",
+      "minutes": 4
+    },
+    {
+      "text": "볼에 부침가루·물 120ml·김치 국물·설탕을 넣고 덩어리가 없을 때까지 젓는다. 반죽은 묽게 흐르는 정도가 맞다.",
+      "minutes": 4
+    },
+    {
+      "text": "김치·대파·청양고추를 반죽에 섞는다. 계란을 넣으면 더 부드러워진다.",
+      "minutes": 2
+    },
+    {
+      "text": "팬에 기름을 넉넉히 두르고 중강불로 2분 달군다. 기름이 부족하면 바삭해지지 않는다.",
+      "minutes": 2
+    },
+    {
+      "text": "반죽을 얇게 펴 붓고 4분 굽는다. 가장자리가 익어 들릴 때까지 뒤집지 않는다.",
+      "minutes": 4
+    },
+    {
+      "text": "뒤집어 3분 더 굽고, 주걱으로 한 번 눌러 준 뒤 접시에 옮긴다.",
+      "minutes": 3
+    }
+  ],
+  "cookMinutes": 20,
+  "difficulty": 1,
+  "allergens": [
+    "밀",
+    "대두",
+    "계란"
+  ],
+  "author": "agent-draft",
+  "reviewedAt": null
+}
