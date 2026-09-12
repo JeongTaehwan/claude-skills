@@ -4,7 +4,14 @@
 
 > 상태: **기획 단계 — 미승인 초안** (2026-09-12). 정식 코드는 없고, 추천 답을 전제로 한 클릭 가능한 프로토타입만 있다.
 >
-> **앱 보기:** https://claude.ai/code/artifact/02eba43d-0a55-4d03-acd4-4bcffd89b44a (프로토타입 v0, 폰 폭 기준) · 로컬은 `prototype/index.html`을 열면 된다.
+> **앱 보기(웹):** https://claude.ai/code/artifact/02eba43d-0a55-4d03-acd4-4bcffd89b44a (프로토타입 v0, 폰 폭 기준) · 로컬은 `prototype/index.html`을 열면 된다.
+>
+> **폰에서 보기(Expo Go):**
+> ```bash
+> cd incubator/kkini/prototype-expo && npm install && npx expo start
+> ```
+> 터미널의 QR을 iOS 카메라 또는 Android Expo Go 앱으로 스캔한다. 폰과 PC가 다른 네트워크면 `npx expo start --tunnel`.
+> (Claude Code 원격 세션은 expo.dev 계열 호스트가 막혀 있어 Snack·EAS 링크를 직접 발급하지 못한다.)
 >
 > 사람이 말한 것은 "매일 끼니 해결 관련 추천해주는 앱. 저녁 식사 고민될 때 해주는 것" 한 줄이다.
 > 그 아래 모든 문서는 역할별 에이전트 팀이 채운 **가설**이며, 사람이 `docs/requirements.md`를
@@ -23,6 +30,7 @@
 | `docs/review/2026-09-12-planning.md` | 문서 검증 보고서 — 문서 간 모순, 근거 없는 확정, 판정 불가 문장. H 3건 / M 5건 / L 3건 | 지적만, 수정은 사람이 정한다 |
 | `docs/domain.md` · `docs/decisions.md` · `docs/test-cases.md` | 사람·검증 AI가 채우는 파일. 아직 골격만 | 비어 있음 |
 | `prototype/` | 클릭 가능한 프로토타입 — 단일 HTML + 카탈로그 200종. 미정 항목은 open-questions.md의 추천 답을 전제. 정식 구현 아님 | 스모크 테스트 통과 |
+| `prototype-expo/` | 같은 프로토타입의 React Native(Expo) 판. Expo Go로 폰에서 실행. KK-OQ-03(플랫폼)이 Expo로 닫히면 이쪽이 출발점 | 타입·번들 검사 통과 |
 | `AGENTS.md` | 타 벤더 검증 AI용 계약 (테스트 케이스·코드 리뷰) | 전제 채움 |
 | `CLAUDE.md` · `.claude/agents/` | Claude Code 팀 운영 규칙과 역할별 에이전트 정의 | 사용 중 |
 
