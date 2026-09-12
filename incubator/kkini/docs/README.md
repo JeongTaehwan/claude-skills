@@ -9,8 +9,9 @@
 | decisions.md | 사람이 내린 결정 기록 | 초안 | 기획 |
 | test-cases.md | 기획 인수 테스트 | 초안 | 검증 AI |
 | research/market.md | 시장 리서치 (저녁 메뉴 결정 서비스) | 조사 완료 | 리서치 |
-| ux/flows.md | 화면 흐름과 와이어프레임 초안 | 초안 | UX |
-| architecture.md | 기술 스택·데이터 모델·설계 제안 | 미승인 초안 | 설계 |
+| research/ingredient-prices-and-delivery.md | 재료비·배달 데이터 리서치 | 조사 완료 | 리서치 |
+| ux/flows.md | 화면 흐름과 와이어프레임 초안 | v1 초안 | UX |
+| architecture.md | 기술 스택·데이터 모델·설계 제안 | 미승인 초안 (v1) | 설계 |
 | review/ | 리뷰 보고서 보관 | 리뷰 보고서 자리 | 문서 검증 |
 
-미정: BLOCKER 20건 / LATER 14건 (2026-09-12, v1)
+미정: BLOCKER 25건 / LATER 21건 (2026-09-12, v1)
