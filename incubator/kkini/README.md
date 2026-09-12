@@ -2,7 +2,9 @@
 
 매일 "오늘 저녁 뭐 먹지?" 고민을 **대신 끝내주는** 앱. 선택지를 늘리지 않고 하나를 정해준다.
 
-> 상태: **기획 단계 — 미승인 초안** (2026-09-12). 코드는 아직 없다.
+> 상태: **기획 단계 — 미승인 초안** (2026-09-12). 정식 코드는 없고, 추천 답을 전제로 한 클릭 가능한 프로토타입만 있다.
+>
+> **앱 보기:** https://claude.ai/code/artifact/02eba43d-0a55-4d03-acd4-4bcffd89b44a (프로토타입 v0, 폰 폭 기준) · 로컬은 `prototype/index.html`을 열면 된다.
 >
 > 사람이 말한 것은 "매일 끼니 해결 관련 추천해주는 앱. 저녁 식사 고민될 때 해주는 것" 한 줄이다.
 > 그 아래 모든 문서는 역할별 에이전트 팀이 채운 **가설**이며, 사람이 `docs/requirements.md`를
@@ -20,6 +22,7 @@
 | `docs/architecture.md` | 결정 분기표, 스택 비교와 추천, 데이터 모델, 추천 로직 v0, 카탈로그, 운영비, 결정 제안(ADR 초안) | 초안 |
 | `docs/review/2026-09-12-planning.md` | 문서 검증 보고서 — 문서 간 모순, 근거 없는 확정, 판정 불가 문장. H 3건 / M 5건 / L 3건 | 지적만, 수정은 사람이 정한다 |
 | `docs/domain.md` · `docs/decisions.md` · `docs/test-cases.md` | 사람·검증 AI가 채우는 파일. 아직 골격만 | 비어 있음 |
+| `prototype/` | 클릭 가능한 프로토타입 — 단일 HTML + 카탈로그 200종. 미정 항목은 open-questions.md의 추천 답을 전제. 정식 구현 아님 | 스모크 테스트 통과 |
 | `AGENTS.md` | 타 벤더 검증 AI용 계약 (테스트 케이스·코드 리뷰) | 전제 채움 |
 | `CLAUDE.md` · `.claude/agents/` | Claude Code 팀 운영 규칙과 역할별 에이전트 정의 | 사용 중 |
 
@@ -44,6 +47,7 @@
 | 2 (병렬) | `architect` 설계 | opus | `docs/architecture.md` |
 | 3 | `scribe` 서기 | haiku | 미정 제안 병합, 집계, `docs/README.md` |
 | 4 | `reviewer` 문서 검증 | sonnet | `docs/review/` — 지적만, 수정은 사람이 정한다 |
+| 5 | `developer` 구현 | opus | `prototype/` — 추천 답 기준 프로토타입, 스모크 테스트까지 |
 
 운영 규칙은 `CLAUDE.md`에 있다. 파이프라인 자체(역할 3분리, 10단계, 게이트, 문서 체계)는
 [`JeongTaehwan/claude-skills`](https://github.com/JeongTaehwan/claude-skills)의 `role-isolation-pipeline` 스킬이 정의한다.
