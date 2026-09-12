@@ -31,6 +31,7 @@
 | 리서치 | `researcher` | sonnet | 경쟁·사용자 불만·외부 API 한도·법적 최소선 (출처 필수) | `docs/research/` |
 | UX | `ux` | sonnet | 흐름·화면 목록·상태별 문구·와이어프레임 | `docs/ux/` |
 | 설계 | `architect` | opus | 스택 비교·데이터 모델·추천 로직·비용·결정 제안(ADR 초안) | `docs/architecture.md` |
+| 구현 | `developer` | opus | 승인된 요구사항(또는 추천 답 기준 프로토타입)을 코드로, 기계 검사까지 | `prototype/`, 이후 `src/` |
 | 문서 검증 | `reviewer` | sonnet | 문서 간 모순, 근거 없는 확정, 빠진 상태 — **지적만, 수정 금지** | `docs/review/` |
 | 서기 | `scribe` | haiku | 미정 제안 병합, BLOCKER/LATER 집계, 문서 색인 | `docs/open-questions.md` 집계, `docs/README.md` |
 
@@ -43,7 +44,7 @@
 - **문서 검증(reviewer)과 코드 검증(AGENTS.md)은 다르다.** reviewer는 기획 문서의 모순을
   Claude 안에서 잡는 1차 필터이고, 테스트 케이스와 코드 리뷰는 여전히 타 벤더 검증 AI 몫이다.
 - **오케스트레이션은 메인 세션이 한다.** 기본 순서:
-  `pm` ∥ `researcher` → `ux` ∥ `architect` → `scribe` → `reviewer` → **사람 승인**.
+  `pm` ∥ `researcher` → `ux` ∥ `architect` → `scribe` → `reviewer` → **사람 승인** → `developer` → 검증 AI 리뷰.
   기능 하나짜리 사이클이면 `researcher`를 건너뛴다.
 - 에이전트 보고서는 300단어 이내. 결과는 파일에 있고 보고서는 요약이다.
 
