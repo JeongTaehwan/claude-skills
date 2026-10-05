@@ -91,6 +91,28 @@ python3 ~/.claude/skill-audit/audit.py \
 
 낡은 곳을 찾았으면 **파일 경로와 해당 줄까지** 적어라. "문서를 갱신해야 함" 같은 말은 다음 주에 아무 도움이 안 된다.
 
+### 3-1. 새 모델이 나왔으면 — 0 베이스 가지치기
+
+3단계에서 새 Claude 모델을 찾았고 `profiles/models.json` 에 없으면:
+
+1. `models.json` 에 `{"profile": "base", "evaluated": null}` 로 추가한다. **기존 구성을 그대로 물려주지 않는다** — 이전 모델의 약점을 메우던 스킬이 새 모델에서는 소음일 수 있다.
+2. 계획만 뽑아 리포트에 붙인다. 실제 실행은 비용이 들어서 사람이 한다.
+
+```bash
+python3 scripts/skill-eval.py --model <새 모델 ID> --dry-run
+```
+
+3. 사람이 돌린 결과(`reports/evals/<모델>-<날짜>.md`)가 있으면 "제안 프로필"을 리포트에 옮긴다. `profiles/<모델>.json` 저장과 `models.json` 갱신은 사람이 승인한 뒤에.
+
+### 3-2. 자주 쓰는 것과 안 쓰는 것, 그리고 새 스킬 후보
+
+```bash
+python3 scripts/skill-usage.py --rank --days 30
+python3 ~/.claude/skills/skill-forge/scripts/skill-candidates.py --days 30
+```
+
+순위의 "설치됐는데 0회"와 후보 목록을 리포트에 그대로 붙인다. 만들지·뺄지는 사람이 정한다.
+
 ### 4. 저장소로 보관
 
 기계 층이 만든 리포트는 `~/.claude` 에 있어서 git 에 안 남는다. 저장소 루트에서 옮긴다 — **체크아웃 경로는 컴퓨터마다 다르므로 여기에 적어두지 않는다.**
