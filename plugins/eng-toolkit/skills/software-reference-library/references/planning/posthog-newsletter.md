@@ -38,3 +38,27 @@ PM에게 기술을 가르치는 게 아니라 **엔지니어에게 제품 감각
 
 ## 인용 포인트
 - "제품 관리가 망가졌다" 계열의 글은, 기획-개발 사이의 전달 방식을 재설계하자는 논의를 시작하는 미끼로 쓰기 좋다. 다만 주장이 세므로 팀 표준의 근거로는 쓰지 말 것.
+
+## 코드 예시
+
+기획 담론을 엔지니어의 어휘로 번역하는 뉴스레터의 방향을 PR 설명 점검으로 옮긴 것 — 코드를 올리기 전에 누구의 어떤 문제를 푸는지, 어떻게 알 수 있는지를 개발자가 직접 쓰게 한다.
+
+```python
+import re, sys
+
+REQUIRED = ["누구의 문제", "왜 지금", "성공을 어떻게 아는가"]
+
+body = open(sys.argv[1], encoding="utf-8").read()    # PR 설명을 저장한 md 파일
+missing = []
+for h in REQUIRED:
+    m = re.search(rf"^##\s*{re.escape(h)}\s*\n(.+?)(?=^##|\Z)", body, re.S | re.M)
+    if not m or len(m.group(1).strip()) < 10:
+        missing.append(h)
+
+if missing:
+    print("비어 있는 칸:", ", ".join(missing))
+    sys.exit(1)
+print("OK")
+```
+
+글자 수만 넘기면 통과한다 — 이 점검이 길러 주는 것은 제품 감각이 아니라 질문을 받아 본 경험이고, 감각은 팀이 돌려 읽고 토론하는 쪽에서 생긴다.

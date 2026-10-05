@@ -35,3 +35,27 @@ Figma가 만든 마케팅 성격의 콘텐츠라는 점은 감안해야 한다 �
 
 ## 인용 포인트
 - 비디자이너에게 디자인 절차를 설명할 때 공통 어휘를 세우는 출발점으로 쓴다. 다만 팀 규칙의 근거 문서로는 삼지 않는 편이 낫다.
+
+## 코드 예시
+
+와이어프레임·목업·프로토타입이 회의마다 뒤섞여 쓰이는 문제를, 팀이 합의한 판정 기준을 코드로 못 박는 방식으로 풀었다.
+
+```python
+# 팀 합의 기준: 클릭 가능하면 프로토타입, 시각 스타일이 있으면 목업, 나머지는 와이어프레임
+def classify(a: dict) -> str:
+    if a["clickable"]:
+        return "prototype"
+    if a["visual_style"]:
+        return "mockup"
+    return "wireframe"
+
+artifacts = [
+    {"name": "login-v1",    "visual_style": False, "clickable": False},
+    {"name": "login-v2",    "visual_style": True,  "clickable": False},
+    {"name": "checkout-flow", "visual_style": True,  "clickable": True},
+]
+for a in artifacts:
+    print(f"{a['name']:14} -> {classify(a)}")
+```
+
+이 기준은 Figma 의 정의가 아니라 우리 팀이 정한 것이다 — 회의 전에 기준을 먼저 합의해 두지 않으면 같은 파일을 두 사람이 다른 이름으로 부르고, 그 불일치는 코드로도 해결되지 않는다.

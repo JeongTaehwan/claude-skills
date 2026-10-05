@@ -52,3 +52,33 @@ Cialdini 가 대중적 요약에서 자주 놓치는 것을 강조하는 지점�
 - 가짜 희소성·조작된 리뷰를 반대할 때, 저자 본인이 진실성 없는 적용을 명시적으로 반대한다는 점을 근거로.
 - 사회적 증거를 넣기 전에 "숫자가 우리에게 유리한가"를 먼저 확인하자는 논거.
 - 온보딩에 작은 약속 단계(목표 설정)를 넣는 설계의 심리적 근거.
+
+## 코드 예시
+
+원문이 강조하는 조건("진실한 조건에서만 작동")을 코드의 문턱으로 옮긴다 — 사회적 증거와 희소성 배지는 실제 데이터가 기준을 넘을 때만 켜지고, 아니면 아예 렌더링되지 않는다.
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Product:
+    reviews: int
+    avg_rating: float
+    stock: int
+    viewers_now: int      # 실제 세션 집계. 난수·고정값 금지
+
+def badges(p: Product) -> list[str]:
+    out = []
+    if p.reviews >= 30 and p.avg_rating >= 4.0:            # 사회적 증거: 표본이 충분할 때만
+        out.append(f"리뷰 {p.reviews}개 · 평균 {p.avg_rating:.1f}")
+    if 0 < p.stock <= 5:                                    # 희소성: 실제 재고가 적을 때만
+        out.append(f"남은 수량 {p.stock}개")
+    if p.viewers_now >= 10:
+        out.append(f"지금 {p.viewers_now}명이 보는 중")
+    return out
+
+print(badges(Product(reviews=128, avg_rating=4.6, stock=3, viewers_now=2)))
+print(badges(Product(reviews=4, avg_rating=5.0, stock=900, viewers_now=1)))   # -> []
+```
+
+문턱 숫자(30, 5, 10)는 팀이 임의로 정한 값이다 — 중요한 것은 값이 아니라 배지가 **측정값에서만 나온다**는 구조이고, 이 연결이 끊기는 순간 원칙은 조작이 된다.

@@ -1,0 +1,21 @@
+# docker compose run --rm claude            # 현재 디렉터리를 /workspace 로
+# docker compose run --rm eval --model claude-opus-5-5 --dry-run
+services:
+  claude:
+    build: { context: ., args: { PROFILE: "${PROFILE:-full}" } }
+    image: claude-skills:${PROFILE:-full}
+    environment: [ANTHROPIC_API_KEY]
+    volumes:
+      - ${WORKSPACE:-.}:/workspace
+      - claude-home:/home/node/.claude      # 사용 로그·로그인 유지 (처음엔 이미지 내용으로 채워진다)
+    stdin_open: true
+    tty: true
+  eval:
+    image: claude-skills:${PROFILE:-full}
+    environment: [ANTHROPIC_API_KEY]
+    working_dir: /home/node/claude-skills
+    entrypoint: ["python3", "scripts/skill-eval.py"]
+    volumes:
+      - ./reports:/home/node/claude-skills/reports
+volumes:
+  claude-home:

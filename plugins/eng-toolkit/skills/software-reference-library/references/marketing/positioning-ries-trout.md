@@ -45,3 +45,31 @@ Al Ries & Jack Trout, 1981(원 논문 시리즈는 1972년 Advertising Age) — 
 - 하나의 브랜드로 새 카테고리에 확장하려는 결정을 재검토할 때, 라인 확장 경고를 근거로 든다.
 - 소구점을 여러 개 담자는 요구에 맞서 "한 단어를 소유하라"는 원칙을 인용해 메시지 개수를 줄이는 논거로 쓴다.
 - 반대로, 이 책의 주장이 실증 연구가 아니라 사례 기반 경험칙임을 밝히고 `marketing/how-brands-grow-byron-sharp.md` 와 대조해 균형 잡힌 결정을 만들 때.
+
+## 코드 예시
+
+"이미 채워진 칸을 정면으로 뺏지 말고 내가 1등이 될 사다리를 정의하라"는 순서를 린터로 만든 것 — 포지셔닝 문장을 쓰기 전에 그 사다리의 1번 칸이 비어 있는지부터 묻는다.
+
+```python
+# 카테고리별 고객 기억 사다리 (조사로 채운다. 아래는 가상 값)
+LADDERS = {
+    "프로젝트 관리 툴": ["BrandA", "BrandB", "BrandC"],
+    "개발자용 팀 위키": [],                      # 비어 있음 = 1번 칸이 열려 있다
+}
+
+def lint(brand: str, category: str) -> list[str]:
+    ladder = LADDERS.get(category)
+    if ladder is None:
+        return [f"사다리 조사 없음: '{category}' 의 상위 기억 브랜드를 먼저 물어라"]
+    if not ladder:
+        return []                               # 통과: 1등 자리가 비어 있다
+    rank = ladder.index(brand) + 1 if brand in ladder else None
+    if rank == 1:
+        return []
+    return [f"'{category}' 1번 칸은 {ladder[0]} — 스펙으로 뒤집으려 하지 말고 카테고리를 다시 정의하라"]
+
+for cat in LADDERS:
+    print(cat, "->", lint("우리제품", cat) or "OK")
+```
+
+사다리 데이터가 조사가 아니라 팀의 짐작이면 이 린터는 통과 도장만 찍는다 — 책 자체가 사례 서사 기반이라는 한계가 그대로 이 코드의 입력 품질로 옮겨 온다.

@@ -2,7 +2,67 @@
 
 개인 Claude Code 스킬 모음. 이 저장소가 **원본**이고, 각 컴퓨터의 `~/.claude/`는 여기서 받아간 사본이다.
 
+## 한눈에
+
+| 층 | 무엇 | 어디 |
+|---|---|---|
+| 흐름 | 구조 → 기획서 → 프로토타입 → 구현, 기존 프로젝트는 분석부터 | `project-flow` |
+| 판단 | 구현 전 설계, 역할 분리 구현, 환경 차이, 저속 네트워크, 브랜치 동기화·MR 충돌 | 스킬 6개 |
+| 운영 | 보안·인프라·마케팅 최소선 | `security-baseline` · `infra-baseline` · `marketing-growth` |
+| 근거 | 10개 도메인 1차 자료 512개, 전부 코드 예시 포함 | `software-reference-library` |
+| 분업 | 역할마다 모델이 고정된 에이전트 9개 | `plugins/eng-toolkit/agents/` |
+| 강제 | 판단 없이 막을 규칙은 훅으로 | `hooks/` |
+| 수명 | 사용 횟수 집계, 스킬 자동 생성, 모델별 0 베이스 가지치기 | `skill-forge` · `profiles/` · `evals/` |
+
+15개 보완 항목을 무엇을 어디에 했는지로 정리한 것은 [docs/improvement-plan.md](docs/improvement-plan.md).
+
+## 작성 규약 — 모든 스킬이 지킨다
+
+- **페르소나** — 본문 첫 절. 너는 누구 / 상대는 누구 / 무엇을 중시
+- **코드 예시** — 절차를 말로만 쓰지 않는다. 레퍼런스 512개도 전부
+- **가볍게** — description 350자, 전체 합 4,200자, 본문 9,000자 상한. 단계별 상세는 `references/` 에 주제 하나씩
+- **판단 없는 금지는 훅으로**
+
+`verify.sh` 가 `skill-forge/scripts/lint_skills.py` 로 이걸 검사한다. 규약 전문은 `skill-forge/references/conventions.md`.
+
+```bash
+python3 plugins/eng-toolkit/skills/skill-forge/scripts/lint_skills.py . --budget   # 매 턴 실리는 글자 수
+```
+
 ## 들어있는 것
+
+### `project-flow` (스킬)
+새 프로젝트나 큰 기능의 진입점. **0 기존 프로젝트 분석 → 1 구조 → 2 기획서 + 질문 → 3 로드맵·투두 → 4 프로토타입 → 5 기능 구현**. 단계마다 산출물이 `docs/` 파일로 남고, 각 단계는 메인 세션이 아니라 역할 에이전트가 쓴다.
+
+- **질문 15개는 기획서가 있을 때만.** 기획서가 없으면 묻지 않고 구조·기획서 초안부터 만든 뒤, 그 초안의 `[미정]` 만 BLOCKER 부터 묻는다
+- 기존 코드가 있으면 `scripts/repo-map.py` 가 지도(언어·진입점·라우트·스키마·검사 명령 후보)를 한 화면으로 낸다. 파일을 하나씩 열지 않는다
+- `repo-map.py --stage` 는 지금 몇 단계인지와 BLOCKER 수만 낸다 — 메인 세션이 문서를 통째로 읽지 않고 다음 단계를 고른다
+
+### 역할 에이전트 9개 (`plugins/eng-toolkit/agents/`)
+
+| 에이전트 | 모델 | 맡는 것 |
+|---|---|---|
+| `planner` | opus | 구조·기획서 초안·미정 질문 |
+| `architect` | opus | 스택 비교·데이터 모델·결정 제안 |
+| `developer` | opus | 승인된 기획서 구현 + 기계 검사 |
+| `researcher` | sonnet | 출처 달린 조사 |
+| `ux-designer` | sonnet | 흐름·상태별 문구 |
+| `prototyper` | sonnet | 눌러 보는 프로토타입 |
+| `analyst` | sonnet | 기존 프로젝트 분석 |
+| `doc-reviewer` | sonnet | 문서 모순 지적 (고치지 않음) |
+| `scribe` | haiku | 미정 병합·집계·색인 |
+
+**메인 세션은 직접 쓰지 않고 맡긴다.** 메인이 opus 로 돌면 집계 같은 기계적 일까지 opus 값을 낸다. 모델은 버전이 아니라 별칭(`opus`/`sonnet`/`haiku`)으로 적어 새 모델이 나와도 파일을 고치지 않는다. 실험 기능인 에이전트 팀(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)을 켜면 같은 정의가 팀메이트로도 쓰인다.
+
+### `security-baseline` · `infra-baseline` · `marketing-growth` (스킬)
+레퍼런스 라이브러리에 보안·인프라·마케팅 도메인은 있었지만 **언제 무엇을 점검하는지**가 없었다. 셋 다 같은 모양이다 — 게이트(연다/안 연다), 점검 표, 코드 예시, 근거를 찾을 `find.py --domain` 경로.
+
+- 보안: 비밀값 → 서버 측 인가 → 입력 경로 → 세션 → 의존성 → 업로드·웹훅 → 로그. **고칠 것은 5개 이하로**
+- 인프라: 출시 전 여섯 줄 — 명령 하나 배포, 5분 롤백, 외부 헬스체크, 요청 ID 로그, 복원해 본 백업, 예산 알림
+- 마케팅: 지표 하나 → 트래킹 플랜(코드로 강제) → 포지셔닝 한 문장 → SEO 기본 → 표본 계산 → UTM
+
+### `skill-forge` (스킬)
+반복되는 요청을 이 규약에 맞는 새 스킬로 만든다. `skill-candidates.py` 가 세션 기록에서 **스킬이 안 뜬 반복 요청**(세션 2개 이상, 3회 이상)을 찾고, `new-skill.py` 가 뼈대와 평가 케이스를 만든다. **만들기는 자동이지만 켜기는 사람이 한다.** 판단이 필요 없는 금지 규칙이면 스킬 대신 훅을 만들라고 돌려보낸다.
 
 ### `implementation-design` (스킬)
 구현 요청을 받았을 때 첫 번째로 떠오른 방법을 그냥 쓰지 않게 하는 절차. 게이트 3개(무제한 순회 / 공유 상태 쓰기 / 되돌리기 비싼 변경) 중 하나라도 걸릴 때만 발동하고, 나머지는 조용히 지나간다.
@@ -77,7 +137,7 @@ QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 
 에러 로그가 있거나 브라우저 차이만 있으면 **발동하지 않는다.**
 
 ### `role-isolation-pipeline` (스킬)
-사람 판단 / 검증 AI(타 벤더) 질문·리뷰 / Claude Code 구현으로 역할을 나누는 10단계 협업 파이프라인. 구현과 검증이 같은 모델이면 틀리는 방식도 같아서 검증이 자기확인이 된다는 문제를 벤더 분리로 막는다.
+사람 판단 / 검증 AI(타 벤더) 리뷰 / Claude Code 구현으로 역할을 나누는 10단계 협업 파이프라인. 기획서가 승인된 뒤 **기능 하나를 구현하는 사이클**을 맡는다 — 앞단(구조·기획서·질문 모드)은 `project-flow` 로 옮겼다. 구현과 검증이 같은 모델이면 틀리는 방식도 같아서 검증이 자기확인이 된다는 문제를 벤더 분리로 막는다.
 
 `templates/`에 프로젝트로 복사하는 골격이 들어 있다 — 검증 AI용 `AGENTS.md`, 프로젝트 CLAUDE.md에 붙이는 구현 역할 절, docs 5종(requirements / test-cases / open-questions / decisions / domain).
 
@@ -91,7 +151,7 @@ QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 
 develop 대상 MR 충돌 시 `-dev` 브랜치를 만들어 develop 을 병합·해결하고 새 MR 을 올리는 절차. main 기준 브랜치를 develop 에 올릴 때 반복되는 상황용.
 
 ### `verify.sh` (검증)
-저장소 자체의 검증 — 파이썬·셸·JSON 구문, 측정 로그 형식, 레퍼런스 검색 품질 회귀. 아래 Stop 훅이 이 파일을 찾아서 돌린다. **훅이 응답마다 부르므로 속도가 곧 매 턴의 지연이다** — 검사를 python3 한 번에 모아 0.76초로 맞춰 뒀다.
+저장소 자체의 검증 — 파이썬·셸·JSON 구문, 측정 로그 형식, 레퍼런스 검색 품질 회귀. 아래 Stop 훅이 이 파일을 찾아서 돌린다. **훅이 응답마다 부르므로 속도가 곧 매 턴의 지연이다** — 검사를 python3 몇 번으로 모으고 `find.py` 의 비교를 항목·단어별 한 번 계산으로 바꿔, 스킬 규약·가드 훅 검사를 더하고도 이전보다 3배 빠르다(같은 컴퓨터 기준 1.77초 → 0.56초).
 
 ### `verify-on-stop.sh` (훅)
 Claude 가 응답을 마칠 때(Stop) 프로젝트의 `verify.sh` 를 돌리고, **실패했을 때만** 실패한 단계와 에러 요약을 되먹이는 훅. 통과하면 아무것도 출력하지 않는다 — Stop 훅의 exit 0 은 stdout 이 컨텍스트에 안 들어가므로 침묵이 토큰을 한 톨도 안 쓴다. 검증 스크립트가 없는 프로젝트에서는 아무 일도 하지 않는다.
@@ -111,7 +171,7 @@ AI 코드를 비판적으로 검토하는 능력은 예방 스킬로는 안 는�
 규칙 하나 — 세 가지를 **적어놓고** 답을 편다. "어떤 입력에서 드러나나"를 구체적 수치로 못 대면 틀린 것으로 친다.
 
 ### `memory/CLAUDE.md`
-**플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 15줄짜리 게이트만 들어있고, 걸리면 스킬을 읽으라고 넘긴다.
+**플러그인으로 배포되지 않는다.** 스킬은 조건부로 로드되지만 이 파일은 매 세션 무조건 로드되는 계층이라 별도로 설치해야 한다. 구현 게이트, 프로젝트 흐름 라우팅, 팀메이트 규칙만 들어 있고(1,500자 상한), 걸리면 스킬을 읽으라고 넘긴다.
 
 ## 설치
 
@@ -121,7 +181,16 @@ AI 코드를 비판적으로 검토하는 능력은 예방 스킬로는 안 는�
 ./sync.sh
 ```
 
-`~/.claude/skills/`, `~/.claude/hooks/`, `~/.claude/CLAUDE.md`로 복사한다. **편집은 항상 이 저장소에서 하고 `sync.sh`를 다시 돌린다** — `~/.claude/` 쪽을 고치면 다음 sync에 덮어써진다.
+`~/.claude/skills/`, `~/.claude/agents/`, `~/.claude/hooks/`, `~/.claude/CLAUDE.md`로 복사한다.
+
+```bash
+./sync.sh --profile base      # 스킬 0개로 시작 (새 모델 가지치기)
+./sync.sh --profile <이름>     # profiles/<이름>.json 에 적힌 것만
+./sync.sh --yes               # 묻지 않는다 (도커·CI)
+./sync.sh --register-hooks    # settings.json 이 없을 때만 훅 등록까지
+```
+
+무엇을 깔았는지 `~/.claude/.claude-skills-manifest` 에 남긴다. 프로필을 바꾸면 **이 저장소가 깐 것 중** 새 프로필에 없는 것만 지운다 — 다른 곳에서 온 스킬은 건드리지 않는다. **편집은 항상 이 저장소에서 하고 `sync.sh`를 다시 돌린다** — `~/.claude/` 쪽을 고치면 다음 sync에 덮어써진다.
 
 훅 스크립트는 복사만 하고 **등록은 하지 않는다.** `settings.json` 은 매 세션 동작을 바꾸는 파일이라 자동으로 건드리지 않는다 — 아래 「검증 훅 켜기」를 보라.
 
@@ -134,17 +203,27 @@ git clone https://github.com/JeongTaehwan/claude-skills.git
 cd claude-skills && ./sync.sh
 ```
 
-또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 일곱 개가 전부 따라온다. 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 12개와 에이전트 9개가 따라온다(플러그인 에이전트는 `eng-toolkit:planner` 처럼 불린다). 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+
+### 도커로
+
+```bash
+docker build -t claude-skills .                                   # 전부
+docker build -t claude-skills:base --build-arg PROFILE=base .     # 0 베이스
+docker run -it --rm -e ANTHROPIC_API_KEY -v "$PWD":/workspace claude-skills
+docker compose run --rm eval --model claude-opus-5-5 --dry-run    # 가지치기 평가 계획
+```
+
+컨테이너 안은 새 집이라 덮을 설정이 없으므로 **훅 등록까지 자동으로 한다.** 호스트의 `~/.claude` 는 건드리지 않는다. 빌드 마지막에 `verify.sh` 가 돌아서 규약을 어긴 상태로는 이미지가 안 만들어진다.
 
 ## 제거
 
 ```bash
-rm ~/.claude/CLAUDE.md
-rm -rf ~/.claude/skills/implementation-design ~/.claude/skills/software-reference-library ~/.claude/skills/role-isolation-pipeline ~/.claude/skills/slow-network-ux ~/.claude/skills/mr-conflict-resolve ~/.claude/skills/main-sync ~/.claude/skills/env-divergence
-rm -rf ~/.claude/hooks ~/.claude/verify-logs
+./sync.sh --uninstall          # 이 저장소가 깐 스킬·에이전트·훅만 지운다
+rm ~/.claude/CLAUDE.md         # 다른 내용이 섞였을 수 있어 직접
 ```
 
-훅을 등록했다면 `~/.claude/settings.json` 의 `hooks.Stop` 항목도 지운다.
+훅을 등록했다면 `~/.claude/settings.json` 의 `hooks` 항목도 지운다.
 
 ## 실제로 쓰이고 있는지 확인
 
@@ -160,6 +239,33 @@ python3 scripts/skill-usage.py implementation-design --days 7
 
 CLAUDE.md가 로드됐는지는 Claude에게 직접 물으면 된다 — "파일 읽지 말고 지금 컨텍스트에 있는
 CLAUDE.md 내용 말해봐". 읽지 않고 답하면 로드된 것이다.
+
+### 자주 쓰는 순위 — 훅 로그로 즉시
+
+```bash
+python3 scripts/skill-usage.py --rank            # 스킬·역할 에이전트 사용 순위 + 설치됐는데 0회
+python3 scripts/skill-usage.py --rank --days 30
+```
+
+`count-usage.sh` 훅이 스킬·에이전트가 쓰일 때마다 `~/.claude/usage-log.jsonl` 에 한 줄 남긴다. 세션 기록 전체를 훑지 않아 즉시 끝난다. 훅을 등록하지 않았으면 세션 기록으로 센다.
+
+## 모델별 스킬 구성 — 0 베이스 가지치기
+
+모델이 좋아지면 예전 모델의 약점을 메우려고 만든 스킬이 소음이 된다. 그래서 **새 모델은 스킬 0개(`profiles/base.json`)에서 시작해**, 붙였을 때 실제로 나아지는 스킬만 남긴다.
+
+```
+profiles/base.json      스킬 0개
+profiles/full.json      전부
+profiles/models.json    모델 ID → 프로필, 평가일
+evals/<스킬>.jsonl      발동해야 할 요청 2개 + 발동하면 안 될 요청 1개, expect/forbid 정규식
+```
+
+```bash
+python3 scripts/skill-eval.py --model <모델> --dry-run          # 계획만 (호출 수)
+ANTHROPIC_API_KEY=… python3 scripts/skill-eval.py --model <모델> --repeat 3
+```
+
+조건 A(스킬 없음)와 조건 B(그 스킬 하나만)를 빈 설정 디렉터리에서 돌려 이 컴퓨터의 다른 스킬·CLAUDE.md 가 섞이지 않게 한다. B 가 A 보다 나으면서 오발동이 0이면 "유지", 아니면 "빼기 후보". 결과는 `reports/evals/` 에 남고 **프로필 반영은 사람이 한다.** 주간 점검이 새 모델을 찾으면 `models.json` 에 base 로 등록하고 계획을 리포트에 붙인다. 호출마다 비용이 들어 실행은 자동으로 하지 않는다.
 
 ## 토큰이 어디로 갔는지 보기
 
@@ -309,12 +415,21 @@ rm ~/.config/systemd/user/weekly-audit.{service,timer}
 
 ## 훅 켜기
 
-훅은 둘이다.
+**훅이란** — Claude Code 가 정해진 순간(도구 실행 전·후, 응답 끝, 세션 시작·끝)에 **모델을 거치지 않고** 자동으로 실행하는 셸 명령이다. 프롬프트에 "하지 마"라고 적으면 매 턴 토큰을 쓰고도 가끔 어기지만, 훅은 토큰 0으로 예외 없이 막는다. 그래서 판정이 기계적인 규칙은 훅으로, 상황을 봐야 하는 판단은 스킬로 둔다. `PreToolUse` 훅이 `exit 2` 로 끝나면 그 도구 호출이 취소되고 stderr 가 Claude 에게 간다.
+
+훅은 다섯이다.
 
 | 이벤트 | 스크립트 | 하는 일 |
 |---|---|---|
+| `PreToolUse` (Bash) | `guard-bash.sh` | 보호 브랜치(main·master·stage·production) push, 강제 push, `git stash` 를 막는다. `--force-with-lease` 는 허용 |
+| `PreToolUse` (Write·Edit) | `guard-write.sh` | 개인키·클라우드 키·토큰 모양의 값 쓰기를 막는다. `AGENTS.md` 가 있는 프로젝트에서 `docs/test-cases.md` 쓰기를 막는다 |
+| `PostToolUse` (Skill·Read·Agent) | `count-usage.sh` | 스킬·에이전트 사용을 한 줄씩 기록 |
 | `Stop` (응답마다) | `verify-on-stop.sh` | `verify.sh` 를 돌리고 **실패했을 때만** 되먹인다 |
 | `SessionEnd` (세션당 한 번) | `record-metrics-on-sessionend.sh` | 토큰 지표를 로그에 남긴다 |
+
+가드 훅 둘은 Bash·쓰기마다 돌므로 빠른 길을 둔다 — 명령에 `git` 이 없거나 기록할 게 없으면 파이썬을 띄우지 않는다. 사람이 의도한 작업이면 `CLAUDE_GUARD_OFF=1` 로 켠 세션에서 한다. 보호 브랜치 목록은 `CLAUDE_GUARD_PROTECTED` 로 바꾼다.
+
+settings 조각에는 `CLAUDE_CODE_SUBAGENT_MODEL=sonnet` 도 들어 있다 — 모델을 적지 않은 서브에이전트가 메인 세션의 비싼 모델을 물려받지 않게 한다.
 
 `sync.sh` 가 스크립트를 `~/.claude/hooks/` 로 복사해두지만 **등록은 직접 해야 한다.**
 `hooks/settings-fragment.json` 의 내용을 `~/.claude/settings.json` 에 병합한다.
@@ -324,7 +439,7 @@ rm ~/.config/systemd/user/weekly-audit.{service,timer}
 cp hooks/settings-fragment.json ~/.claude/settings.json   # settings.json 이 없을 때만
 ```
 
-이미 있으면 `hooks.Stop` 배열에 항목만 끼워 넣는다. **자동으로 병합하지 않는 이유는
+이미 있으면 `hooks` 의 각 이벤트 배열에 항목만 끼워 넣는다. **자동으로 병합하지 않는 이유는
 `settings.json` 이 매 세션의 동작을 바꾸는 파일이기 때문이다** — 스크립트가 조용히
 덮어쓰면 사라진 설정을 나중에 찾게 된다.
 

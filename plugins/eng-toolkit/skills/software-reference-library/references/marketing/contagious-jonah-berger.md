@@ -51,3 +51,29 @@ STEPPS 여섯 요소:
 - 감성 소구 방향을 정할 때 긍정/부정이 아니라 각성 수준이 공유를 가른다는 구분을 인용.
 - 인플루언서 예산 집중에 대한 반론 — 확산의 다수가 일반인의 대화에서 나온다는 관찰.
 - 제품에 사용 흔적을 남기는 설계(공개성)를 마케팅 요구가 아니라 확산 메커니즘으로 정당화할 때.
+
+## 코드 예시
+
+STEPPS 를 "바이럴을 노려 봅시다"를 끝내는 기획 체크리스트로 만든다 — 여섯 요소마다 점수와 한 줄 근거를 요구하고, 근거가 비면 점수를 인정하지 않는다.
+
+```python
+STEPPS = ["social_currency", "triggers", "emotion", "public", "practical_value", "stories"]
+
+# 0=없음 1=약함 2=분명함. 근거(why)가 비어 있으면 0 으로 처리.
+campaign = {
+    "social_currency": (2, "구독자만 보는 내부 수치 공개"),
+    "triggers":        (1, "월요일 출근길과 연결"),
+    "emotion":         (2, "경외: 예상 밖 규모를 시각화"),
+    "public":          (0, ""),
+    "practical_value": (1, "절약 팁 3개 포함"),
+    "stories":         (0, ""),
+}
+
+scores = {k: (s if campaign[k][1] else 0) for k, (s, _) in campaign.items()}
+weak = [k for k in STEPPS if scores[k] == 0]
+print("합계:", sum(scores.values()), "/ 12")
+print("비어 있는 요소:", weak)
+print("이야기가 브랜드와 분리되지 않는지 별도 확인할 것" if scores["stories"] else "")
+```
+
+합계 점수는 의미 없는 숫자다 — 이 표가 하는 일은 어느 요소가 비어 있는지 드러내는 것까지이고, 실제 공유 효과는 소규모로 내보내 직접 재 보기 전에는 모른다.

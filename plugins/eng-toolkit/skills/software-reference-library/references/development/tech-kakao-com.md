@@ -38,3 +38,25 @@ https://tech.kakao.com/
 
 ## 인용 포인트
 - 대규모 트래픽 대응 설계를 제안할 때, 해외 사례 대신 국내 서비스의 실제 규모와 선택을 붙이면 "우리랑 상황이 다르다"는 반론을 미리 걷어낸다.
+
+## 코드 예시
+
+이 블로그에서 쓸모 있는 글은 "이 규모에서 이런 제약이 생겼다"를 서술한 글이다 — 피드를 받아 제약 조건을 드러내는 단어가 제목·요약에 있는 글만 걸러 읽는다.
+
+```python
+import urllib.request
+import xml.etree.ElementTree as ET
+
+FEED = "https://example.com/feed.xml"   # 실제 RSS 주소는 사이트에서 확인해 교체
+CONSTRAINT_WORDS = ["트래픽", "병목", "지연", "장애", "대용량", "확장", "한계", "비용"]
+
+raw = urllib.request.urlopen(FEED, timeout=10).read()
+for item in ET.fromstring(raw).iter("item"):          # RSS 2.0 가정
+    title = item.findtext("title", "")
+    desc = item.findtext("description", "") or ""
+    hits = [w for w in CONSTRAINT_WORDS if w in title + desc]
+    if hits:
+        print(f"{len(hits)}  {title}  {item.findtext('link', '')}  {hits}")
+```
+
+키워드가 걸렸다고 좋은 글인 것은 아니다 — 자체 개발 인프라 이야기는 우리 스택에 이식되지 않으므로, 걸러낸 글에서는 구현보다 "왜 사내 개발로 갔는가"의 판단 근거만 읽어야 한다.

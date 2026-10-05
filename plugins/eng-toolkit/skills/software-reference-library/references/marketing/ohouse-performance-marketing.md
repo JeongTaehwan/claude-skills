@@ -48,3 +48,29 @@ https://www.bucketplace.com/post/2021-11-11-%EC%98%A4%EB%8A%98%EC%9D%98%E4%BA%BA
 - 매체마다 운영 방식을 통일하라는 요구에 맞서, 자동화 영역과 수동 관리 영역을 나눈 사례를 제시할 때.
 - 검색광고 키워드 운영 규모의 현실감을 잡을 때(수십만 개 단위 운영이 존재한다는 사실).
 - 퍼포먼스 조직에 회고 루틴을 도입하자는 제안의 사례.
+
+## 코드 예시
+
+원문의 핵심인 "성장 단계에 따라 최적화 목표를 바꾼다"를 목표 선택 함수로 못 박은 것 — 단계 경계와 CPI 상한이 코드에 드러나야 "효율이냐 규모냐" 협상이 숫자 위에서 이루어진다.
+
+```python
+# 경계값은 예시다. 원문은 1,000만 다운로드 전후로 우선순위가 바뀌었다고만 말한다.
+STAGE_BOUNDARY = 10_000_000
+CPI_CEILING = 3_000          # 규모 단계에서도 넘기지 않을 설치당 비용(원), 팀이 정한다
+
+def objective(cum_downloads: int) -> str:
+    return "efficiency" if cum_downloads < STAGE_BOUNDARY else "impact"
+
+def pick(campaigns: list[dict], cum_downloads: int) -> dict:
+    """campaigns: [{"name":..., "cpi":..., "installs":...}]"""
+    if objective(cum_downloads) == "efficiency":
+        return min(campaigns, key=lambda c: c["cpi"])           # 싸게 사는 쪽
+    ok = [c for c in campaigns if c["cpi"] <= CPI_CEILING]       # 상한 안에서
+    return max(ok, key=lambda c: c["installs"])                  # 절대량이 큰 쪽
+
+cs = [{"name": "A", "cpi": 1200, "installs": 4_000},
+      {"name": "B", "cpi": 2800, "installs": 15_000}]
+print(pick(cs, 4_000_000)["name"], pick(cs, 12_000_000)["name"])   # A B
+```
+
+경계와 상한을 누가 언제 바꾸는지가 핵심이다 — 이 두 상수를 분기마다 다시 합의하지 않으면 함수는 그대로인데 목표만 낡는다.

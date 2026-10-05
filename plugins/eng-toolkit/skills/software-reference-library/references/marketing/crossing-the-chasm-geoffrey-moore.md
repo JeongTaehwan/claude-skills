@@ -46,3 +46,28 @@ Geoffrey A. Moore, 1991(3판 2014) — 기술 제품의 채택 곡선에서 **�
 - "타깃을 좁히자"는 제안의 근거 — 좁은 세그먼트에서의 압도적 점유가 다음 단계의 전제라는 주장.
 - 기능 추가보다 레퍼런스·도입 지원·연동을 먼저 갖추자는 우선순위 논거로 완결 제품 개념을 든다.
 - 초기 고객의 요구를 그대로 로드맵에 넣으면 안 되는 이유 — 그들이 다음 층의 대표 표본이 아니라는 점.
+
+## 코드 예시
+
+비치헤드는 "압도적 1위가 될 수 있을 만큼 좁고, 완결 제품을 갖출 수 있는" 세그먼트다 — 후보를 이 두 조건으로 걸러 하나만 남긴다.
+
+```python
+WHOLE_PRODUCT = {"core", "integration", "onboarding", "training", "partner"}
+
+segments = [
+    # name, 세그먼트 내 우리 점유율 추정, 갖춘 완결 제품 요소, 레퍼런스 고객 수
+    {"name": "중형 물류사",   "share": 0.22, "have": {"core", "integration", "onboarding"}, "refs": 4},
+    {"name": "대형 제조사",   "share": 0.03, "have": {"core"}, "refs": 1},
+    {"name": "지역 병원",     "share": 0.31, "have": {"core", "integration", "onboarding", "training", "partner"}, "refs": 6},
+]
+
+def gap(s):
+    return sorted(WHOLE_PRODUCT - s["have"])
+
+ready = [s for s in segments if not gap(s) and s["share"] >= 0.20]
+for s in segments:
+    print(f'{s["name"]:8} 점유율={s["share"]:.0%} 부족한 요소={gap(s) or "없음"} 레퍼런스={s["refs"]}')
+print("비치헤드 후보:", [s["name"] for s in ready] or "아직 없음 -> 세그먼트를 더 좁힌다")
+```
+
+임계값 0.20 과 점유율은 입력한 사람의 추정일 뿐이다 — 코드가 고르는 것이 아니라, 팀이 "왜 이 세그먼트 하나만"을 숫자 앞에서 합의하도록 강제하는 장치다.

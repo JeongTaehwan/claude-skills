@@ -1,0 +1,3 @@
+{"prompt": "이 프로젝트에 역할 분리 파이프라인 구조 깔아줘.", "should_trigger": true, "expect": ["AGENTS\\.md", "docs/"], "forbid": []}
+{"prompt": "요구사항 승인했어. 이제 구현해줘. BLOCKER는 2건 남아 있어.", "should_trigger": true, "expect": ["BLOCKER"], "forbid": []}
+{"prompt": "이 함수 이름 camelCase로 바꿔줘.", "should_trigger": false, "expect": [], "forbid": ["게이트 A"]}

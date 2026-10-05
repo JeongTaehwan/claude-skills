@@ -35,3 +35,26 @@ https://github.com/JaeYeopHan/Interview_Question_for_Beginner
 
 ## 인용 포인트
 - 신입 교육 커리큘럼의 목차를 짤 때, 이 저장소의 대분류를 그대로 가져오면 "CS 기초 범위"에 대한 팀 합의를 빨리 얻을 수 있다.
+
+## 코드 예시
+
+온보딩 퀴즈를 만들 때, 문답마다 1차 문서 링크를 필수 필드로 달아 정확성 확인 경로를 남기는 틀.
+
+```python
+import random
+
+QUIZ = [
+    {"q": "TCP 3-way handshake 에서 각 단계가 확인하는 것은?",
+     "a": "클라이언트와 서버가 서로 송수신 가능한지, 초기 시퀀스 번호를 교환한다",
+     "source": "https://example.com/rfc-or-official-doc"},   # 실제 1차 문서 링크로 교체
+    {"q": "인덱스가 쓰기 성능을 떨어뜨리는 이유는?",
+     "a": "삽입·갱신 때 인덱스 구조도 함께 갱신해야 한다",
+     "source": "https://example.com/official-doc"},
+]
+
+for item in random.sample(QUIZ, k=len(QUIZ)):
+    input(f"\nQ. {item['q']}\n(엔터로 답 확인) ")
+    print(f"A. {item['a']}\n   근거: {item['source']}")
+```
+
+`source` 가 비어 있는 문답은 퀴즈에 넣지 않는다 — 저장소의 설명은 첫 진입로일 뿐이고, 정확성이 걸린 답은 1차 문서로 되돌아가 확인할 수 있어야 한다.

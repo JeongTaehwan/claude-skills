@@ -36,3 +36,33 @@ Royce는 분석·코딩만 있는 소박한 모델에서 시작해 요구사항�
 ## 인용 포인트
 - "폭포수의 원전이 폭포수를 반대했다"는 사실 자체가, 프로세스 논쟁에서 라벨 대신 실제 문제로 대화를 돌리는 가장 빠른 카드다.
 - "do it twice" — 첫 버전은 버릴 각오로 만든다 — 는 프로토타입 예산을 방어할 때 1970년까지 거슬러 올라가는 근거가 된다.
+
+## 코드 예시
+
+"한 번에 순서대로 만들면 오해가 테스트에서야 드러난다"는 구조를 시뮬레이션으로 옮긴 것. 축소판을 먼저 만드는 선택이 기대 비용을 어떻게 바꾸는지 본다.
+
+```python
+import random
+
+STAGES = {"requirements": 1, "design": 1, "coding": 2, "testing": 1}  # 주 단위, 가정값
+FULL = sum(STAGES.values())
+
+def cost(pilot: bool, p_misread=0.4, seed=0) -> float:
+    rng = random.Random(seed)
+    total = 0.0
+    if pilot:                          # 버릴 셈치고 먼저 만드는 축소판
+        total += 0.2 * FULL
+        misread = rng.random() < p_misread * 0.25   # 오해가 일찍 노출돼 줄어든다고 가정
+    else:
+        misread = rng.random() < p_misread
+    total += FULL
+    if misread:                        # 테스트에서 발견 -> 앞 단계로 돌아가 전부 재작업
+        total += FULL
+    return total
+
+for pilot in (False, True):
+    avg = sum(cost(pilot, seed=s) for s in range(10_000)) / 10_000
+    print(f"pilot={pilot}: 평균 {avg:.2f}주")
+```
+
+확률과 비용 계수는 전부 가정이다 — 이 코드가 보여주는 것은 숫자가 아니라, 오해가 마지막 단계에서 드러나면 재작업이 전 단계 비용을 통째로 곱한다는 구조뿐이다.

@@ -32,3 +32,22 @@ https://github.com/dend/awesome-product-management
 GitHub의 awesome-* 관례를 따르는 링크 모음으로, 제품 관리 영역을 책·아티클·블로그·팟캐스트·뉴스레터·도구·템플릿·커뮤니티 등으로 나눠 정리한다. 각 링크에는 짧은 설명이 붙지만, 왜 그 자료가 신뢰할 만한지에 대한 평가는 거의 없다.
 큐레이션 저장소의 구조적 한계도 그대로 있다. 항목의 진입 기준이 느슨하고 PR로 축적되므로 품질 편차가 크며, 링크 부패(죽은 링크, 유료화된 자료)가 시간이 지날수록 쌓인다. 따라서 여기서 고른 자료는 항상 한 번 열어 보고 판단해야 하고, 이 목록의 존재 자체를 근거로 쓰면 안 된다.
 사용법은 명확하다. 넓게 훑어 후보를 뽑는 데 쓰고, 깊이는 이 라이브러리의 개별 항목이나 1차 출처에서 확보한다.
+
+## 코드 예시
+
+이 저장소는 "찾는 출발점"이고 링크 부패가 쌓인다 — 후보를 뽑기 전에 링크가 살아 있는지부터 기계로 걸러 내는 스크립트.
+
+```bash
+#!/usr/bin/env bash
+# OWNER/REPO 는 실제 awesome 저장소로 바꾼다
+README=https://raw.githubusercontent.com/OWNER/REPO/main/README.md
+
+curl -fsSL "$README" \
+  | grep -oE '\]\(https?://[^)]+\)' | sed -E 's/^\]\(//; s/\)$//' | sort -u \
+  | while read -r url; do
+      code=$(curl -s -o /dev/null -L --max-time 10 -w '%{http_code}' "$url")
+      [ "$code" != "200" ] && echo "$code $url"      # 200 이 아니면 열어서 확인
+    done
+```
+
+200 이 나왔다고 좋은 자료인 것은 아니다 — 이 스크립트가 거르는 것은 죽은 링크뿐이고, 신뢰할 만한지는 여전히 사람이 한 번 열어 봐야 한다.

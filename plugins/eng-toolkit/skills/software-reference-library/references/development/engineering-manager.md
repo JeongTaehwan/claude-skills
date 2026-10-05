@@ -35,3 +35,25 @@ https://github.com/ryanburgess/engineer-manager
 
 ## 인용 포인트
 - 이 저장소 자체를 인용하기보다, 여기서 찾은 1차 아티클을 인용하는 용도로 쓰는 것이 맞다.
+
+## 코드 예시
+
+링크 모음에서 지금 필요한 주제(예: 1:1)의 출발점 글만 뽑아 오는 스크립트. 제목 매칭이라 완전하지 않지만, 읽을거리 선별의 첫 단계로는 충분하다.
+
+```python
+import re, sys, urllib.request
+
+URL = "https://raw.githubusercontent.com/ryanburgess/engineer-manager/HEAD/README.md"
+topic = (sys.argv[1] if len(sys.argv) > 1 else "1:1").lower()
+
+text = urllib.request.urlopen(URL).read().decode("utf-8")
+section = ""
+for line in text.splitlines():
+    if line.startswith("#"):
+        section = line.lstrip("# ").strip()
+    m = re.search(r"\[([^\]]+)\]\((https?://[^)]+)\)", line)
+    if m and (topic in m.group(1).lower() or topic in section.lower()):
+        print(f"[{section}] {m.group(1)}\n    {m.group(2)}")
+```
+
+링크가 죽었는지, 아직 유효한 조언인지는 이 스크립트가 알 수 없다 — 출력된 목록은 후보일 뿐이고, 두세 개를 직접 읽고 걸러야 한다.

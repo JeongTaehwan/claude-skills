@@ -46,3 +46,32 @@ SB7 프레임의 일곱 요소는 다음과 같다 — (1) 무언가를 원하�
 - 카피 리뷰에서 "외적 문제만 있고 내적 문제가 없다"는 지적을 구조적 결함으로 제기할 때.
 - 한 화면에 CTA 를 여러 개 두려는 요구를 주 CTA/부 CTA 위계로 정리할 때.
 - 마케터가 없는 팀에 카피 작성 절차를 넘겨줄 때, 채워 넣기만 하면 되는 7칸 틀로서.
+
+## 코드 예시
+
+SB7 의 규칙을 린터로 만든다 — 일곱 요소가 다 채워졌는지, 히어로 문구가 브랜드가 아닌 고객 문제로 시작하는지, CTA 가 하나인지 확인한다.
+
+```python
+SB7 = ["character", "problem", "guide", "plan", "cta", "failure", "success"]
+
+page = {
+    "character": "월말 정산에 하루를 쓰는 소규모 가게 사장",
+    "problem": {"external": "정산이 수작업", "internal": "실수할까 불안", "philosophical": "성실한 사람이 숫자에 시달릴 이유는 없다"},
+    "guide": "정산 자동화 도구 (공감 한 줄 + 근거 한 줄)",
+    "plan": ["연결한다", "규칙을 고른다", "자동으로 닫는다"],
+    "cta": {"primary": "무료로 시작", "secondary": ["자료 받기"]},
+    "failure": "계속 월말마다 밤을 샌다",
+    "success": "월말이 평범한 하루가 된다",
+    "hero": "정산, 이제 버튼 하나로 끝내세요",
+}
+BRAND_FIRST = ["우리는", "10년", "차세대", "통합 플랫폼"]
+
+errors = [f"빈 요소: {k}" for k in SB7 if not page.get(k)]
+if any(w in page["hero"] for w in BRAND_FIRST):
+    errors.append("히어로가 브랜드 자랑으로 시작 — 고객 문제로 뒤집을 것")
+if set(page["problem"]) != {"external", "internal", "philosophical"}:
+    errors.append("문제는 외적·내적·철학적 세 층으로 적을 것")
+print("\n".join(errors) or "통과")
+```
+
+린터는 형식만 검사한다 — 통과해도 문구가 좋다는 뜻은 아니며, 이 프레임이 전환율을 얼마나 올리는지는 코드가 아니라 우리 A/B 테스트로만 확인할 수 있다.

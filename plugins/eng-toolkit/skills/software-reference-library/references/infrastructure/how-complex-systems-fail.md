@@ -53,3 +53,34 @@ https://how.complexsystems.fail/
 - "시스템은 늘 부분적으로 고장 나 있다"는 명제는, 무장애 기간을 근거로 안정성 투자를 줄이자는 주장에 대한 답이 된다.
 - 변경이 새 실패 경로를 만든다는 관점은 안전장치 추가를 무조건적 개선으로 보는 시각을 교정한다.
 - 운영자를 원인이자 해결책으로 보는 프레임은, 비난 없는 회고가 온정이 아니라 정확한 원인 분석이라는 논증을 제공한다.
+
+## 코드 예시
+
+"재앙은 여러 개의 작은 결함이 동시에 정렬될 때만 일어난다"를 시뮬레이션으로 옮긴다 — 결함마다 평소엔 무해하게 잠복하다가, 임계 개수 이상이 같은 날 겹칠 때만 사고가 난다.
+
+```python
+import random
+
+random.seed(1)
+DAYS = 100_000
+LATENT = {"stale_runbook": 0.05, "flaky_alert": 0.08, "unpatched_node": 0.03,
+          "expired_cert_soon": 0.02, "bad_failover_config": 0.04}  # 하루에 활성일 확률(가정값)
+NEEDED = 3   # 방어가 여러 겹이라 이만큼 겹쳐야 사고
+
+def incidents(latent):
+    count, culprit = 0, {k: 0 for k in latent}
+    for _ in range(DAYS):
+        active = [k for k, p in latent.items() if random.random() < p]
+        if len(active) >= NEEDED:
+            count += 1
+            for k in active:
+                culprit[k] += 1
+    return count, culprit
+
+total, culprit = incidents(LATENT)
+print("사고 일수:", total)
+print("사고 당일 활성이었던 결함:", culprit)   # 거의 전부 연루 -> '근본 원인 하나'는 없다
+print("한 결함만 제거 후:", incidents({k: p for k, p in LATENT.items() if k != "flaky_alert"})[0])
+```
+
+결함 하나를 고쳐도 사고가 0이 되지 않는다는 점이 핵심이다 — 이 모델은 확률을 가정으로 넣은 장난감이며, 말해 주는 것은 "근본 원인 하나를 찾아 끝내는 회고"의 구조적 한계까지다.

@@ -32,3 +32,27 @@ https://blog.banksalad.com/
 개별 글 단위의 자료가 아니라 지속적으로 갱신되는 블로그이므로, 특정 주장을 인용하려면 그때그때 해당 글을 직접 확인해야 한다. 이 항목이 가리키는 것은 **이 블로그가 축적한 주제의 성향**이다.
 성향은 뚜렷하다. 프레임워크 사용기나 성능 튜닝기보다, 팀을 어떻게 나눴고 결정을 누가 어떻게 내리며 그 방식이 어떤 문제를 낳았는지에 대한 회고성 글의 비중이 높다. 개발 문화·채용·온보딩·직군 협업이 반복 주제로 나타난다.
 한국어라는 점, 그리고 조직 규모와 채용 시장이 유사하다는 점 때문에 해외 사례보다 이식 가능성이 높다. 다만 회사 브랜딩 목적의 글이라 실패와 비용은 축소되어 서술되는 경향이 있으므로, "이렇게 하면 된다"가 아니라 "이런 선택지를 이 회사는 이렇게 골랐다"로 읽는 편이 안전하다.
+
+## 코드 예시
+
+이 블로그의 값은 코드 글이 아니라 조직·의사결정·협업 회고 글에 있다 — 피드를 받아 그 성향의 글만 걸러 읽는 필터. 피드 주소는 예시이므로 실제 블로그의 RSS 주소로 바꾼다.
+
+```python
+import urllib.request
+import xml.etree.ElementTree as ET
+
+FEED = "https://example.com/rss.xml"
+KEYWORDS = ["조직", "협업", "온보딩", "의사결정", "회고", "채용", "문화"]
+
+with urllib.request.urlopen(FEED, timeout=10) as r:
+    root = ET.fromstring(r.read())
+
+for item in root.iter("item"):
+    title = (item.findtext("title") or "").strip()
+    link = (item.findtext("link") or "").strip()
+    hits = [k for k in KEYWORDS if k in title]
+    if hits:
+        print(f"{','.join(hits):12} {title}\n             {link}")
+```
+
+제목 키워드는 거친 체다 — 걸린 글은 "이렇게 하면 된다"가 아니라 "이 회사는 이 선택지를 골랐다"로 읽어야 하고, 인용 전에는 해당 글을 직접 확인해야 한다.

@@ -36,3 +36,31 @@ https://github.com/Integerous/goQuality-dev-contents
 
 ## 인용 포인트
 - 한국어 자료를 추천할 때 개인 취향 목록 대신 "커뮤니티에서 반복 추천된 목록"이라는 근거를 붙일 수 있다.
+
+## 코드 예시
+
+섹션별로 앞쪽 글 몇 개만 뽑아 신규 입사자 읽을거리 체크리스트(마크다운)를 만든다. 항목 단위가 글 하나라는 점을 그대로 활용한다.
+
+```python
+import re, urllib.request
+
+URL = "https://raw.githubusercontent.com/Integerous/goQuality-dev-contents/HEAD/README.md"
+WANT = ["Spring", "JPA", "Git"]    # 온보딩에 필요한 주제 키워드 (예시)
+PER_TOPIC = 3
+
+text = urllib.request.urlopen(URL).read().decode("utf-8")
+picked, section = {}, ""
+for line in text.splitlines():
+    if line.startswith("#"):
+        section = line.lstrip("# ").strip()
+        continue
+    m = re.search(r"\[([^\]]+)\]\((https?://[^)]+)\)", line)
+    for kw in WANT:
+        if m and kw.lower() in section.lower() and len(picked.setdefault(kw, [])) < PER_TOPIC:
+            picked[kw].append(f"- [ ] [{m.group(1)}]({m.group(2)})")
+
+for kw, items in picked.items():
+    print(f"### {kw}", *items, sep="\n")
+```
+
+커뮤니티 추천 순서는 품질 순서가 아니다 — 앞의 세 개를 그대로 체크리스트에 넣지 말고, 발행 시점과 버전 의존 여부를 한 번 훑은 뒤에 확정해야 한다.

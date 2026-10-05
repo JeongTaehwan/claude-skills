@@ -22,7 +22,7 @@ for pat in ("scripts/*.py", "plugins/eng-toolkit/skills/*/scripts/*.py"):
             bad.append(f"FAIL 구문 오류 {f}:{e.lineno} {e.msg}")
 
 for pat in (".claude-plugin/marketplace.json", "plugins/*/.claude-plugin/plugin.json",
-            "hooks/*.json"):
+            "hooks/*.json", "profiles/*.json"):
     for f in sorted(glob.glob(pat)):
         try:
             json.load(open(f, encoding="utf-8"))
@@ -33,6 +33,9 @@ for line in bad:
     print(line)
 sys.exit(1 if bad else 0)
 PY
+
+echo "==> 스킬 규약 (페르소나 · 코드 예시 · 프롬프트 무게)"
+python3 plugins/eng-toolkit/skills/skill-forge/scripts/lint_skills.py . || exit 1
 
 echo "==> 셸 구문"
 for f in sync.sh verify.sh hooks/*.sh; do
@@ -60,6 +63,13 @@ for i, line in enumerate(open(p, encoding="utf-8"), 1):
             print(f"FAIL {i}줄: '{k}' 없음"); bad += 1
 sys.exit(1 if bad else 0)
 PY
+
+echo "==> 가드 훅 동작"
+g() { printf '%s' "$2" | CLAUDE_GUARD_OFF=0 sh "hooks/$1" >/dev/null 2>&1 && echo 0 || echo $?; }
+[ "$(g guard-bash.sh '{"tool_input":{"command":"git push origin main"},"cwd":"/"}')" = 2 ] || { echo "FAIL guard-bash: main push 를 못 막음"; exit 1; }
+[ "$(g guard-bash.sh '{"tool_input":{"command":"git push -u origin feature/x"},"cwd":"/"}')" = 0 ] || { echo "FAIL guard-bash: 피처 브랜치 push 를 막음"; exit 1; }
+[ "$(g guard-write.sh '{"tool_input":{"file_path":"/x/a.ts","content":"k=AKIA'"ABCDEFGHIJKLMNOP"'"}}')" = 2 ] || { echo "FAIL guard-write: 키를 못 막음"; exit 1; }
+[ "$(g guard-write.sh '{"tool_input":{"file_path":"/x/a.ts","content":"k=process.env.K"}}')" = 0 ] || { echo "FAIL guard-write: 정상 쓰기를 막음"; exit 1; }
 
 echo "==> 레퍼런스 검색 품질"
 (cd plugins/eng-toolkit/skills/software-reference-library && python3 scripts/find_test.py) \
