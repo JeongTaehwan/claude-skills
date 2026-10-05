@@ -4,6 +4,7 @@ url: https://github.com/aquasecurity/trivy
 domain: security
 type: 저장소
 lang: en
+concepts: [security-scanning, containers]
 ---
 
 # Trivy

@@ -4,6 +4,7 @@ url: https://postmarkapp.com/developer
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [email-marketing]
 ---
 
 # Postmark 개발자 문서 — 트랜잭션 이메일 발송 API

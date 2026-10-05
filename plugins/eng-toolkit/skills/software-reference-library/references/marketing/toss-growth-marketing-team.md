@@ -4,6 +4,7 @@ url: https://toss.im/tossfeed/article/marketingteam-interview
 domain: marketing
 type: 블로그
 lang: ko
+concepts: [growth-strategy, performance-marketing]
 ---
 
 # 토스 마케팅팀이 말하는 그로스 마케팅 (토스피드)

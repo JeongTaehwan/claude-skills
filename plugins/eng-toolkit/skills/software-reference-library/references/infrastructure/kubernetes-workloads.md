@@ -4,6 +4,7 @@ url: https://kubernetes.io/docs/concepts/workloads/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [k8s-workload-config]
 ---
 
 # Kubernetes 워크로드 공식 문서

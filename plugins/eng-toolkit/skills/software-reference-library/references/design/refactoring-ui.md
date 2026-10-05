@@ -4,6 +4,7 @@ url: https://www.refactoringui.com/
 domain: design
 type: 공식문서
 lang: en
+concepts: [visual-design]
 ---
 
 # Refactoring UI

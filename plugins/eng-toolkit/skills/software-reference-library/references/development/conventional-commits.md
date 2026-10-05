@@ -4,6 +4,7 @@ url: https://www.conventionalcommits.org/en/v1.0.0/
 domain: development
 type: 표준
 lang: en
+concepts: [versioning-changelog]
 ---
 
 # Conventional Commits

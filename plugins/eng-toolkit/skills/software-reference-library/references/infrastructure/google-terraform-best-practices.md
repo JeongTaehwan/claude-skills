@@ -4,6 +4,7 @@ url: https://cloud.google.com/docs/terraform/best-practices/general-style-struct
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [infrastructure-as-code]
 ---
 
 # Google Cloud — Terraform 모범 사례

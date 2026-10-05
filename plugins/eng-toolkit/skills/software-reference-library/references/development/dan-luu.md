@@ -4,6 +4,7 @@ url: https://danluu.com/
 domain: development
 type: 블로그
 lang: en
+concepts: [engineering-effectiveness]
 ---
 
 # Dan Luu

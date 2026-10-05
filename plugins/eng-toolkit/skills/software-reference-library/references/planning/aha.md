@@ -4,6 +4,7 @@ url: https://www.aha.io/roadmapping/guide/roadmap
 domain: planning
 type: 공식문서
 lang: en
+concepts: [roadmapping]
 ---
 
 # Aha! — 제품 로드맵 가이드

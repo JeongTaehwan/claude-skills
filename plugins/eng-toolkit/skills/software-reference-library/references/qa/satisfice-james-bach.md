@@ -4,6 +4,7 @@ url: https://www.satisfice.com/
 domain: qa
 type: 공식문서
 lang: en
+concepts: [exploratory-testing, test-heuristics]
 ---
 
 # Satisfice — James Bach

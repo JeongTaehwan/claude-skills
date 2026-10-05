@@ -4,6 +4,7 @@ url: https://csrc.nist.gov/Projects/ssdf
 domain: security
 type: 표준
 lang: en
+concepts: [security-frameworks, supply-chain-security]
 ---
 
 # NIST Secure Software Development Framework (SSDF)

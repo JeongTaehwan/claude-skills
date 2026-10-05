@@ -4,6 +4,7 @@ url: https://stryker-mutator.io/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [mutation-testing]
 ---
 
 # Stryker Mutator (JS/TS/C#/Scala)

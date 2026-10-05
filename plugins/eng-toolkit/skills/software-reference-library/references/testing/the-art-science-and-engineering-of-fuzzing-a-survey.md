@@ -4,6 +4,7 @@ url: https://arxiv.org/abs/1812.00140
 domain: testing
 type: 논문
 lang: en
+concepts: [fuzzing]
 ---
 
 # The Art, Science, and Engineering of Fuzzing: A Survey

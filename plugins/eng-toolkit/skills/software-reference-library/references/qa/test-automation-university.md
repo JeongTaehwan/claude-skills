@@ -4,6 +4,7 @@ url: https://testautomationu.applitools.com/
 domain: qa
 type: 공식문서
 lang: en
+concepts: [test-automation, qa-practice-community]
 ---
 
 # Test Automation University

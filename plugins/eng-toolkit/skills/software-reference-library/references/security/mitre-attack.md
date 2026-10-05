@@ -4,6 +4,7 @@ url: https://attack.mitre.org/
 domain: security
 type: 표준
 lang: en
+concepts: [threat-modeling]
 ---
 
 # MITRE ATT&CK

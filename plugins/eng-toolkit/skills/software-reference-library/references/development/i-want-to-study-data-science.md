@@ -4,6 +4,7 @@ url: https://github.com/Team-Neighborhood/I-want-to-study-Data-Science
 domain: development
 type: 저장소
 lang: ko
+concepts: [learning-resources]
 ---
 
 # I-want-to-study-Data-Science

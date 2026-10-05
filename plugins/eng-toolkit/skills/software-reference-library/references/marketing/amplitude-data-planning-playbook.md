@@ -4,6 +4,7 @@ url: https://amplitude.com/docs/data/data-planning-playbook
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [tracking-plan]
 ---
 
 # Amplitude 택소노미 플래닝 플레이북

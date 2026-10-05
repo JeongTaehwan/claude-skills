@@ -4,6 +4,7 @@ url: https://llvm.org/docs/LibFuzzer.html
 domain: testing
 type: 공식문서
 lang: en
+concepts: [fuzzing]
 ---
 
 # libFuzzer

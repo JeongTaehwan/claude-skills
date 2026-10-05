@@ -4,6 +4,7 @@ url: https://gatling.io/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [load-testing]
 ---
 
 # Gatling

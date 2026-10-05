@@ -4,6 +4,7 @@ url: https://github.com/serwist/serwist
 domain: performance
 type: 저장소
 lang: en
+concepts: [service-worker-offline]
 ---
 
 # Serwist — Next.js 시대의 서비스 워커 툴킷

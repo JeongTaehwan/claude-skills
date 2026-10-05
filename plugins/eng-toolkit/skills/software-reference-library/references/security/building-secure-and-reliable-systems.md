@@ -4,6 +4,7 @@ url: https://google.github.io/building-secure-and-reliable-systems/raw/toc.html
 domain: security
 type: 공식문서
 lang: en
+concepts: [security-engineering, site-reliability-engineering]
 ---
 
 # Building Secure and Reliable Systems (Google, 무료 웹북)

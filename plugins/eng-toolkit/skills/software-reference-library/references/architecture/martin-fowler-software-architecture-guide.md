@@ -4,6 +4,7 @@ url: https://martinfowler.com/architecture/
 domain: architecture
 type: 블로그
 lang: en
+concepts: [architecture-patterns, software-complexity]
 ---
 
 # Martin Fowler — Software Architecture Guide

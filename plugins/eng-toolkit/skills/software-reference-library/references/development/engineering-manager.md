@@ -4,6 +4,7 @@ url: https://github.com/ryanburgess/engineer-manager
 domain: development
 type: 저장소
 lang: en
+concepts: [engineering-leadership]
 ---
 
 # Engineering Manager 자료 모음

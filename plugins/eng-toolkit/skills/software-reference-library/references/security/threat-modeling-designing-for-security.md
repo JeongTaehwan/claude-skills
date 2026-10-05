@@ -4,6 +4,7 @@ url: https://shostack.org/books/threat-modeling-book
 domain: security
 type: 서적
 lang: en
+concepts: [threat-modeling]
 ---
 
 # Threat Modeling — Designing for Security (Adam Shostack)

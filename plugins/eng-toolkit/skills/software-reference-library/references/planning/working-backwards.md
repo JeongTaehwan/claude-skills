@@ -4,6 +4,7 @@ url: https://www.allthingsdistributed.com/2006/11/working_backwards.html
 domain: planning
 type: 공식문서
 lang: en
+concepts: [requirements-specs, product-management-practice]
 ---
 
 # Working Backwards (Amazon, Werner Vogels)

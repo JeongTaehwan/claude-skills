@@ -4,6 +4,7 @@ url: https://github.com/papers-we-love/papers-we-love
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources]
 ---
 
 # Papers We Love

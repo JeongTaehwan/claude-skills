@@ -4,6 +4,7 @@ url: https://slsa.dev/
 domain: development
 type: 표준
 lang: en
+concepts: [sbom-provenance]
 ---
 
 # SLSA (Supply-chain Levels for Software Artifacts)

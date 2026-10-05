@@ -4,6 +4,7 @@ url: https://www.akamai.com/newsroom/press-release/akamai-releases-spring-2017-s
 domain: performance
 type: 리포트
 lang: en
+concepts: [performance-business-impact]
 ---
 
 # Akamai / SOASTA: The State of Online Retail Performance (Spring 2017)

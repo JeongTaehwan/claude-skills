@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/guides/package-bundling
 domain: performance
 type: 공식문서
 lang: en
+concepts: [javascript-payload]
 ---
 
 # Next.js 번들 분석 — @next/bundle-analyzer

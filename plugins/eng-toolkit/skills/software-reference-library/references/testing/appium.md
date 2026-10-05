@@ -4,6 +4,7 @@ url: https://appium.io/docs/en/latest/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [e2e-browser-automation]
 ---
 
 # Appium — 모바일 자동화

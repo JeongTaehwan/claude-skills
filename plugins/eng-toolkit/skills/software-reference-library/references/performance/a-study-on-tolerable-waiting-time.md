@@ -4,6 +4,7 @@ url: https://www.tandfonline.com/doi/abs/10.1080/01449290410001669914
 domain: performance
 type: 논문
 lang: en
+concepts: [perceived-performance]
 ---
 
 # A Study on Tolerable Waiting Time: How Long Are Web Users Willing to Wait? (2004)

@@ -4,6 +4,7 @@ url: https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final
 domain: security
 type: 표준
 lang: en
+concepts: [security-frameworks]
 ---
 
 # NIST SP 800-53 — 보안·프라이버시 통제 카탈로그

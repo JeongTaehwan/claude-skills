@@ -4,6 +4,7 @@ url: https://www.jaegertracing.io/docs/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [distributed-tracing]
 ---
 
 # Jaeger 공식 문서

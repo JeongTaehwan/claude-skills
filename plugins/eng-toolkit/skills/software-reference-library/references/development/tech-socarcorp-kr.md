@@ -4,6 +4,7 @@ url: https://tech.socarcorp.kr/
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 쏘카 기술블로그

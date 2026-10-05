@@ -122,6 +122,9 @@ def main():
             "한 줄" in e["secs"] and "페르소나" in e["secs"] for e in all_entries(mod))),
         ("서술어를 거른다", lambda: mod.terms_of("느려서 죽는다 싶다") == ["느려서"]),
         ("조사를 뗀다", lambda: mod.match_weight("리뷰가", "코드 리뷰 규범") == 0.85),
+        ("모든 항목에 개념이 있다", lambda: all(e["concepts"] for e in all_entries(mod))),
+        ("개념 필터가 하위 개념을 포함한다", lambda: {"test-strategy", "test-portfolio-shape"}
+         <= mod.concept_family("test-strategy")),
     ):
         ok = False
         try:

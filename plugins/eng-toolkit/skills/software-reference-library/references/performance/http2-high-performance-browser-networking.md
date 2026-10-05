@@ -4,6 +4,7 @@ url: https://hpbn.co/http2/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [network-protocols]
 ---
 
 # HTTP/2 — High Performance Browser Networking

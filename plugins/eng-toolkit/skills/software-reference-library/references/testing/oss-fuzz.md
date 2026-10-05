@@ -4,6 +4,7 @@ url: https://github.com/google/oss-fuzz
 domain: testing
 type: 저장소
 lang: en
+concepts: [fuzzing]
 ---
 
 # OSS-Fuzz

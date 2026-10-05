@@ -4,6 +4,7 @@ url: https://www.usenix.org/system/files/conference/nsdi15/nsdi15-paper-butkiewi
 domain: performance
 type: 논문
 lang: en
+concepts: [resource-prioritization, perceived-performance]
 ---
 
 # Klotski: Reprioritizing Web Content to Improve User Experience on Mobile Devices (NSDI '15)

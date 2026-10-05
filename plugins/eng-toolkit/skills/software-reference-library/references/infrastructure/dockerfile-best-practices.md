@@ -4,6 +4,7 @@ url: https://docs.docker.com/build/building/best-practices/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [containers]
 ---
 
 # Dockerfile 작성 모범 사례 (Docker 공식)

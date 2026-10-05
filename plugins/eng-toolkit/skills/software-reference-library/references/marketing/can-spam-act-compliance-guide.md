@@ -4,6 +4,7 @@ url: https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-gui
 domain: marketing
 type: 표준
 lang: en
+concepts: [email-marketing]
 ---
 
 # FTC — CAN-SPAM Act 사업자 준수 가이드

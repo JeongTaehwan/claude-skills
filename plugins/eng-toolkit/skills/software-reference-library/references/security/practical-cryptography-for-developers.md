@@ -4,6 +4,7 @@ url: https://cryptobook.nakov.com/
 domain: security
 type: 공식문서
 lang: en
+concepts: [security-engineering]
 ---
 
 # Practical Cryptography for Developers (무료 온라인 책)

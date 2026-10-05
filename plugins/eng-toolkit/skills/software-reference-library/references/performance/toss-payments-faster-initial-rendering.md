@@ -4,6 +4,7 @@ url: https://toss.tech/article/faster-initial-rendering
 domain: performance
 type: 블로그
 lang: ko
+concepts: [critical-rendering-path, javascript-payload]
 ---
 
 # 조금만 신경써서 초기 렌더링 빠르게 하기

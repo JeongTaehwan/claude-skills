@@ -4,6 +4,7 @@ url: https://geoffreyamoore.com/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [positioning-brand, growth-strategy]
 ---
 
 # Crossing the Chasm (Geoffrey A. Moore)

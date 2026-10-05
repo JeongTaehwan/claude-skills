@@ -4,6 +4,7 @@ url: https://atlassian.design/
 domain: design
 type: 공식문서
 lang: en
+concepts: [design-systems, component-libraries]
 ---
 
 # Atlassian Design System

@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc7519.html
 domain: security
 type: 표준
 lang: en
+concepts: [oauth-jwt]
 ---
 
 # RFC 7519 — JSON Web Token (JWT)

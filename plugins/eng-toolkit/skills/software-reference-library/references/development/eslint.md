@@ -4,6 +4,7 @@ url: https://eslint.org/docs/latest/
 domain: development
 type: 공식문서
 lang: en
+concepts: [style-guides-linting]
 ---
 
 # ESLint 공식 문서

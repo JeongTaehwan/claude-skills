@@ -4,6 +4,7 @@ url: https://diataxis.fr/
 domain: development
 type: 공식문서
 lang: en
+concepts: [technical-writing]
 ---
 
 # Diátaxis — 문서 작성 프레임워크

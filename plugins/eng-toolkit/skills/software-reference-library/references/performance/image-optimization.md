@@ -4,6 +4,7 @@ url: https://www.smashingmagazine.com/printed-books/image-optimization/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [image-optimization]
 ---
 
 # Image Optimization — Addy Osmani

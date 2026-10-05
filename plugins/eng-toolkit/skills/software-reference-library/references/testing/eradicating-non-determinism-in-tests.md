@@ -4,6 +4,7 @@ url: https://martinfowler.com/articles/nonDeterminism.html
 domain: testing
 type: 블로그
 lang: en
+concepts: [flaky-tests]
 ---
 
 # Eradicating Non-Determinism in Tests (Martin Fowler)

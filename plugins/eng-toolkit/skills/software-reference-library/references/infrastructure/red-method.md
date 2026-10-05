@@ -4,6 +4,7 @@ url: https://grafana.com/blog/2018/08/02/the-red-method-how-to-instrument-your-s
 domain: infrastructure
 type: 블로그
 lang: en
+concepts: [metrics-monitoring, slo-error-budget]
 ---
 
 # The RED Method (Tom Wilkie, Grafana)

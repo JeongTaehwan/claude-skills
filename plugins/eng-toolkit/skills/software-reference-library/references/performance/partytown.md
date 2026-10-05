@@ -4,6 +4,7 @@ url: https://github.com/QwikDev/partytown
 domain: performance
 type: 저장소
 lang: en
+concepts: [third-party-scripts]
 ---
 
 # Partytown — 서드파티 스크립트 웹 워커 오프로딩

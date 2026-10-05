@@ -4,6 +4,7 @@ url: https://adr.github.io/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [architecture-documentation]
 ---
 
 # adr.github.io

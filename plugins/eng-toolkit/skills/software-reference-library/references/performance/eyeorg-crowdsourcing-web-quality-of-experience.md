@@ -4,6 +4,7 @@ url: https://www.davidtnaylor.com/eyeorg.pdf
 domain: performance
 type: 논문
 lang: en
+concepts: [perceived-performance, performance-measurement]
 ---
 
 # Eyeorg: A Platform for Crowdsourcing Web Quality of Experience Measurements (CoNEXT '16)

@@ -4,6 +4,7 @@ url: https://github.com/kuchin/awesome-cto
 domain: development
 type: 저장소
 lang: en
+concepts: [engineering-leadership]
 ---
 
 # Awesome CTO

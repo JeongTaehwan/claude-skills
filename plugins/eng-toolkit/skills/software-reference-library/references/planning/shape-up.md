@@ -4,6 +4,8 @@ url: https://basecamp.com/shapeup/webbook
 domain: planning
 type: 공식문서
 lang: en
+concepts: [agile-delivery]
+opposes: [planning/the-scrum-guide]
 ---
 
 # Shape Up (Basecamp, 무료 웹북)

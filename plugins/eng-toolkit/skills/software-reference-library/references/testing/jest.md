@@ -4,6 +4,7 @@ url: https://jestjs.io/docs/getting-started
 domain: testing
 type: 공식문서
 lang: en
+concepts: [test-runners]
 ---
 
 # Jest 공식 문서

@@ -4,6 +4,7 @@ url: https://tr.designtokens.org/format/
 domain: design
 type: 표준
 lang: en
+concepts: [design-tokens-foundations]
 ---
 
 # Design Tokens Format Module (W3C CG)

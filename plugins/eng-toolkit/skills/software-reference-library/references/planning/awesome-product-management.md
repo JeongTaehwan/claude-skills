@@ -4,6 +4,7 @@ url: https://github.com/dend/awesome-product-management
 domain: planning
 type: 저장소
 lang: en
+concepts: [product-management-practice]
 ---
 
 # Awesome Product Management

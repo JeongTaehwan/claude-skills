@@ -4,6 +4,7 @@ url: https://cyclonedx.org/
 domain: security
 type: 표준
 lang: en
+concepts: [sbom-provenance]
 ---
 
 # CycloneDX (SBOM 표준)

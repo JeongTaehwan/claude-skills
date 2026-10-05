@@ -4,6 +4,7 @@ url: https://learning.postman.com/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [api-testing]
 ---
 
 # Postman 문서

@@ -4,6 +4,7 @@ url: https://hbr.org/2003/12/the-one-number-you-need-to-grow
 domain: marketing
 type: 논문
 lang: en
+concepts: [product-metrics, growth-strategy]
 ---
 
 # The One Number You Need to Grow — NPS 원 논문 (Frederick Reichheld)

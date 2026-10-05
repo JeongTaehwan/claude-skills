@@ -4,6 +4,7 @@ url: https://developers.google.com/google-ads/api/docs/conversions/overview
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [performance-marketing]
 ---
 
 # Google Ads API — 전환 추적과 오프라인 전환 업로드

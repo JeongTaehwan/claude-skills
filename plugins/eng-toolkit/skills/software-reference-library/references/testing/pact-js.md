@@ -4,6 +4,7 @@ url: https://github.com/pact-foundation/pact-js
 domain: testing
 type: 저장소
 lang: en
+concepts: [contract-testing]
 ---
 
 # Pact JS

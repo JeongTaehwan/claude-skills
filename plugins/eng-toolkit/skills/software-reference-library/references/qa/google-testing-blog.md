@@ -4,6 +4,7 @@ url: https://testing.googleblog.com/
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-strategy, qa-practice-community]
 ---
 
 # Google Testing Blog

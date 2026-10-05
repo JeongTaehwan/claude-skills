@@ -4,6 +4,7 @@ url: https://github.com/kamranahmedse/developer-roadmap
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources]
 ---
 
 # Developer Roadmap

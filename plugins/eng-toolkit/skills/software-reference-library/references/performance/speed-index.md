@@ -4,6 +4,7 @@ url: https://sites.google.com/a/webpagetest.org/docs/using-webpagetest/metrics/s
 domain: performance
 type: 공식문서
 lang: en
+concepts: [performance-measurement]
 ---
 
 # Speed Index (원 정의 문서, WebPagetest)

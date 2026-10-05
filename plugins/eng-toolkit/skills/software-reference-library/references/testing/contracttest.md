@@ -4,6 +4,7 @@ url: https://martinfowler.com/bliki/ContractTest.html
 domain: testing
 type: 블로그
 lang: en
+concepts: [contract-testing]
 ---
 
 # ContractTest (Martin Fowler bliki)

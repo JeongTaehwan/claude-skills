@@ -4,6 +4,7 @@ url: https://m3.material.io/foundations
 domain: design
 type: 공식문서
 lang: en
+concepts: [design-tokens-foundations]
 ---
 
 # Material Design 3 — Foundations

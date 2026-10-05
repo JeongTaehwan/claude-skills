@@ -4,6 +4,7 @@ url: https://redis.io/docs/latest/
 domain: development
 type: 공식문서
 lang: en
+concepts: [database-usage]
 ---
 
 # Redis 공식 문서

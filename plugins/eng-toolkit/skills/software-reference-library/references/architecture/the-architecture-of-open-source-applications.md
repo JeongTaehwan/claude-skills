@@ -4,6 +4,7 @@ url: https://aosabook.org/en/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [system-design, architecture-patterns]
 ---
 
 # The Architecture of Open Source Applications

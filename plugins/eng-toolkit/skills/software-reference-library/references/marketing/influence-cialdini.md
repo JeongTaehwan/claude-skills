@@ -4,6 +4,7 @@ url: https://www.influenceatwork.com/principles-of-persuasion/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [persuasion-messaging, behavioral-design]
 ---
 
 # Influence — 설득의 7가지 원칙 (Robert Cialdini)

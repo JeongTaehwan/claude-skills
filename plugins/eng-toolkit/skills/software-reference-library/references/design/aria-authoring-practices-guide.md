@@ -4,6 +4,7 @@ url: https://www.w3.org/WAI/ARIA/apg/
 domain: design
 type: 표준
 lang: en
+concepts: [accessible-components]
 ---
 
 # ARIA Authoring Practices Guide (APG)

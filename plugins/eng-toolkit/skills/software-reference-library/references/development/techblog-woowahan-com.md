@@ -4,6 +4,7 @@ url: https://techblog.woowahan.com/
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs, domain-driven-design]
 ---
 
 # 우아한형제들 기술블로그

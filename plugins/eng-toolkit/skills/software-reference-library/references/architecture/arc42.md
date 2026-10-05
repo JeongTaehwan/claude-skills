@@ -4,6 +4,7 @@ url: https://arc42.org/overview
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [architecture-documentation]
 ---
 
 # arc42 — 아키텍처 문서 템플릿

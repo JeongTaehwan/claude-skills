@@ -4,6 +4,7 @@ url: https://www.bucketplace.com/post/2021-07-06-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB
 domain: marketing
 type: 블로그
 lang: ko
+concepts: [performance-marketing]
 ---
 
 # 오늘의집 — 데이터 마케팅 기반 만들기 (버킷플레이스)

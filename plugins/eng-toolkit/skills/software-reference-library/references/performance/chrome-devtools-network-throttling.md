@@ -4,6 +4,7 @@ url: https://developer.chrome.com/docs/devtools/settings/throttling
 domain: performance
 type: 공식문서
 lang: en
+concepts: [synthetic-testing]
 ---
 
 # Chrome DevTools 네트워크 스로틀링

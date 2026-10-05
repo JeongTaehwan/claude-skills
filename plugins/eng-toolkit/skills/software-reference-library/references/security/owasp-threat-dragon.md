@@ -4,6 +4,7 @@ url: https://github.com/OWASP/threat-dragon
 domain: security
 type: 저장소
 lang: en
+concepts: [threat-modeling]
 ---
 
 # OWASP Threat Dragon

@@ -4,6 +4,7 @@ url: https://react.dev/reference/react/Suspense
 domain: performance
 type: 공식문서
 lang: en
+concepts: [rendering-strategies]
 ---
 
 # React Suspense 스트리밍

@@ -4,6 +4,7 @@ url: https://ipa.co.uk/knowledge/publications-reports/the-long-and-the-short-of-
 domain: marketing
 type: 논문
 lang: en
+concepts: [brand-growth-science]
 ---
 
 # The Long and the Short of It (Binet & Field, IPA)

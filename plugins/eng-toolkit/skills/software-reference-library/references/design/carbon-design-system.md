@@ -4,6 +4,7 @@ url: https://carbondesignsystem.com/
 domain: design
 type: 공식문서
 lang: en
+concepts: [component-libraries]
 ---
 
 # Carbon Design System (IBM)

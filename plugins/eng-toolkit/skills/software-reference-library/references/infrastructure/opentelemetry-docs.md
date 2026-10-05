@@ -4,6 +4,7 @@ url: https://opentelemetry.io/docs/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [distributed-tracing, observability]
 ---
 
 # OpenTelemetry Docs

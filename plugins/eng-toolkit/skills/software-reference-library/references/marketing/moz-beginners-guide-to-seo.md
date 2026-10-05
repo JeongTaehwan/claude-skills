@@ -4,6 +4,7 @@ url: https://moz.com/beginners-guide-to-seo
 domain: marketing
 type: 블로그
 lang: en
+concepts: [seo]
 ---
 
 # Moz — The Beginner's Guide to SEO

@@ -4,6 +4,7 @@ url: https://github.com/airbnb/javascript
 domain: development
 type: 저장소
 lang: en
+concepts: [style-guides-linting]
 ---
 
 # Airbnb JavaScript Style Guide

@@ -4,6 +4,7 @@ url: https://foldingburritos.com/blog/kano-model/
 domain: planning
 type: 블로그
 lang: en
+concepts: [prioritization]
 ---
 
 # Kano 모델 실무 가이드

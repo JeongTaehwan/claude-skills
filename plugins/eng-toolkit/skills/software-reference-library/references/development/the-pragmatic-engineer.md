@@ -4,6 +4,7 @@ url: https://newsletter.pragmaticengineer.com/
 domain: development
 type: 블로그
 lang: en
+concepts: [engineering-leadership, engineering-effectiveness]
 ---
 
 # The Pragmatic Engineer

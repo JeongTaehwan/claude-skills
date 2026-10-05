@@ -4,6 +4,7 @@ url: https://dora.dev/
 domain: development
 type: 공식문서
 lang: en
+concepts: [engineering-effectiveness]
 ---
 
 # DORA (DevOps Research and Assessment)

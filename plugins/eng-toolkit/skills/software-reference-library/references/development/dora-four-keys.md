@@ -4,6 +4,7 @@ url: https://dora.dev/guides/dora-metrics-four-keys/
 domain: development
 type: 공식문서
 lang: en
+concepts: [engineering-effectiveness]
 ---
 
 # DORA — Four Keys 가이드

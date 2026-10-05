@@ -4,6 +4,7 @@ url: https://www.selenium.dev/documentation/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [e2e-browser-automation]
 ---
 
 # Selenium 공식 문서

@@ -4,6 +4,7 @@ url: https://www.deque.com/axe/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [accessibility-testing]
 ---
 
 # Deque axe

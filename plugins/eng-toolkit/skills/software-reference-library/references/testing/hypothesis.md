@@ -4,6 +4,7 @@ url: https://hypothesis.readthedocs.io/en/latest/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [property-based-testing]
 ---
 
 # Hypothesis (Python 속성 기반 테스트)

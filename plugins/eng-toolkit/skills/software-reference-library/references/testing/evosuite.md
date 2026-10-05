@@ -4,6 +4,7 @@ url: https://www.evosuite.org/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [generative-testing]
 ---
 
 # EvoSuite

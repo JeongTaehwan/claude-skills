@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP
 domain: security
 type: 공식문서
 lang: en
+concepts: [browser-security]
 ---
 
 # MDN — Content Security Policy (CSP)

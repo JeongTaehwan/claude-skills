@@ -4,6 +4,7 @@ url: https://grpc.io/docs/
 domain: development
 type: 공식문서
 lang: en
+concepts: [api-design]
 ---
 
 # gRPC 공식 문서

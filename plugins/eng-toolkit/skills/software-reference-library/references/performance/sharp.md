@@ -4,6 +4,7 @@ url: https://github.com/lovell/sharp
 domain: performance
 type: 저장소
 lang: en
+concepts: [image-optimization]
 ---
 
 # sharp — libvips 기반 Node.js 이미지 처리

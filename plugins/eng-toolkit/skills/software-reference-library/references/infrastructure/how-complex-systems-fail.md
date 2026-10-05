@@ -4,6 +4,7 @@ url: https://how.complexsystems.fail/
 domain: infrastructure
 type: 논문
 lang: en
+concepts: [incident-postmortem, software-complexity]
 ---
 
 # How Complex Systems Fail (Richard I. Cook)

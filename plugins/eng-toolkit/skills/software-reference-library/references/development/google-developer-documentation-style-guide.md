@@ -4,6 +4,7 @@ url: https://developers.google.com/style
 domain: development
 type: 공식문서
 lang: en
+concepts: [technical-writing]
 ---
 
 # Google Developer Documentation Style Guide

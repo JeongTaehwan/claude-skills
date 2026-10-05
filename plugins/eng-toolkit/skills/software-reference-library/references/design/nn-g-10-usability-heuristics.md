@@ -4,6 +4,7 @@ url: https://www.nngroup.com/articles/ten-usability-heuristics/
 domain: design
 type: 공식문서
 lang: en
+concepts: [ux-heuristics-patterns]
 ---
 
 # NN/g — 10 Usability Heuristics

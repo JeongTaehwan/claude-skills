@@ -4,6 +4,7 @@ url: https://kafka.apache.org/documentation/
 domain: development
 type: 공식문서
 lang: en
+concepts: [event-streaming-messaging]
 ---
 
 # Apache Kafka 문서

@@ -4,6 +4,7 @@ url: https://www.brendangregg.com/usemethod.html
 domain: infrastructure
 type: 블로그
 lang: en
+concepts: [metrics-monitoring, performance-measurement]
 ---
 
 # USE Method (Brendan Gregg)

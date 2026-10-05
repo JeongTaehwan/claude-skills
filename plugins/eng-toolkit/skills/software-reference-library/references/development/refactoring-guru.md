@@ -4,6 +4,7 @@ url: https://refactoring.guru/refactoring/catalog
 domain: development
 type: 공식문서
 lang: en
+concepts: [code-level-design-patterns, code-conventions]
 ---
 
 # Refactoring Guru — 리팩터링 & 디자인 패턴

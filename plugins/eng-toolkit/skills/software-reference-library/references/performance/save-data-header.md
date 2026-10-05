@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Save-Da
 domain: performance
 type: 공식문서
 lang: en
+concepts: [adaptive-loading]
 ---
 
 # Save-Data 요청 헤더

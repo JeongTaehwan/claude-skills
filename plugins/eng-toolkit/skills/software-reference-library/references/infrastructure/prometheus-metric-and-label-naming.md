@@ -4,6 +4,7 @@ url: https://prometheus.io/docs/practices/naming/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [metrics-monitoring]
 ---
 
 # Prometheus 메트릭·라벨 작명 규약 (카디널리티 관리)

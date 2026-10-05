@@ -4,6 +4,7 @@ url: https://articles.sequoiacap.com/retention
 domain: marketing
 type: 블로그
 lang: en
+concepts: [unit-economics-retention]
 ---
 
 # Retention — 코호트·리텐션 분석 가이드 (Sequoia)

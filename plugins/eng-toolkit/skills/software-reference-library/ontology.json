@@ -1,0 +1,902 @@
+{
+ "version": 1,
+ "description": "레퍼런스 라이브러리 온톨로지. 종류·관계·개념 어휘의 단일 정의. 관계 데이터는 각 항목 파일이 갖는다.",
+ "entity_types": {
+  "domain": "10개 도메인. 항목의 디렉터리 이름",
+  "reference": "항목 하나 = 파일 하나 (references/<도메인>/<slug>.md). id 는 '<도메인>/<slug>'",
+  "concept": "아래 concepts 어휘. 2단계(상위 → 하위)"
+ },
+ "relations": {
+  "about": {
+   "from": "reference",
+   "to": "concept",
+   "where": "front-matter concepts: [..]",
+   "rule": "1~4개. 어휘에 있는 id 만. 가장 좁은 개념을 단다 (상위는 자동으로 포함된다)"
+  },
+  "see_instead": {
+   "from": "reference",
+   "to": "reference",
+   "where": "본문 '이럴 땐 아니다' 의 `도메인/slug.md` 링크",
+   "rule": "파일에 다시 적지 않는다. 본문이 단일 출처"
+  },
+  "opposes": {
+   "from": "reference",
+   "to": "reference",
+   "symmetric": true,
+   "where": "front-matter opposes: [..]",
+   "rule": "업계가 실제로 갈리는 반대 입장. 한쪽에만 적어도 양방향"
+  },
+  "supersedes": {
+   "from": "reference",
+   "to": "reference",
+   "where": "front-matter supersedes: [..]",
+   "rule": "지우지 않고 대체한다. 대체된 쪽은 status: superseded 가 되고 find.py 기본 검색에서 빠진다"
+  },
+  "broader": {
+   "from": "concept",
+   "to": "concept",
+   "where": "ontology.json concepts.<id>.broader",
+   "rule": "2단계까지. 순환 금지"
+  }
+ },
+ "domains": [
+  "planning",
+  "architecture",
+  "development",
+  "design",
+  "qa",
+  "testing",
+  "performance",
+  "security",
+  "infrastructure",
+  "marketing"
+ ],
+ "domain_labels": {
+  "planning": "기획",
+  "architecture": "설계",
+  "development": "개발",
+  "design": "디자인",
+  "qa": "QA",
+  "testing": "테스트",
+  "performance": "성능",
+  "security": "보안",
+  "infrastructure": "인프라",
+  "marketing": "마케팅"
+ },
+ "concepts": {
+  "product-discovery": {
+   "label": "제품 발견",
+   "broader": null,
+   "domain": "planning",
+   "scope": "무엇을 만들지 결정하기 전에 고객 문제와 기회를 탐색·검증하는 활동이며, 이미 정한 것을 만들고 배포하는 실행 프로세스는 agile-delivery에 둔다."
+  },
+  "customer-jobs-opportunities": {
+   "label": "고객 과업·기회 탐색",
+   "broader": "product-discovery",
+   "domain": "planning",
+   "scope": "JTBD·Opportunity Solution Tree·Kano처럼 고객이 해결하려는 과업과 기회를 구조화하는 프레임이며, 정량 실험은 online-experimentation에 둔다."
+  },
+  "discovery-workshops": {
+   "label": "발견 워크숍·프로세스",
+   "broader": "product-discovery",
+   "domain": "planning",
+   "scope": "디자인 스프린트·더블 다이아몬드·프로덕트 트리오처럼 팀이 함께 문제를 넓히고 좁히는 진행 절차이며, 도메인 모델링 워크숍(Event Storming)은 domain-driven-design에 둔다."
+  },
+  "prioritization": {
+   "label": "우선순위 결정",
+   "broader": null,
+   "domain": "planning",
+   "scope": "RICE·Impact Mapping·Story Mapping·Kano 등 후보 기능 사이의 순서를 정하는 기법이며, 장기 방향 설정 자체는 product-strategy에 둔다."
+  },
+  "product-strategy": {
+   "label": "제품 전략",
+   "broader": null,
+   "domain": "planning",
+   "scope": "비전·로드맵·비즈니스 모델·목표 지표 등 제품의 중장기 방향을 정하는 자료이며, 개별 기능의 요구사항 문서는 requirements-specs에 둔다."
+  },
+  "roadmapping": {
+   "label": "로드맵",
+   "broader": "product-strategy",
+   "domain": "planning",
+   "scope": "제품 로드맵의 형식·운영과 Wardley Map 같은 전략 지도를 다루며, 스프린트 단위 백로그 관리는 agile-delivery에 둔다."
+  },
+  "business-model": {
+   "label": "비즈니스 모델",
+   "broader": "product-strategy",
+   "domain": "planning",
+   "scope": "Business Model Canvas·가치사슬 진화 지도처럼 돈을 버는 구조와 경쟁 지형을 그리는 도구이며, 획득 비용·리텐션 등 성장 수치는 marketing의 unit-economics-retention에 둔다."
+  },
+  "product-metrics": {
+   "label": "제품 지표 체계",
+   "broader": "product-strategy",
+   "domain": "planning",
+   "scope": "OKR·North Star·HEART처럼 목표를 세우고 제품 성공을 무엇으로 잴지 정하는 프레임이며, 이벤트 수집·태깅 구현은 marketing의 product-analytics에 둔다."
+  },
+  "requirements-specs": {
+   "label": "요구사항·기획 문서",
+   "broader": null,
+   "domain": "planning",
+   "scope": "PRD·PR/FAQ·Design Doc·RFD·사용자 스토리처럼 구현 전에 만들 것과 설계 의도를 글로 합의하는 산출물이며, 결정 한 건을 짧게 남기는 ADR은 architecture-documentation에 둔다."
+  },
+  "user-stories": {
+   "label": "사용자 스토리",
+   "broader": "requirements-specs",
+   "domain": "planning",
+   "scope": "사용자 스토리 작성·분할·스토리 매핑을 다루며, 예시 기반 인수 기준(Given/When/Then)은 qa의 specification-by-example에 둔다."
+  },
+  "agile-delivery": {
+   "label": "애자일 실행 방식",
+   "broader": null,
+   "domain": "planning",
+   "scope": "스크럼·칸반·Shape Up·애자일 선언처럼 팀이 일을 나눠 반복적으로 전달하는 프로세스(고정 기간·가변 범위 방식 포함)이며, 무엇을 만들지 탐색하는 것은 product-discovery에 둔다."
+  },
+  "online-experimentation": {
+   "label": "온라인 실험(A/B 테스트)",
+   "broader": null,
+   "domain": "planning",
+   "scope": "통제 실험으로 제품 변경의 효과를 판정하는 설계와 실험 플랫폼(GrowthBook·Statsig·ExP)이며, 기능을 켜고 끄는 배포 기법 자체는 development의 progressive-delivery에 둔다."
+  },
+  "experiment-statistics": {
+   "label": "실험 통계·해석 함정",
+   "broader": "online-experimentation",
+   "domain": "planning",
+   "scope": "표본·p값·SRM·지표 해석 오류처럼 실험 결과를 믿을 수 있는지 판단하는 방법이며, 실험 도구 사용법은 online-experimentation 상위에 둔다."
+  },
+  "product-management-practice": {
+   "label": "PM 직무·조직 운영",
+   "broader": null,
+   "domain": "planning",
+   "scope": "PM 역할·제품 조직 구조·회사 핸드북·PM 뉴스레터처럼 제품 일을 하는 방식 전반이며, 엔지니어링 조직 운영은 development의 engineering-leadership에 둔다."
+  },
+  "distributed-systems": {
+   "label": "분산 시스템 기초",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "부분 실패·시간·합의·일관성 등 여러 노드가 협력할 때 생기는 근본 문제(원격 호출 투명성의 환상·종단 간 원칙 포함)를 다루며, 구체적 재시도·서킷브레이커 기법은 resilience-patterns에 둔다."
+  },
+  "consensus-time": {
+   "label": "합의·논리 시계",
+   "broader": "distributed-systems",
+   "domain": "architecture",
+   "scope": "Paxos·Raft·비잔틴 장군·Lamport 시계처럼 노드 간 합의와 사건 순서를 정하는 알고리즘이며, 그 위에 지은 DB의 일관성 보장은 consistency-cap에 둔다."
+  },
+  "consistency-cap": {
+   "label": "일관성 모델·CAP",
+   "broader": "distributed-systems",
+   "domain": "architecture",
+   "scope": "CAP·선형화 가능성·최종 일관성처럼 데이터 시스템이 무엇을 보장하는지와 그 검증(Jepsen)을 다루며, 합의 알고리즘 내부는 consensus-time에 둔다."
+  },
+  "data-intensive-systems": {
+   "label": "데이터 집약 시스템",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "대규모 저장·처리·스트리밍 시스템의 설계 원전과 트레이드오프이며, 개발자가 쓰는 특정 DB의 쿼리·인덱스 사용법은 development의 database-usage에 둔다."
+  },
+  "distributed-storage": {
+   "label": "분산 저장소",
+   "broader": "data-intensive-systems",
+   "domain": "architecture",
+   "scope": "GFS·Bigtable·Dynamo·Spanner처럼 대규모 저장소의 설계와 복제·파티셔닝을 다루며, 일관성 보장 이론 자체는 consistency-cap에 둔다."
+  },
+  "event-streaming-messaging": {
+   "label": "이벤트 스트리밍·메시징",
+   "broader": "data-intensive-systems",
+   "domain": "architecture",
+   "scope": "Kafka·메시지 브로커·통합 패턴·반응형 시스템처럼 비동기 메시지로 시스템을 잇는 방식이며, 배치 처리(MapReduce)는 distributed-storage에 둔다."
+  },
+  "architecture-patterns": {
+   "label": "아키텍처 패턴",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "시스템·서비스·코드 구조에 이름 붙인 재사용 해법의 카탈로그이며, 패턴 선택을 기록하는 문서 형식은 architecture-documentation에 둔다."
+  },
+  "microservices": {
+   "label": "마이크로서비스",
+   "broader": "architecture-patterns",
+   "domain": "architecture",
+   "scope": "서비스 분해·Saga·CQRS·Strangler Fig 등 마이크로서비스 전환과 그 대가를 다루며, 서비스 간 테스트 전략은 qa의 service-test-strategy에 둔다."
+  },
+  "resilience-patterns": {
+   "label": "회복력 패턴",
+   "broader": "architecture-patterns",
+   "domain": "architecture",
+   "scope": "재시도·타임아웃·서킷브레이커·벌크헤드·부하 차단처럼 운영 중 장애를 견디는 설계 기법이며, 장애를 일부러 주입하는 실험은 testing의 chaos-engineering에 둔다."
+  },
+  "code-level-design-patterns": {
+   "label": "코드 수준 디자인 패턴",
+   "broader": "architecture-patterns",
+   "domain": "architecture",
+   "scope": "GoF·PoEAA·포트&어댑터처럼 클래스·모듈 단위 구조 패턴이며, 기존 코드를 고치는 리팩터링 기법은 development의 code-conventions에 둔다."
+  },
+  "domain-driven-design": {
+   "label": "도메인 주도 설계",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "바운디드 컨텍스트·Event Storming·DDD 모델링 절차처럼 업무 도메인에서 경계를 찾는 방법이며, 일반 요구사항 수집 워크숍은 planning의 discovery-workshops에 둔다."
+  },
+  "architecture-documentation": {
+   "label": "아키텍처 문서화",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "ADR 포맷·C4 다이어그램·arc42 템플릿처럼 아키텍처 결정과 구조를 기록·도식화하는 형식이며, 구현 전 설계 토론 문서는 planning의 requirements-specs에 둔다."
+  },
+  "architecture-review": {
+   "label": "아키텍처 리뷰·Well-Architected",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "Well-Architected 필라·설계 격언 체크리스트·Twelve-Factor·CNCF 지도처럼 설계를 질문지·기준으로 점검하고 선택지를 훑는 프레임이며, 보안 통제 카탈로그는 security의 security-frameworks에 둔다."
+  },
+  "system-design": {
+   "label": "시스템 설계 학습·사례",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "캐시·샤딩·로드밸런싱 등 시스템 설계 어휘와 실제 기업·오픈소스의 확장 사례 모음이며, 개별 원전 논문은 distributed-systems나 data-intensive-systems, 한국어 기업 블로그는 development의 korean-tech-blogs에 둔다."
+  },
+  "software-complexity": {
+   "label": "복잡성·모듈화",
+   "broader": null,
+   "domain": "architecture",
+   "scope": "본질적/부수적 복잡성·정보 은닉·구조적 프로그래밍·진흙 덩어리처럼 소프트웨어가 왜 복잡해지는지에 대한 원칙이며, 코드 스타일 규칙은 development의 code-conventions에 둔다."
+  },
+  "code-conventions": {
+   "label": "코드 컨벤션·품질",
+   "broader": null,
+   "domain": "development",
+   "scope": "스타일 가이드·린터·포매터·코드리뷰·리팩터링 카탈로그처럼 코드를 읽기 좋게 유지하는 관행이며, 테스트 코드 설계는 qa의 unit-test-design에 둔다."
+  },
+  "style-guides-linting": {
+   "label": "스타일 가이드·린팅",
+   "broader": "code-conventions",
+   "domain": "development",
+   "scope": "언어별 스타일 가이드와 ESLint·Prettier 같은 자동 검사·포매팅이며, 보안 목적 정적 분석(Semgrep)은 security의 security-scanning에 둔다."
+  },
+  "code-review": {
+   "label": "코드 리뷰",
+   "broader": "code-conventions",
+   "domain": "development",
+   "scope": "리뷰 프로세스·리뷰어/작성자 규범을 다루며, 자동 린트 규칙은 style-guides-linting에 둔다."
+  },
+  "api-design": {
+   "label": "API 설계",
+   "broader": null,
+   "domain": "development",
+   "scope": "HTTP·RPC·GraphQL API의 설계 규약(Google API 가이드·AIP·gRPC)과 계약 명세이며, 계약을 실제로 검증하는 테스트는 testing의 api-testing에 둔다."
+  },
+  "api-specs-schemas": {
+   "label": "API 명세·스키마 검증",
+   "broader": "api-design",
+   "domain": "development",
+   "scope": "OpenAPI·JSON Schema·GraphQL 명세·Zod/Joi처럼 데이터 계약을 기계가 읽는 형식으로 적는 것이며, 그 스키마로 테스트를 생성하는 도구는 testing에 둔다."
+  },
+  "http-semantics": {
+   "label": "HTTP 프로토콜 의미",
+   "broader": "api-design",
+   "domain": "development",
+   "scope": "HTTP 메서드·상태 코드·헤더 의미를 정의한 RFC·레퍼런스이며, 캐싱 성능 튜닝은 performance의 web-caching, CORS 보안은 security의 browser-security에 둔다."
+  },
+  "release-engineering": {
+   "label": "릴리스 엔지니어링",
+   "broader": null,
+   "domain": "development",
+   "scope": "버전·브랜치·CI 워크플로·점진 배포처럼 코드를 안전하게 사용자에게 내보내는 방식이며, 인프라 선언·클러스터 배포 도구(Argo CD 등)는 infrastructure에 두고 빌드 산출물 출처 증명은 security의 supply-chain-security에 둔다."
+  },
+  "versioning-changelog": {
+   "label": "버전·커밋·체인지로그",
+   "broader": "release-engineering",
+   "domain": "development",
+   "scope": "SemVer·Conventional Commits·Keep a Changelog처럼 변경을 기록·번호 매기는 규약이며, 사용자 문서 작성법은 technical-writing에 둔다."
+  },
+  "progressive-delivery": {
+   "label": "점진 배포",
+   "broader": "release-engineering",
+   "domain": "development",
+   "scope": "카나리·블루그린·트렁크 기반 개발처럼 위험을 나눠 배포하는 기법이며, 효과 측정용 A/B 실험은 planning의 online-experimentation에 둔다."
+  },
+  "feature-flags": {
+   "label": "피처 플래그",
+   "broader": "release-engineering",
+   "domain": "development",
+   "scope": "토글 종류·수명·정리 같은 플래그 운영이며, 플래그 기반 통계 실험은 planning의 online-experimentation에 둔다."
+  },
+  "engineering-effectiveness": {
+   "label": "엔지니어링 생산성·조직",
+   "broader": null,
+   "domain": "development",
+   "scope": "DORA 4대 지표·엔지니어링 매니지먼트·대규모 엔지니어링 문화처럼 팀이 일하는 방식과 그 측정이며, PM 조직은 planning의 product-management-practice, 서비스 가용성 목표는 infrastructure의 slo-error-budget에 둔다."
+  },
+  "engineering-leadership": {
+   "label": "엔지니어링 리더십",
+   "broader": "engineering-effectiveness",
+   "domain": "development",
+   "scope": "CTO·EM 역할, 채용·조직 설계, 빅테크 내부 사례처럼 코드 밖의 리더십 주제이며, 개인 학습 로드맵은 learning-resources에 둔다."
+  },
+  "technical-writing": {
+   "label": "기술 문서 작성",
+   "broader": null,
+   "domain": "development",
+   "scope": "Diátaxis·문서 스타일 가이드·README 규격처럼 개발 문서를 쓰는 법이며, 아키텍처 문서 템플릿은 architecture-documentation에 둔다."
+  },
+  "language-platform-references": {
+   "label": "언어·플랫폼 레퍼런스",
+   "broader": null,
+   "domain": "development",
+   "scope": "Rust·Go·TypeScript·Node·React·MDN·Vite 등 특정 언어·런타임·프레임워크의 공식 문서와 관용구이며, 그 위의 성능 최적화 기법은 performance에 둔다."
+  },
+  "database-usage": {
+   "label": "데이터베이스 활용",
+   "broader": null,
+   "domain": "development",
+   "scope": "PostgreSQL 격리 수준·인덱스·Redis 자료구조·ORM처럼 개발자가 DB를 올바르게 쓰는 법이며, 분산 저장소 설계 원리는 architecture의 distributed-storage에 둔다."
+  },
+  "learning-resources": {
+   "label": "학습 로드맵·큐레이션",
+   "broader": null,
+   "domain": "development",
+   "scope": "로드맵·Build-your-own-X·논문 큐레이션·면접 정리·업계 뉴스레터처럼 무엇을 읽고 공부할지 안내하는 모음이며, 특정 주제에 한정된 awesome 목록은 그 주제 개념에 둔다."
+  },
+  "korean-tech-blogs": {
+   "label": "한국 기업 기술블로그",
+   "broader": "learning-resources",
+   "domain": "development",
+   "scope": "토스·카카오·우아한형제들·LINE·당근 등 국내 기업이 자사 사례를 한국어로 공개한 블로그이며, 단일 주제 글 한 편(예: 이미지 최적화 사례)은 해당 주제 개념에 둔다."
+  },
+  "accessibility": {
+   "label": "접근성",
+   "broader": null,
+   "domain": "design",
+   "scope": "장애 사용자가 쓸 수 있게 만드는 규범·구현 지침이며, axe 같은 자동 접근성 검사 도구는 testing의 accessibility-testing에 둔다."
+  },
+  "wcag-compliance": {
+   "label": "WCAG 준수 기준",
+   "broader": "accessibility",
+   "domain": "design",
+   "scope": "WCAG 성공 기준과 이를 실무 체크리스트로 옮긴 자료(WebAIM·A11Y Project)이며, 위젯별 ARIA 구현법은 accessible-components에 둔다."
+  },
+  "accessible-components": {
+   "label": "접근 가능한 컴포넌트·ARIA",
+   "broader": "accessibility",
+   "domain": "design",
+   "scope": "ARIA 역할·키보드 인터랙션·접근 가능한 위젯 구현이며, 판정 기준 자체는 wcag-compliance에 둔다."
+  },
+  "design-systems": {
+   "label": "디자인 시스템",
+   "broader": null,
+   "domain": "design",
+   "scope": "토큰·컴포넌트·플랫폼 가이드라인(Apple HIG·Material)을 묶어 여러 제품에 일관된 UI를 공급하는 체계와 그 운영이며, 개별 UI 패턴의 사용성 판단은 usability-principles에 둔다."
+  },
+  "design-tokens-foundations": {
+   "label": "디자인 토큰·기초 요소",
+   "broader": "design-systems",
+   "domain": "design",
+   "scope": "색 역할·타입 스케일·간격 그리드 등 컴포넌트 이전 층과 토큰 포맷이며, 컴포넌트 카탈로그는 component-libraries에 둔다."
+  },
+  "component-libraries": {
+   "label": "컴포넌트 라이브러리 사례",
+   "broader": "design-systems",
+   "domain": "design",
+   "scope": "Carbon·Polaris·Primer·Spectrum·Atlassian 등 공개 디자인 시스템의 컴포넌트와 그 비교·거버넌스이며, OS 플랫폼 규범(HIG)은 design-systems 상위, 접근성 구현 상세는 accessible-components에 둔다."
+  },
+  "usability-principles": {
+   "label": "사용성 원칙",
+   "broader": null,
+   "domain": "design",
+   "scope": "휴리스틱·UX 법칙·검증된 UI 패턴·리뷰 체크리스트처럼 화면이 쓰기 쉬운지 판단하는 기준이며, 응답 시간 한계 같은 속도 체감은 performance의 perceived-performance에 둔다."
+  },
+  "ux-heuristics-patterns": {
+   "label": "사용성 휴리스틱·UI 패턴",
+   "broader": "usability-principles",
+   "domain": "design",
+   "scope": "Nielsen 휴리스틱·Laws of UX·NN/g 패턴·디자인 체크리스트이며, 사용자 테스트 진행 방법은 usability-principles 상위에 둔다."
+  },
+  "visual-design": {
+   "label": "시각 디자인",
+   "broader": null,
+   "domain": "design",
+   "scope": "타이포그래피·레이아웃·CSS 배치·시각 위계처럼 화면을 보기 좋고 읽기 좋게 만드는 기법이며, 토큰으로 체계화한 값은 design-tokens-foundations에 둔다."
+  },
+  "typography": {
+   "label": "타이포그래피",
+   "broader": "visual-design",
+   "domain": "design",
+   "scope": "서체·행간·본문 폭·문장부호 등 글자 조판이며, 웹폰트 로딩 성능은 performance에 둔다."
+  },
+  "css-layout": {
+   "label": "CSS 레이아웃",
+   "broader": "visual-design",
+   "domain": "design",
+   "scope": "Flexbox·Grid·레이아웃 프리미티브·반응형 배치 기법이며, CSS 로딩 최적화(Critical CSS)는 performance에 둔다."
+  },
+  "behavioral-design": {
+   "label": "행동 심리 기반 설계",
+   "broader": null,
+   "domain": "design",
+   "scope": "희소성·사회적 증명·설득 원칙 등 심리학을 화면 설계에 적용하는 사례이며, 광고 메시지·브랜드 카피 전략은 marketing의 persuasion-messaging에 둔다."
+  },
+  "test-strategy": {
+   "label": "테스트 전략",
+   "broader": null,
+   "domain": "qa",
+   "scope": "무엇을 어느 수준에서 얼마나 테스트할지 결정하는 것이며, 그 결정을 실행하는 도구·기법은 testing에 둔다."
+  },
+  "test-portfolio-shape": {
+   "label": "테스트 피라미드·트로피",
+   "broader": "test-strategy",
+   "domain": "qa",
+   "scope": "피라미드·트로피·테스트 크기(Small/Medium/Large)처럼 테스트 종류 간 비율을 정하는 모델이며, 개별 단위 테스트 작성법은 unit-test-design에 둔다."
+  },
+  "service-test-strategy": {
+   "label": "서비스·통합 테스트 전략",
+   "broader": "test-strategy",
+   "domain": "qa",
+   "scope": "마이크로서비스·대형 시스템에서 경계별로 어떤 테스트를 둘지 정하는 전략이며, 계약 테스트 도구 사용법은 testing의 contract-testing에 둔다."
+  },
+  "test-heuristics": {
+   "label": "테스트 휴리스틱 모델",
+   "broader": "test-strategy",
+   "domain": "qa",
+   "scope": "HTSM·맥락 주도 원칙처럼 테스트할 대상을 빠짐없이 떠올리는 사고 도구이며, 실제 탐색 세션 수행은 exploratory-testing에 둔다."
+  },
+  "exploratory-testing": {
+   "label": "탐색적 테스트",
+   "broader": null,
+   "domain": "qa",
+   "scope": "Rapid Software Testing·테스팅 vs 체킹처럼 사람의 탐색·판단으로 품질 정보를 얻는 접근이며, 스크립트화된 자동 검사는 testing에 둔다."
+  },
+  "specification-by-example": {
+   "label": "예시 기반 명세·BDD",
+   "broader": null,
+   "domain": "qa",
+   "scope": "Example Mapping·BDD·Specification by Example처럼 구체 예시로 요구사항과 인수 기준을 합의하는 방법이며, 스토리 작성 자체는 planning의 user-stories에 둔다."
+  },
+  "unit-test-design": {
+   "label": "단위 테스트 설계",
+   "broader": null,
+   "domain": "qa",
+   "scope": "좋은 단위 테스트의 정의·유지보수성·xUnit 패턴·안티패턴처럼 테스트 코드 품질을 정하는 원칙이며, 테스트 러너 사용법은 testing의 test-runners에 둔다."
+  },
+  "test-doubles": {
+   "label": "테스트 더블(목·스텁·페이크)",
+   "broader": "unit-test-design",
+   "domain": "qa",
+   "scope": "mock·stub·fake·dummy의 구분과 언제 쓸지에 대한 판단이며, 네트워크 목 서버 같은 도구는 testing의 service-virtualization에 둔다."
+  },
+  "qa-practice-community": {
+   "label": "QA 실무·표준·커뮤니티",
+   "broader": null,
+   "domain": "qa",
+   "scope": "ISTQB·ISO 29119 같은 표준·자격과 테스트 커뮤니티·블로그·awesome 목록 등 QA 직무 전반 자료이며, 특정 기법 전용 자료는 그 기법 개념에 둔다."
+  },
+  "test-automation": {
+   "label": "테스트 자동화 도구",
+   "broader": null,
+   "domain": "testing",
+   "scope": "테스트를 실제로 작성·실행하는 러너·브라우저 자동화·컴포넌트 테스트 도구이며, 어느 층을 얼마나 테스트할지는 qa의 test-strategy에 둔다."
+  },
+  "test-runners": {
+   "label": "테스트 러너·프레임워크",
+   "broader": "test-automation",
+   "domain": "testing",
+   "scope": "Jest·Vitest·Mocha·pytest처럼 테스트를 정의·실행·단언하는 프레임워크이며, 브라우저 구동은 e2e-browser-automation에 둔다."
+  },
+  "e2e-browser-automation": {
+   "label": "E2E·브라우저 자동화",
+   "broader": "test-automation",
+   "domain": "testing",
+   "scope": "Playwright·Cypress·Selenium·Puppeteer·Appium처럼 실제 브라우저/앱을 조작하는 자동화이며, 컴포넌트 단독 렌더 테스트는 component-visual-testing에 둔다."
+  },
+  "component-visual-testing": {
+   "label": "컴포넌트·시각 회귀 테스트",
+   "broader": "test-automation",
+   "domain": "testing",
+   "scope": "Testing Library·Storybook·Chromatic·Playwright CT처럼 UI 컴포넌트를 격리해 동작·화면을 검증하는 것이며, 페이지 전체 흐름은 e2e-browser-automation에 둔다."
+  },
+  "flaky-tests": {
+   "label": "플레이키 테스트",
+   "broader": null,
+   "domain": "testing",
+   "scope": "비결정적으로 실패하는 테스트의 원인·격리·대규모 CI에서의 관리이며, 테스트가 결함을 얼마나 잡는지는 test-adequacy에 둔다."
+  },
+  "api-testing": {
+   "label": "API·계약 테스트",
+   "broader": null,
+   "domain": "testing",
+   "scope": "HTTP API를 호출해 검증하거나 소비자-제공자 계약을 검증하는 테스트이며, API 설계 규약 자체는 development의 api-design에 둔다."
+  },
+  "contract-testing": {
+   "label": "계약 테스트",
+   "broader": "api-testing",
+   "domain": "testing",
+   "scope": "Pact 등 소비자 주도 계약 테스트와 계약 테스트의 정의이며, 스키마로부터 무작위 입력을 생성하는 것은 property-based-testing에 둔다."
+  },
+  "service-virtualization": {
+   "label": "목 서버·테스트 의존성",
+   "broader": "api-testing",
+   "domain": "testing",
+   "scope": "MSW·WireMock·Testcontainers처럼 외부 서비스·DB를 가짜 또는 실제 컨테이너로 대체하는 도구이며, 코드 내 목 객체 개념은 qa의 test-doubles에 둔다."
+  },
+  "generative-testing": {
+   "label": "생성형 테스트 입력",
+   "broader": null,
+   "domain": "testing",
+   "scope": "사람이 예제를 고르지 않고 도구가 입력을 생성하는 테스트 전반이며, 생성된 테스트의 판정 기준 문제(오라클)도 여기 둔다."
+  },
+  "property-based-testing": {
+   "label": "속성 기반 테스트",
+   "broader": "generative-testing",
+   "domain": "testing",
+   "scope": "QuickCheck·Hypothesis·fast-check·Schemathesis처럼 성질을 적고 입력을 생성·축소하는 테스트이며, 커버리지 유도 무작위 변형은 fuzzing에 둔다."
+  },
+  "fuzzing": {
+   "label": "퍼징",
+   "broader": "generative-testing",
+   "domain": "testing",
+   "scope": "AFL·libFuzzer·OSS-Fuzz처럼 커버리지 피드백으로 입력을 변형해 크래시·취약점을 찾는 것이며, 웹 프록시 기반 동적 보안 스캔은 security의 security-scanning에 둔다."
+  },
+  "test-adequacy": {
+   "label": "테스트 충분성 측정",
+   "broader": null,
+   "domain": "testing",
+   "scope": "커버리지·단언 밀도·뮤테이션 점수처럼 테스트 스위트가 결함을 잡는 능력을 재는 것이며, 테스트 비율 결정은 qa의 test-portfolio-shape에 둔다."
+  },
+  "mutation-testing": {
+   "label": "뮤테이션 테스트",
+   "broader": "test-adequacy",
+   "domain": "testing",
+   "scope": "PIT·Stryker 등 코드를 변형해 테스트가 잡는지 보는 기법과 그 산업 적용이며, 단순 라인 커버리지 논의는 test-adequacy 상위에 둔다."
+  },
+  "load-testing": {
+   "label": "부하 테스트",
+   "broader": null,
+   "domain": "testing",
+   "scope": "JMeter·Gatling·k6·Locust로 서버에 가상 사용자 부하를 걸어 처리량·지연을 검증하는 것이며, 브라우저 프런트엔드 로딩 성능은 performance에 둔다."
+  },
+  "chaos-engineering": {
+   "label": "카오스 엔지니어링·장애 주입",
+   "broader": null,
+   "domain": "testing",
+   "scope": "Chaos Monkey·카오스 원칙·Jepsen처럼 운영/클러스터에 장애를 주입해 회복력과 보장을 검증하는 실험이며, 장애를 견디는 설계 기법은 architecture의 resilience-patterns에 둔다."
+  },
+  "accessibility-testing": {
+   "label": "접근성 자동 검사",
+   "broader": null,
+   "domain": "testing",
+   "scope": "axe-core·Deque·Lighthouse 접근성 감사처럼 접근성 위반을 도구로 검출하는 것이며, 무엇이 위반인지의 기준은 design의 wcag-compliance에 둔다."
+  },
+  "performance-measurement": {
+   "label": "성능 측정",
+   "broader": null,
+   "domain": "performance",
+   "scope": "웹 성능을 어떤 지표로 어떤 환경에서 재는지이며, 측정 결과를 줄이는 최적화 기법은 각 최적화 개념에 둔다."
+  },
+  "core-web-vitals": {
+   "label": "Core Web Vitals·로딩 지표",
+   "broader": "performance-measurement",
+   "domain": "performance",
+   "scope": "LCP·INP·CLS·Speed Index·TTI 등 사용자 중심 성능 지표의 정의와 측정 연구이며, 체감 심리 연구는 perceived-performance에 둔다."
+  },
+  "real-user-monitoring": {
+   "label": "실사용자 측정(RUM)",
+   "broader": "performance-measurement",
+   "domain": "performance",
+   "scope": "web-vitals 라이브러리·field 데이터·Web Almanac처럼 실제 사용자 환경에서 수집한 성능이며, 통제 환경 측정은 synthetic-testing에 둔다."
+  },
+  "synthetic-testing": {
+   "label": "랩 측정·스로틀링",
+   "broader": "performance-measurement",
+   "domain": "performance",
+   "scope": "Lighthouse·WebPageTest·sitespeed.io·DevTools 스로틀링처럼 통제 환경에서 재는 성능 테스트이며, 서버 부하 테스트는 testing의 load-testing에 둔다."
+  },
+  "performance-budgets": {
+   "label": "성능 예산·회귀 방지",
+   "broader": "performance-measurement",
+   "domain": "performance",
+   "scope": "번들 크기·지표 상한을 정하고 CI에서 회귀를 막는 것(size-limit·Lighthouse CI)이며, 번들 내용 분석·축소는 javascript-payload에 둔다."
+  },
+  "perceived-performance": {
+   "label": "체감 성능",
+   "broader": null,
+   "domain": "performance",
+   "scope": "실제 시간과 별개로 사용자가 느끼는 빠르기와 그 근거(0.1/1/10초 한계·RAIL·허용 대기 시간 연구)이며, 실제 로드 시간 단축은 다른 최적화 개념에, 지연의 매출 영향은 performance-business-impact에 둔다."
+  },
+  "loading-placeholders": {
+   "label": "진행 표시·스켈레톤·플레이스홀더",
+   "broader": "perceived-performance",
+   "domain": "performance",
+   "scope": "진행률 표시기·스켈레톤 스크린·BlurHash·LQIP·낙관적 UI처럼 기다리는 동안 보여주는 피드백·대체물이며, 이미지 자체의 압축은 image-optimization에 둔다."
+  },
+  "performance-business-impact": {
+   "label": "성능의 비즈니스 효과",
+   "broader": null,
+   "domain": "performance",
+   "scope": "지연이 전환율·이탈·매출·검색 이용에 미치는 실험·리포트와 성능 문화 설득이며, 사용자의 지각 심리 연구는 perceived-performance에 둔다."
+  },
+  "payload-reduction": {
+   "label": "전송량 줄이기",
+   "broader": null,
+   "domain": "performance",
+   "scope": "이미지·JS·서드파티 등 내려보내는 바이트와 실행량을 줄이는 기법이며, 로딩 순서 조정은 resource-prioritization에 둔다."
+  },
+  "image-optimization": {
+   "label": "이미지 최적화",
+   "broader": "payload-reduction",
+   "domain": "performance",
+   "scope": "포맷·압축·반응형 이미지·이미지 CDN·sharp 등 이미지 바이트를 줄이는 것이며, 지연 로딩 시점 조정은 lazy-loading에 둔다."
+  },
+  "javascript-payload": {
+   "label": "JS 번들 최적화",
+   "broader": "payload-reduction",
+   "domain": "performance",
+   "scope": "코드 분할·트리 셰이킹·번들 분석·JS 덜 쓰기처럼 자바스크립트 양을 줄이는 것이며, CI 크기 상한은 performance-budgets에 둔다."
+  },
+  "third-party-scripts": {
+   "label": "서드파티 스크립트",
+   "broader": "payload-reduction",
+   "domain": "performance",
+   "scope": "분석·광고·태그 스크립트의 로딩 전략과 워커 오프로딩이며, 태그 관리 설정 자체는 marketing의 product-analytics에 둔다."
+  },
+  "resource-prioritization": {
+   "label": "리소스 우선순위·로딩 시점",
+   "broader": null,
+   "domain": "performance",
+   "scope": "무엇을 먼저/나중에 가져올지 조정하는 힌트와 패턴이며, 바이트 자체 축소는 payload-reduction에 둔다."
+  },
+  "preload-prefetch": {
+   "label": "프리로드·프리페치",
+   "broader": "resource-prioritization",
+   "domain": "performance",
+   "scope": "preload·preconnect·Early Hints·fetchpriority·링크 프리페치·PRPL처럼 미리 가져오는 기법이며, 화면 밖 지연은 lazy-loading에 둔다."
+  },
+  "lazy-loading": {
+   "label": "지연 로딩·가상화",
+   "broader": "resource-prioritization",
+   "domain": "performance",
+   "scope": "이미지·비디오 lazy loading과 리스트 가상화처럼 보이지 않는 것을 늦추는 기법이며, 코드 분할은 javascript-payload에 둔다."
+  },
+  "web-caching": {
+   "label": "웹 캐싱",
+   "broader": null,
+   "domain": "performance",
+   "scope": "Cache-Control·ETag·stale-while-revalidate·CDN 등 HTTP 계층 캐시와 서비스 워커 캐시로 재요청을 줄이는 것이며, 서버 측 데이터 캐시(Redis 등)는 development의 database-usage에 둔다."
+  },
+  "service-worker-offline": {
+   "label": "서비스 워커·오프라인",
+   "broader": "web-caching",
+   "domain": "performance",
+   "scope": "Workbox·App Shell·캐싱 전략처럼 서비스 워커로 캐시·오프라인을 구현하는 것이며, 순수 HTTP 헤더 캐시는 web-caching 상위에 둔다."
+  },
+  "rendering-strategies": {
+   "label": "렌더링 전략",
+   "broader": null,
+   "domain": "performance",
+   "scope": "SSR·SSG·ISR·스트리밍 SSR·Suspense·아일랜드·점진적 하이드레이션처럼 HTML을 어디서 언제 만드는지와 브라우저 렌더 파이프라인이며, 프레임워크 일반 문서는 development의 language-platform-references에 둔다."
+  },
+  "critical-rendering-path": {
+   "label": "주요 렌더링 경로",
+   "broader": "rendering-strategies",
+   "domain": "performance",
+   "scope": "DOM/CSSOM·렌더 차단·Critical CSS와 페이지 로드 의존성 그래프 연구(WProf·Polaris·Vroom 등)이며, 서버 렌더링 방식 선택은 rendering-strategies 상위에, 프로토콜 계층 지연은 network-protocols에 둔다."
+  },
+  "network-adaptive-delivery": {
+   "label": "네트워크·기기 적응",
+   "broader": null,
+   "domain": "performance",
+   "scope": "전송 프로토콜과 느린 네트워크·저사양 기기 사용자를 위한 전달 방식이며, 일반 캐시 정책은 web-caching에 둔다."
+  },
+  "network-protocols": {
+   "label": "전송 프로토콜(HTTP/2·3)",
+   "broader": "network-adaptive-delivery",
+   "domain": "performance",
+   "scope": "HTTP/2·HTTP/3·QUIC·압축·TCP/TLS 왕복처럼 전송 계층 성능이며, HTTP 의미론(메서드·상태 코드)은 development의 http-semantics에 둔다."
+  },
+  "adaptive-loading": {
+   "label": "적응형 로딩·데이터 절약",
+   "broader": "network-adaptive-delivery",
+   "domain": "performance",
+   "scope": "Network Information API·Save-Data·데이터 압축 프록시·신흥 지역 웹 연구처럼 연결 품질에 따라 경험을 바꾸는 것이며, 고정 예산 설정은 performance-budgets에 둔다."
+  },
+  "security-frameworks": {
+   "label": "보안 프레임워크·성숙도",
+   "broader": null,
+   "domain": "security",
+   "scope": "NIST CSF·SSDF·SP 800-53·OWASP SAMM처럼 조직 수준 보안 활동과 통제를 정하는 체계이며, 앱 단위 검증 항목은 security-requirements에 둔다."
+  },
+  "security-requirements": {
+   "label": "보안 검증 기준·위험 목록",
+   "broader": null,
+   "domain": "security",
+   "scope": "ASVS·MASVS·OWASP Top 10·API Top 10·CWE Top 25·CVSS처럼 앱이 충족해야 할 검증 항목과 약점 순위·점수 체계이며, 자동 검출 도구는 security-scanning에 둔다."
+  },
+  "threat-modeling": {
+   "label": "위협 모델링",
+   "broader": null,
+   "domain": "security",
+   "scope": "설계 단계에서 공격 경로를 찾는 방법·도구와 공격자 행동 지식(ATT&CK)이며, 구현 후 취약점 스캔은 security-scanning에 둔다."
+  },
+  "supply-chain-security": {
+   "label": "소프트웨어 공급망 보안",
+   "broader": null,
+   "domain": "security",
+   "scope": "의존성·빌드·배포 산출물이 변조되지 않았음을 보장하는 것(SBOM·SLSA·서명·Scorecard)이며, 알려진 CVE 자동 검출 도구는 security-scanning에 둔다."
+  },
+  "sbom-provenance": {
+   "label": "SBOM·출처 증명·서명",
+   "broader": "supply-chain-security",
+   "domain": "security",
+   "scope": "CycloneDX·SLSA·Sigstore·Trusting Trust처럼 구성 목록과 빌드 출처를 증명하는 것이며, 알려진 CVE 검출은 security-scanning에 둔다."
+  },
+  "security-scanning": {
+   "label": "보안 스캔(SAST·DAST·시크릿)",
+   "broader": null,
+   "domain": "security",
+   "scope": "Semgrep(SAST)·ZAP(DAST)·gitleaks(시크릿)·Trivy/Dependency-Check(의존성·이미지 CVE)처럼 코드·실행 중 앱·저장소·이미지에서 취약점과 비밀을 자동 검출하는 것이며, 퍼징은 testing의 fuzzing에 둔다."
+  },
+  "authentication-authorization": {
+   "label": "인증·인가",
+   "broader": null,
+   "domain": "security",
+   "scope": "OAuth 2.0·JWT·세션 관리·비밀번호 저장처럼 사용자·클라이언트를 식별하고 권한을 위임하는 규격과 모범 사례이며, 브라우저 출처 정책은 browser-security에 둔다."
+  },
+  "oauth-jwt": {
+   "label": "OAuth·JWT",
+   "broader": "authentication-authorization",
+   "domain": "security",
+   "scope": "OAuth 2.0 RFC·보안 BCP·JWT 규격과 JWT BCP이며, 일반 인증 치트시트는 authentication-authorization 상위에 둔다."
+  },
+  "browser-security": {
+   "label": "웹·브라우저 보안",
+   "broader": null,
+   "domain": "security",
+   "scope": "CSP·CORS·HSTS·동일 출처 정책·XSS 방어처럼 브라우저가 집행하는 보안 모델이며, 서버 API 인가 로직은 authentication-authorization에 둔다."
+  },
+  "security-engineering": {
+   "label": "보안 공학 기초",
+   "broader": null,
+   "domain": "security",
+   "scope": "암호학 실무·보안 공학 교과서·보안과 신뢰성의 공동 설계처럼 원리 수준 자료이며, 특정 표준 체크리스트는 security-requirements에 둔다."
+  },
+  "containers": {
+   "label": "컨테이너·이미지",
+   "broader": null,
+   "domain": "infrastructure",
+   "scope": "Docker·Dockerfile·OCI 이미지·distroless·Compose처럼 컨테이너를 만들고 단일 호스트에서 돌리는 것이며, 클러스터 오케스트레이션은 kubernetes에 둔다."
+  },
+  "kubernetes": {
+   "label": "쿠버네티스",
+   "broader": null,
+   "domain": "infrastructure",
+   "scope": "쿠버네티스 개념·워크로드·프로브·자원 관리·Pod Security Standards·cert-manager·클러스터 구성과 그 원형(Borg)이며, 패키징·배포 도구는 gitops-packaging에 둔다."
+  },
+  "k8s-workload-config": {
+   "label": "워크로드·프로브·자원 설정",
+   "broader": "kubernetes",
+   "domain": "infrastructure",
+   "scope": "Deployment/StatefulSet 선택·liveness/readiness·requests/limits 등 파드 실행 설정이며, 이미지 취약점 스캔은 security의 security-scanning에 둔다."
+  },
+  "infrastructure-as-code": {
+   "label": "코드형 인프라",
+   "broader": null,
+   "domain": "infrastructure",
+   "scope": "Terraform 등 인프라를 선언형 코드로 관리하고 협업하는 것이며, 쿠버네티스 매니페스트 배포는 gitops-packaging에 둔다."
+  },
+  "gitops-packaging": {
+   "label": "GitOps·매니페스트 패키징",
+   "broader": "infrastructure-as-code",
+   "domain": "infrastructure",
+   "scope": "Argo CD·Helm·Kustomize처럼 매니페스트를 패키징하고 Git 상태로 동기화하는 것이며, 애플리케이션 CI 워크플로는 development의 release-engineering에 둔다."
+  },
+  "observability": {
+   "label": "관측 가능성",
+   "broader": null,
+   "domain": "infrastructure",
+   "scope": "메트릭·로그·트레이스·알림(Alertmanager 그룹핑·억제)으로 운영 중 시스템 상태를 아는 것이며, 브라우저 실사용자 성능 측정은 performance의 real-user-monitoring에 둔다."
+  },
+  "metrics-monitoring": {
+   "label": "메트릭·모니터링",
+   "broader": "observability",
+   "domain": "infrastructure",
+   "scope": "Prometheus·PromQL·Grafana·메트릭 작명·RED/USE 방법론이며, 알림 라우팅은 observability 상위, SLO 수치 설정은 slo-error-budget에 둔다."
+  },
+  "distributed-tracing": {
+   "label": "분산 트레이싱·OpenTelemetry",
+   "broader": "observability",
+   "domain": "infrastructure",
+   "scope": "Dapper·Jaeger·OpenTelemetry처럼 요청 경로를 서비스 간에 추적하는 것과 텔레메트리 표준이며, 로그 저장(Loki)은 observability 상위에 둔다."
+  },
+  "site-reliability-engineering": {
+   "label": "SRE·운영 신뢰성",
+   "broader": null,
+   "domain": "infrastructure",
+   "scope": "SRE 원칙·운영 문화·장애 대응처럼 서비스를 안정적으로 운영하는 방식이며, 설계 단계 회복력 패턴은 architecture의 resilience-patterns에 둔다."
+  },
+  "slo-error-budget": {
+   "label": "SLO·에러 버짓",
+   "broader": "site-reliability-engineering",
+   "domain": "infrastructure",
+   "scope": "SLI/SLO 정의·에러 버짓 정책·SLO 기반 알림과 SRE 책·워크북이며, 배포 성과 지표는 development의 engineering-effectiveness에 둔다."
+  },
+  "incident-postmortem": {
+   "label": "장애 대응·포스트모템",
+   "broader": "site-reliability-engineering",
+   "domain": "infrastructure",
+   "scope": "비난 없는 포스트모템·복잡계 실패·운영에서 살아남는 설계 교훈이며, 장애 주입 실험은 testing의 chaos-engineering에 둔다."
+  },
+  "positioning-brand": {
+   "label": "포지셔닝·브랜드",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "시장 내 위치·브랜드 성장 법칙·브랜드 대 퍼포먼스 예산처럼 '누구에게 무엇으로 기억될지'를 정하는 것이며, 개별 광고 카피 설득 기법은 persuasion-messaging에 둔다."
+  },
+  "positioning": {
+   "label": "포지셔닝",
+   "broader": "positioning-brand",
+   "domain": "marketing",
+   "scope": "Dunford·Ries & Trout·캐즘·StoryBrand처럼 경쟁 대안 대비 위치와 메시지 뼈대를 정하는 방법이며, 브랜드 성장의 실증 법칙은 brand-growth-science에 둔다."
+  },
+  "brand-growth-science": {
+   "label": "증거 기반 브랜드 성장",
+   "broader": "positioning-brand",
+   "domain": "marketing",
+   "scope": "Ehrenberg-Bass·Double Jeopardy·Binet & Field처럼 브랜드 성장과 예산 배분의 실증 연구이며, 단기 퍼포먼스 채널 운영은 performance-marketing에 둔다."
+  },
+  "persuasion-messaging": {
+   "label": "설득·메시지 전파",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "Made to Stick·Contagious·Influence처럼 메시지가 기억·공유·설득되는 원리이며, 이를 UI 화면에 적용한 사례는 design의 behavioral-design에 둔다."
+  },
+  "growth-strategy": {
+   "label": "그로스 전략",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "그로스 루프·PLG·트랙션 채널·AARRR처럼 사용자 획득·성장 엔진을 설계하는 것이며, 개별 실험의 통계는 planning의 online-experimentation에 둔다."
+  },
+  "unit-economics-retention": {
+   "label": "유닛 이코노믹스·리텐션",
+   "broader": "growth-strategy",
+   "domain": "marketing",
+   "scope": "CAC·LTV·코호트 리텐션·NPS·AARRR 퍼널 지표처럼 성장의 경제성과 유지율을 재는 것이며, 성장 메커니즘 설계는 growth-strategy 상위, 제품 북극성 지표 선택은 planning의 product-metrics에 둔다."
+  },
+  "performance-marketing": {
+   "label": "퍼포먼스 마케팅·어트리뷰션",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "광고 전환 추적·UTM·어트리뷰션·퍼포먼스 팀 사례처럼 유료 채널 성과를 측정·최적화하는 것이며, 제품 내 이벤트 설계는 product-analytics에 둔다."
+  },
+  "product-analytics": {
+   "label": "제품 분석·이벤트 트래킹",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "이벤트 택소노미·트래킹 플랜·GA4/Segment/PostHog/Matomo·태그 매니저처럼 사용자 행동 데이터를 수집하는 설계와 구현이며, 광고 전환 귀속은 performance-marketing에 둔다."
+  },
+  "tracking-plan": {
+   "label": "이벤트 택소노미·트래킹 플랜",
+   "broader": "product-analytics",
+   "domain": "marketing",
+   "scope": "이벤트 이름·속성 스키마와 그 강제(Segment Spec/Protocols·Amplitude 플레이북)이며, 개별 분석 도구 SDK 사용법은 product-analytics 상위에 둔다."
+  },
+  "seo": {
+   "label": "검색엔진 최적화(SEO)",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "크롤링·색인·랭킹과 검색 노출을 위한 사이트 설정 전반이며, 페이지 속도 개선 자체는 performance에 둔다."
+  },
+  "technical-seo": {
+   "label": "기술 SEO(크롤링·색인)",
+   "broader": "seo",
+   "domain": "marketing",
+   "scope": "robots.txt·사이트맵·Search Console·검색 기본사항처럼 검색엔진이 사이트를 읽게 만드는 것이며, 결과 화면 표시용 마크업은 structured-data에 둔다."
+  },
+  "structured-data": {
+   "label": "구조화 데이터·링크 미리보기",
+   "broader": "seo",
+   "domain": "marketing",
+   "scope": "schema.org·리치 결과·Open Graph처럼 페이지 의미를 기계에 알리는 메타데이터이며, 크롤링 허용·차단은 technical-seo에 둔다."
+  },
+  "email-marketing": {
+   "label": "이메일 마케팅·발송",
+   "broader": null,
+   "domain": "marketing",
+   "scope": "이메일 HTML 작성(MJML·React Email)·트랜잭션 발송·스팸법 준수처럼 이메일 채널 전반이며, 이메일 인증 보안 일반은 security에 둔다."
+  }
+ }
+}

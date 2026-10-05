@@ -4,6 +4,7 @@ url: https://abookapart.com/products/responsible-javascript
 domain: performance
 type: 공식문서
 lang: en
+concepts: [javascript-payload]
 ---
 
 # Responsible JavaScript

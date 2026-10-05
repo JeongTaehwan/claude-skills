@@ -4,6 +4,7 @@ url: https://www.usenix.org/system/files/conference/nsdi16/nsdi16-paper-wang-xia
 domain: performance
 type: 논문
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # Speeding up Web Page Loads with Shandian (NSDI '16)

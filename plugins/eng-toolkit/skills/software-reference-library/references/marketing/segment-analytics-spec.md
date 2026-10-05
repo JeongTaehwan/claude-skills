@@ -4,6 +4,7 @@ url: https://segment.com/docs/connections/spec/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [tracking-plan]
 ---
 
 # Segment Spec — 이벤트 스키마의 벤더 중립 규약

@@ -4,6 +4,7 @@ url: https://keepachangelog.com/en/1.1.0/
 domain: development
 type: 공식문서
 lang: en
+concepts: [versioning-changelog]
 ---
 
 # Keep a Changelog

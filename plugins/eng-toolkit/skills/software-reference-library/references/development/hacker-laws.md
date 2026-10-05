@@ -4,6 +4,7 @@ url: https://github.com/dwmkerr/hacker-laws
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources]
 ---
 
 # Hacker Laws

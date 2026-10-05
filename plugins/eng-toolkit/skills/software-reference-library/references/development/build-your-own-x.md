@@ -4,6 +4,7 @@ url: https://github.com/codecrafters-io/build-your-own-x
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources]
 ---
 
 # Build Your Own X

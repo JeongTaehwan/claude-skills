@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/P
 domain: performance
 type: 공식문서
 lang: en
+concepts: [perceived-performance]
 ---
 
 # Perceived Performance — 체감 성능

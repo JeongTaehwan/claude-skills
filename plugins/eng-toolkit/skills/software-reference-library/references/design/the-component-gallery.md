@@ -4,6 +4,7 @@ url: https://component.gallery/
 domain: design
 type: 공식문서
 lang: en
+concepts: [component-libraries]
 ---
 
 # The Component Gallery

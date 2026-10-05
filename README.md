@@ -9,10 +9,11 @@
 | 흐름 | 구조 → 기획서 → 프로토타입 → 구현, 기존 프로젝트는 분석부터 | `project-flow` |
 | 판단 | 구현 전 설계, 역할 분리 구현, 환경 차이, 저속 네트워크, 브랜치 동기화·MR 충돌 | 스킬 6개 |
 | 운영 | 보안·인프라·마케팅 최소선 | `security-baseline` · `infra-baseline` · `marketing-growth` |
-| 근거 | 10개 도메인 1차 자료 512개, 전부 코드 예시 포함 | `software-reference-library` |
+| 근거 | 10개 도메인 1차 자료 512개, 전부 코드 예시 포함. 개념 139개·관계 5종의 온톨로지 | `software-reference-library` |
 | 분업 | 역할마다 모델이 고정된 에이전트 9개 | `plugins/eng-toolkit/agents/` |
 | 강제 | 판단 없이 막을 규칙은 훅으로 | `hooks/` |
 | 수명 | 사용 횟수 집계, 스킬 자동 생성, 모델별 0 베이스 가지치기 | `skill-forge` · `profiles/` · `evals/` |
+| 화면 | 위 숫자를 탭으로 보는 단일 HTML | `scripts/dashboard.py` |
 
 15개 보완 항목을 무엇을 어디에 했는지로 정리한 것은 [docs/improvement-plan.md](docs/improvement-plan.md).
 
@@ -125,6 +126,30 @@ Claude 는 설치본 경로(`~/.claude/skills/software-reference-library/scripts
 | 마케팅 marketing | 45 | 애널리틱스, SEO, 실험, 포지셔닝, 브랜드 연구 |
 
 QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 검증하는 것*으로 나눴다.
+
+### 온톨로지 — 레퍼런스를 그래프로
+
+512개 항목을 낱장이 아니라 **종류·관계·개념**으로 묶었다. 정의는 `ontology.json` 한 곳, 관계 데이터는 각 항목 파일이 갖는다.
+
+| 관계 | 어디에 적나 | 수 |
+|---|---|---:|
+| `about` 항목 → 개념 | front-matter `concepts: [..]` | 632 |
+| `see_instead` 이 상황이면 저쪽 | 본문 "이럴 땐 아니다" 링크 (다시 적지 않는다) | 2,668 |
+| `opposes` 업계가 갈리는 반대 입장 | front-matter `opposes: [..]` | 4쌍 |
+| `supersedes` 지우지 않고 대체 | front-matter `supersedes: [..]` | 0 |
+| `broader` 개념 → 상위 개념 | `ontology.json` | 2단계 |
+
+`see_instead` 를 front-matter 에 복사하지 않은 이유는 색인 파일을 두지 않은 이유와 같다 — 두 곳에 적으면 언젠가 어긋난다. `supersedes` 는 지금 0건이지만 자리를 만들어 둔 것이다. 낡은 자료를 지우는 대신 새 항목이 대체를 선언하면, 대체된 쪽은 기본 검색에서 빠지고 기록은 남는다.
+
+```bash
+cd plugins/eng-toolkit/skills/software-reference-library
+python3 scripts/ontology.py check                       # verify.sh 가 돈다
+python3 scripts/ontology.py tree                        # 도메인 → 개념 → 하위 개념, 항목 수
+python3 scripts/ontology.py related the-testing-trophy  # 대신 쓸 것·반대 입장·같은 개념
+python3 scripts/find.py "깨지는 테스트" --concept flaky-tests
+```
+
+개념 어휘는 opus 가 512개의 제목·요약을 보고 짰고, 배정은 sonnet 4개가 나눠 했다. 배정이 애매했던 항목(학습 큐레이션·기업 블로그처럼 주제가 아니라 출처 종류로 묶이는 것)은 넓은 개념에 붙어 있다. 고칠 때는 파일의 `concepts:` 줄만 바꾸면 된다.
 
 ### `env-divergence` (스킬)
 같은 코드가 환경·배포마다 **에러 없이 조용히** 다른 값으로 돌 때 원인을 찾는 절차. "STAGE에선 되는데 운영에선 안 돼", "앱에선 보이는데 웹에선 안 보여" 같은 상황용.
@@ -248,6 +273,25 @@ python3 scripts/skill-usage.py --rank --days 30
 ```
 
 `count-usage.sh` 훅이 스킬·에이전트가 쓰일 때마다 `~/.claude/usage-log.jsonl` 에 한 줄 남긴다. 세션 기록 전체를 훑지 않아 즉시 끝난다. 훅을 등록하지 않았으면 세션 기록으로 센다.
+
+## 대시보드 — 화면으로 보기
+
+```bash
+python3 scripts/dashboard.py --open          # ~/.claude/skill-audit/dashboard.html 을 만들고 연다
+python3 scripts/dashboard.py --days 30 --open
+python3 scripts/dashboard.py --demo --out /tmp/demo.html   # 기록이 없을 때 화면 모양만
+```
+
+| 탭 | 보여주는 것 | 데이터 |
+|---|---|---|
+| 개요 | 사용 횟수·후보 수·매 턴 글자·온톨로지 규모, 일별 사용 | 아래 전부 |
+| 사용 순위 | 스킬·역할 에이전트 막대, 설치됐는데 0회 | `count-usage.sh` 로그 (없으면 세션 기록) |
+| 스킬 후보 | 스킬이 안 뜬 반복 요청 묶음, 만들 명령 | `skill-candidates.py` 와 같은 함수 |
+| 온톨로지 | 개념 트리 → 항목 목록 → 항목의 관계, 도메인 사이 연결표 | `ontology.json` + 항목 파일 |
+| 프롬프트 무게 | 매 턴 실리는 글자와 상한 | `lint_skills.py` 와 같은 상한 |
+| 모델·프로필 | 모델 레지스트리, 프로필, 평가 리포트 | `profiles/`, `reports/evals/` |
+
+파일 하나에 데이터를 넣어 만들어서 서버도 외부 스크립트도 없이 오프라인에서 열린다. **기본 위치가 저장소가 아니라 `~/.claude` 인 이유는 사용 기록이 개인 데이터라서다** — git 에 올리지 않는다. 주간 점검이 매주 새로 만든다.
 
 ## 모델별 스킬 구성 — 0 베이스 가지치기
 

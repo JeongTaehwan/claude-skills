@@ -4,6 +4,7 @@ url: https://users.ece.cmu.edu/~adrian/731-sp04/readings/GL-cap.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [consistency-cap]
 ---
 
 # Brewer's Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services (CAP)

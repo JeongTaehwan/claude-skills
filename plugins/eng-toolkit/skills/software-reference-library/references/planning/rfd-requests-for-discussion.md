@@ -4,6 +4,7 @@ url: https://www.oxide.computer/blog/rfd-1-requests-for-discussion
 domain: planning
 type: 공식문서
 lang: en
+concepts: [architecture-documentation, technical-writing]
 ---
 
 # RFD — Requests for Discussion (Oxide)

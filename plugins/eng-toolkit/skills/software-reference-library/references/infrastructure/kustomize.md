@@ -4,6 +4,7 @@ url: https://kustomize.io/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [gitops-packaging]
 ---
 
 # Kustomize

@@ -4,6 +4,7 @@ url: https://primer.style/
 domain: design
 type: 공식문서
 lang: en
+concepts: [component-libraries]
 ---
 
 # Primer (GitHub)

@@ -4,6 +4,7 @@ url: https://github.com/charlax/professional-programming
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources, engineering-effectiveness]
 ---
 
 # Professional Programming (charlax)

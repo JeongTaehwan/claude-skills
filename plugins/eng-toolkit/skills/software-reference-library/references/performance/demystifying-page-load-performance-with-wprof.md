@@ -4,6 +4,7 @@ url: https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final177.pdf
 domain: performance
 type: 논문
 lang: en
+concepts: [critical-rendering-path, performance-measurement]
 ---
 
 # Demystifying Page Load Performance with WProf (NSDI '13)

@@ -4,6 +4,7 @@ url: https://blog.banksalad.com/
 domain: planning
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 뱅크샐러드 기술블로그

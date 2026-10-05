@@ -4,6 +4,7 @@ url: https://www.mheducation.com/highered/product/positioning-battle-your-mind-r
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [positioning]
 ---
 
 # Positioning: The Battle for Your Mind (Ries & Trout)

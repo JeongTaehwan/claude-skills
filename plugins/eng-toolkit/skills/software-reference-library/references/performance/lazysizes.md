@@ -4,6 +4,7 @@ url: https://github.com/aFarkas/lazysizes
 domain: performance
 type: 저장소
 lang: en
+concepts: [lazy-loading]
 ---
 
 # lazysizes — 레거시 lazy loading 라이브러리 (대체됨)

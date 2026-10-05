@@ -4,6 +4,7 @@ url: https://mswjs.io/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [service-virtualization]
 ---
 
 # Mock Service Worker (MSW)

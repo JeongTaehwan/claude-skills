@@ -4,6 +4,7 @@ url: https://almanac.httparchive.org/
 domain: development
 type: 공식문서
 lang: en
+concepts: [performance-measurement, real-user-monitoring]
 ---
 
 # Web Almanac (HTTP Archive)

@@ -4,6 +4,7 @@ url: https://react.email/docs/introduction
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [email-marketing]
 ---
 
 # React Email 공식 문서
