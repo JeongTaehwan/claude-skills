@@ -4,6 +4,7 @@ url: http://crest.cs.ucl.ac.uk/fileadmin/crest/sebasepaper/JiaH10.pdf
 domain: testing
 type: 논문
 lang: en
+concepts: [mutation-testing]
 ---
 
 # An Analysis and Survey of the Development of Mutation Testing

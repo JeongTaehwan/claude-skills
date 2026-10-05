@@ -4,6 +4,7 @@ url: https://docs.docker.com/get-started/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [containers]
 ---
 
 # Docker 공식 문서

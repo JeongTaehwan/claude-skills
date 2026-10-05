@@ -4,6 +4,7 @@ url: https://microservices.io/patterns/index.html
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [microservices]
 ---
 
 # microservices.io — 패턴 카탈로그

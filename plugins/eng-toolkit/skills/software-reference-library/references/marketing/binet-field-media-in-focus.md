@@ -4,6 +4,7 @@ url: https://ipa.co.uk/knowledge/publications-reports/media-in-focus-marketing-e
 domain: marketing
 type: 논문
 lang: en
+concepts: [brand-growth-science, performance-marketing]
 ---
 
 # Media in Focus — 브랜드 대 퍼포먼스 예산 배분 (Binet & Field, IPA)

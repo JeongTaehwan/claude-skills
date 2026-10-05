@@ -4,6 +4,7 @@ url: https://testing-library.com/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [test-runners, component-visual-testing]
 ---
 
 # Testing Library — 공식 문서

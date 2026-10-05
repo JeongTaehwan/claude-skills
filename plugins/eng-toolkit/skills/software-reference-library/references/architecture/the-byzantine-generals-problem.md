@@ -4,6 +4,7 @@ url: https://lamport.azurewebsites.net/pubs/byz.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [consensus-time]
 ---
 
 # The Byzantine Generals Problem

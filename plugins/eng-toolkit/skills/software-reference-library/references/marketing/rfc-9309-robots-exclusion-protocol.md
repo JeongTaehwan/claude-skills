@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc9309.html
 domain: marketing
 type: 표준
 lang: en
+concepts: [technical-seo]
 ---
 
 # RFC 9309 — Robots Exclusion Protocol (robots.txt)

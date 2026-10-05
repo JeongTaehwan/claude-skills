@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/guides/lazy-loading
 domain: performance
 type: 공식문서
 lang: en
+concepts: [javascript-payload, lazy-loading]
 ---
 
 # next/dynamic — 코드 스플리팅

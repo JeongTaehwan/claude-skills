@@ -4,6 +4,7 @@ url: https://github.com/hapijs/joi
 domain: testing
 type: 저장소
 lang: en
+concepts: [api-specs-schemas]
 ---
 
 # Joi

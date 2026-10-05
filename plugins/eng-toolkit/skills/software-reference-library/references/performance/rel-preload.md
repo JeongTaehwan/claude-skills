@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [preload-prefetch]
 ---
 
 # rel="preload" — 리소스 사전 로드

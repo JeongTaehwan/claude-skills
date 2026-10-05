@@ -4,6 +4,7 @@ url: https://github.com/ossf/scorecard
 domain: development
 type: 저장소
 lang: en
+concepts: [supply-chain-security, security-scanning]
 ---
 
 # OpenSSF Scorecard

@@ -4,6 +4,7 @@ url: https://cert-manager.io/docs/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [kubernetes, security-engineering]
 ---
 
 # cert-manager 공식 문서

@@ -4,6 +4,7 @@ url: http://umu.diva-portal.org/smash/record.jsf?pid=diva2:1293450
 domain: performance
 type: 논문
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # The Effect of Skeleton Screens: Users' Perception of Speed and Ease of Navigation (ECCE '18)

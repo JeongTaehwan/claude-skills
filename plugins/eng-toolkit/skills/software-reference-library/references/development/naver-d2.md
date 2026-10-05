@@ -4,6 +4,7 @@ url: https://d2.naver.com/home
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # NAVER D2

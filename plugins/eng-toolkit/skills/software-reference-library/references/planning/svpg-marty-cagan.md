@@ -4,6 +4,7 @@ url: https://www.svpg.com/articles/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-management-practice, product-discovery]
 ---
 
 # SVPG — Marty Cagan 아티클 전체

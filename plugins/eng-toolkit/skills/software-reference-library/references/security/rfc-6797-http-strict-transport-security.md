@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc6797.html
 domain: security
 type: 표준
 lang: en
+concepts: [browser-security]
 ---
 
 # RFC 6797 — HTTP Strict Transport Security (HSTS)

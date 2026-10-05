@@ -4,6 +4,7 @@ url: https://basecamp.com/shapeup
 domain: planning
 type: 공식문서
 lang: en
+concepts: [agile-delivery]
 ---
 
 # Shape Up (랜딩)

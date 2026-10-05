@@ -4,6 +4,7 @@ url: https://web.dev/articles/vitals
 domain: development
 type: 공식문서
 lang: en
+concepts: [core-web-vitals]
 ---
 
 # Web Vitals (Core Web Vitals)

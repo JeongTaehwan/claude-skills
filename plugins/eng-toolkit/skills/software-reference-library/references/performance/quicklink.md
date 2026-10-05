@@ -4,6 +4,7 @@ url: https://github.com/GoogleChromeLabs/quicklink
 domain: performance
 type: 저장소
 lang: en
+concepts: [preload-prefetch]
 ---
 
 # quicklink — 뷰포트 링크 자동 프리페치

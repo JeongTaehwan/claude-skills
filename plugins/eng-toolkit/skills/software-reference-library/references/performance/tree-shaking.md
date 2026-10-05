@@ -4,6 +4,7 @@ url: https://web.dev/articles/reduce-javascript-payloads-with-tree-shaking
 domain: performance
 type: 공식문서
 lang: en
+concepts: [javascript-payload]
 ---
 
 # 트리 셰이킹 (Reduce JavaScript payloads with tree shaking)

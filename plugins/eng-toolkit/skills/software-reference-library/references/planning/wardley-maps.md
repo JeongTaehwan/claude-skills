@@ -4,6 +4,7 @@ url: https://medium.com/wardleymaps
 domain: planning
 type: 블로그
 lang: en
+concepts: [roadmapping, business-model]
 ---
 
 # Wardley Maps 원저 (Simon Wardley, Medium 연재)

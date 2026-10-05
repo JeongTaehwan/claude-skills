@@ -4,6 +4,7 @@ url: https://web.dev/articles/fast-playback-with-preload
 domain: performance
 type: 공식문서
 lang: en
+concepts: [payload-reduction]
 ---
 
 # 비디오 preload · poster

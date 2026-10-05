@@ -4,6 +4,7 @@ url: https://services.google.com/fh/files/blogs/google_delayexp.pdf
 domain: performance
 type: 리포트
 lang: en
+concepts: [performance-business-impact]
 ---
 
 # Speed Matters for Google Web Search (2009)

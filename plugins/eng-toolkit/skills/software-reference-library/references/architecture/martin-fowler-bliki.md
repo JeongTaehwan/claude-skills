@@ -4,6 +4,7 @@ url: https://martinfowler.com/
 domain: architecture
 type: 블로그
 lang: en
+concepts: [architecture-patterns, microservices]
 ---
 
 # Martin Fowler — bliki

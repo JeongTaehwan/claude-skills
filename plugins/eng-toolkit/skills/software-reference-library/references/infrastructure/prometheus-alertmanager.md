@@ -4,6 +4,7 @@ url: https://prometheus.io/docs/alerting/latest/alertmanager/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [metrics-monitoring]
 ---
 
 # Alertmanager

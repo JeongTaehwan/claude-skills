@@ -4,6 +4,7 @@ url: https://github.com/JaeYeopHan/Interview_Question_for_Beginner
 domain: development
 type: 저장소
 lang: ko
+concepts: [learning-resources]
 ---
 
 # Interview_Question_for_Beginner

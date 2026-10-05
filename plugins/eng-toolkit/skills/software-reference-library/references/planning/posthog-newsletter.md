@@ -4,6 +4,7 @@ url: https://newsletter.posthog.com/
 domain: planning
 type: 블로그
 lang: en
+concepts: [product-management-practice]
 ---
 
 # PostHog Newsletter (Product for Engineers)

@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
 domain: performance
 type: 공식문서
 lang: en
+concepts: [web-caching]
 ---
 
 # HTTP 캐싱 가이드 — MDN

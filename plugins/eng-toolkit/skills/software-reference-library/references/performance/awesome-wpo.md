@@ -4,6 +4,7 @@ url: https://github.com/davidsonfellipe/awesome-wpo
 domain: performance
 type: 저장소
 lang: en
+concepts: [performance-measurement, learning-resources]
 ---
 
 # awesome-wpo — 웹 성능 최적화 큐레이션

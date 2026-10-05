@@ -4,6 +4,7 @@ url: https://helloworld.kurly.com/
 domain: development
 type: 공식문서
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 컬리 기술블로그 (Hello World)

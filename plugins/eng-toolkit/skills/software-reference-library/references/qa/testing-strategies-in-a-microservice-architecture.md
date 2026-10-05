@@ -4,6 +4,7 @@ url: https://martinfowler.com/articles/microservice-testing/
 domain: qa
 type: 블로그
 lang: en
+concepts: [service-test-strategy, microservices]
 ---
 
 # Testing Strategies in a Microservice Architecture

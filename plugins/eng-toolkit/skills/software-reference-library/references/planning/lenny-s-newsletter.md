@@ -4,6 +4,7 @@ url: https://www.lennysnewsletter.com/
 domain: planning
 type: 블로그
 lang: en
+concepts: [product-management-practice, growth-strategy]
 ---
 
 # Lenny's Newsletter

@@ -4,6 +4,7 @@ url: https://www.mindtheproduct.com/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-management-practice]
 ---
 
 # Mind the Product

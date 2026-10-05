@@ -4,6 +4,7 @@ url: https://www.satisfice.com/download/heuristic-test-strategy-model
 domain: qa
 type: 공식문서
 lang: en
+concepts: [test-heuristics]
 ---
 
 # Heuristic Test Strategy Model (James Bach)

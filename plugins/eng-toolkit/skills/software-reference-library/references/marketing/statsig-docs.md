@@ -4,6 +4,7 @@ url: https://docs.statsig.com/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [online-experimentation, feature-flags]
 ---
 
 # Statsig 공식 문서 — 피처 게이트와 실험

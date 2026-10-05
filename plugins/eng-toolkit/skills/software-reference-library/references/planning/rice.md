@@ -4,6 +4,7 @@ url: https://www.intercom.com/blog/rice-simple-prioritization-for-product-manage
 domain: planning
 type: 공식문서
 lang: en
+concepts: [prioritization]
 ---
 
 # RICE 스코어링 (Intercom 원문)

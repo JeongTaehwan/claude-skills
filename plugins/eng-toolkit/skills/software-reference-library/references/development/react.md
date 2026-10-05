@@ -4,6 +4,7 @@ url: https://react.dev/learn
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # React 공식 문서 (react.dev)

@@ -4,6 +4,7 @@ url: https://www.sigstore.dev/
 domain: security
 type: 공식문서
 lang: en
+concepts: [sbom-provenance]
 ---
 
 # Sigstore

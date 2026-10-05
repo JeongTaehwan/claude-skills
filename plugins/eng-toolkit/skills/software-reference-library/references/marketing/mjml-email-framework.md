@@ -4,6 +4,7 @@ url: https://documentation.mjml.io/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [email-marketing]
 ---
 
 # MJML 공식 문서 — 반응형 이메일 마크업 언어

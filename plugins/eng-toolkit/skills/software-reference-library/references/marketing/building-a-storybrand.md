@@ -4,6 +4,7 @@ url: https://storybrand.com/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [persuasion-messaging]
 ---
 
 # Building a StoryBrand (Donald Miller)

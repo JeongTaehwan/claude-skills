@@ -4,6 +4,7 @@ url: https://www.atlassian.com/software/confluence/templates/product-requirement
 domain: planning
 type: 공식문서
 lang: en
+concepts: [requirements-specs]
 ---
 
 # Atlassian PRD 템플릿

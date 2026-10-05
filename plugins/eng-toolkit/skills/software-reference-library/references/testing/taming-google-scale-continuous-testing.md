@@ -4,6 +4,7 @@ url: https://research.google/pubs/pub45880/
 domain: testing
 type: 논문
 lang: en
+concepts: [flaky-tests, test-strategy]
 ---
 
 # Taming Google-Scale Continuous Testing

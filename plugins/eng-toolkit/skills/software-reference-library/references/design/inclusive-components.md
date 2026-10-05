@@ -4,6 +4,7 @@ url: https://inclusive-components.design/
 domain: design
 type: 공식문서
 lang: en
+concepts: [accessible-components]
 ---
 
 # Inclusive Components

@@ -4,6 +4,7 @@ url: https://designingforperformance.com/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [image-optimization, typography]
 ---
 
 # Designing for Performance

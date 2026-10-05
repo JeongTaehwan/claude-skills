@@ -4,6 +4,7 @@ url: https://ogp.me/
 domain: marketing
 type: 표준
 lang: en
+concepts: [structured-data]
 ---
 
 # Open Graph protocol (ogp.me)

@@ -4,6 +4,7 @@ url: https://github.com/dvtng/react-loading-skeleton
 domain: performance
 type: 저장소
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # react-loading-skeleton — 레이아웃 적응형 스켈레톤 스크린

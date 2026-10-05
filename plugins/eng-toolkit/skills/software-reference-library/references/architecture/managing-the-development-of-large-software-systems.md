@@ -4,6 +4,7 @@ url: https://www.cs.umd.edu/class/spring2003/cmsc838p/Process/waterfall.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [agile-delivery]
 ---
 
 # Managing the Development of Large Software Systems

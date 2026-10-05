@@ -4,6 +4,7 @@ url: https://github.com/ProductHired/open-product-management
 domain: planning
 type: 저장소
 lang: en
+concepts: [product-management-practice]
 ---
 
 # Open Product Management

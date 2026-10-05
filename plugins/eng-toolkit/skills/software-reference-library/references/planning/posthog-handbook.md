@@ -4,6 +4,7 @@ url: https://posthog.com/handbook
 domain: planning
 type: 공식문서
 lang: en
+concepts: [engineering-effectiveness, product-management-practice]
 ---
 
 # PostHog Handbook

@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc9110.html
 domain: development
 type: 표준
 lang: en
+concepts: [http-semantics]
 ---
 
 # RFC 9110 — HTTP Semantics

@@ -4,6 +4,7 @@ url: https://spec.openapis.org/oas/latest.html
 domain: development
 type: 표준
 lang: en
+concepts: [api-specs-schemas]
 ---
 
 # OpenAPI Specification

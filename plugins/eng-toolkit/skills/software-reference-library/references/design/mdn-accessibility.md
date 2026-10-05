@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/Accessibility
 domain: design
 type: 공식문서
 lang: en
+concepts: [accessibility, accessible-components]
 ---
 
 # MDN — Accessibility

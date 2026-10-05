@@ -4,6 +4,7 @@ url: https://www.istqb.org/certifications/certified-tester-foundation-level-ctfl
 domain: qa
 type: 공식문서
 lang: en
+concepts: [qa-practice-community]
 ---
 
 # ISTQB Foundation Level (CTFL v4.0)

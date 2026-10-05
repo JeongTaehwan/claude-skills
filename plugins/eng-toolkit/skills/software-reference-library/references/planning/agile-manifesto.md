@@ -4,6 +4,7 @@ url: https://agilemanifesto.org/
 domain: planning
 type: 표준
 lang: en
+concepts: [agile-delivery]
 ---
 
 # Agile Manifesto

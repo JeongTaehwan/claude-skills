@@ -4,6 +4,7 @@ url: https://tech.kakao.com/
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 카카오 기술블로그

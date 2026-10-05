@@ -4,6 +4,7 @@ url: https://www.romanpichler.com/blog/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-strategy, roadmapping]
 ---
 
 # Roman Pichler 블로그

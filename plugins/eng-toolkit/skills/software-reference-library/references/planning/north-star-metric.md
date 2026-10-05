@@ -4,6 +4,7 @@ url: https://amplitude.com/blog/product-north-star-metric
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-metrics]
 ---
 
 # North Star Metric (Amplitude)

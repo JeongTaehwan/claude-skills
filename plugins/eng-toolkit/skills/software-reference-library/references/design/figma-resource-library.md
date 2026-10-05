@@ -4,6 +4,7 @@ url: https://www.figma.com/resource-library/
 domain: design
 type: 공식문서
 lang: en
+concepts: [design-systems]
 ---
 
 # Figma Resource Library

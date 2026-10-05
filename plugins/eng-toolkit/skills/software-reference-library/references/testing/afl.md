@@ -4,6 +4,7 @@ url: https://github.com/google/AFL
 domain: testing
 type: 저장소
 lang: en
+concepts: [fuzzing]
 ---
 
 # AFL (American Fuzzy Lop)

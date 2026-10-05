@@ -4,6 +4,7 @@ url: https://hpbn.co/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [network-protocols]
 ---
 
 # High Performance Browser Networking

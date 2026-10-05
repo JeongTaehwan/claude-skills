@@ -4,6 +4,7 @@ url: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat
 domain: architecture
 type: 논문
 lang: en
+concepts: [system-design, software-complexity]
 ---
 
 # Hints for Computer System Design

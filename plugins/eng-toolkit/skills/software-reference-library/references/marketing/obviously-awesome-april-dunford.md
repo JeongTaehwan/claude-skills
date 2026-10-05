@@ -4,6 +4,7 @@ url: https://www.aprildunford.com/obviously-awesome
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [positioning]
 ---
 
 # Obviously Awesome (April Dunford)

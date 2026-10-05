@@ -4,6 +4,7 @@ url: https://research.google/pubs/pub36299/
 domain: planning
 type: 논문
 lang: en
+concepts: [product-metrics]
 ---
 
 # HEART 프레임워크 (Google, CHI 2010)

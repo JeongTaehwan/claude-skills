@@ -4,6 +4,7 @@ url: https://www.reforge.com/blog/growth-loops
 domain: marketing
 type: 블로그
 lang: en
+concepts: [growth-strategy]
 ---
 
 # Growth Loops are the New Funnels (Brian Balfour, Reforge)

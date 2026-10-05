@@ -4,6 +4,7 @@ url: https://nickarner.com/cited_papers/The_importance_of_percent-done_progress_
 domain: performance
 type: 논문
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # The Importance of Percent-Done Progress Indicators for Computer-Human Interfaces (CHI '85)

@@ -4,6 +4,7 @@ url: https://www.producttalk.org/opportunity-solution-tree/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [customer-jobs-opportunities]
 ---
 
 # Teresa Torres — Opportunity Solution Tree

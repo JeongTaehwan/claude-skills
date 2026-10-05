@@ -4,6 +4,7 @@ url: https://www.thoughtworks.com/radar
 domain: development
 type: 공식문서
 lang: en
+concepts: [architecture-review, learning-resources]
 ---
 
 # ThoughtWorks Technology Radar

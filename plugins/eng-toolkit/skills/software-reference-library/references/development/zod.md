@@ -4,6 +4,7 @@ url: https://zod.dev/
 domain: development
 type: 공식문서
 lang: en
+concepts: [api-specs-schemas, language-platform-references]
 ---
 
 # Zod — 스키마 검증

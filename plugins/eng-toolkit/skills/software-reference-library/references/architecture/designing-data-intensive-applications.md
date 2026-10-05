@@ -4,6 +4,7 @@ url: https://dataintensive.net/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [data-intensive-systems, consistency-cap]
 ---
 
 # Designing Data-Intensive Applications (책 사이트)

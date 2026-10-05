@@ -4,6 +4,7 @@ url: https://segment.com/docs/protocols/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [tracking-plan]
 ---
 
 # Segment Protocols — 트래킹 플랜과 스키마 강제

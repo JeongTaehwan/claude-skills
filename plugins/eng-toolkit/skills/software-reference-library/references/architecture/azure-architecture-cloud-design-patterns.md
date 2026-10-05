@@ -4,6 +4,7 @@ url: https://learn.microsoft.com/en-us/azure/architecture/patterns/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [resilience-patterns, architecture-patterns]
 ---
 
 # Azure Architecture — Cloud Design Patterns

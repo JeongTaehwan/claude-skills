@@ -4,6 +4,7 @@ url: https://prometheus.io/docs/prometheus/latest/querying/basics/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [metrics-monitoring]
 ---
 
 # PromQL 질의 기초

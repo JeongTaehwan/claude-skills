@@ -4,6 +4,7 @@ url: https://www.w3.org/TR/WCAG22/
 domain: design
 type: 표준
 lang: en
+concepts: [wcag-compliance]
 ---
 
 # WCAG 2.2

@@ -4,6 +4,7 @@ url: https://glinden.blogspot.com/2006/12/slides-from-my-talk-at-stanford.html
 domain: performance
 type: 발표
 lang: en
+concepts: [performance-business-impact]
 ---
 
 # Amazon "100ms = 매출 1%" — Make Data Useful (Greg Linden, 2006)

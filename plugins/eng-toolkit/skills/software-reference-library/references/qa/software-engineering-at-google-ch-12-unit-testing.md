@@ -4,6 +4,7 @@ url: https://abseil.io/resources/swe-book/html/ch12.html
 domain: qa
 type: 공식문서
 lang: en
+concepts: [unit-test-design]
 ---
 
 # Software Engineering at Google — Ch.12 Unit Testing

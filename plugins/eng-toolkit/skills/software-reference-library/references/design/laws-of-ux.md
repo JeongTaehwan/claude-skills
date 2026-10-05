@@ -4,6 +4,7 @@ url: https://lawsofux.com/
 domain: design
 type: 공식문서
 lang: en
+concepts: [ux-heuristics-patterns, behavioral-design]
 ---
 
 # Laws of UX

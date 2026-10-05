@@ -4,6 +4,7 @@ url: https://kubernetes.io/docs/reference/kubectl/quick-reference/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [kubernetes]
 ---
 
 # kubectl 치트시트 (Quick Reference)

@@ -4,6 +4,7 @@ url: https://owasp.org/www-project-api-security/
 domain: security
 type: 표준
 lang: en
+concepts: [security-requirements, api-design]
 ---
 
 # OWASP API Security Top 10

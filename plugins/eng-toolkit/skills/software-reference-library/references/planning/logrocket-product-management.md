@@ -4,6 +4,7 @@ url: https://blog.logrocket.com/product-management/
 domain: planning
 type: 블로그
 lang: en
+concepts: [product-management-practice]
 ---
 
 # LogRocket Product Management 블로그

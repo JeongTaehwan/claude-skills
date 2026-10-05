@@ -4,6 +4,7 @@ url: https://web.dev/articles/efficiently-load-third-party-javascript
 domain: performance
 type: 공식문서
 lang: en
+concepts: [third-party-scripts]
 ---
 
 # 서드파티 JavaScript 효율적 로딩 (Efficiently load third-party JavaScript)

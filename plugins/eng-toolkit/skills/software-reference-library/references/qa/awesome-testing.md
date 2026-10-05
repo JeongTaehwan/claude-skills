@@ -4,6 +4,7 @@ url: https://github.com/TheJambo/awesome-testing
 domain: qa
 type: 저장소
 lang: en
+concepts: [qa-practice-community]
 ---
 
 # Awesome Testing (TheJambo)

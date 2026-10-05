@@ -4,6 +4,7 @@ url: https://gojko.net/books/specification-by-example/
 domain: qa
 type: 공식문서
 lang: en
+concepts: [specification-by-example]
 ---
 
 # Specification by Example (Gojko Adzic)

@@ -4,6 +4,7 @@ url: https://static.googleusercontent.com/media/research.google.com/en//archive/
 domain: architecture
 type: 논문
 lang: en
+concepts: [data-intensive-systems]
 ---
 
 # MapReduce: Simplified Data Processing on Large Clusters

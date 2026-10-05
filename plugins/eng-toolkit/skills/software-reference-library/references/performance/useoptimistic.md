@@ -4,6 +4,7 @@ url: https://react.dev/reference/react/useOptimistic
 domain: performance
 type: 공식문서
 lang: en
+concepts: [perceived-performance]
 ---
 
 # useOptimistic — React 낙관적 UI 훅

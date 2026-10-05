@@ -4,6 +4,7 @@ url: https://www.iso.org/standard/81291.html
 domain: qa
 type: 표준
 lang: en
+concepts: [qa-practice-community]
 ---
 
 # ISO/IEC/IEEE 29119 (소프트웨어 테스팅 국제 표준)

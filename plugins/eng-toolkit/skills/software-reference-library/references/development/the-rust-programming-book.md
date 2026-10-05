@@ -4,6 +4,7 @@ url: https://doc.rust-lang.org/book/
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # The Rust Programming Book

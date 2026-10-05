@@ -4,6 +4,7 @@ url: https://www.usenix.org/system/files/conference/nsdi16/nsdi16-paper-netraval
 domain: performance
 type: 논문
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # Polaris: Faster Page Loads Using Fine-grained Dependency Tracking (NSDI '16)

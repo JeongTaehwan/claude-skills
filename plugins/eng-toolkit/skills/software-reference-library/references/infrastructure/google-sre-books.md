@@ -4,6 +4,7 @@ url: https://sre.google/books/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [site-reliability-engineering]
 ---
 
 # Google SRE Books (전권 무료)

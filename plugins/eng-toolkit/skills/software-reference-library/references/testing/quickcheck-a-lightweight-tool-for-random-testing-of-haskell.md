@@ -4,6 +4,7 @@ url: https://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf
 domain: testing
 type: 논문
 lang: en
+concepts: [property-based-testing]
 ---
 
 # QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs

@@ -4,6 +4,7 @@ url: https://github.com/dubzzz/fast-check
 domain: testing
 type: 저장소
 lang: en
+concepts: [property-based-testing]
 ---
 
 # fast-check (JS 속성 기반 테스트)

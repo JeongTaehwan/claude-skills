@@ -4,6 +4,7 @@ url: https://cucumber.io/blog/bdd/example-mapping-introduction/
 domain: qa
 type: 공식문서
 lang: en
+concepts: [specification-by-example]
 ---
 
 # Example Mapping

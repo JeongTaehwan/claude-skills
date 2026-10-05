@@ -4,6 +4,7 @@ url: https://scrumguides.org/scrum-guide.html
 domain: planning
 type: 표준
 lang: en
+concepts: [agile-delivery]
 ---
 
 # The Scrum Guide

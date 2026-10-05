@@ -4,6 +4,7 @@ url: https://mir.cs.illinois.edu/marinov/publications/LuoETAL14FlakyTestsAnalysi
 domain: testing
 type: 논문
 lang: en
+concepts: [flaky-tests]
 ---
 
 # An Empirical Analysis of Flaky Tests

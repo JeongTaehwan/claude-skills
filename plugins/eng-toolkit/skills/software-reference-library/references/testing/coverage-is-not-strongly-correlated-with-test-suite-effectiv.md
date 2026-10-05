@@ -4,6 +4,7 @@ url: http://linozemtseva.com/research/2014/icse/coverage/coverage_is_not_strongl
 domain: testing
 type: 논문
 lang: en
+concepts: [test-adequacy]
 ---
 
 # Coverage Is Not Strongly Correlated with Test Suite Effectiveness

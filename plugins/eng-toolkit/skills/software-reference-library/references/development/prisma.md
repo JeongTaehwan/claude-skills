@@ -4,6 +4,7 @@ url: https://www.prisma.io/docs
 domain: development
 type: 공식문서
 lang: en
+concepts: [database-usage]
 ---
 
 # Prisma 공식 문서

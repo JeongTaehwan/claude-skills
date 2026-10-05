@@ -4,6 +4,7 @@ url: https://www.marketingscience.info/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [brand-growth-science]
 ---
 
 # Ehrenberg-Bass Institute for Marketing Science

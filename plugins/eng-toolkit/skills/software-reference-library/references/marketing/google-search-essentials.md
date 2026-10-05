@@ -4,6 +4,7 @@ url: https://developers.google.com/search/docs/essentials
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [seo]
 ---
 
 # Google 검색 기본사항 (Google Search Essentials)

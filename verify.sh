@@ -71,6 +71,10 @@ g() { printf '%s' "$2" | CLAUDE_GUARD_OFF=0 sh "hooks/$1" >/dev/null 2>&1 && ech
 [ "$(g guard-write.sh '{"tool_input":{"file_path":"/x/a.ts","content":"k=AKIA'"ABCDEFGHIJKLMNOP"'"}}')" = 2 ] || { echo "FAIL guard-write: 키를 못 막음"; exit 1; }
 [ "$(g guard-write.sh '{"tool_input":{"file_path":"/x/a.ts","content":"k=process.env.K"}}')" = 0 ] || { echo "FAIL guard-write: 정상 쓰기를 막음"; exit 1; }
 
+echo "==> 레퍼런스 온톨로지"
+(cd plugins/eng-toolkit/skills/software-reference-library && python3 scripts/ontology.py check >/dev/null) \
+  || { (cd plugins/eng-toolkit/skills/software-reference-library && python3 scripts/ontology.py check | grep FAIL | head -20); exit 1; }
+
 echo "==> 레퍼런스 검색 품질"
 (cd plugins/eng-toolkit/skills/software-reference-library && python3 scripts/find_test.py) \
   || { echo "FAIL find_test.py"; exit 1; }

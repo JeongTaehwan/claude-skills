@@ -4,6 +4,7 @@ url: https://heathbrothers.com/books/made-to-stick/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [persuasion-messaging]
 ---
 
 # Made to Stick (Chip Heath & Dan Heath)

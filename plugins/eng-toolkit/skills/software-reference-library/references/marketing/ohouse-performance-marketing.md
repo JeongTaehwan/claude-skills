@@ -4,6 +4,7 @@ url: https://www.bucketplace.com/post/2021-11-11-%EC%98%A4%EB%8A%98%EC%9D%98%E4%
 domain: marketing
 type: 블로그
 lang: ko
+concepts: [performance-marketing]
 ---
 
 # 오늘의집 퍼포먼스 마케팅의 비밀 (버킷플레이스 인터뷰)

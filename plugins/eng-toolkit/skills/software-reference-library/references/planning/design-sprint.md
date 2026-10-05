@@ -4,6 +4,7 @@ url: https://www.gv.com/sprint/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [discovery-workshops]
 ---
 
 # Design Sprint (GV)

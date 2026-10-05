@@ -4,6 +4,7 @@ url: https://www.slideshare.net/dmc500hats/startup-metrics-for-pirates-long-vers
 domain: marketing
 type: 블로그
 lang: en
+concepts: [growth-strategy, product-metrics]
 ---
 
 # AARRR 해적 지표 — Startup Metrics for Pirates (Dave McClure)

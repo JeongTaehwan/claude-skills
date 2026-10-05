@@ -4,6 +4,7 @@ url: https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modulariza
 domain: architecture
 type: 논문
 lang: en
+concepts: [software-complexity]
 ---
 
 # On the Criteria To Be Used in Decomposing Systems into Modules

@@ -4,6 +4,7 @@ url: https://github.com/GoogleContainerTools/distroless
 domain: infrastructure
 type: 저장소
 lang: en
+concepts: [containers, supply-chain-security]
 ---
 
 # distroless — 셸도 패키지 매니저도 없는 컨테이너 베이스 이미지

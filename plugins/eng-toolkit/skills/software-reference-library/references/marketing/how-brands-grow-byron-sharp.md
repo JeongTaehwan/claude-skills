@@ -4,6 +4,7 @@ url: https://www.byronsharp.com/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [brand-growth-science]
 ---
 
 # How Brands Grow (Byron Sharp)

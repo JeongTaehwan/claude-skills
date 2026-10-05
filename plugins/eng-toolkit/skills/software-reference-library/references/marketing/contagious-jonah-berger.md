@@ -4,6 +4,7 @@ url: https://jonahberger.com/books/contagious/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [persuasion-messaging]
 ---
 
 # Contagious — Why Things Catch On (Jonah Berger)

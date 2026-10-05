@@ -4,6 +4,7 @@ url: http://www.cs.unc.edu/techreports/86-020.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [software-complexity]
 ---
 
 # No Silver Bullet — Essence and Accidents of Software Engineering

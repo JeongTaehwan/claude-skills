@@ -4,6 +4,7 @@ url: https://www.jpattonassociates.com/story-mapping/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [user-stories, prioritization]
 ---
 
 # User Story Mapping (Jeff Patton)

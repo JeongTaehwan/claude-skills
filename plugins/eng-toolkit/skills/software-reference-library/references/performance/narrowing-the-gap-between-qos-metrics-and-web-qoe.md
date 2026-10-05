@@ -4,6 +4,7 @@ url: https://inria.hal.science/hal-01677260/document
 domain: performance
 type: 논문
 lang: en
+concepts: [perceived-performance, performance-measurement]
 ---
 
 # Narrowing the Gap Between QoS Metrics and Web QoE Using Above-the-fold Metrics (PAM 2018)

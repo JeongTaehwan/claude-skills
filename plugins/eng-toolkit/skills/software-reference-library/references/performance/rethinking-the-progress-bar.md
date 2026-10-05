@@ -4,6 +4,7 @@ url: https://chrisharrison.net/projects/progressbars/ProgBarHarrison.pdf
 domain: performance
 type: 논문
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # Rethinking the Progress Bar (UIST '07)

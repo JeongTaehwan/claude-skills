@@ -4,6 +4,7 @@ url: https://k6.io/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [load-testing]
 ---
 
 # k6

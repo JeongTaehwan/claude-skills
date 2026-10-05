@@ -4,6 +4,7 @@ url: https://github.com/Integerous/goQuality-dev-contents
 domain: development
 type: 저장소
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # goQuality-dev-contents

@@ -4,6 +4,7 @@ url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [k8s-workload-config]
 ---
 
 # Kubernetes 프로브 설정 가이드 (liveness/readiness/startup)

@@ -4,6 +4,7 @@ url: https://research.google/pubs/pub43438/
 domain: architecture
 type: 논문
 lang: en
+concepts: [kubernetes, distributed-systems]
 ---
 
 # Large-scale cluster management at Google with Borg

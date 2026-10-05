@@ -4,6 +4,7 @@ url: https://www.webpagetest.org/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [synthetic-testing]
 ---
 
 # WebPageTest

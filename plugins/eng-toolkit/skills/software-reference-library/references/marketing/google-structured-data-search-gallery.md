@@ -4,6 +4,7 @@ url: https://developers.google.com/search/docs/appearance/structured-data/search
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [structured-data]
 ---
 
 # Google 구조화 데이터 마크업 갤러리 (Search Gallery)

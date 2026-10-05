@@ -4,6 +4,7 @@ url: https://martinfowler.com/bliki/CanaryRelease.html
 domain: development
 type: 블로그
 lang: en
+concepts: [progressive-delivery]
 ---
 
 # Canary Release

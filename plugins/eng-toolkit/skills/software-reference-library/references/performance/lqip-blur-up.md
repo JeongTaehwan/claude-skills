@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/api-reference/components/image
 domain: performance
 type: 공식문서
 lang: en
+concepts: [loading-placeholders, image-optimization]
 ---
 
 # LQIP · blur-up — Next.js Image placeholder

@@ -4,6 +4,7 @@ url: http://web.cs.ucla.edu/~ravi/publications/watchtower_mobisys19.pdf
 domain: performance
 type: 논문
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # WatchTower: Fast, Secure Mobile Page Loads Using Remote Dependency Resolution (MobiSys '19)
