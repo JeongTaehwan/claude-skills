@@ -40,3 +40,27 @@ FAQ, 커뮤니티·스터디 그룹 정보, 후기 모음처럼 학습 자료 �
 
 ## 인용 포인트
 - 데이터 직군 역할 구분이 정리돼 있어, 채용·업무 분장 논의에서 "우리가 뽑으려는 건 어느 쪽인가"를 명확히 하는 데 쓸 수 있다.
+
+## 코드 예시
+
+로드맵의 층(직군 구분 -> 기초 -> 세부 분야 -> 실무·커리어)을 팀원 학습 계획 파일로 옮긴 예. 자료 이름은 비워 두고, 위키에서 찾은 링크를 채우는 틀로 쓴다.
+
+```yaml
+# study-plan.yaml — 본인 전문 분야가 아닌 팀원의 학습 계획을 같이 짤 때
+member: example-backend-dev
+target_role: ml-engineer        # analyst | data-engineer | ml-engineer | scientist 중 먼저 합의
+layers:
+  - name: 기초
+    items: [python, linux, git, linear-algebra]
+    done_when: "작은 데이터셋으로 전처리 스크립트를 혼자 짠다"
+  - name: 세부 분야
+    items: [recommendation]     # 하나만 고른다
+    resources: []               # 위키에서 찾은 링크를 채운다
+    done_when: "논문 1편을 읽고 핵심 구현을 재현한다"
+  - name: 실무·커리어
+    items: [portfolio]
+    done_when: "공개 가능한 결과물 1개"
+review_every: 4w
+```
+
+`target_role` 을 정하지 않은 채 목록만 채우면 계획이 아니라 북마크가 된다 — 직군 구분이 이 파일에서 가장 먼저 채워야 하는 줄이다.

@@ -33,3 +33,21 @@ https://github.com/kuchin/awesome-cto
 각 링크에 짧은 설명이 붙어 있어 클릭 전에 성격을 판단할 수 있다.
 "CTO" 라는 제목보다 실제 범위가 넓어서, 팀 리드나 시니어 개인 기여자가 조직 맥락을 이해할 때도 쓸모가 있다.
 큐레이션의 성격상 깊이보다 폭이다 — 여기서 방향을 잡고 원문으로 넘어가는 진입점으로 쓰는 게 맞다.
+
+## 코드 예시
+
+큐레이션 목록은 폭이 장점이므로, 먼저 섹션별 분량을 보고 필요한 주제의 줄만 뽑아 입구로 쓴다.
+
+```bash
+readme=$(mktemp)
+curl -fsSL https://raw.githubusercontent.com/kuchin/awesome-cto/HEAD/README.md -o "$readme"
+
+# 섹션별 링크 수 — 목록의 무게 중심 파악
+awk '/^#+ /{sec=$0; next} /\]\(http/{n[sec]++} END{for(s in n) printf "%4d %s\n", n[s], s}' "$readme" \
+  | sort -rn | head -15
+
+# 지금 닥친 주제의 링크만
+grep -iE 'hiring|interview|tech debt|outsourc' "$readme" | head -20
+```
+
+이 스크립트는 길을 찾는 데까지다 — 링크 제목과 한 줄 설명만으로 고르게 되므로, 고른 글의 최신성과 품질은 직접 열어서 확인해야 한다.

@@ -40,3 +40,29 @@ DORA 는 이 지표를 **팀 단위 개선 신호**로 쓰라고 명시하고, �
 - "빠르게 가면 위험하다"는 반대 의견에, 고성과 조직이 속도와 안정성을 동시에 갖는다는 관측을 대치시킬 수 있다.
 - 지표 도입을 제안할 때 DORA 자신의 "개인 평가에 쓰지 말라"는 단서를 함께 인용하면, 지표가 감시 도구로 읽히는 것을 미리 차단한다.
 - 지표는 결과이고 역량이 원인이라는 구분은, "숫자를 올려라" 대신 "무엇을 바꿔야 숫자가 움직이는가"로 논의를 되돌린다.
+
+## 코드 예시
+
+4 key metrics 를 배포 로그에서 계산한다. 처리량 축 둘과 안정성 축 둘을 한 화면에 나란히 찍어, 한쪽만 밀어서는 좋아 보일 수 없게 한다.
+
+```python
+import csv, statistics as st
+from datetime import datetime as dt
+
+# deploys.csv 컬럼: commit_at, deployed_at, failed(true/false), restored_at(실패 때만)
+rows = list(csv.DictReader(open("deploys.csv")))
+t = dt.fromisoformat
+hours = lambda a, b: (t(b) - t(a)).total_seconds() / 3600
+
+span_days = max((max(t(r["deployed_at"]) for r in rows)
+                 - min(t(r["deployed_at"]) for r in rows)).days, 1)
+failed = [r for r in rows if r["failed"] == "true"]
+
+print(f"배포 빈도        {len(rows) / span_days:.2f} 회/일")
+print(f"변경 리드타임    {st.median(hours(r['commit_at'], r['deployed_at']) for r in rows):.1f} 시간 (중앙값)")
+print(f"변경 실패율      {len(failed) / len(rows):.1%}")
+print(f"복구 시간        {st.median(hours(r['deployed_at'], r['restored_at']) for r in failed):.1f} 시간 (중앙값)"
+      if failed else "복구 시간        실패 없음")
+```
+
+작성자(author) 컬럼을 일부러 넣지 않았다 — 이 CSV 에 사람 이름을 붙여 groupby 하는 순간 팀 개선 신호가 개인 평가 도구로 변한다.

@@ -38,3 +38,27 @@ Lenny Rachitsky 가 운영하는 제품·성장 분야 최대 뉴스레터 — �
 ## 인용 포인트
 - 목표 수치를 정할 때 "업계 범위가 이 정도"라는 출발선을 제시할 수 있다 — 단, 표본 편향을 함께 명시하는 편이 낫다.
 - 조직 구조 변경 제안서에서 다른 회사들의 실제 구성 사례를 인용하는 용도.
+
+## 코드 예시
+
+이 뉴스레터는 근거가 아니라 가설의 출발점이다 — 벤치마크를 우리 수치에 대 볼 때 절대값이 아니라 자릿수와 측정 정의가 맞는지를 먼저 확인하도록 강제하는 비교 함수.
+
+```python
+# 벤치마크는 원문에서 손으로 옮겨 적는다. 아래 숫자는 자리표시 예시 값이다 — 인용하지 않는다.
+BENCH = {"d30_retention": {"low": 0.05, "high": 0.15,
+                           "definition": "가입 후 30일차에 1회 이상 재방문"}}
+
+def compare(metric: str, ours: float, our_definition: str) -> str:
+    b = BENCH[metric]
+    if our_definition != b["definition"]:
+        return "비교 불가: 측정 정의가 다르다 — 정의부터 맞춰라"
+    if ours < b["low"] / 3 or ours > b["high"] * 3:
+        return "자릿수가 다르다: 측정 오류나 시장 차이부터 의심"
+    pos = "범위 안" if b["low"] <= ours <= b["high"] else "범위 밖"
+    return f"{pos} — 이 숫자는 가설일 뿐, 우리 코호트로 확인하라"
+
+print(compare("d30_retention", 0.09, "가입 후 30일차에 1회 이상 재방문"))
+print(compare("d30_retention", 0.40, "가입 후 30일 내 결제"))
+```
+
+북미 SaaS 표본에서 온 범위를 한국 커머스에 그대로 대입하면 안 된다 — 이 함수가 "범위 안"이라고 말해도 그것은 목표가 아니라 질문이다.

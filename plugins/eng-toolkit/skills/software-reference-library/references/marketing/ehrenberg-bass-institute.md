@@ -46,3 +46,28 @@ Andrew Ehrenberg 로 이어지는 계보에서 나온 개념들 — 더블 제�
 - 반대로 그 주장의 **적용 한계**(주로 반복 구매 소비재 데이터)를 명시해 과잉 일반화를 막을 때.
 - 브랜드 조사 설문을 설계하며 "선호도"가 아니라 "어떤 상황에서 떠오르는가(CEP)"를 묻자고 제안할 때.
 - 대행사 제안서의 프레임이 어느 계보에서 왔는지 구분하고, 상충하는 두 계보를 나란히 놓고 결정할 때.
+
+## 코드 예시
+
+이 연구소의 방법은 하나의 실험이 아니라 **여러 데이터에서 같은 패턴이 반복되는지** 보는 경험적 일반화다 — 더블 제퍼디(작은 브랜드는 침투율도 낮고 충성도도 낮다)를 우리 카테고리 데이터로 직접 확인하는 최소 스크립트.
+
+```python
+import math
+from statistics import correlation   # Python 3.10+
+
+# 우리 카테고리 구매 패널에서 뽑은 값으로 교체: (브랜드, 침투율, 구매자당 평균 구매 횟수)
+rows = [("A", 0.40, 3.1), ("B", 0.25, 2.6), ("C", 0.12, 2.2), ("D", 0.06, 1.9), ("E", 0.03, 1.7)]
+
+pen = [r[1] for r in rows]
+freq = [r[2] for r in rows]
+print("상관계수(침투율 vs 구매 빈도):", round(correlation(pen, freq), 2))
+
+# 법칙에서 벗어나는 브랜드 찾기: 침투율 대비 기대 빈도에서 크게 이탈하는 곳
+slope = correlation(pen, freq) * (math.sqrt(sum((x - sum(freq)/len(freq))**2 for x in freq)) /
+                                    math.sqrt(sum((x - sum(pen)/len(pen))**2 for x in pen)))
+icpt = sum(freq)/len(freq) - slope * sum(pen)/len(pen)
+for b, p, f in rows:
+    print(b, "잔차:", round(f - (icpt + slope * p), 2))
+```
+
+여러 카테고리·시기에서 반복해 보지 않으면 결과가 아무것도 증명하지 못한다 — 한 번 계산한 표본 다섯 개는 법칙이 아니라 이 데이터의 모양일 뿐이다.

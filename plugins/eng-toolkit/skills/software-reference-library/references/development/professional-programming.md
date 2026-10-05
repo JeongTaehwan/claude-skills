@@ -38,3 +38,27 @@ https://github.com/charlax/professional-programming
 
 ## 인용 포인트
 - "프로답게 일하는 법은 별도로 학습해야 하는 기술"이라는 전제는, 온보딩에 기술 외 자료를 넣자는 제안의 근거로 쓰인다.
+
+## 코드 예시
+
+이 저장소는 읽는 대상이 아니라 **목차로 쓰는 것**이다 — README 를 받아 우리 온보딩 주제어에 걸리는 링크만 뽑아 읽기 목록의 초안으로 만든다.
+
+```python
+import re
+import urllib.request
+
+URL = "https://raw.githubusercontent.com/charlax/professional-programming/master/README.md"
+TOPICS = ["review", "estimation", "incident", "design doc", "career"]   # 우리 팀 온보딩 주제어
+
+md = urllib.request.urlopen(URL).read().decode("utf-8")
+heading = ""
+for line in md.splitlines():
+    if line.startswith("#"):
+        heading = line.lstrip("# ").strip()
+        continue
+    m = re.search(r"\[(.+?)\]\((https?://[^)]+)\)", line)
+    if m and any(t in (heading + " " + m.group(1)).lower() for t in TOPICS):
+        print(f"{heading[:30]:30} | {m.group(1)[:60]:60} | {m.group(2)}")
+```
+
+출력은 후보일 뿐이다 — 항목마다 저자가 달라 서로 모순되는 조언이 섞이므로, 이 목록에서 무엇을 먼저 읽게 할지는 스크립트가 아니라 사람이 정해야 한다.

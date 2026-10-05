@@ -38,3 +38,25 @@ https://github.com/dwmkerr/hacker-laws
 ## 인용 포인트
 - 법칙을 인용할 때 원 출처 링크를 함께 달 수 있어, "어디서 들은 말" 대신 근거 있는 인용이 된다.
 - 굿하트의 법칙은 목표를 지표로 바꾸는 모든 논의(예: 리뷰 응답 시간, 커버리지 수치)에서 그대로 쓰인다.
+
+## 코드 예시
+
+브룩스의 법칙을 "소통 경로 수 + 신규 인력 램프업 비용"이라는 작은 모델로 옮겼다. 법칙을 구호가 아니라 계수가 보이는 계산으로 말하게 한다.
+
+```python
+def weeks_to_finish(work, team, add=0, ramp=3, overhead=0.01, mentor_cost=0.5):
+    """work: 남은 인주(人週). 모든 계수는 가정값."""
+    week, n = 0, team + add
+    while work > 0:
+        week += 1
+        ramping = add if week <= ramp else 0
+        eff = (n - ramping) - ramping * mentor_cost          # 신규는 램프업 중 생산 0, 기존 인력 시간 소모
+        eff *= max(0.0, 1 - overhead * n * (n - 1) / 2)       # 소통 경로 수에 비례한 손실
+        work -= max(eff, 0.01)
+    return week
+
+for work in (20, 40, 80):
+    print(work, [weeks_to_finish(work, 5, add) for add in (0, 1, 3, 5)])
+```
+
+계수가 전부 임의다 — 남은 작업량과 램프업 기간을 바꾸면 결론이 뒤집히므로, 이 모델은 "인원 추가가 늘 늦춘다"를 증명하는 것이 아니라 어떤 조건에서 그렇게 되는지 묻게 만드는 용도다.

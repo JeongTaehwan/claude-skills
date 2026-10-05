@@ -50,3 +50,29 @@ https://toss.im/tossfeed/article/marketingteam-interview
 - 브랜드 커뮤니케이션과 퍼포먼스 조직 분리의 실효를 설명할 때.
 - 소재 제작·집행 권한을 실무자에게 위임하자는 제안 — 실험 사이클 단축의 조직적 조건으로.
 - 신규 기능 개발 전 마케팅 조직이 수요를 먼저 검증하는 절차를 제안할 때.
+
+## 코드 예시
+
+"마케팅팀은 신규 회원 획득 하나에만 목표를 건다"는 조직 설계를 팀 설정 검증으로 옮긴 것 — 목표가 둘이 되는 순간 어느 쪽 실패도 상대 지표로 변명된다.
+
+```python
+TEAMS = {
+    "marketing":     {"goals": ["new_user_acquisition"], "launch_needs_approval": False},
+    "communication": {"goals": ["brand_awareness"],      "launch_needs_approval": True},
+    "growth_mixed":  {"goals": ["new_user_acquisition", "brand_awareness"],
+                      "launch_needs_approval": True},
+}
+
+def check(name: str, t: dict) -> list[str]:
+    errs = []
+    if len(t["goals"]) != 1:
+        errs.append(f"{name}: 목표가 {len(t['goals'])}개 — 하나만 남기고 나머지는 다른 팀으로")
+    if t["goals"] == ["new_user_acquisition"] and t["launch_needs_approval"]:
+        errs.append(f"{name}: 획득팀인데 시작에 결재가 필요 — 기획~집행 대기 시간이 생긴다")
+    return errs
+
+for n, t in TEAMS.items():
+    print(n, check(n, t) or "OK")
+```
+
+이 검증은 구조만 본다 — 결재 없이 시작해도 되는 이유는 목표 하나로 성과 판정이 단순하기 때문이지, 결재를 없애서 얻는 속도가 아니다.

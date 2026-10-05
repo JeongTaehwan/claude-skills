@@ -37,3 +37,27 @@ https://blog.logrocket.com/product-management/
 ## 인용 포인트
 - 팀에 새 우선순위 기준을 제안할 때, 원전 하나만 들고 가는 것보다 "이 프레임워크를 이렇게 변형한 사례들이 있다"는 식으로 변형 여지를 미리 열어두면 도입 저항이 줄어든다.
 - 다만 팀 표준을 확정하는 문서에는 이 블로그 대신 원전을 인용하는 편이 낫다. 여기는 탐색용이다.
+
+## 코드 예시
+
+이 아카이브의 글은 대개 "원전 + 우리가 바꾼 부분" 구조다 — 그 구조를 데이터로 만들어 원전과 각색의 차이, 그리고 각색의 이유를 항상 같이 적게 하는 기록.
+
+```python
+BASE = {"name": "RICE", "formula": "reach * impact * confidence / effort"}
+
+variants = [
+    {"team": "A", "formula": "reach * impact * confidence / effort * strategic_fit",
+     "why": ""},                                              # 이유 누락
+    {"team": "B", "formula": "reach * impact * confidence / effort",
+     "why": "원전 그대로"},
+]
+
+for v in variants:
+    changed = v["formula"] != BASE["formula"]
+    if changed and not v["why"].strip():
+        print(f"[거절] {v['team']}: {BASE['name']} 에서 바꿨는데 이유가 없다")
+    else:
+        print(f"[기록] {v['team']}: {'변형' if changed else '원전 그대로'} — {v['why']}")
+```
+
+원전을 읽지 않으면 BASE 자체를 틀리게 적는다 — 각색 사례는 어디가 바뀌었는지를 보는 글이지 정본이 아니다.

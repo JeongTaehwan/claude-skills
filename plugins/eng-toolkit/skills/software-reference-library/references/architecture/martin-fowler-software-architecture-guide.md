@@ -36,3 +36,26 @@ https://martinfowler.com/architecture/
 ## 인용 포인트
 - 기술 부채 상환 예산을 요청할 때: 품질-비용 트레이드오프가 거짓이며 회수 기간이 수 주 수준이라는 주장을 근거로 쓸 수 있다.
 - 아키텍처 문서화 요구가 과해질 때: 아키텍처를 "팀이 공유하는 이해"로 정의하는 대목은, 문서 산출물보다 합의 형성이 목적이라는 방향 전환에 쓸 만하다.
+
+## 코드 예시
+
+"내부 품질은 신기능 속도를 좌우한다"는 주장을 누적 처리량 모델로 옮겼다. 품질에 시간을 쓰는 쪽이 언제부터 앞서는지 숫자로 보여 주면 예산 설득의 논거가 된다.
+
+```python
+def cumulative(weeks=40, invest=0.0, decay=0.04, gain=0.5):
+    """invest: 주당 내부 품질에 쓰는 시간 비율. 계수는 가정값."""
+    quality, shipped, out = 1.0, 0.0, []
+    for _ in range(weeks):
+        shipped += 10 * quality * (1 - invest)        # 품질이 곧 기능 처리 속도
+        quality = min(1.0, max(0.2, quality * (1 - decay) + invest * gain))
+        out.append(shipped)
+    return out
+
+skip = cumulative(invest=0.0)
+pay  = cumulative(invest=0.2)
+cross = next((w + 1 for w, (a, b) in enumerate(zip(skip, pay)) if b > a), None)
+print(f"40주 누적 기능량  투자 안 함 {skip[-1]:.0f} / 20% 투자 {pay[-1]:.0f}")
+print(f"역전되는 주차: {cross}")
+```
+
+역전 주차는 decay 와 gain 을 어떻게 잡느냐에 전적으로 달려 있다 — 팀의 실제 리드타임 추이로 이 두 값을 먼저 추정하지 않으면 설득 자료가 아니라 그럴듯한 그래프일 뿐이다.

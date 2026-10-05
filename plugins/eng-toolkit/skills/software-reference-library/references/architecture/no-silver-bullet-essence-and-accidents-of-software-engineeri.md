@@ -39,3 +39,24 @@ http://www.cs.unc.edu/techreports/86-020.pdf
 - 도구 도입 심사 기준으로 그대로 쓸 수 있다: "이 도구가 제거하는 것이 본질적 복잡성인가 부수적 복잡성인가, 부수적이라면 지금 그게 우리 병목의 몇 퍼센트인가."
 - "은탄환은 없다"는 문구 자체가 관용어가 되어 있어, 과장된 로드맵 발표에 대한 짧은 반론으로 이름만 언급해도 통한다.
 - "grow, don't build" — 큰 설계를 한 번에 완성하려는 계획에 반대할 때의 고전 근거.
+
+## 코드 예시
+
+도구가 줄이는 것은 부수적 복잡성뿐이라는 구분을 속도 상한 계산으로 옮겼다. 도입 제안을 받으면 "부수 비중이 얼마이고 그중 몇 %를 걷어내는가"를 되묻게 한다.
+
+```python
+def speedup(accidental_share: float, removed: float) -> float:
+    """전체 노력 중 부수적 복잡성 비중과, 도구가 그 중 걷어내는 비율 -> 배속."""
+    remaining = (1 - accidental_share) + accidental_share * (1 - removed)
+    return 1 / remaining
+
+print("부수비중  50%제거  90%제거  100%제거")
+for share in (0.5, 0.8, 0.9):
+    row = [speedup(share, r) for r in (0.5, 0.9, 1.0)]
+    print(f"{share:6.0%}  " + "  ".join(f"{x:6.2f}x" for x in row))
+
+# 10배가 나오려면 부수 비중 90% 이상을 전부 제거해야 한다
+print(speedup(0.9, 1.0))   # 10.0
+```
+
+입력값인 "부수 비중"을 어디서 얻느냐가 핵심이다 — 측정 없이 이 값을 높게 가정하면 어떤 도구도 10배가 되므로, 비중을 모르는 채 배속 주장을 받아들이면 안 된다.

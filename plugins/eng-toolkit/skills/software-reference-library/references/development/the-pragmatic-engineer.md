@@ -38,3 +38,27 @@ https://newsletter.pragmaticengineer.com/
 
 ## 인용 포인트
 - 프로세스 변경 제안서에서 "업계 관행"을 주장할 때, 여러 회사 사례를 모아 분포로 보여준 글이 단일 회사 사례보다 반박에 강하다.
+
+## 코드 예시
+
+이 뉴스레터의 가치는 "회사마다 이렇게 다르다"는 분포다 — 읽으면서 관행을 회사별로 기록하고, 근거가 충분한 분포만 팀 제안서에 인용하게 만드는 최소 장부.
+
+```python
+from collections import Counter
+
+# (관행, 회사, 출처 URL) — 읽은 글에서 옮겨 적는다. 아래는 형식을 보이는 가짜 값.
+EVIDENCE = [
+    ("oncall_rotation", "A사", "https://example.com/post-1"),
+    ("oncall_rotation", "B사", "https://example.com/post-2"),
+    ("oncall_rotation", "C사", "https://example.com/post-3"),
+    ("promo_committee", "A사", "https://example.com/post-1"),
+]
+MIN_SOURCES = 3   # 이보다 적으면 "업계 표준"이라 부르지 않는다
+
+counts = Counter(practice for practice, _, _ in EVIDENCE)
+for practice, n in counts.most_common():
+    verdict = "인용 가능" if n >= MIN_SOURCES else "근거 부족"
+    print(f"{practice:18} {n}곳  {verdict}")
+```
+
+회사 수를 세는 것만으로는 부족하다 — 각 관행이 어떤 문제를 풀려고 생겼는지를 한 줄 덧붙이지 않으면, 이 장부는 우리 조직에 맞지 않는 관행을 그대로 옮기는 근거가 된다.
