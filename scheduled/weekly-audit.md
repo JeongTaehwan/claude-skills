@@ -113,6 +113,12 @@ python3 ~/.claude/skills/skill-forge/scripts/skill-candidates.py --days 30
 
 순위의 "설치됐는데 0회"와 후보 목록을 리포트에 그대로 붙인다. 만들지·뺄지는 사람이 정한다.
 
+화면으로 볼 수 있게 대시보드도 새로 만든다 (저장소 체크아웃에서). 리포트에는 경로만 적는다.
+
+```bash
+python3 scripts/dashboard.py --days 30      # → ~/.claude/skill-audit/dashboard.html
+```
+
 ### 4. 저장소로 보관
 
 기계 층이 만든 리포트는 `~/.claude` 에 있어서 git 에 안 남는다. 저장소 루트에서 옮긴다 — **체크아웃 경로는 컴퓨터마다 다르므로 여기에 적어두지 않는다.**
