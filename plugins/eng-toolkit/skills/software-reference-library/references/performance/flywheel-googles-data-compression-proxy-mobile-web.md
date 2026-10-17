@@ -4,6 +4,7 @@ url: https://www.usenix.org/system/files/conference/nsdi15/nsdi15-paper-agababov
 domain: performance
 type: 논문
 lang: en
+concepts: [adaptive-loading, payload-reduction]
 ---
 
 # Flywheel: Google's Data Compression Proxy for the Mobile Web (NSDI '15)

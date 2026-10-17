@@ -4,6 +4,7 @@ url: https://github.com/joe-bell/plaiceholder
 domain: performance
 type: 저장소
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # plaiceholder — 빌드 타임 이미지 플레이스홀더 (아카이브됨)

@@ -4,6 +4,7 @@ url: https://owasp.org/www-project-top-ten/
 domain: security
 type: 표준
 lang: en
+concepts: [security-requirements]
 ---
 
 # OWASP Top 10

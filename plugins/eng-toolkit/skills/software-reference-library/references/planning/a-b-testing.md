@@ -4,6 +4,7 @@ url: https://www.optimizely.com/optimization-glossary/ab-testing/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [online-experimentation]
 ---
 
 # A/B Testing 용어 정리 (Optimizely)

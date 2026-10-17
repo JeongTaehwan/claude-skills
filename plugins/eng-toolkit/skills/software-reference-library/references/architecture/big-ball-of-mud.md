@@ -4,6 +4,7 @@ url: http://www.laputan.org/mud/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [software-complexity, architecture-patterns]
 ---
 
 # Big Ball of Mud

@@ -4,6 +4,7 @@ url: https://github.com/GoogleChrome/web-vitals
 domain: performance
 type: 저장소
 lang: en
+concepts: [core-web-vitals, real-user-monitoring]
 ---
 
 # web-vitals — Core Web Vitals RUM 측정 라이브러리

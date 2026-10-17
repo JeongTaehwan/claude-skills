@@ -4,6 +4,7 @@ url: https://www.sitemaps.org/protocol.html
 domain: marketing
 type: 표준
 lang: en
+concepts: [technical-seo]
 ---
 
 # XML 사이트맵 프로토콜 (sitemaps.org)

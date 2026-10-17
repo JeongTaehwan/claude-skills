@@ -4,6 +4,7 @@ url: https://gitlab.com/gitlab-com/content-sites/handbook
 domain: planning
 type: 저장소
 lang: en
+concepts: [engineering-effectiveness, product-management-practice]
 ---
 
 # GitLab Handbook

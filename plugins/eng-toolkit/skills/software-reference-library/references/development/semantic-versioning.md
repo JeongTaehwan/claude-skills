@@ -4,6 +4,7 @@ url: https://semver.org/
 domain: development
 type: 표준
 lang: en
+concepts: [versioning-changelog]
 ---
 
 # Semantic Versioning

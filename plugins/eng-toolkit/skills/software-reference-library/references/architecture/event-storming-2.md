@@ -4,6 +4,7 @@ url: https://github.com/ddd-crew/eventstorming-glossary-cheat-sheet
 domain: architecture
 type: 저장소
 lang: en
+concepts: [domain-driven-design]
 ---
 
 # Event Storming 용어 치트시트

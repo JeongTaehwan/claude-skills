@@ -4,6 +4,8 @@ url: https://martinfowler.com/bliki/TestPyramid.html
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-portfolio-shape]
+opposes: [qa/the-testing-trophy]
 ---
 
 # TestPyramid (Martin Fowler bliki)

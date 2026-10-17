@@ -4,6 +4,7 @@ url: https://www.strategyzer.com/library/the-business-model-canvas
 domain: planning
 type: 공식문서
 lang: en
+concepts: [business-model]
 ---
 
 # Business Model Canvas

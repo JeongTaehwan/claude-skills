@@ -4,6 +4,7 @@ url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containe
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [k8s-workload-config]
 ---
 
 # Kubernetes 컨테이너 자원 관리 (requests/limits)

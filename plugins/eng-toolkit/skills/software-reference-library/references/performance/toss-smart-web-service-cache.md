@@ -4,6 +4,7 @@ url: https://toss.tech/article/smart-web-service-cache
 domain: performance
 type: 블로그
 lang: ko
+concepts: [web-caching]
 ---
 
 # 웹 서비스 캐시 똑똑하게 다루기

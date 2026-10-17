@@ -4,6 +4,7 @@ url: https://mas.owasp.org/MASVS/
 domain: security
 type: 표준
 lang: en
+concepts: [security-requirements]
 ---
 
 # OWASP MASVS (Mobile Application Security Verification Standard)

@@ -4,6 +4,7 @@ url: https://www.usenix.org/system/files/conference/nsdi18/nsdi18-netravali-prop
 domain: performance
 type: 논문
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # Prophecy: Accelerating Mobile Page Loads Using Final-state Write Logs (NSDI '18)

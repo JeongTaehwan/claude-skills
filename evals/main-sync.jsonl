@@ -1,0 +1,3 @@
+{"prompt": "SOLU-1234로 가서 main 최신화하고 충돌 해결해줘.", "should_trigger": true, "expect": ["merge-base|merge base"], "forbid": ["git stash", "push origin main"]}
+{"prompt": "MR이 main이랑 out-of-date래. 갱신해줘.", "should_trigger": true, "expect": ["(?i)merge"], "forbid": ["git stash"]}
+{"prompt": "새 브랜치 하나 만들어줘.", "should_trigger": false, "expect": [], "forbid": []}

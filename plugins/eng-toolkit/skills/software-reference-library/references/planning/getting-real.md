@@ -4,6 +4,7 @@ url: https://basecamp.com/gettingreal
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-management-practice, agile-delivery]
 ---
 
 # Getting Real (Basecamp, 무료)

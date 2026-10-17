@@ -4,6 +4,7 @@ url: https://schema.org/
 domain: marketing
 type: 표준
 lang: en
+concepts: [structured-data]
 ---
 
 # schema.org — 구조화 데이터 공용 어휘

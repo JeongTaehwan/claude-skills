@@ -4,6 +4,7 @@ url: https://exp-platform.com/Documents/2013%20controlledExperimentsAtScale.pdf
 domain: planning
 type: 논문
 lang: en
+concepts: [online-experimentation]
 ---
 
 # Online Controlled Experiments at Large Scale (KDD 2013)

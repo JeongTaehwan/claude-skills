@@ -4,6 +4,7 @@ url: https://github.com/adamtornhill/code-maat
 domain: development
 type: 저장소
 lang: en
+concepts: [change-coupling-analysis]
 ---
 
 # Code Maat

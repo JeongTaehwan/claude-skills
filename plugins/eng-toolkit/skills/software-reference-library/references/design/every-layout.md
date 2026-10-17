@@ -4,6 +4,7 @@ url: https://every-layout.dev/
 domain: design
 type: 공식문서
 lang: en
+concepts: [css-layout]
 ---
 
 # Every Layout

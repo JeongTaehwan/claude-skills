@@ -4,6 +4,7 @@ url: https://discovery.ucl.ac.uk/1471263/1/06963470.pdf
 domain: testing
 type: 논문
 lang: en
+concepts: [test-adequacy]
 ---
 
 # The Oracle Problem in Software Testing: A Survey

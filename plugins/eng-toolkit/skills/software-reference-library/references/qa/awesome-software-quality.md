@@ -4,6 +4,7 @@ url: https://github.com/ligurio/awesome-software-quality
 domain: qa
 type: 저장소
 lang: en
+concepts: [qa-practice-community]
 ---
 
 # Awesome Software Quality

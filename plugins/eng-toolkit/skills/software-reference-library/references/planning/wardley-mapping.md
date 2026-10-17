@@ -4,6 +4,7 @@ url: https://learnwardleymapping.com/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [roadmapping, business-model]
 ---
 
 # Wardley Mapping (Learn Wardley Mapping)

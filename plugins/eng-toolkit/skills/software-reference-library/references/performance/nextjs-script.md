@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/guides/scripts
 domain: performance
 type: 공식문서
 lang: en
+concepts: [third-party-scripts]
 ---
 
 # next/script — 서드파티 스크립트 전략

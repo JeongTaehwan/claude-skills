@@ -4,6 +4,7 @@ url: https://docs.docker.com/reference/compose-file/
 domain: infrastructure
 type: 표준
 lang: en
+concepts: [containers]
 ---
 
 # Compose 파일 규격 (Compose Specification)

@@ -4,6 +4,7 @@ url: https://martinfowler.com/bliki/UnitTest.html
 domain: qa
 type: 블로그
 lang: en
+concepts: [unit-test-design]
 ---
 
 # UnitTest (Martin Fowler bliki)

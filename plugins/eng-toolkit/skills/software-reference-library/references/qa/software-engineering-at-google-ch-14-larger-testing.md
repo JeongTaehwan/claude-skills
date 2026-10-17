@@ -4,6 +4,7 @@ url: https://abseil.io/resources/swe-book/html/ch14.html
 domain: qa
 type: 공식문서
 lang: en
+concepts: [service-test-strategy]
 ---
 
 # Software Engineering at Google — Ch.14 Larger Testing

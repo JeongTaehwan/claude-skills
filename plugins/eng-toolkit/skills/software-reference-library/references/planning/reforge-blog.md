@@ -4,6 +4,7 @@ url: https://www.reforge.com/blog
 domain: planning
 type: 공식문서
 lang: en
+concepts: [growth-strategy, product-management-practice]
 ---
 
 # Reforge Blog

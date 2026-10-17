@@ -4,6 +4,7 @@ url: https://medium.com/daangn
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 당근 팀블로그

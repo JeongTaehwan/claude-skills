@@ -4,6 +4,7 @@ url: https://feature-sliced.design/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [client-app-structure]
 ---
 
 # Feature-Sliced Design

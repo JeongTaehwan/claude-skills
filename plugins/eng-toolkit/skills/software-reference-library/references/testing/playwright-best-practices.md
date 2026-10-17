@@ -4,6 +4,7 @@ url: https://playwright.dev/docs/best-practices
 domain: testing
 type: 공식문서
 lang: en
+concepts: [e2e-browser-automation]
 ---
 
 # Playwright — Best Practices

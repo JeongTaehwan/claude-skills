@@ -4,6 +4,7 @@ url: https://www.impactmapping.org/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-strategy, discovery-workshops]
 ---
 
 # Impact Mapping (Gojko Adzic)

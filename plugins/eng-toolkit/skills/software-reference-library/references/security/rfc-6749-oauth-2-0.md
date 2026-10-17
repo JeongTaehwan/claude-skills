@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc6749.html
 domain: security
 type: 표준
 lang: en
+concepts: [oauth-jwt]
 ---
 
 # RFC 6749 — OAuth 2.0 Authorization Framework

@@ -4,6 +4,7 @@ url: https://github.com/binhnguyennus/awesome-scalability
 domain: architecture
 type: 저장소
 lang: en
+concepts: [system-design, distributed-systems]
 ---
 
 # Awesome Scalability

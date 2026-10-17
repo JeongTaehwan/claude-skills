@@ -4,6 +4,7 @@ url: https://www.cl.cam.ac.uk/~rja14/book.html
 domain: security
 type: 공식문서
 lang: en
+concepts: [security-engineering]
 ---
 
 # Security Engineering (Ross Anderson, 3판 전문 무료)

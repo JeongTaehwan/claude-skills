@@ -4,6 +4,7 @@ url: https://www.satisfice.com/rapid-testing-methodology
 domain: qa
 type: 공식문서
 lang: en
+concepts: [exploratory-testing, test-heuristics]
 ---
 
 # Rapid Software Testing (James Bach)

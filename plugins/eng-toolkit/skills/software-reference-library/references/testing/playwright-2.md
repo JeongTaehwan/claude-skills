@@ -4,6 +4,7 @@ url: https://playwright.dev/docs/test-components
 domain: testing
 type: 공식문서
 lang: en
+concepts: [component-visual-testing]
 ---
 
 # Playwright — 컴포넌트 테스트

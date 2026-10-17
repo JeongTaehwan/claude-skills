@@ -4,6 +4,7 @@ url: https://growth.design/case-studies
 domain: design
 type: 공식문서
 lang: en
+concepts: [behavioral-design]
 ---
 
 # Growth.Design — 케이스 스터디

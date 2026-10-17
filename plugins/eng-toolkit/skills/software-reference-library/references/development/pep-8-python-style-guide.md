@@ -4,6 +4,7 @@ url: https://peps.python.org/pep-0008/
 domain: development
 type: 공식문서
 lang: en
+concepts: [style-guides-linting]
 ---
 
 # PEP 8 — Python Style Guide

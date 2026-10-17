@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc9700.html
 domain: security
 type: 표준
 lang: en
+concepts: [oauth-jwt]
 ---
 
 # RFC 9700 — OAuth 2.0 Security Best Current Practice

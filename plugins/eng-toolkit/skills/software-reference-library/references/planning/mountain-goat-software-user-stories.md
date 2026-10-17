@@ -4,6 +4,7 @@ url: https://www.mountaingoatsoftware.com/agile/user-stories
 domain: planning
 type: 공식문서
 lang: en
+concepts: [user-stories]
 ---
 
 # Mountain Goat Software — User Stories

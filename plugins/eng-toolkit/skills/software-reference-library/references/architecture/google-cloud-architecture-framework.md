@@ -4,6 +4,7 @@ url: https://cloud.google.com/architecture/framework
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [architecture-review]
 ---
 
 # Google Cloud Architecture Framework

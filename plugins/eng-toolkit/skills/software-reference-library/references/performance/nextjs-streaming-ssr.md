@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/api-reference/file-conventions/loading
 domain: performance
 type: 공식문서
 lang: en
+concepts: [rendering-strategies]
 ---
 
 # Next.js 스트리밍 SSR — loading.js · Suspense · PPR

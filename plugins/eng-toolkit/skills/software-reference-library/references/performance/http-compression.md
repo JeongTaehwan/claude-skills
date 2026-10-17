@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Compression
 domain: performance
 type: 공식문서
 lang: en
+concepts: [payload-reduction]
 ---
 
 # HTTP 압축 — MDN

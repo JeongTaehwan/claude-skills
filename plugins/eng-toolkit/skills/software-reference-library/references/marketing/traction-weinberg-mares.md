@@ -4,6 +4,7 @@ url: https://www.penguin.co.uk/books/181725/traction-by-weinberg-gabriel/9780241
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [growth-strategy]
 ---
 
 # Traction (Gabriel Weinberg & Justin Mares)

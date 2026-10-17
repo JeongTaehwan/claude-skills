@@ -4,6 +4,7 @@ url: https://doi.org/10.1177/002224299005400307
 domain: marketing
 type: 논문
 lang: en
+concepts: [brand-growth-science]
 ---
 
 # Double Jeopardy Revisited (Ehrenberg, Goodhardt & Barwise)

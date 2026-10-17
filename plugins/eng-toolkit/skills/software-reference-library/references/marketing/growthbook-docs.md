@@ -4,6 +4,7 @@ url: https://docs.growthbook.io/
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [online-experimentation, feature-flags]
 ---
 
 # GrowthBook 공식 문서 — 웨어하우스 네이티브 실험 플랫폼

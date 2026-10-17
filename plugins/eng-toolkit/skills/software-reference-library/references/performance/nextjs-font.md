@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/api-reference/components/font
 domain: performance
 type: 공식문서
 lang: en
+concepts: [typography, core-web-vitals]
 ---
 
 # next/font — 레이아웃 시프트 없는 폰트

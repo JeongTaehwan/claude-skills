@@ -4,6 +4,7 @@ url: https://www.atlassian.com/agile
 domain: planning
 type: 공식문서
 lang: en
+concepts: [agile-delivery]
 ---
 
 # Atlassian Agile Coach

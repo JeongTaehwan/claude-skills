@@ -4,6 +4,7 @@ url: https://github.com/sitespeedio/sitespeed.io
 domain: performance
 type: 저장소
 lang: en
+concepts: [synthetic-testing, performance-budgets]
 ---
 
 # sitespeed.io — 자체 호스팅 성능 모니터링

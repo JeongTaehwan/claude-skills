@@ -4,6 +4,7 @@ url: https://web.dev/articles/content-delivery-networks
 domain: performance
 type: 공식문서
 lang: en
+concepts: [web-caching]
 ---
 
 # CDN 최적화 (Content Delivery Networks)

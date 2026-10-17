@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/api-reference/components/image
 domain: performance
 type: 공식문서
 lang: en
+concepts: [image-optimization]
 ---
 
 # next/image — 자동 이미지 최적화

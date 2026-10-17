@@ -4,6 +4,7 @@ url: https://kubernetes.io/docs/concepts/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [kubernetes]
 ---
 
 # Kubernetes Concepts

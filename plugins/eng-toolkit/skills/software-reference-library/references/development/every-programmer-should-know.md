@@ -4,6 +4,7 @@ url: https://github.com/mtdvio/every-programmer-should-know
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources]
 ---
 
 # Every Programmer Should Know

@@ -4,6 +4,7 @@ url: https://www.eviltester.com/
 domain: qa
 type: 블로그
 lang: en
+concepts: [qa-practice-community, exploratory-testing]
 ---
 
 # EvilTester — Alan Richardson

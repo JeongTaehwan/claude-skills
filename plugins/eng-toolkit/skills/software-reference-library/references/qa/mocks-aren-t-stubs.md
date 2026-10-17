@@ -4,6 +4,7 @@ url: https://martinfowler.com/articles/mocksArentStubs.html
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-doubles]
 ---
 
 # Mocks Aren't Stubs (Martin Fowler)

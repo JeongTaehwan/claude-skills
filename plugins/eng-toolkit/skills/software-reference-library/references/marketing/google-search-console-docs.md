@@ -4,6 +4,7 @@ url: https://developers.google.com/search/docs/monitor-debug/search-console-star
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [technical-seo]
 ---
 
 # Google Search Console 공식 문서

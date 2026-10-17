@@ -4,6 +4,7 @@ url: https://owasp.org/www-project-dependency-check/
 domain: security
 type: 저장소
 lang: en
+concepts: [supply-chain-security, security-scanning]
 ---
 
 # OWASP Dependency-Check

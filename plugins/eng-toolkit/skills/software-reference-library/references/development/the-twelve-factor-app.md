@@ -4,6 +4,7 @@ url: https://12factor.net/
 domain: development
 type: 공식문서
 lang: en
+concepts: [architecture-patterns]
 ---
 
 # The Twelve-Factor App

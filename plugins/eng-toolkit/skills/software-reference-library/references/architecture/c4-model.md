@@ -4,6 +4,7 @@ url: https://c4model.com/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [architecture-documentation]
 ---
 
 # C4 Model

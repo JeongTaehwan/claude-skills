@@ -4,6 +4,7 @@ url: https://sre.google/workbook/table-of-contents/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [slo-error-budget]
 ---
 
 # SRE Workbook

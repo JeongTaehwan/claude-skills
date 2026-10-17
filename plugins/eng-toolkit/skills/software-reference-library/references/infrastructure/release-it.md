@@ -4,6 +4,7 @@ url: https://pragprog.com/titles/mnee2/release-it-second-edition/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [resilience-patterns]
 ---
 
 # Release It! (Michael Nygard) — 운영에서 살아남는 소프트웨어 설계

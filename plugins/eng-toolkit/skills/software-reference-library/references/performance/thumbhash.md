@@ -4,6 +4,7 @@ url: https://github.com/evanw/thumbhash
 domain: performance
 type: 저장소
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # ThumbHash — 알파 채널을 지원하는 이미지 플레이스홀더 해시

@@ -4,6 +4,7 @@ url: https://www.youtube.com/watch?v=bQSE51-gr2s
 domain: performance
 type: 발표
 lang: en
+concepts: [performance-business-impact]
 ---
 
 # Performance Related Changes and their User Impact — Bing + Google 합동 (Velocity 2009)

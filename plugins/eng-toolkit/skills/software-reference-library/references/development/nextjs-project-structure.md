@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/getting-started/project-structure
 domain: development
 type: 공식문서
 lang: en
+concepts: [client-app-structure, language-platform-references]
 ---
 
 # Next.js: Project structure and organization

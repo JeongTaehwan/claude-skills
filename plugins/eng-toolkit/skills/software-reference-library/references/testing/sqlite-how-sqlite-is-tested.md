@@ -4,6 +4,7 @@ url: https://sqlite.org/testing.html
 domain: testing
 type: 공식문서
 lang: en
+concepts: [test-strategy, fuzzing]
 ---
 
 # SQLite — How SQLite Is Tested

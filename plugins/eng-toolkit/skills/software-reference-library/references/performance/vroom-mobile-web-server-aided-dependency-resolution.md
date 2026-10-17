@@ -4,6 +4,7 @@ url: https://www.cs.princeton.edu/~ravian/publications/vroom.pdf
 domain: performance
 type: 논문
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # Vroom: Accelerating the Mobile Web with Server-Aided Dependency Resolution (SIGCOMM '17)

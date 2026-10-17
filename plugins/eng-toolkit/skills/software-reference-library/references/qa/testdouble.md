@@ -4,6 +4,7 @@ url: https://martinfowler.com/bliki/TestDouble.html
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-doubles]
 ---
 
 # TestDouble (Martin Fowler)

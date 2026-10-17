@@ -4,6 +4,7 @@ url: https://exp-platform.com/Documents/2017-08%20KDDMetricInterpretationPitfall
 domain: planning
 type: 논문
 lang: en
+concepts: [experiment-statistics]
 ---
 
 # A Dirty Dozen: Twelve Common Metric Interpretation Pitfalls in Online Controlled Experiments

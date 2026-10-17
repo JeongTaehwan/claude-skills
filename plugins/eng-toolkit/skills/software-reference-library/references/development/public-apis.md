@@ -4,6 +4,7 @@ url: https://github.com/public-apis/public-apis
 domain: development
 type: 저장소
 lang: en
+concepts: [api-design, learning-resources]
 ---
 
 # Public APIs

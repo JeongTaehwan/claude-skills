@@ -4,6 +4,7 @@ url: https://www.designsystems.com/
 domain: design
 type: 공식문서
 lang: en
+concepts: [design-systems]
 ---
 
 # Design Systems (Figma)

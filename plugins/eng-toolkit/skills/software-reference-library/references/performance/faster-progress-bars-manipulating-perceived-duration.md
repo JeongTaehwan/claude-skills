@@ -4,6 +4,7 @@ url: https://www.chrisharrison.net/projects/progressbars2/ProgressBarsHarrison.p
 domain: performance
 type: 논문
 lang: en
+concepts: [loading-placeholders]
 ---
 
 # Faster Progress Bars: Manipulating Perceived Duration with Visual Augmentations (CHI '10)

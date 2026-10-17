@@ -4,6 +4,7 @@ url: https://developer.apple.com/design/human-interface-guidelines
 domain: design
 type: 공식문서
 lang: en
+concepts: [ux-heuristics-patterns, usability-principles]
 ---
 
 # Apple Human Interface Guidelines

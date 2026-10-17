@@ -4,6 +4,7 @@ url: https://schemathesis.readthedocs.io/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [api-testing, property-based-testing]
 ---
 
 # Schemathesis — API 속성 기반 테스트

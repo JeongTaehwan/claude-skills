@@ -4,6 +4,7 @@ url: https://cloud.google.com/apis/design
 domain: development
 type: 공식문서
 lang: en
+concepts: [api-design]
 ---
 
 # Google API Design Guide

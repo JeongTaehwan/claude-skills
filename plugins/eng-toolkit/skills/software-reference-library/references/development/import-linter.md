@@ -4,6 +4,7 @@ url: https://import-linter.readthedocs.io/
 domain: development
 type: 공식문서
 lang: en
+concepts: [boundary-enforcement]
 ---
 
 # Import Linter

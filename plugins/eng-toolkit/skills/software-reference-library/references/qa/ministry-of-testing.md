@@ -4,6 +4,7 @@ url: https://www.ministryoftesting.com/
 domain: qa
 type: 공식문서
 lang: en
+concepts: [qa-practice-community]
 ---
 
 # Ministry of Testing

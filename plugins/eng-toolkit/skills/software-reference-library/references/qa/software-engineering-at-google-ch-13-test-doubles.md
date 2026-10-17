@@ -4,6 +4,7 @@ url: https://abseil.io/resources/swe-book/html/ch13.html
 domain: qa
 type: 공식문서
 lang: en
+concepts: [test-doubles]
 ---
 
 # Software Engineering at Google — Ch.13 Test Doubles

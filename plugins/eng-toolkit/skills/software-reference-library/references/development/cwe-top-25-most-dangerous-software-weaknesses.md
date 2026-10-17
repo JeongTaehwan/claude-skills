@@ -4,6 +4,7 @@ url: https://cwe.mitre.org/top25/
 domain: development
 type: 표준
 lang: en
+concepts: [security-requirements]
 ---
 
 # CWE Top 25 Most Dangerous Software Weaknesses

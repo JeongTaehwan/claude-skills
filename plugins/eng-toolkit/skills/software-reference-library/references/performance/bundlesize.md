@@ -4,6 +4,7 @@ url: https://github.com/siddharthkp/bundlesize
 domain: performance
 type: 저장소
 lang: en
+concepts: [performance-budgets]
 ---
 
 # bundlesize — gzip 사이즈 CI 체크의 원조 (대체됨)

@@ -4,6 +4,7 @@ url: https://google.github.io/eng-practices/review/
 domain: development
 type: 공식문서
 lang: en
+concepts: [code-review]
 ---
 
 # Google Code Review Developer Guide (웹 버전)

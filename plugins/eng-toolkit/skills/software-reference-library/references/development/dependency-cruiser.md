@@ -4,6 +4,7 @@ url: https://github.com/sverweij/dependency-cruiser
 domain: development
 type: 저장소
 lang: en
+concepts: [boundary-enforcement]
 ---
 
 # dependency-cruiser

@@ -4,6 +4,7 @@ url: https://argo-cd.readthedocs.io/en/stable/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [gitops-packaging]
 ---
 
 # Argo CD 공식 문서

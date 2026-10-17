@@ -4,6 +4,7 @@ url: https://www.designcouncil.org.uk/our-resources/the-double-diamond/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [discovery-workshops]
 ---
 
 # Double Diamond (UK Design Council)

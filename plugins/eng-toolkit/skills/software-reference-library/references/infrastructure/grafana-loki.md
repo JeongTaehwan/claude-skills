@@ -4,6 +4,7 @@ url: https://grafana.com/docs/loki/latest/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [observability]
 ---
 
 # Grafana Loki 공식 문서

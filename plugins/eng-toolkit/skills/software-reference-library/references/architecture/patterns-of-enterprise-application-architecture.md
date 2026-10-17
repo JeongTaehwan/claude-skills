@@ -4,6 +4,7 @@ url: https://martinfowler.com/eaaCatalog/
 domain: architecture
 type: 블로그
 lang: en
+concepts: [architecture-patterns]
 ---
 
 # Patterns of Enterprise Application Architecture — 카탈로그

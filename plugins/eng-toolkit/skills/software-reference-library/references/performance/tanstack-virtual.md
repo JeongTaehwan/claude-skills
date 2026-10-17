@@ -4,6 +4,7 @@ url: https://github.com/TanStack/virtual
 domain: performance
 type: 저장소
 lang: en
+concepts: [lazy-loading]
 ---
 
 # TanStack Virtual — 헤드리스 리스트 가상화

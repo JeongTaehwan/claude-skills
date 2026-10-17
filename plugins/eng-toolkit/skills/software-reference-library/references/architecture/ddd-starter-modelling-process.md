@@ -4,6 +4,7 @@ url: https://github.com/ddd-crew/ddd-starter-modelling-process
 domain: architecture
 type: 저장소
 lang: en
+concepts: [domain-driven-design]
 ---
 
 # DDD Starter Modelling Process

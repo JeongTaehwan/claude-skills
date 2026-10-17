@@ -4,6 +4,7 @@ url: https://github.com/google/eng-practices
 domain: development
 type: 저장소
 lang: en
+concepts: [code-review]
 ---
 
 # Google Engineering Practices (eng-practices)

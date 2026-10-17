@@ -4,6 +4,7 @@ url: https://vite.dev/guide/
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # Vite 공식 문서

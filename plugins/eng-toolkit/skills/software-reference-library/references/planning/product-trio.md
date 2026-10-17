@@ -4,6 +4,7 @@ url: https://www.producttalk.org/2021/08/product-trio/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-discovery, product-management-practice]
 ---
 
 # Product Trio (Teresa Torres)

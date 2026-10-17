@@ -4,6 +4,7 @@ url: https://use-the-index-luke.com/
 domain: development
 type: 공식문서
 lang: en
+concepts: [database-usage]
 ---
 
 # Use The Index, Luke!

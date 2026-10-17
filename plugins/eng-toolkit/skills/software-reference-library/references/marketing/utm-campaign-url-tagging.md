@@ -4,6 +4,7 @@ url: https://support.google.com/analytics/answer/10917952
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [performance-marketing]
 ---
 
 # UTM 캠페인 URL 파라미터 규약 (GA4 공식 도움말)

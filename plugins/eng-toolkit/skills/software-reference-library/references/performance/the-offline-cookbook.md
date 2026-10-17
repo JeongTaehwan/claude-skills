@@ -4,6 +4,7 @@ url: https://web.dev/articles/offline-cookbook
 domain: performance
 type: 공식문서
 lang: en
+concepts: [service-worker-offline]
 ---
 
 # The Offline Cookbook

@@ -4,6 +4,7 @@ url: https://prettier.io/docs/
 domain: development
 type: 공식문서
 lang: en
+concepts: [style-guides-linting]
 ---
 
 # Prettier 공식 문서

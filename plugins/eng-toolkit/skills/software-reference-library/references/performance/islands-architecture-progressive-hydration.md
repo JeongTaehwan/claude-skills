@@ -4,6 +4,7 @@ url: https://docs.astro.build/en/concepts/islands/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [rendering-strategies]
 ---
 
 # Islands 아키텍처 · 점진적 하이드레이션

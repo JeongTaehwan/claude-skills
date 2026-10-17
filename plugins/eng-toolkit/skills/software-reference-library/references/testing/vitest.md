@@ -4,6 +4,7 @@ url: https://vitest.dev/guide/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [test-runners]
 ---
 
 # Vitest

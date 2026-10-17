@@ -4,6 +4,7 @@ url: https://web.dev/articles/extract-critical-css
 domain: performance
 type: 공식문서
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # Critical CSS 추출·인라인

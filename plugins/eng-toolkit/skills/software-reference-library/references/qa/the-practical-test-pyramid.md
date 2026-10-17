@@ -4,6 +4,8 @@ url: https://martinfowler.com/articles/practical-test-pyramid.html
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-portfolio-shape]
+opposes: [qa/the-testing-trophy]
 ---
 
 # The Practical Test Pyramid (Ham Vocke, martinfowler.com)

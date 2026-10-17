@@ -4,6 +4,7 @@ url: https://www.postgresql.org/docs/current/
 domain: development
 type: 공식문서
 lang: en
+concepts: [database-usage]
 ---
 
 # PostgreSQL 공식 문서

@@ -4,6 +4,7 @@ url: https://www.nist.gov/cyberframework
 domain: security
 type: 표준
 lang: en
+concepts: [security-frameworks]
 ---
 
 # NIST Cybersecurity Framework (CSF) 2.0

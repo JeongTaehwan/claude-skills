@@ -4,6 +4,7 @@ url: https://github.com/alan2207/bulletproof-react
 domain: architecture
 type: 저장소
 lang: en
+concepts: [client-app-structure]
 ---
 
 # Bulletproof React

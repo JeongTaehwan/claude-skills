@@ -4,6 +4,7 @@ url: https://github.com/donnemartin/system-design-primer
 domain: architecture
 type: 저장소
 lang: en
+concepts: [system-design]
 ---
 
 # System Design Primer

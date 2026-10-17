@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTTP
 domain: development
 type: 공식문서
 lang: en
+concepts: [http-semantics]
 ---
 
 # MDN — HTTP

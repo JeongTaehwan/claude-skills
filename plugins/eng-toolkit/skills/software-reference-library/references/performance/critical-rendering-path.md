@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Critical_re
 domain: performance
 type: 공식문서
 lang: en
+concepts: [critical-rendering-path]
 ---
 
 # Critical Rendering Path

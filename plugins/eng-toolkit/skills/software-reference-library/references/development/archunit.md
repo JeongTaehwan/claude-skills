@@ -4,6 +4,7 @@ url: https://www.archunit.org/
 domain: development
 type: 공식문서
 lang: en
+concepts: [boundary-enforcement]
 ---
 
 # ArchUnit User Guide

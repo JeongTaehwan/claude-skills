@@ -4,6 +4,7 @@ url: https://www.forentrepreneurs.com/startup-killer/
 domain: marketing
 type: 블로그
 lang: en
+concepts: [unit-economics-retention]
 ---
 
 # Startup Killer — the Cost of Customer Acquisition (David Skok)

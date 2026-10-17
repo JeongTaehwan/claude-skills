@@ -4,6 +4,7 @@ url: https://martinfowler.com/bliki/PresentationDomainDataLayering.html
 domain: architecture
 type: 블로그
 lang: en
+concepts: [layering-dependency-rule]
 ---
 
 # Presentation Domain Data Layering

@@ -4,6 +4,7 @@ url: https://developer.android.com/topic/modularization
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [client-app-structure]
 ---
 
 # Guide to Android app modularization

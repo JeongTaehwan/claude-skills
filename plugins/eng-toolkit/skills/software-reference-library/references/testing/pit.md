@@ -4,6 +4,7 @@ url: https://pitest.org/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [mutation-testing]
 ---
 
 # PIT (Java 뮤테이션 테스트)

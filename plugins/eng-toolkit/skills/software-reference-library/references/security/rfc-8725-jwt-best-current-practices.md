@@ -4,6 +4,7 @@ url: https://www.rfc-editor.org/rfc/rfc8725.html
 domain: security
 type: 표준
 lang: en
+concepts: [oauth-jwt]
 ---
 
 # RFC 8725 — JSON Web Token Best Current Practices

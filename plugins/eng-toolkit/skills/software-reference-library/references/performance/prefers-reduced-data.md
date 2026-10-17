@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [adaptive-loading]
 ---
 
 # prefers-reduced-data 미디어 쿼리

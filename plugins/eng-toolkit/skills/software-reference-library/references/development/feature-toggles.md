@@ -4,6 +4,7 @@ url: https://martinfowler.com/articles/feature-toggles.html
 domain: development
 type: 블로그
 lang: en
+concepts: [feature-flags]
 ---
 
 # Feature Toggles (Feature Flags)

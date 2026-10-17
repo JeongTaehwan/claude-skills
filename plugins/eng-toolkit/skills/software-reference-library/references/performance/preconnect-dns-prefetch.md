@@ -4,6 +4,7 @@ url: https://web.dev/articles/preconnect-and-dns-prefetch
 domain: performance
 type: 공식문서
 lang: en
+concepts: [preload-prefetch]
 ---
 
 # preconnect · dns-prefetch — 연결 사전 수립

@@ -4,6 +4,7 @@ url: https://www.smashingmagazine.com/
 domain: design
 type: 블로그
 lang: en
+concepts: [visual-design, design-systems]
 ---
 
 # Smashing Magazine

@@ -4,6 +4,7 @@ url: https://nx.dev/docs/features/enforce-module-boundaries
 domain: development
 type: 공식문서
 lang: en
+concepts: [boundary-enforcement, monorepo]
 ---
 
 # Nx Enforce Module Boundaries

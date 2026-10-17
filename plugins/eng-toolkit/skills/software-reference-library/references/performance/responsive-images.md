@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images
 domain: performance
 type: 공식문서
 lang: en
+concepts: [image-optimization]
 ---
 
 # 반응형 이미지 (srcset · sizes · picture)

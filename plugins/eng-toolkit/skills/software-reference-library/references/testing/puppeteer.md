@@ -4,6 +4,7 @@ url: https://pptr.dev/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [e2e-browser-automation]
 ---
 
 # Puppeteer 공식 문서

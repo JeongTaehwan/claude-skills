@@ -4,6 +4,7 @@ url: https://web.dev/articles/performance-budgets-101
 domain: performance
 type: 공식문서
 lang: en
+concepts: [performance-budgets]
 ---
 
 # 성능 예산 101 (Performance budgets 101)

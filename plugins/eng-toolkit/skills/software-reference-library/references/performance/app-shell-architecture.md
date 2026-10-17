@@ -4,6 +4,7 @@ url: https://developer.chrome.com/blog/app-shell
 domain: performance
 type: 공식문서
 lang: en
+concepts: [service-worker-offline, perceived-performance]
 ---
 
 # App Shell 아키텍처

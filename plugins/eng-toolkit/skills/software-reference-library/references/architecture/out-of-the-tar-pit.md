@@ -4,6 +4,7 @@ url: https://curtclifton.net/papers/MoseleyMarks06a.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [software-complexity]
 ---
 
 # Out of the Tar Pit

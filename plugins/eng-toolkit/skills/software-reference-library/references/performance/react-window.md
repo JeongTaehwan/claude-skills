@@ -4,6 +4,7 @@ url: https://github.com/bvaughn/react-window
 domain: performance
 type: 저장소
 lang: en
+concepts: [lazy-loading]
 ---
 
 # react-window — 컴포넌트 방식 리스트 가상화

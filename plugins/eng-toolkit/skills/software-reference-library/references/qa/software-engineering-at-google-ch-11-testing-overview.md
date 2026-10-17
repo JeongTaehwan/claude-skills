@@ -4,6 +4,7 @@ url: https://abseil.io/resources/swe-book/html/ch11.html
 domain: qa
 type: 공식문서
 lang: en
+concepts: [test-strategy]
 ---
 
 # Software Engineering at Google — Ch.11 Testing Overview

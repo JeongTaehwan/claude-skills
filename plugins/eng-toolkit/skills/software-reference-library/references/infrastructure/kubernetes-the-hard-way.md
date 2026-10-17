@@ -4,6 +4,7 @@ url: https://github.com/kelseyhightower/kubernetes-the-hard-way
 domain: infrastructure
 type: 저장소
 lang: en
+concepts: [kubernetes]
 ---
 
 # Kubernetes The Hard Way

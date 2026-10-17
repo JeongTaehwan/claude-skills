@@ -4,6 +4,7 @@ url: https://bytebytego.com/
 domain: architecture
 type: 블로그
 lang: en
+concepts: [system-design]
 ---
 
 # ByteByteGo — 시스템 디자인

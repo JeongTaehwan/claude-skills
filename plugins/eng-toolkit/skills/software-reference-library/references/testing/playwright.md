@@ -4,6 +4,7 @@ url: https://github.com/microsoft/playwright
 domain: testing
 type: 저장소
 lang: en
+concepts: [e2e-browser-automation]
 ---
 
 # Playwright 저장소

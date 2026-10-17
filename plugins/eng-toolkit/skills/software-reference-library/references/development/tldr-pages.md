@@ -4,6 +4,7 @@ url: https://github.com/tldr-pages/tldr
 domain: development
 type: 저장소
 lang: en
+concepts: [learning-resources]
 ---
 
 # tldr pages

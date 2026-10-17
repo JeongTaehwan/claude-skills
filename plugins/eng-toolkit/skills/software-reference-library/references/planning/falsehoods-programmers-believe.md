@@ -4,6 +4,7 @@ url: https://github.com/kdeldycke/awesome-falsehood
 domain: planning
 type: 저장소
 lang: en
+concepts: [software-complexity]
 ---
 
 # Falsehoods Programmers Believe (awesome-falsehood)

@@ -4,6 +4,7 @@ url: https://monorepo.tools/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [monorepo]
 ---
 
 # monorepo.tools

@@ -4,6 +4,7 @@ url: https://owasp.org/www-community/Threat_Modeling
 domain: security
 type: 표준
 lang: en
+concepts: [threat-modeling]
 ---
 
 # OWASP Threat Modeling

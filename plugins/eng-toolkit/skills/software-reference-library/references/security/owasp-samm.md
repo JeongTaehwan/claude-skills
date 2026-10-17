@@ -4,6 +4,7 @@ url: https://owaspsamm.org/
 domain: security
 type: 표준
 lang: en
+concepts: [security-frameworks]
 ---
 
 # OWASP SAMM (Software Assurance Maturity Model)

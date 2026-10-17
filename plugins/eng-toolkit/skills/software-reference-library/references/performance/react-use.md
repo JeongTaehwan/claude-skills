@@ -4,6 +4,7 @@ url: https://github.com/streamich/react-use
 domain: performance
 type: 저장소
 lang: en
+concepts: [adaptive-loading]
 ---
 
 # react-use — useNetworkState를 포함한 React 훅 컬렉션

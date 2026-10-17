@@ -4,6 +4,7 @@ url: https://json-schema.org/learn
 domain: development
 type: 표준
 lang: en
+concepts: [api-specs-schemas]
 ---
 
 # JSON Schema

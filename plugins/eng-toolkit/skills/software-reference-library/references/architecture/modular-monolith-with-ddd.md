@@ -4,6 +4,7 @@ url: https://github.com/kgrzybek/modular-monolith-with-ddd
 domain: architecture
 type: 저장소
 lang: en
+concepts: [modular-monolith, domain-driven-design]
 ---
 
 # Modular Monolith with DDD

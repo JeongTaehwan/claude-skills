@@ -4,6 +4,7 @@ url: https://techblog.woowahan.com/20228/
 domain: performance
 type: 블로그
 lang: ko
+concepts: [image-optimization]
 ---
 
 # 왜 이미지만 700MB를 다운로드하는 거죠?

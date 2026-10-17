@@ -1,0 +1,3 @@
+{"prompt": "출시했는데 GA4 이벤트 뭘 심어야 할지 모르겠어.", "should_trigger": true, "expect": ["(?i)트래킹 플랜|tracking plan|활성화"], "forbid": []}
+{"prompt": "랜딩 페이지 SEO 기본 세팅 해줘.", "should_trigger": true, "expect": ["(?i)canonical|og:|sitemap"], "forbid": []}
+{"prompt": "이 SQL 쿼리 최적화해줘.", "should_trigger": false, "expect": [], "forbid": ["UTM"]}

@@ -4,6 +4,7 @@ url: https://cucumber.io/docs/bdd/
 domain: qa
 type: 공식문서
 lang: en
+concepts: [specification-by-example]
 ---
 
 # Cucumber — BDD 문서

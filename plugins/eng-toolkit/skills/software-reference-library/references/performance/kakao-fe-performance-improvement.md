@@ -4,6 +4,7 @@ url: https://tech.kakao.com/posts/586
 domain: performance
 type: 블로그
 lang: ko
+concepts: [core-web-vitals, javascript-payload]
 ---
 
 # FE 성능개선기 1·2부 — 카카오 Biz FE

@@ -4,6 +4,7 @@ url: https://github.com/RichardLitt/standard-readme
 domain: development
 type: 저장소
 lang: en
+concepts: [technical-writing]
 ---
 
 # Standard README

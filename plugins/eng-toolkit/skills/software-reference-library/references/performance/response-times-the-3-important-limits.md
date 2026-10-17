@@ -4,6 +4,7 @@ url: https://www.nngroup.com/articles/response-times-3-important-limits/
 domain: performance
 type: 아티클
 lang: en
+concepts: [perceived-performance, usability-principles]
 ---
 
 # Response Times: The 3 Important Limits — 0.1초 / 1초 / 10초 (Nielsen)

@@ -4,6 +4,7 @@ url: https://google.github.io/styleguide/
 domain: development
 type: 공식문서
 lang: en
+concepts: [style-guides-linting]
 ---
 
 # Google Style Guides

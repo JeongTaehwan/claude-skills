@@ -4,6 +4,7 @@ url: https://github.com/guess-js/guess
 domain: performance
 type: 저장소
 lang: en
+concepts: [preload-prefetch, javascript-payload]
 ---
 
 # Guess.js — ML 예측 기반 프리페칭

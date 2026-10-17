@@ -4,6 +4,7 @@ url: https://jmeter.apache.org/usermanual/index.html
 domain: testing
 type: 공식문서
 lang: en
+concepts: [load-testing]
 ---
 
 # Apache JMeter 사용자 매뉴얼

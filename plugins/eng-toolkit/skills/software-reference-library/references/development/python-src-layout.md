@@ -4,6 +4,7 @@ url: https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layou
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-project-layout]
 ---
 
 # src layout vs flat layout

@@ -4,6 +4,7 @@ url: https://developer.chrome.com/docs/workbox/caching-strategies-overview
 domain: performance
 type: 공식문서
 lang: en
+concepts: [service-worker-offline]
 ---
 
 # 서비스 워커 캐싱 전략 (Workbox Caching Strategies)

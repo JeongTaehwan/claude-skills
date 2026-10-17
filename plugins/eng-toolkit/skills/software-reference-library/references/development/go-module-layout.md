@@ -4,6 +4,7 @@ url: https://go.dev/doc/modules/layout
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-project-layout]
 ---
 
 # Organizing a Go module

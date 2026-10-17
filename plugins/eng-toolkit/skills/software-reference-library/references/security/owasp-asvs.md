@@ -4,6 +4,7 @@ url: https://owasp.org/www-project-application-security-verification-standard/
 domain: security
 type: 표준
 lang: en
+concepts: [security-requirements]
 ---
 
 # OWASP ASVS (Application Security Verification Standard)

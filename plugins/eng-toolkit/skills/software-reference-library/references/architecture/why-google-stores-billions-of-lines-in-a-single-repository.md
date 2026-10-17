@@ -4,6 +4,7 @@ url: https://research.google/pubs/why-google-stores-billions-of-lines-of-code-in
 domain: architecture
 type: 논문
 lang: en
+concepts: [monorepo]
 ---
 
 # Why Google Stores Billions of Lines of Code in a Single Repository

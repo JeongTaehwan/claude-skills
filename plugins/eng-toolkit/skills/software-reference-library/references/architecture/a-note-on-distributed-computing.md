@@ -4,6 +4,7 @@ url: https://scholar.harvard.edu/files/waldo/files/waldo-94.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [distributed-systems]
 ---
 
 # A Note on Distributed Computing

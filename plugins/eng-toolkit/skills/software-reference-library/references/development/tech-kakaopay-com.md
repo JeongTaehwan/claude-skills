@@ -4,6 +4,7 @@ url: https://tech.kakaopay.com/
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 카카오페이 기술블로그

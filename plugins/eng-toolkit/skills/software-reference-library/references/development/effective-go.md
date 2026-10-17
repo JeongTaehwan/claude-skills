@@ -4,6 +4,7 @@ url: https://go.dev/doc/effective_go
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # Effective Go

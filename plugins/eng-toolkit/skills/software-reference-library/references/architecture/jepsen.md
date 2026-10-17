@@ -4,6 +4,7 @@ url: https://jepsen.io/analyses
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [consistency-cap, distributed-systems]
 ---
 
 # Jepsen — 분산 시스템 안전성 분석

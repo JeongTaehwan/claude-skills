@@ -4,6 +4,7 @@ url: https://web.dev/articles/browser-level-image-lazy-loading
 domain: performance
 type: 공식문서
 lang: en
+concepts: [lazy-loading]
 ---
 
 # 브라우저 내장 이미지 lazy loading

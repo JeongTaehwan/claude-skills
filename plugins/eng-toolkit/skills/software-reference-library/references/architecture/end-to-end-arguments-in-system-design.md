@@ -4,6 +4,7 @@ url: https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [distributed-systems, system-design]
 ---
 
 # End-to-End Arguments in System Design

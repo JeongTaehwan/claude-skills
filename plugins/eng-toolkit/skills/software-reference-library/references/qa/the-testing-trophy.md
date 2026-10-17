@@ -4,6 +4,7 @@ url: https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-portfolio-shape]
 ---
 
 # The Testing Trophy (Kent C. Dodds)

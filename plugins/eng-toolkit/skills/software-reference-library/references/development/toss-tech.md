@@ -4,6 +4,7 @@ url: https://toss.tech/
 domain: development
 type: 블로그
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # 토스 기술블로그 (toss.tech)

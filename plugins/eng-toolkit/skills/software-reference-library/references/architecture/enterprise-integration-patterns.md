@@ -4,6 +4,7 @@ url: https://www.enterpriseintegrationpatterns.com/patterns/messaging/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [event-streaming-messaging, architecture-patterns]
 ---
 
 # Enterprise Integration Patterns

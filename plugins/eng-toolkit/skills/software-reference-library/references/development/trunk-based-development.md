@@ -4,6 +4,7 @@ url: https://trunkbaseddevelopment.com/
 domain: development
 type: 공식문서
 lang: en
+concepts: [release-engineering]
 ---
 
 # Trunk Based Development

@@ -4,6 +4,7 @@ url: https://raft.github.io/raft.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [consensus-time]
 ---
 
 # In Search of an Understandable Consensus Algorithm (Raft)

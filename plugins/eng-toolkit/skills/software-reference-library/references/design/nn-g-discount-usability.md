@@ -4,6 +4,7 @@ url: https://www.nngroup.com/articles/discount-usability-20-years/
 domain: design
 type: 공식문서
 lang: en
+concepts: [usability-principles]
 ---
 
 # NN/g — Discount Usability

@@ -4,6 +4,7 @@ url: https://www.chromatic.com/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [component-visual-testing]
 ---
 
 # Chromatic — 시각 회귀 테스트

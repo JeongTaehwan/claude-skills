@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/api-reference/functions/use-report-web-vitals
 domain: performance
 type: 공식문서
 lang: en
+concepts: [real-user-monitoring]
 ---
 
 # useReportWebVitals — RUM 측정

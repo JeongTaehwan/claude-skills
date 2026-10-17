@@ -4,6 +4,7 @@ url: https://docs.spring.io/spring-modulith/reference/
 domain: development
 type: 공식문서
 lang: en
+concepts: [boundary-enforcement, modular-monolith]
 ---
 
 # Spring Modulith Reference

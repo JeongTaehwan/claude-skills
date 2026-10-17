@@ -4,6 +4,7 @@ url: https://web.dev/learn/images
 domain: performance
 type: 공식문서
 lang: en
+concepts: [image-optimization]
 ---
 
 # Learn Images — 이미지 포맷·압축 코스

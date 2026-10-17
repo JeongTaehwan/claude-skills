@@ -4,6 +4,7 @@ url: https://spec.graphql.org/
 domain: development
 type: 표준
 lang: en
+concepts: [api-specs-schemas]
 ---
 
 # GraphQL Specification

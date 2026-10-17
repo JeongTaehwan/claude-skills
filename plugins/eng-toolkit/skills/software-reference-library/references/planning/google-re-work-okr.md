@@ -4,6 +4,7 @@ url: https://rework.withgoogle.com/en/guides/set-goals-with-okrs
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-strategy]
 ---
 
 # Google re:Work — OKR 가이드

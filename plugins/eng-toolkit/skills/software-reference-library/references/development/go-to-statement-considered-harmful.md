@@ -4,6 +4,7 @@ url: https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf
 domain: development
 type: 논문
 lang: en
+concepts: [software-complexity]
 ---
 
 # Go To Statement Considered Harmful

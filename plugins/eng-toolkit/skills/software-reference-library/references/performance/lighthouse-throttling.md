@@ -4,6 +4,7 @@ url: https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md
 domain: performance
 type: 공식문서
 lang: en
+concepts: [synthetic-testing]
 ---
 
 # Lighthouse 스로틀링

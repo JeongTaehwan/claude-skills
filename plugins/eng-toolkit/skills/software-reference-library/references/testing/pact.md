@@ -4,6 +4,7 @@ url: https://docs.pact.io/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [contract-testing]
 ---
 
 # Pact — 계약 테스트 문서

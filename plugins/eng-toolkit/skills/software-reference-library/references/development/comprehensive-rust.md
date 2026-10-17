@@ -4,6 +4,7 @@ url: https://google.github.io/comprehensive-rust/
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # Comprehensive Rust (Google)

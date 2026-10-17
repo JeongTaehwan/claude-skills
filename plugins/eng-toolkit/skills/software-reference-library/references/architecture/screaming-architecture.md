@@ -4,6 +4,7 @@ url: https://blog.cleancoder.com/uncle-bob/2011/09/30/Screaming-Architecture.htm
 domain: architecture
 type: 블로그
 lang: en
+concepts: [project-structure]
 ---
 
 # Screaming Architecture

@@ -4,6 +4,7 @@ url: https://web.dev/articles/stale-while-revalidate
 domain: performance
 type: 공식문서
 lang: en
+concepts: [web-caching]
 ---
 
 # stale-while-revalidate

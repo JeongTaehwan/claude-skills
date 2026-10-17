@@ -4,6 +4,7 @@ url: https://developer.mozilla.org/en-US/docs/Web
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # MDN Web Docs

@@ -4,6 +4,7 @@ url: https://nostarch.com/tangledweb
 domain: security
 type: 공식문서
 lang: en
+concepts: [browser-security]
 ---
 
 # The Tangled Web (Michal Zalewski) — 브라우저 보안 모델의 해부

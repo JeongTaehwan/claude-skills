@@ -4,6 +4,7 @@ url: https://research.google/pubs/state-of-mutation-testing-at-google/
 domain: testing
 type: 논문
 lang: en
+concepts: [mutation-testing]
 ---
 
 # State of Mutation Testing at Google

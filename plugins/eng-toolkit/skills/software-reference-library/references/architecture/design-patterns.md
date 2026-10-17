@@ -4,6 +4,7 @@ url: https://refactoring.guru/design-patterns/catalog
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [code-level-design-patterns]
 ---
 
 # Design Patterns 카탈로그 (Refactoring Guru)

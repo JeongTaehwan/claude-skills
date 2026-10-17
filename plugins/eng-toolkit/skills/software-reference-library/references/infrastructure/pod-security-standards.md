@@ -4,6 +4,7 @@ url: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 domain: infrastructure
 type: 표준
 lang: en
+concepts: [kubernetes, security-requirements]
 ---
 
 # Kubernetes Pod 보안 표준 (Pod Security Standards)

@@ -4,6 +4,7 @@ url: https://web.dev/articles/adaptive-loading-cds-2019
 domain: performance
 type: 공식문서
 lang: en
+concepts: [adaptive-loading]
 ---
 
 # Adaptive Loading — 적응형 로딩 패턴

@@ -4,6 +4,7 @@ url: https://docs.github.com/en/actions
 domain: development
 type: 저장소
 lang: en
+concepts: [release-engineering, security-scanning]
 ---
 
 # GitHub Actions 문서

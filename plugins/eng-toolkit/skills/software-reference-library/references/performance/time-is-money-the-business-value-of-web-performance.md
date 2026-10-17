@@ -4,6 +4,7 @@ url: https://www.oreilly.com/library/view/time-is-money/9781491928783/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [performance-business-impact]
 ---
 
 # Time Is Money — The Business Value of Web Performance

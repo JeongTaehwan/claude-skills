@@ -4,6 +4,7 @@ url: https://context-driven-testing.com/
 domain: qa
 type: 표준
 lang: en
+concepts: [test-heuristics, exploratory-testing]
 ---
 
 # Context-Driven Testing 원칙

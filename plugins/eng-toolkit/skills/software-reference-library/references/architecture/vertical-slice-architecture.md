@@ -4,6 +4,8 @@ url: https://www.jimmybogard.com/vertical-slice-architecture/
 domain: architecture
 type: 블로그
 lang: en
+concepts: [layering-dependency-rule]
+opposes: [architecture/the-clean-architecture]
 ---
 
 # Vertical Slice Architecture

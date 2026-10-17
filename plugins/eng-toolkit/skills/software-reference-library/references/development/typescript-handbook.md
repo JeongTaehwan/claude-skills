@@ -4,6 +4,7 @@ url: https://www.typescriptlang.org/docs/handbook/intro.html
 domain: development
 type: 공식문서
 lang: en
+concepts: [language-platform-references]
 ---
 
 # TypeScript Handbook

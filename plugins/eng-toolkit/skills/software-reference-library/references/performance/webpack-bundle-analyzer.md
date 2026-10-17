@@ -4,6 +4,7 @@ url: https://github.com/webpack/webpack-bundle-analyzer
 domain: performance
 type: 저장소
 lang: en
+concepts: [javascript-payload]
 ---
 
 # webpack-bundle-analyzer — 번들 트리맵 시각화

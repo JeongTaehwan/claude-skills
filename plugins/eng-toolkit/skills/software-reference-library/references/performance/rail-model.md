@@ -4,6 +4,7 @@ url: https://web.dev/articles/rail
 domain: performance
 type: 공식문서
 lang: en
+concepts: [perceived-performance, performance-measurement]
 ---
 
 # RAIL 모델

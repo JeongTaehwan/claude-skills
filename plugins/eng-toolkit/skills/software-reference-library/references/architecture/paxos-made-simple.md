@@ -4,6 +4,7 @@ url: https://lamport.azurewebsites.net/pubs/paxos-simple.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [consensus-time]
 ---
 
 # Paxos Made Simple

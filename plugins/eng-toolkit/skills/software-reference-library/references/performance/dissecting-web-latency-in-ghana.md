@@ -4,6 +4,7 @@ url: https://conferences.sigcomm.org/imc/2014/papers/p241.pdf
 domain: performance
 type: 논문
 lang: en
+concepts: [network-protocols]
 ---
 
 # Dissecting Web Latency in Ghana (IMC '14)

@@ -4,6 +4,7 @@ url: https://www.melconway.com/Home/Committees_Paper.html
 domain: architecture
 type: 논문
 lang: en
+concepts: [project-structure, engineering-effectiveness]
 ---
 
 # How Do Committees Invent? (Conway's Law)

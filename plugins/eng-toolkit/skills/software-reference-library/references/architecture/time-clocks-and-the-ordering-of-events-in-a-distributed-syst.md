@@ -4,6 +4,7 @@ url: https://lamport.azurewebsites.net/pubs/time-clocks.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [consensus-time]
 ---
 
 # Time, Clocks, and the Ordering of Events in a Distributed System

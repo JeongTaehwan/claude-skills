@@ -4,6 +4,7 @@ url: https://github.com/javierbrea/eslint-plugin-boundaries
 domain: development
 type: 저장소
 lang: en
+concepts: [boundary-enforcement]
 ---
 
 # eslint-plugin-boundaries

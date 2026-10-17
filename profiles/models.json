@@ -1,0 +1,9 @@
+{
+  "description": "모델별 스킬 구성 레지스트리. 새 모델은 profile=base, evaluated=null 로 들어오고, scripts/skill-eval.py 결과를 사람이 승인하면 전용 프로필로 바뀐다.",
+  "models": {
+    "claude-opus-5-5":   { "profile": "full", "evaluated": null, "note": "평가 전 — 기존 구성 유지" },
+    "claude-sonnet-5-5": { "profile": "full", "evaluated": null, "note": "평가 전 — 기존 구성 유지" },
+    "claude-fable-5-1":  { "profile": "full", "evaluated": null, "note": "평가 전 — 기존 구성 유지" },
+    "claude-haiku-4-5":  { "profile": "full", "evaluated": null, "note": "평가 전 — 역할 에이전트(scribe)용" }
+  }
+}

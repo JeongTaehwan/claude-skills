@@ -4,6 +4,7 @@ url: https://wiremock.org/docs/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [service-virtualization]
 ---
 
 # WireMock — HTTP 목 서버

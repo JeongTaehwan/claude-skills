@@ -4,6 +4,7 @@ url: https://github.com/jepsen-io/jepsen
 domain: architecture
 type: 저장소
 lang: en
+concepts: [consistency-cap, chaos-engineering]
 ---
 
 # Jepsen 도구

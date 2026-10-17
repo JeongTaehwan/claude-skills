@@ -4,6 +4,7 @@ url: https://www.eventstorming.com/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [domain-driven-design]
 ---
 
 # Event Storming

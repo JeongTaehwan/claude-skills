@@ -4,6 +4,7 @@ url: https://people.ece.ubc.ca/amesbah/resources/papers/fse15.pdf
 domain: testing
 type: 논문
 lang: en
+concepts: [test-adequacy]
 ---
 
 # Assertions Are Strongly Correlated with Test Suite Effectiveness

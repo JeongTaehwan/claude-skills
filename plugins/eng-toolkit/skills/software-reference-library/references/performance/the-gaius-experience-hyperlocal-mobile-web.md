@@ -4,6 +4,7 @@ url: https://arxiv.org/pdf/2412.14178
 domain: performance
 type: 논문
 lang: en
+concepts: [network-adaptive-delivery]
 ---
 
 # The GAIUS Experience: Powering a Hyperlocal Mobile Web for Communities in Emerging Regions (ICTD '24)

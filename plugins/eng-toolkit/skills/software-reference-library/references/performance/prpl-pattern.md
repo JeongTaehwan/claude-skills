@@ -4,6 +4,7 @@ url: https://web.dev/articles/apply-instant-loading-with-prpl
 domain: performance
 type: 공식문서
 lang: en
+concepts: [preload-prefetch, lazy-loading]
 ---
 
 # PRPL 패턴

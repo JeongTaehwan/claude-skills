@@ -4,6 +4,7 @@ url: https://experimentguide.com/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [online-experimentation, experiment-statistics]
 ---
 
 # Trustworthy Online Controlled Experiments (책 사이트)

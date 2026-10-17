@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/api-reference/components/link
 domain: performance
 type: 공식문서
 lang: en
+concepts: [preload-prefetch]
 ---
 
 # Next.js Link prefetch 튜닝

@@ -4,6 +4,7 @@ url: https://productled.com/book/product-led-growth
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [growth-strategy]
 ---
 
 # Product-Led Growth (Wes Bush, ProductLed)

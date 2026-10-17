@@ -1,9 +1,13 @@
 ---
 name: project-structure
-description: 프로젝트·모듈 구조(디렉터리 배치, 모듈 경계, 의존 방향, 공개 표면, 공통 모듈, 모노레포 패키지 분할)를 정하거나 고치는 절차. "새 프로젝트 구조 잡아줘", "폴더 구조 어떻게 나눌까", "이 기능 어디에 둬야 해", "utils·common 폴더가 너무 커졌다", "순환 의존 정리", "레이어드로 갈까 기능별로 갈까", "모노레포로 쪼갤까", "패키지 분리", "클린 아키텍처·헥사고날 적용", "구조 리팩터링", "모듈 경계 강제" 같은 요청에 쓴다. 새 최상위 디렉터리·패키지·모듈을 만들거나 두 모듈 사이에 처음으로 import 를 놓는 구현이면 사용자가 '구조'라고 말하지 않아도 참조한다. 이미 있는 모듈 안에 파일을 하나 더 두는 일반 구현에는 발동하지 않는다 — 그때는 주변 관례를 그대로 따른다.
+description: 프로젝트·모듈 구조(디렉터리, 모듈 경계, 의존 방향, 공개 표면, 공통 모듈, 모노레포 분할)를 정하거나 고치고 CI 로 강제하는 절차. "폴더 구조 어떻게 나눌까", "이거 어디 둬야 해", "utils 가 너무 커졌다", "순환 의존 정리", "레이어드 vs 기능별", "모노레포로 쪼갤까", "클린 아키텍처 적용"에 쓴다. 새 최상위 모듈을 만들거나 두 모듈 사이에 첫 import 를 놓을 때도. 기존 모듈 안에 파일 하나 추가는 아니다.
 ---
 
 # 프로젝트 구조 설계
+
+## 페르소나
+너는 경계를 긋고 그 경계가 CI 에서 지켜지게 만드는 테크리드다. 상대는 "이거 어디 둬야 하지"를 매일 겪는 개발자다.
+중시하는 것: 예쁜 트리가 아니라 변경 하나가 디렉터리 하나 안에서 끝나는 것, 그리고 규칙이 문서가 아니라 검사로 남는 것.
 
 구조의 목적은 **변경 하나가 닿는 범위를 작게 유지하는 것**이다. 디렉터리 트리는 그 경계를 눈에 보이게 한 것일 뿐이고, 트리가 예쁜 것은 목적이 아니다.
 
@@ -98,9 +102,7 @@ python3 ~/.claude/skills/project-structure/scripts/structure_scan.py <저장소>
 
 ### 3-5. 테스트·생성 코드·설정의 자리
 
-- **테스트** — 저장소 관례를 따른다. 정한다면 단위 테스트는 대상 옆(`cart.test.ts`), 통합·e2e 는 최상위 `tests/`·`e2e/`. 언어 관례가 있으면 그게 이긴다 (Go `_test.go` 옆, JVM `src/test/` 미러)
-- **생성 코드**(OpenAPI 클라이언트, ORM 클라이언트, protobuf) — 한 디렉터리에 모으고, 손대지 말라는 표시를 하고, lint·스캔에서 뺀다. 생성 코드를 손으로 고치면 다음 생성이 지운다
-- **설정** — 환경 변수를 읽는 곳은 설정 모듈 하나다. 나머지는 그 모듈을 import 한다. `process.env` 가 스무 파일에 흩어져 있으면 "환경마다 다르게 돈다"는 버그의 온상이 된다 (→ `env-divergence` 스킬)
+저장소 관례를 따른다. 정할 때의 기본값(테스트는 대상 옆, 생성 코드는 한 디렉터리에 격리, 환경 변수는 설정 모듈 하나만 읽는다)은 [references/layouts.md](references/layouts.md) 첫 절.
 
 ### 3-6. 경계를 단단하게 만드는 단계
 
@@ -120,7 +122,7 @@ python3 ~/.claude/skills/project-structure/scripts/structure_scan.py <저장소>
 
 ## 4. 강제한다
 
-규칙은 문서가 아니라 **CI 에서 깨지는 검사**로 남긴다. 스택별 도구와 설정 골격은 `references/enforcement.md` 에 있다.
+규칙은 문서가 아니라 **CI 에서 깨지는 검사**로 남긴다. 스택별 도구와 설정 골격은 [references/enforcement.md](references/enforcement.md) 에 있다.
 
 | 스택 | 도구 |
 |---|---|
@@ -147,11 +149,7 @@ allow  features/checkout -> features/cart   # 결제는 장바구니 공개 API 
 
 ## 5. 고칠 때 — 재구조화
 
-1. **순서**: 순환 끊기 → 공개 표면 만들기(밖에서 오는 내부 import 를 진입점으로) → 규칙 켜기(기준선으로 얼림) → 이동. 이동부터 하면 규칙 없이 옮긴 자리에서 다시 엉킨다
-2. **한 PR 은 이동만, 또는 동작 변경만.** 이동 PR 은 `git mv` 와 import 경로 수정 외에 아무것도 없어야 리뷰가 가능하고, 문제가 생기면 통째로 되돌릴 수 있다
-3. **빅뱅 금지.** 기능 하나씩 새 구조로 옮긴다. 두 구조가 몇 주 공존한다는 걸 전제로 "새 코드는 `features/` 에, 옛 `services/` 는 옮기는 중"을 README 한 줄에 적는다
-4. **이동 PR 은 짧게 열고 빨리 머지한다.** 열려 있는 동안 다른 브랜치가 전부 충돌한다. 큰 이동은 팀에 미리 알린다
-5. **끝나면 다시 잰다.** 순환·커밋당 모듈 수가 실제로 줄었는지 스캔으로 확인한다. 안 줄었으면 폴더만 옮긴 것이다
+순서는 **순환 끊기 → 공개 표면 → 규칙 켜기(기준선으로 얼림) → 이동**, 그리고 한 PR 은 이동만 또는 동작 변경만이다. 빅뱅 없이 기능 하나씩 옮긴다. PR 단위 계획의 모양과 세부는 [references/restructure.md](references/restructure.md).
 
 ## 6. 출력 계약
 
@@ -170,8 +168,8 @@ allow  features/checkout -> features/cart   # 결제는 장바구니 공개 API 
 
 ## 7. 다른 자료로 넘길 때
 
-- **스택별 기본 골격**: `references/layouts.md` — Next.js/React, NestJS·Express, Spring/Kotlin, FastAPI·Django, Go, 모노레포. 기본값이지 정답이 아니다
-- **구조 냄새 진단표**: `references/smells.md` — 증상 → 원인 → 처방
+- **스택별 기본 골격**: [references/layouts.md](references/layouts.md) — Next.js/React, NestJS·Express, Spring/Kotlin, FastAPI·Django, Go, 모노레포. 기본값이지 정답이 아니다
+- **구조 냄새 진단표**: [references/smells.md](references/smells.md) — 증상 → 원인 → 처방
 - **근거 자료**: `software-reference-library` 의 설계·개발 도메인. 이름이 아니라 상황으로 찾는다
 
   ```bash
@@ -179,7 +177,7 @@ allow  features/checkout -> features/cart   # 결제는 장바구니 공개 API 
   python3 ~/.claude/skills/software-reference-library/scripts/find.py --show dependency-cruiser --only 코드
   ```
 
-  자주 쓰는 slug — 원리: `on-the-criteria-to-be-used-in-decomposing-systems-into-modul`(Parnas), `the-clean-architecture`, `screaming-architecture`, `presentation-domain-data-layering`, `vertical-slice-architecture`, `hexagonal-architecture`, `conways-law` / 분할: `monolith-first`, `modular-monolith-with-ddd`, `deconstructing-the-monolith-shopify`, `monorepo-tools`, `why-google-stores-billions-of-lines-in-a-single-repository` / 프런트: `feature-sliced-design`, `bulletproof-react`, `nextjs-project-structure`, `android-modularization-guide` / 강제: `dependency-cruiser`, `eslint-plugin-boundaries`, `nx-enforce-module-boundaries`, `import-linter`, `archunit`, `spring-modulith`, `packwerk`, `go-module-layout`, `python-src-layout` / 진단: `code-maat`, `big-ball-of-mud`
+  어느 결정에 어느 자료를 드는지는 [references/sources.md](references/sources.md).
 - **구조 안의 개별 구현**이 상태 쓰기·스키마·무제한 조회에 걸리면 `implementation-design`
 - **결정 기록**: `role-isolation-pipeline` 이 설치된 프로젝트면 `docs/decisions.md`, 아니면 `docs/adr/NNNN-제목.md`
 

@@ -4,6 +4,7 @@ url: https://web.dev/articles/fetch-priority
 domain: performance
 type: 공식문서
 lang: en
+concepts: [resource-prioritization]
 ---
 
 # fetchpriority — Fetch Priority API

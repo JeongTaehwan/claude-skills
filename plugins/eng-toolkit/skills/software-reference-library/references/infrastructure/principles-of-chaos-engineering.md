@@ -4,6 +4,7 @@ url: https://principlesofchaos.org/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [chaos-engineering]
 ---
 
 # Principles of Chaos Engineering

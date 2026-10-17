@@ -4,6 +4,7 @@ url: https://github.com/GoogleChrome/lighthouse-ci
 domain: performance
 type: 저장소
 lang: en
+concepts: [performance-budgets]
 ---
 
 # Lighthouse CI — 커밋마다 성능 회귀를 막는 CI

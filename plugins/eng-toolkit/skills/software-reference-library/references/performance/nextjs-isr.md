@@ -4,6 +4,7 @@ url: https://nextjs.org/docs/app/guides/incremental-static-regeneration
 domain: performance
 type: 공식문서
 lang: en
+concepts: [rendering-strategies, web-caching]
 ---
 
 # Next.js ISR / 정적 렌더링 — TTFB 절감

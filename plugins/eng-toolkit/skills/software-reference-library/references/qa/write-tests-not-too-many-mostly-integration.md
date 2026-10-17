@@ -4,6 +4,8 @@ url: https://kentcdodds.com/blog/write-tests
 domain: qa
 type: 블로그
 lang: en
+concepts: [test-portfolio-shape]
+opposes: [qa/testpyramid]
 ---
 
 # Write Tests. Not Too Many. Mostly Integration. (Kent C. Dodds)

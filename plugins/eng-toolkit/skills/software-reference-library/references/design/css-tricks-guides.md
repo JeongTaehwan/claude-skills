@@ -4,6 +4,7 @@ url: https://css-tricks.com/guides/
 domain: design
 type: 블로그
 lang: en
+concepts: [css-layout]
 ---
 
 # CSS-Tricks Guides

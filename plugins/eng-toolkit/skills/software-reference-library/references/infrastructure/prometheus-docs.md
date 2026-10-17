@@ -4,6 +4,7 @@ url: https://prometheus.io/docs/introduction/overview/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [metrics-monitoring]
 ---
 
 # Prometheus 공식 문서

@@ -4,6 +4,7 @@ url: https://github.com/dastergon/awesome-chaos-engineering
 domain: qa
 type: 저장소
 lang: en
+concepts: [chaos-engineering]
 ---
 
 # Awesome Chaos Engineering

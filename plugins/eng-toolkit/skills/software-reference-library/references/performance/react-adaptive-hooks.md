@@ -4,6 +4,7 @@ url: https://github.com/GoogleChromeLabs/react-adaptive-hooks
 domain: performance
 type: 저장소
 lang: en
+concepts: [adaptive-loading]
 ---
 
 # react-adaptive-hooks — 네트워크·기기 적응형 로딩 훅

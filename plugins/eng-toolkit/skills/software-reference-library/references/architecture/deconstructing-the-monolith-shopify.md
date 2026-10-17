@@ -4,6 +4,7 @@ url: https://shopify.engineering/deconstructing-monolith-designing-software-maxi
 domain: architecture
 type: 블로그
 lang: en
+concepts: [modular-monolith]
 ---
 
 # Deconstructing the Monolith: Designing Software that Maximizes Developer Productivity

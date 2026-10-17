@@ -4,6 +4,7 @@ url: https://posthog.com/docs/product-analytics
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [product-analytics]
 ---
 
 # PostHog 제품 분석 공식 문서

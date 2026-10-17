@@ -4,6 +4,7 @@ url: https://www.patterns.dev/
 domain: performance
 type: 공식문서
 lang: en
+concepts: [code-level-design-patterns, rendering-strategies]
 ---
 
 # Learning Patterns (patterns.dev)

@@ -4,6 +4,7 @@ url: https://developer.hashicorp.com/terraform/docs
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [infrastructure-as-code]
 ---
 
 # Terraform 공식 문서

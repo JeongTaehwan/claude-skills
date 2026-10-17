@@ -4,6 +4,7 @@ url: https://www.industrialempathy.com/posts/design-docs-at-google/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [architecture-documentation, technical-writing]
 ---
 
 # Design Docs at Google

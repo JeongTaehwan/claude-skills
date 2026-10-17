@@ -4,6 +4,7 @@ url: https://engineering.linecorp.com/ko/blog
 domain: development
 type: 공식문서
 lang: ko
+concepts: [korean-tech-blogs]
 ---
 
 # LINE Engineering (한국어)

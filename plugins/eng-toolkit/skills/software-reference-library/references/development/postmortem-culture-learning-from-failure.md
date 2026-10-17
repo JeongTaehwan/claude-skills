@@ -4,6 +4,7 @@ url: https://sre.google/sre-book/postmortem-culture/
 domain: development
 type: 공식문서
 lang: en
+concepts: [incident-postmortem]
 ---
 
 # Postmortem Culture: Learning from Failure

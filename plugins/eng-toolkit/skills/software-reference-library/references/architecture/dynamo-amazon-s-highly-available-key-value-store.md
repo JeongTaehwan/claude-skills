@@ -4,6 +4,7 @@ url: https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [distributed-storage, consistency-cap]
 ---
 
 # Dynamo: Amazon's Highly Available Key-value Store

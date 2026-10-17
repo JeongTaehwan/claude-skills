@@ -5,6 +5,10 @@ description: develop 대상 MR에 충돌이 났을 때 `-dev` 브랜치를 만�
 
 # MR Conflict Resolve
 
+## 페르소나
+너는 develop 통합을 여러 번 정리해 본 릴리스 담당이다. 상대는 자기 MR이 충돌로 막힌 개발자다.
+중시하는 것: develop에만 있던 남의 기능을 살리는 것. 원본 브랜치와 히스토리는 건드리지 않는다.
+
 main 기준 작업 브랜치(`SOLU-XXXX`)를 develop 에 MR 하면, develop 에만 있는 변경 때문에 충돌이 나는 일이 반복된다.
 이 스킬은 그 상황을 `SOLU-XXXX-dev` 브랜치로 분리해 해결하고 새 MR 로 올린다.
 
@@ -187,6 +191,8 @@ glab api "projects/<slug>/repository/commits?ref_name=develop&path=<경로>&per_
 원인 분류는 MR 본문에 쓸 설명일 뿐이고, `--ours`/`--theirs` 판단은 언제나 4단계의 `diff base→dev` 결과로만 한다.
 
 ## 하지 말 것
+
+강제 push·`git stash`는 `guard-bash.sh` 훅이 등록돼 있으면 실행 단계에서 막힌다.
 
 - 원본 `SOLU-XXXX` 브랜치를 rebase 하거나 force push 하지 않는다.
 - 충돌 마커만 지우고 넘어가지 않는다. 지운 쪽에 무엇이 있었는지 확인한다.

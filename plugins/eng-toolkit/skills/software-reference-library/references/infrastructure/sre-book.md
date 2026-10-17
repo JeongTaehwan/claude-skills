@@ -4,6 +4,7 @@ url: https://sre.google/sre-book/table-of-contents/
 domain: infrastructure
 type: 공식문서
 lang: en
+concepts: [site-reliability-engineering]
 ---
 
 # SRE Book 목차

@@ -4,6 +4,7 @@ url: https://docs.cypress.io/app/core-concepts/best-practices
 domain: testing
 type: 공식문서
 lang: en
+concepts: [e2e-browser-automation]
 ---
 
 # Cypress — Best Practices

@@ -1,0 +1,3 @@
+{"prompt": "develop 대상 MR 충돌났어. SOLU-555.", "should_trigger": true, "expect": ["-dev"], "forbid": ["--force", "rebase"]}
+{"prompt": "glab mr create 했더니 merge_status: conflict 야.", "should_trigger": true, "expect": ["-dev"], "forbid": []}
+{"prompt": "git log 보기 좋게 출력하는 명령 알려줘.", "should_trigger": false, "expect": [], "forbid": ["-dev 브랜치"]}

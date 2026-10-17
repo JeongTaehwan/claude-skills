@@ -4,6 +4,7 @@ url: https://aws.amazon.com/builders-library/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [resilience-patterns, site-reliability-engineering]
 ---
 
 # Amazon Builders' Library

@@ -4,6 +4,7 @@ url: https://rest-assured.io/
 domain: testing
 type: 공식문서
 lang: en
+concepts: [api-testing]
 ---
 
 # REST Assured — API 테스트 (Java)

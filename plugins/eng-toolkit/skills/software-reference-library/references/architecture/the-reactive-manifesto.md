@@ -4,6 +4,7 @@ url: https://www.reactivemanifesto.org/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [resilience-patterns, architecture-patterns]
 ---
 
 # The Reactive Manifesto

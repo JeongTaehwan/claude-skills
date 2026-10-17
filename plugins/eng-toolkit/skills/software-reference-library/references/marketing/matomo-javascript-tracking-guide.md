@@ -4,6 +4,7 @@ url: https://developer.matomo.org/guides/tracking-javascript-guide
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [product-analytics]
 ---
 
 # Matomo JavaScript 트래킹 가이드

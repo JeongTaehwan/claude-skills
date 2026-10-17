@@ -4,6 +4,7 @@ url: https://github.com/goldbergyoni/javascript-testing-best-practices
 domain: testing
 type: 저장소
 lang: en
+concepts: [test-strategy, test-runners]
 ---
 
 # JavaScript Testing Best Practices

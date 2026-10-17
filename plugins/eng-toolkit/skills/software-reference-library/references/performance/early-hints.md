@@ -4,6 +4,7 @@ url: https://developer.chrome.com/docs/web-platform/early-hints
 domain: performance
 type: 공식문서
 lang: en
+concepts: [preload-prefetch, http-semantics]
 ---
 
 # 103 Early Hints

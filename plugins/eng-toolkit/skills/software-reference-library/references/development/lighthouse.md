@@ -4,6 +4,7 @@ url: https://developer.chrome.com/docs/lighthouse/overview
 domain: development
 type: 공식문서
 lang: en
+concepts: [synthetic-testing, performance-budgets]
 ---
 
 # Lighthouse

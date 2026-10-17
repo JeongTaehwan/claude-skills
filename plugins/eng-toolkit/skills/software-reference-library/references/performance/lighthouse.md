@@ -4,6 +4,7 @@ url: https://github.com/GoogleChrome/lighthouse
 domain: performance
 type: 저장소
 lang: en
+concepts: [synthetic-testing, accessibility-testing]
 ---
 
 # Lighthouse — 성능·접근성 자동 감사

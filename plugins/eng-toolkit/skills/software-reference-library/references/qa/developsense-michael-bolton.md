@@ -4,6 +4,7 @@ url: https://www.developsense.com/blog
 domain: qa
 type: 블로그
 lang: en
+concepts: [exploratory-testing, test-heuristics]
 ---
 
 # DevelopSense — Michael Bolton

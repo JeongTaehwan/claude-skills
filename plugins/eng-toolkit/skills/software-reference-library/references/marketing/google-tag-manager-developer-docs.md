@@ -4,6 +4,7 @@ url: https://developers.google.com/tag-platform/tag-manager
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [product-analytics, performance-marketing]
 ---
 
 # Google 태그 관리자 개발자 문서 (Google Tag Manager)

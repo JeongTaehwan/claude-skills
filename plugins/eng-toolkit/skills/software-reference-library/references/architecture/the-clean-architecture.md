@@ -4,6 +4,7 @@ url: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.htm
 domain: architecture
 type: 블로그
 lang: en
+concepts: [layering-dependency-rule]
 ---
 
 # The Clean Architecture

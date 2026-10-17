@@ -4,6 +4,7 @@ url: https://github.com/joelparkerhenderson/architecture-decision-record
 domain: architecture
 type: 저장소
 lang: en
+concepts: [architecture-documentation]
 ---
 
 # Architecture Decision Records (ADR) 모음

@@ -4,6 +4,7 @@ url: https://github.com/woltapp/blurhash
 domain: performance
 type: 저장소
 lang: en
+concepts: [loading-placeholders, image-optimization]
 ---
 
 # BlurHash — 이미지 블러 플레이스홀더 인코딩

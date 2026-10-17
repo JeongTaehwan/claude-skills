@@ -4,6 +4,7 @@ url: https://cheatsheetseries.owasp.org/
 domain: security
 type: 표준
 lang: en
+concepts: [security-engineering, security-requirements]
 ---
 
 # OWASP Cheat Sheet Series

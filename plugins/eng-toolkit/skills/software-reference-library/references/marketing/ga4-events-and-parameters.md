@@ -4,6 +4,7 @@ url: https://developers.google.com/analytics/devguides/collection/ga4/events
 domain: marketing
 type: 공식문서
 lang: en
+concepts: [product-analytics]
 ---
 
 # GA4 이벤트 측정 개발자 문서 (Google Analytics 4 Events)

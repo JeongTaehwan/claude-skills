@@ -4,6 +4,7 @@ url: https://hbr.org/2016/09/know-your-customers-jobs-to-be-done
 domain: planning
 type: 공식문서
 lang: en
+concepts: [customer-jobs-opportunities]
 ---
 
 # Jobs to Be Done — "Know Your Customers' Jobs to Be Done" (HBR)

@@ -4,6 +4,7 @@ url: https://web.dev/articles/rendering-on-the-web
 domain: performance
 type: 공식문서
 lang: en
+concepts: [rendering-strategies]
 ---
 
 # Rendering on the Web

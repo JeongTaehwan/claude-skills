@@ -4,6 +4,7 @@ url: https://github.com/opencontainers/image-spec
 domain: infrastructure
 type: 표준
 lang: en
+concepts: [containers]
 ---
 
 # OCI Image Format Specification

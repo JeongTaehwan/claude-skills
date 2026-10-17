@@ -4,6 +4,7 @@ url: https://aws.amazon.com/architecture/well-architected/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [architecture-review]
 ---
 
 # AWS Well-Architected Framework

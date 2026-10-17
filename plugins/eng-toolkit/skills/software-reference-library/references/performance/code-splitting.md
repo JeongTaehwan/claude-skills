@@ -4,6 +4,7 @@ url: https://web.dev/articles/reduce-javascript-payloads-with-code-splitting
 domain: performance
 type: 공식문서
 lang: en
+concepts: [javascript-payload]
 ---
 
 # 코드 분할 (Reduce JavaScript payloads with code splitting)

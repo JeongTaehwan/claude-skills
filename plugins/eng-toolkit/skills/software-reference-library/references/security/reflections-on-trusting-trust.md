@@ -4,6 +4,7 @@ url: https://www.cs.cmu.edu/~rdriley/487/papers/Thompson_1984_ReflectionsonTrust
 domain: security
 type: 논문
 lang: en
+concepts: [supply-chain-security]
 ---
 
 # Reflections on Trusting Trust (Ken Thompson, 1984)

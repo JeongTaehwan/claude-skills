@@ -4,6 +4,7 @@ url: https://notes.stephenholiday.com/Kafka.pdf
 domain: architecture
 type: 논문
 lang: en
+concepts: [event-streaming-messaging]
 ---
 
 # Kafka: a Distributed Messaging System for Log Processing

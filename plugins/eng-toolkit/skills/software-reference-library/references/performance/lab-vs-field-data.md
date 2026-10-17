@@ -4,6 +4,7 @@ url: https://web.dev/articles/lab-and-field-data-differences
 domain: performance
 type: 공식문서
 lang: en
+concepts: [synthetic-testing, real-user-monitoring]
 ---
 
 # Lab vs Field 데이터

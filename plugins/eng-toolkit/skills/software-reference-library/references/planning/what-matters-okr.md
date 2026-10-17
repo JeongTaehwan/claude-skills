@@ -4,6 +4,7 @@ url: https://www.whatmatters.com/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-metrics]
 ---
 
 # What Matters — OKR (John Doerr)

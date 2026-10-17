@@ -4,6 +4,7 @@ url: https://brooker.co.za/blog/
 domain: development
 type: 블로그
 lang: en
+concepts: [resilience-patterns, distributed-systems]
 ---
 
 # Marc Brooker's Blog

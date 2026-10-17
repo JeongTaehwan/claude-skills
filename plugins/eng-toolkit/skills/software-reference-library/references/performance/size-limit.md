@@ -4,6 +4,7 @@ url: https://github.com/ai/size-limit
 domain: performance
 type: 저장소
 lang: en
+concepts: [performance-budgets, javascript-payload]
 ---
 
 # size-limit — 실행 시간까지 재는 사이즈 예산 CI

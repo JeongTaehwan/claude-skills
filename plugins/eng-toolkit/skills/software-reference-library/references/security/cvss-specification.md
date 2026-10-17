@@ -4,6 +4,7 @@ url: https://www.first.org/cvss/v4.0/specification-document
 domain: security
 type: 표준
 lang: en
+concepts: [security-requirements]
 ---
 
 # CVSS v4.0 명세 (Common Vulnerability Scoring System)

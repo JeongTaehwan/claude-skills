@@ -4,6 +4,7 @@ url: https://www.svpg.com/product-fail/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [product-management-practice, product-discovery]
 ---
 
 # Product Fail (Marty Cagan)

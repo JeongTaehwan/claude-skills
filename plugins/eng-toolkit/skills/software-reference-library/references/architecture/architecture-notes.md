@@ -4,6 +4,7 @@ url: https://architecturenotes.co/
 domain: architecture
 type: 공식문서
 lang: en
+concepts: [system-design, resilience-patterns]
 ---
 
 # Architecture Notes

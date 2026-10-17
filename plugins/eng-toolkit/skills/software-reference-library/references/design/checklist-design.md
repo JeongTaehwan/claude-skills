@@ -4,6 +4,7 @@ url: https://www.checklist.design/
 domain: design
 type: 공식문서
 lang: en
+concepts: [ux-heuristics-patterns]
 ---
 
 # Checklist Design

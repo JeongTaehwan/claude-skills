@@ -4,6 +4,7 @@ url: https://storybook.js.org/docs/writing-tests
 domain: testing
 type: 공식문서
 lang: en
+concepts: [component-visual-testing]
 ---
 
 # Storybook — 컴포넌트 테스트

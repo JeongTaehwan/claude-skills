@@ -20,6 +20,7 @@
 
 import argparse
 import glob
+import json
 import math
 import os
 import re
@@ -112,7 +113,16 @@ def parse(path):
             "domain": os.path.basename(os.path.dirname(path)),
             "title": meta.get("title", slug), "url": meta.get("url", ""),
             "type": meta.get("type", ""), "lang": meta.get("lang", ""),
+            "status": meta.get("status", "current") or "current",
+            "concepts": _list(meta.get("concepts")), "opposes": _list(meta.get("opposes")),
+            "supersedes": _list(meta.get("supersedes")),
             "secs": secs}
+
+
+def _list(v):
+    """front-matter 의 `[a, b]` 를 리스트로. 온톨로지 관계 필드(ontology.json)가 쓴다."""
+    v = (v or "").strip().strip("[]")
+    return [x.strip().strip("'\"") for x in v.split(",") if x.strip()]
 
 
 def load_all():
@@ -137,43 +147,68 @@ def terms_of(query):
     return out
 
 
-def match_weight(term, text):
-    """정확히 1.0 → 조사 떼고 0.85 → 앞부분만 0.6 → 없으면 0."""
-    if not text:
-        return 0.0
-    low = text.lower()
-    t = term.lower()
+def _variants(term, _cache={}):
+    """단어 하나의 비교 형태를 한 번만 만든다: (원형, 조사 뗀 것들, 앞부분들).
+
+    검색 한 번에 항목 512개 × 절 11개를 비교하므로, 이걸 비교마다 다시 만들면
+    endswith 호출만 수백만 번이다. Stop 훅이 응답마다 find_test 를 돌리므로 그 시간이
+    곧 매 턴의 지연이다."""
+    v = _cache.get(term)
+    if v is None:
+        stripped = [term[: -len(j)].lower() for group in (JOSA2, JOSA1) for j in group
+                    if term.endswith(j) and len(term) - len(j) >= 2]
+        # 앞부분만 맞추기는 **한글에만** 쓴다. '멱등키로' 의 핵심은 '멱등' 이라
+        # 2글자까지 내려가야 하는데, 같은 규칙을 영어에 쓰면 'Raft' 가 'Ra' 로 떨어져
+        # 437개 항목에 걸리고 그 단어의 변별력이 통째로 사라진다.
+        prefixes = ([term[:L].lower() for L in range(len(term) - 1, 1, -1)]
+                    if len(term) >= 4 and HANGUL.search(term) else [])
+        v = _cache[term] = (term.lower(), stripped, prefixes)
+    return v
+
+
+def _weight(term, low):
+    t, stripped, prefixes = _variants(term)
     if t in low:
         return 1.0
-    for group in (JOSA2, JOSA1):
-        for j in group:
-            if term.endswith(j) and len(term) - len(j) >= 2:
-                if term[: -len(j)].lower() in low:
-                    return 0.85
-    # 앞부분만 맞추기는 **한글에만** 쓴다. '멱등키로' 의 핵심은 '멱등' 이라
-    # 2글자까지 내려가야 하는데, 같은 규칙을 영어에 쓰면 'Raft' 가 'Ra' 로 떨어져
-    # 437개 항목에 걸리고 그 단어의 변별력이 통째로 사라진다.
-    if len(term) >= 4 and HANGUL.search(term):
-        for L in range(len(term) - 1, 1, -1):
-            if term[:L].lower() in low:
-                return 0.5
+    for s in stripped:
+        if s in low:
+            return 0.85
+    for s in prefixes:
+        if s in low:
+            return 0.5
     return 0.0
+
+
+def match_weight(term, text):
+    """정확히 1.0 → 조사 떼고 0.85 → 앞부분만 0.5 → 없으면 0."""
+    return _weight(term, text.lower()) if text else 0.0
+
+
+FIELDS = ("한 줄", "페르소나", "이럴 때 연다", "이럴 땐 아니다", "무엇이 들어있나", "인용 포인트", "코드 예시")
+
+
+def _lowered(entry):
+    """항목의 비교용 필드를 소문자로 한 번만 만들어 항목에 붙여 둔다."""
+    low = entry.get("_low")
+    if low is None:
+        fields = [("slug", entry["slug"].replace("-", " ")), ("title", entry["title"]),
+                  ("type", entry["type"]), ("domain", entry["domain"])]
+        fields += [(name, entry["secs"].get(name, "")) for name in FIELDS]
+        low = entry["_low"] = [(name, text.lower(), FIELD_WEIGHT.get(name, 1.0))
+                               for name, text in fields if text]
+    return low
 
 
 def best_weights(entry, terms):
     """이 항목에서 각 단어가 어디에 걸렸는지, 그 최고 가중치."""
-    fields = [("slug", entry["slug"].replace("-", " ")), ("title", entry["title"]),
-              ("type", entry["type"]), ("domain", entry["domain"])]
-    fields += [(name, entry["secs"].get(name, "")) for name in
-               ("한 줄", "페르소나", "이럴 때 연다", "이럴 땐 아니다",
-                "무엇이 들어있나", "인용 포인트", "코드 예시")]
     out = {}
+    fields = _lowered(entry)
     for term in terms:
         best = 0.0
-        for name, text in fields:
-            w = match_weight(term, text)
+        for _name, low, fw in fields:
+            w = _weight(term, low)
             if w:
-                best = max(best, w * FIELD_WEIGHT.get(name, 1.0))
+                best = max(best, w * fw)
         if best:
             out[term] = best
     return out
@@ -210,6 +245,24 @@ def one_line(entry, width=100):
     return s if len(s) <= width else s[: width - 1] + "…"
 
 
+def concept_family(cid):
+    """개념과 그 하위 개념 전부. 어휘는 ontology.json 한 곳에만 있다."""
+    try:
+        concepts = json.load(open(os.path.join(ROOT, "ontology.json"), encoding="utf-8"))["concepts"]
+    except (OSError, ValueError, KeyError):
+        return set()
+    if cid not in concepts:
+        return set()
+    out, stack = {cid}, [cid]
+    while stack:
+        cur = stack.pop()
+        for k, v in concepts.items():
+            if v.get("broader") == cur and k not in out:
+                out.add(k)
+                stack.append(k)
+    return out
+
+
 def cmd_search(args):
     terms = terms_of(" ".join(args.query))
     if not terms:
@@ -217,6 +270,14 @@ def cmd_search(args):
         return 2
 
     entries = load_all()
+    if not args.all:
+        entries = [e for e in entries if e["status"] != "superseded"]
+    if args.concept:
+        want = concept_family(args.concept)
+        if not want:
+            print(f"'{args.concept}' 개념이 없습니다. scripts/ontology.py tree 로 어휘를 보세요.", file=sys.stderr)
+            return 2
+        entries = [e for e in entries if want & set(e["concepts"])]
     if args.domain:
         entries = [e for e in entries if e["domain"] == args.domain]
         if not entries:
@@ -237,9 +298,11 @@ def cmd_search(args):
         print(f"  흔해서 거의 무시한 단어: {', '.join(weak)}")
     for i, (sc, hit, e) in enumerate(ranked[: args.n], 1):
         rel = os.path.relpath(e["path"], ROOT)
-        print(f"[{i}] {rel}  ({e['type']}, {hit}/{len(terms)}단어)")
+        tag = f" · {', '.join(e['concepts'])}" if e["concepts"] else ""
+        print(f"[{i}] {rel}  ({e['type']}, {hit}/{len(terms)}단어{tag})")
         print(f"    {one_line(e)}")
     print("\n항목의 일부만 보려면: find.py --show <slug> --only 인용,아니다")
+    print("같은 개념·인접 항목:  ontology.py related <slug>  /  find.py \"<상황>\" --concept <개념>")
     return 0
 
 
@@ -305,6 +368,8 @@ def main():
     ap.add_argument("--show", help="이 slug 의 항목을 출력")
     ap.add_argument("--only", help=f"출력할 절: {', '.join(SECTIONS)}")
     ap.add_argument("--domains", action="store_true", help="도메인 목록")
+    ap.add_argument("--concept", help="이 개념(과 하위 개념)이 붙은 항목만 — ontology.json 어휘")
+    ap.add_argument("--all", action="store_true", help="대체된(superseded) 항목도 포함")
     args = ap.parse_args()
 
     if args.domains:

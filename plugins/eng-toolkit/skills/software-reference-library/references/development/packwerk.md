@@ -4,6 +4,7 @@ url: https://github.com/Shopify/packwerk
 domain: development
 type: 저장소
 lang: en
+concepts: [boundary-enforcement, modular-monolith]
 ---
 
 # Packwerk

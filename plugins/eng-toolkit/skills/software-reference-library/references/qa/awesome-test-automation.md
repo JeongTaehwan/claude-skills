@@ -4,6 +4,7 @@ url: https://github.com/atinfo/awesome-test-automation
 domain: qa
 type: 저장소
 lang: en
+concepts: [test-automation]
 ---
 
 # Awesome Test Automation

@@ -4,6 +4,7 @@ url: https://exp-platform.com/
 domain: planning
 type: 공식문서
 lang: en
+concepts: [online-experimentation]
 ---
 
 # ExP Platform (Ron Kohavi 자료실)

@@ -4,6 +4,7 @@ url: https://www.intercom.com/blog/product-management/
 domain: planning
 type: 블로그
 lang: en
+concepts: [product-management-practice]
 ---
 
 # Intercom — 제품 관리 블로그

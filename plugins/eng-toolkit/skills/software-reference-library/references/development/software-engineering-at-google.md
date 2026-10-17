@@ -4,6 +4,7 @@ url: https://abseil.io/resources/swe-book
 domain: development
 type: 공식문서
 lang: en
+concepts: [engineering-effectiveness, software-complexity]
 ---
 
 # Software Engineering at Google (무료 웹북)

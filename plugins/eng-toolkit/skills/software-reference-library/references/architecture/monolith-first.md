@@ -4,6 +4,7 @@ url: https://martinfowler.com/bliki/MonolithFirst.html
 domain: architecture
 type: 블로그
 lang: en
+concepts: [modular-monolith, microservices]
 ---
 
 # Monolith First
