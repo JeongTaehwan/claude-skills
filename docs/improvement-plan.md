@@ -12,7 +12,7 @@
 
 | # | 원래 메모 | 한 것 | 어디 |
 |---|---|---|---|
-| 15 | 구조 → 기획서 → 프로토타입 → 기능 구현. 기존 프로젝트면 전체 분석 | ✅ 새 스킬 `project-flow`. 0 분석 → 1 구조 → 2 기획서+질문 → 3 로드맵 → 4 프로토타입 → 5 구현(`role-isolation-pipeline`). 기존 코드가 있으면 `repo-map.py` 로 지도부터 | `plugins/eng-toolkit/skills/project-flow/` |
+| 15 | 구조 → 기획서 → 프로토타입 → 기능 구현. 기존 프로젝트면 전체 분석 | ✅ 새 스킬 `project-flow`. 0 분석 → 1 구조 → 2 기획서 초안+질문 → 3 기획서+프로토타입(질문 직후 같이 낸다) → 4 로드맵 → 5 구현(`role-isolation-pipeline`). 기존 코드가 있으면 `repo-map.py` 로 지도부터 | `plugins/eng-toolkit/skills/project-flow/` |
 | 13 | 기획서 있을 때만 질문 15개 | ✅ 질문 모드에 진입 조건. 기획서가 없으면 묻지 않고 구조·기획서 초안부터 만든다. 질문은 초안의 `[미정]` 만, BLOCKER 부터 | `project-flow/references/question-mode.md` |
 | 10 | 투두리스트·로드맵 자동 | ✅ 3단계. 마일스톤 = 사람이 눌러 볼 수 있는 결과, 투두 한 줄 = 반나절 이하 + 기획서 ID + 맡는 에이전트 + 판정 가능한 완료 조건 | `project-flow/references/roadmap.md`, `templates/roadmap.md` |
 | 3 | 스킬을 쓸 때 페르소나를 구성 | ✅ 모든 스킬·에이전트에 `## 페르소나` (너는 누구 / 상대는 누구 / 무엇을 중시). 구조 문서에는 제품 페르소나 칸. 빠지면 lint 실패 | 각 `SKILL.md`, `agents/*.md`, `templates/structure.md` |
