@@ -48,6 +48,17 @@ CASES = [
     ("이미지가 느린 3G에서 늦게 뜬다",
      ["network-information-api", "react-adaptive-hooks",
       "high-performance-browser-networking", "adaptive-loading"], 3, None),
+    ("폴더 구조를 기능별로 나눌지 레이어별로 나눌지",
+     ["screaming-architecture", "vertical-slice-architecture",
+      "presentation-domain-data-layering"], 5, None),
+    ("순환 의존을 CI에서 막고 싶다",
+     ["dependency-cruiser", "archunit", "import-linter", "packwerk"], 5, None),
+    ("모노레포로 쪼갤까",
+     ["monorepo-tools", "why-google-stores-billions-of-lines-in-a-single-repository"], 3, None),
+    ("마이크로서비스 말고 모듈러 모놀리스",
+     ["deconstructing-the-monolith-shopify", "modular-monolith-with-ddd", "monolith-first"], 3, None),
+    ("같이 바뀌는 파일 분석", ["code-maat"], 1, None),
+    ("클린 아키텍처 의존성 규칙", ["the-clean-architecture"], 1, None),
 ]
 
 WEAK = [
@@ -69,7 +80,7 @@ _ENTRIES = None
 
 
 def all_entries(mod):
-    """512개를 한 번만 읽는다. 이 테스트는 Stop 훅이 응답마다 부르므로
+    """536개를 한 번만 읽는다. 이 테스트는 Stop 훅이 응답마다 부르므로
     같은 1.4MB 를 다섯 번 읽으면 그만큼 매 턴 느려진다."""
     global _ENTRIES
     if _ENTRIES is None:
@@ -117,7 +128,7 @@ def main():
     checks = 0
     for name, fn in (
         ("도메인 10개를 센다", lambda: len({e["domain"] for e in all_entries(mod)}) == 10),
-        ("항목 512개를 읽는다", lambda: len(all_entries(mod)) == 512),
+        ("항목 536개를 읽는다", lambda: len(all_entries(mod)) == 536),
         ("절 파싱이 된다", lambda: all(
             "한 줄" in e["secs"] and "페르소나" in e["secs"] for e in all_entries(mod))),
         ("서술어를 거른다", lambda: mod.terms_of("느려서 죽는다 싶다") == ["느려서"]),

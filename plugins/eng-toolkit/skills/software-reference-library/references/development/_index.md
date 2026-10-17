@@ -1,4 +1,4 @@
-# 개발 (development) — 83개
+# 개발 (development) — 94개
 
 코드를 쓰고 굴린다
 
@@ -23,13 +23,14 @@
 | [SLSA (Supply-chain Levels for Software Artifacts)](slsa.md) | "이 바이너리가 정말 그 소스에서, 그 파이프라인으로 만들어진 게 맞나"를 증명하는 방법을 단계(Level)로 나눈 공급망 보안 프레임워크 — 코드 취약점이 아니라 빌드 과정의 변조를 다룬다. | 보안 감사나 고객사 실사에서 "빌드 산출물의 무결성을 어떻게 보장하느냐"는 질문을 받고 답을 못 한 인프라·플랫폼 담당자. |
 | [Semantic Versioning](semantic-versioning.md) | MAJOR.MINOR.PATCH를 "감각"이 아니라 규칙으로 못 박은 짧은 명세 — 버전 번호를 올리는 조건이 공개 API의 호환성 변화로만 정의된다. | 사내 공용 라이브러리나 API를 관리하다가 "이거 메이저 올려야 하나요?"라는 질문을 매번 받는 사람. |
 
-## 공식문서 (43)
+## 공식문서 (50)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
 | [AB180 엔지니어링 블로그](ab180.md) | 모바일 어트리뷰션(Airbridge)을 만드는 회사가, 하루 수십억 건 규모의 이벤트를 받아 저장·집계하는 데이터 인프라를 어떻게 굴리는지 한국어로 공개한 기록. | "일단 로그부터 쌓자"로 시작한 이벤트 수집이 커져서, 적재는 되는데 집계가 못 따라가는 상황에 놓인 백엔드/데이터 엔지니어. |
 | [ACM Queue](acm-queue.md) | ACM이 "학회지가 아니라 현장 엔지니어를 위한 잡지"로 따로 만든 매체 — 논문처럼 검증되어 있으면서 논문처럼 읽히지는 않는 글이 모여 있다. | 블로그 글로는 근거가 약하고 논문은 읽어낼 시간이 없는, 기술 결정을 문서로 정당화해야 하는 시니어/테크리드. |
 | [Apache Kafka 문서](apache-kafka.md) | Kafka 공식 매뉴얼 — 그런데 실제 가치는 API 레퍼런스가 아니라 "왜 이렇게 설계했는가"를 설명하는 Design 장에 있다. | 주문·결제 이벤트를 Kafka 로 흘려보내기 시작했는데, "중복 소비가 왜 생기는가"와 "어디까지가 보장이고 어디부터가 우리 책임인가"의 경계를 못 긋고 있는… |
+| [ArchUnit User Guide](archunit.md) | Java 바이트코드를 읽어 클래스·패키지 의존을 모델로 만든 뒤, 레이어·슬라이스·순환·명명 규칙을 평범한 단위 테스트로 검증하게 하는 라이브러리의 공식 가이드 — 아키텍처 규칙을 위키 문서가 아니라 실패하는 테스트로 만든다는 것이 요지다. | Spring/Java 커머스 백엔드에서 controller → service → repository 레이어를 정해 놓았지만 controller 가 reposit… |
 | [Comprehensive Rust (Google)](comprehensive-rust.md) | 구글이 안드로이드 팀 엔지니어들을 Rust로 옮기기 위해 만든 사내 집체 교육 과정을 그대로 공개한 것 — 개인 독학서가 아니라 강사가 진행하는 며칠짜리 커리큘럼이다. | 팀에 Rust를 도입하기로 정해 놓고, "각자 The Book 읽으세요"로는 아무도 안 읽는다는 걸 이미 겪은 리드. |
 | [DORA (DevOps Research and Assessment)](dora.md) | "배포 자주 하면 더 안정적이다"라는 반직관적 주장에 수년치 설문 데이터를 붙인 연구 프로그램 — 4 key metrics 의 출처이자, 그 지표를 개인 평가에 쓰지 말라는 경고의 출처이기도 하다. | "개발 생산성 개선"을 KPI 로 받았는데 무엇을 세야 할지 모르는 팀 리드. |
 | [DORA — Four Keys 가이드](dora-four-keys.md) | 4개 지표 각각을 "무엇을 언제부터 언제까지 세는가" 수준까지 정의해 놓은 실행 문서 — 대시보드를 만들다가 "배포 하나를 어디서부터 세지?"에 막혔을 때 여는 페이지. | DORA 지표를 도입하기로 결정은 났고, 이제 실제로 숫자를 뽑아야 하는 엔지니어. |
@@ -41,13 +42,17 @@
 | [Google Code Review Developer Guide (웹 버전)](google-code-review-developer-guide.md) | 코드리뷰를 "코드를 어떻게 볼 것인가"가 아니라 "리뷰라는 프로세스를 어떻게 굴릴 것인가"로 다루는 문서 — 무엇을 볼지, 얼마나 빨리 볼지, 어떤 말투로 쓸지가 각각 독립된 장으로 있다. | 리뷰가 며칠씩 방치되거나, 반대로 사소한 지적으로 스무 번씩 왕복해서 배포가 밀리는 팀의 테크리드. |
 | [Google Developer Documentation Style Guide](google-developer-documentation-style-guide.md) | 영문 기술 문서의 어투·용어·형식을 항목 단위로 판정해 주는 사전형 스타일 가이드 — "이 표현을 쓸까 말까"를 검색해서 바로 답을 얻는 용도다. | 영문 API 문서나 릴리스 노트를 여러 명이 나눠 쓰는데, 사람마다 시제·인칭·용어가 달라 한 문서처럼 안 읽히는 상황의 개발자. |
 | [Google Style Guides](google-style-guides.md) | C++/Java/Python/Go/TypeScript/Shell 등 여러 언어의 스타일 가이드를 한자리에 모아 둔 원본 — 대부분의 린터 프리셋이 조상으로 삼는 문서다. | 여러 언어가 섞인 저장소에서 언어마다 다른 사람이 다른 관례를 들고 와 리뷰가 매번 늘어지는 상황의 리드. |
+| [Import Linter](import-linter.md) | Python 패키지 사이의 import 에 '계약(contract)' — layers, forbidden, independence, protected, acyclic_siblings — 을 선언하고 lint-imports 로 검사하는 도구의 공식 문서 — 직접 imp… | Django/FastAPI 로 커머스 백엔드를 굴리는데 orders 앱이 payments 내부 모델을 import 하고, domain 이 api 를 import… |
 | [Increment](increment.md) | Stripe가 발행한 "규모 있는 팀이 실제로 어떻게 소프트웨어를 만들고 운영하는가"를 호(issue) 단위 주제로 파고든 잡지 — 링크는 그중 테스팅 호(Issue 10, 2019)다. | "우리 팀 테스트 전략이 이상한 건지 원래 다들 이런 건지" 판단이 서지 않는, 테스트 정책을 새로 정해야 하는 백엔드 리드. |
 | [Keep a Changelog](keep-a-changelog.md) | "git log를 그대로 붙여 넣은 것은 changelog가 아니다"라는 주장에서 출발해, 사람이 읽을 릴리스 노트의 최소 형식(Added/Changed/Deprecated/Removed/Fixed/Security)을 규정한 문서. | 릴리스마다 릴리스 노트를 새로 발명하고 있고, 그래서 아무도 안 읽는 릴리스 노트를 쓰는 사람. |
 | [LINE Engineering (한국어)](line-engineering.md) | 글로벌 메시징 트래픽을 실제로 감당하는 조직이 스토리지·비동기 처리·장애 대응을 어떻게 설계했는지 한국어로 공개한 엔지니어링 블로그. | 국내 규모에서는 잘 돌던 구조가 트래픽이 한 자릿수 배 늘면 무엇이 먼저 깨지는지 감이 없는 백엔드 엔지니어. |
 | [Lighthouse](lighthouse.md) | 성능·접근성·SEO·베스트프랙티스를 자동 감사하는 Chrome 도구의 공식 문서 — DevTools 패널로만 쓰던 것을 CLI·Node API로 돌려 CI 게이트로 만드는 방법이 여기 있다. | "이번 배포로 화면이 느려졌다"는 말이 나올 때마다 사후에야 측정하게 되는 프론트엔드/풀스택 개발자. |
 | [MDN Web Docs](mdn-web-docs.md) | HTML·CSS·JavaScript·Web API의 사실상 1차 레퍼런스 — 표준 문서가 규정한 동작과, 브라우저가 실제로 구현한 범위를 한 페이지에서 같이 보여준다는 점이 다른 자료와의 결정적 차이다. | 블로그 글을 보고 쓴 API가 특정 브라우저에서만 깨져 원인을 못 찾는 프론트엔드 개발자. |
 | [MDN — HTTP](mdn-http.md) | HTTP 메서드·상태 코드·헤더·캐싱·CORS·쿠키를 항목 단위로 정리한 레퍼런스 — RFC의 내용을 브라우저가 실제로 어떻게 처리하는지까지 붙여 놓은 것이 핵심 가치다. | "이 응답에 404를 줄지 409를 줄지", "이 캐시 헤더면 브라우저가 진짜 캐싱하는지" 매번 검색으로 때우는 API 개발자. |
+| [Next.js: Project structure and organization](nextjs-project-structure.md) | Next.js App Router 의 폴더·파일 규약(최상위 폴더, 라우팅 파일, 동적 세그먼트, route group (group), private folder _folder, 병렬·가로채기 라우트, 메타데이터 파일)을 한 페이지에 모은 공식 문서 — 폴더가 URL… | Next.js 로 커머스 프런트를 처음 세팅하거나 Pages Router 에서 App Router 로 옮기는 프런트엔드 개발자. |
 | [Node.js API 문서](node-js-api.md) | Node 런타임이 제공하는 모든 내장 모듈의 정본 레퍼런스이자, 각 API 옆에 붙은 Stability Index(0 Deprecated / 1 Experimental / 2 Stable / 3 Legacy) 로 "이 기능을 프로덕션에 써도 되는가"를 공식적으로 판정… | 블로그 글이나 LLM 답변에서 본 Node API 를 그대로 썼는데, 배포한 뒤에야 그게 실험적 기능이었거나 이미 deprecated 였음을 알게 되는 백엔드… |
+| [Nx Enforce Module Boundaries](nx-enforce-module-boundaries.md) | Nx 공식 문서로, 모노레포의 각 프로젝트에 scope:*, type:* 같은 태그를 붙이고 @nx/enforce-module-boundaries 린트 규칙의 depConstraints 로 "어떤 태그가 어떤 태그에만 의존할 수 있는가"를 선언해 import를 강제하… | Nx 모노레포에 고객용 앱, 어드민 앱, 공통 UI·유틸 라이브러리 수십 개가 쌓인 커머스 프런트엔드 팀의 리드. |
+| [Organizing a Go module](go-module-layout.md) | Go 공식 문서가 제시하는 모듈 레이아웃 지침으로, 단일 패키지에서 서버 프로젝트까지 프로젝트 유형별로 디렉터리 구조를 보이며 지원 패키지는 처음부터 internal/ 에 넣고, 명령은 cmd/ 아래 둔다는 두 가지만 권한다 — 흔히 "Go 표준 레이아웃"으로 인용되… | Go로 주문·정산 API 서버를 새로 시작하면서 폴더 구조를 어떻게 잡아야 할지 모르는 백엔드 개발자. |
 | [PEP 8 — Python Style Guide](pep-8-python-style-guide.md) | 파이썬 코드 스타일의 원전 — 들여쓰기·줄 길이·명명 규칙 같은 규칙보다, "어리석은 일관성은 소인배의 도깨비" 라는 첫머리처럼 규칙을 언제 어겨도 되는지를 명시했다는 점이 이 문서의 성격을 결정한다. | 파이썬 프로젝트에 린터·포매터를 도입하면서 "왜 이 설정인가"를 팀에 설명해야 하는 개발자. |
 | [PostgreSQL 공식 문서](postgresql.md) | "어떤 SQL 을 쓰면 되나"가 아니라 "이 SQL 이 동시에 열 번 들어오면 DB 가 정확히 무엇을 보장하는가"를 조문 수준으로 못 박아 둔 문서 — 격리 수준·락·플래너 장을 근거로 인용할 수 있는 몇 안 되는 DB 문서다. | 쿠폰 수량이 가끔 마이너스로 내려가거나 재고가 초과 차감되는데, 재현이 안 돼서 원인을 못 잡고 있는 커머스 백엔드 엔지니어. |
 | [Postmortem Culture: Learning from Failure](postmortem-culture-learning-from-failure.md) | 비난 없는 포스트모템(blameless postmortem)이라는 말의 원전 격 챕터 — "사람을 탓하지 말자"는 정서적 호소가 아니라, 비난이 들어오면 사실이 숨겨져 재발 방지가 실패한다는 인과로 논증한다. | 장애 회고 자리가 사실상 책임자 색출 자리가 되어버려서, 다음부터 아무도 실수를 먼저 말하지 않게 된 팀의 리드. |
@@ -58,6 +63,7 @@
 | [Refactoring Catalog (Martin Fowler)](refactoring-catalog.md) | 『Refactoring』 2판에 실린 리팩터링 기법들의 정본 목록 — 가치는 기법 설명 자체보다 각 변형에 붙은 이름이 팀의 공통 어휘가 된다는 데 있다. | 리뷰 코멘트가 "이 부분 좀 정리해주세요"에서 멈춰서, 작성자와 리뷰어가 서로 다른 걸 상상한 채 합의했다고 착각하는 테크리드. |
 | [Refactoring Guru — 리팩터링 & 디자인 패턴](refactoring-guru.md) | 코드 스멜 → 그 냄새에 대응하는 리팩터링 기법의 매핑을 예제 코드와 함께 제공하는 사이트 — 문제 쪽에서 출발해 해법을 찾게 되어 있고, 한국어 번역이 있어 주니어 교육 자료로 바로 쓰인다. | "이 코드 어딘가 이상한데 왜 이상한지 설명을 못 하겠는" 상태로 리뷰를 하고 있는 개발자, 혹은 주니어에게 그걸 가르쳐야 하는 사람. |
 | [Software Engineering at Google (무료 웹북)](software-engineering-at-google.md) | "프로그래밍은 코드를 만드는 일이고, 소프트웨어 엔지니어링은 시간에 통합된 프로그래밍이다"라는 한 문장을 축으로, 수십 년·수천 명 규모에서 무엇이 실제로 깨지는지를 정리한 책 — 전문 무료 공개. | 팀이 커지면서 개별 코드 품질은 그대로인데 전체 개발 속도만 느려지는 걸 목격한 테크리드·엔지니어링 매니저. |
+| [Spring Modulith Reference](spring-modulith.md) | Spring Boot 애플리케이션의 메인 패키지 바로 아래 하위 패키지 각각을 '애플리케이션 모듈'로 보는 규약을 세우고, 그 경계를 ApplicationModules.of(...).verify() 테스트로 검증하며, 모듈 간 통신을 이벤트로 바꾸고 모듈 구조를 문서… | Spring Boot 커머스 모놀리스에서 order, inventory, payment 패키지를 나눴지만 서로의 서비스·리포지토리를 마구 주입받아 결국 한 덩어… |
 | [The Rust Programming Book](the-rust-programming-book.md) | Rust 공식 입문서. 문법 나열이 아니라 소유권·빌림·수명이라는 하나의 개념 축을 중심으로 언어 전체를 다시 설명하는 구성이라, "왜 컴파일이 안 되는가"의 답이 대부분 여기 있다. | GC 언어(Java, TypeScript, Go)만 써 온 백엔드 엔지니어가 Rust 로 된 컴포넌트를 맡게 되어, 빌림 검사기와 매일 싸우고 있는 상황. |
 | [The Twelve-Factor App](the-twelve-factor-app.md) | 배포 가능한 서비스가 갖춰야 할 12가지 조건을 항목별로 못 박은 문서 — 설정은 환경변수로, 프로세스는 무상태로, 로그는 파일이 아니라 stdout 이벤트 스트림으로. 컨테이너 이전에 쓰였지만 오늘날 쿠버네티스 배포가 전제하는 규약과 거의 일치한다. | 신규 서비스를 부트스트랩하거나, 레거시 서비스를 컨테이너로 옮기려는데 "왜 이건 안 되는지" 매번 설명해야 하는 백엔드 엔지니어. |
 | [ThoughtWorks Technology Radar](thoughtworks-technology-radar.md) | ThoughtWorks 가 실제 고객 프로젝트에서 쓴 기술만 골라 Adopt / Trial / Assess / Hold 네 단계로 분류해 반기마다 내는 리포트 — 특히 "Hold" 항목이 유행하는 기술에 제동을 걸 때의 인용원이 된다. | 팀에서 "이거 도입하자"는 제안이 올라왔는데, 유행인지 성숙한지 판단할 근거가 없어 결정을 미루고 있는 테크리드. |
@@ -69,15 +75,17 @@
 | [Web Vitals (Core Web Vitals)](web-vitals.md) | Google 이 정한 사용자 체감 성능 지표의 정의 문서 — 로딩(LCP), 응답성(INP), 시각적 안정성(CLS) 세 축과 각각의 "좋음/개선 필요/나쁨" 임계값, 그리고 75번째 백분위수로 판정한다는 평가 규칙까지 명시돼 있다. | "화면이 느리다"는 CS 는 계속 들어오는데 성능 목표를 숫자로 정하지 못해 개선 작업의 완료 조건을 못 세우는 프런트엔드/풀스택 엔지니어. |
 | [Zod — 스키마 검증](zod.md) | 스키마를 한 번 정의하면 런타임 검증과 TypeScript 정적 타입을 동시에 얻는 라이브러리의 공식 문서 — 타입 선언과 검증 코드가 따로 놀며 어긋나는 문제를 "스키마가 곧 타입"으로 없앤다. 의존성이 없고 Zod 4 가 안정 버전이다. | 외부 API 응답이나 클라이언트 요청 본문을 인터페이스로 선언해 두고 as 로 캐스팅해 쓰다가, 필드가 빠지거나 타입이 달라졌을 때 한참 뒤 엉뚱한 곳에서 터지… |
 | [gRPC 공식 문서](grpc.md) | 서비스 정의(.proto)에서 클라이언트·서버 코드를 생성하는 RPC 프레임워크의 공식 문서 — 개념 설명과 언어별 퀵스타트·가이드가 같은 사이트에 붙어 있다. | 내부 서비스 간 호출이 JSON over HTTP 로 늘어나면서 스펙 불일치와 직렬화 비용이 문제가 되기 시작한 백엔드 엔지니어. |
+| [src layout vs flat layout](python-src-layout.md) | Python Packaging User Guide의 토론 문서로, import 패키지를 프로젝트 루트에 바로 두는 flat layout과 src/ 아래로 내리는 src layout의 동작 차이를 비교한다 — src layout의 가치는 "깔끔해 보이는 폴더"가 아니라… | 사내 공통 라이브러리(결제 SDK, 로깅 래퍼 같은)를 Python 패키지로 배포하는데, 로컬 테스트는 다 통과했는데 배포한 wheel을 설치하면 ModuleN… |
 | [컬리 기술블로그 (Hello World)](helloworld-kurly-com.md) | 주문·입고·물류처럼 재고와 배송이 물리 세계와 물려 있는 이커머스 도메인의 실무 글이 꾸준히 올라오는 한국어 기술블로그. | 외부 시스템(공급사·물류사)에서 들어오는 데이터를 우리 재고·주문 상태와 맞추다가 정합성이 깨지는 문제를 겪는 커머스 백엔드 엔지니어. |
 
-## 저장소 (19)
+## 저장소 (23)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
 | [Airbnb JavaScript Style Guide](airbnb-javascript-style-guide.md) | "왜 이렇게 써야 하는가"를 규칙마다 붙여 놓은 JS 스타일 가이드 — 그리고 사실상 대부분의 ESLint 설정이 조상으로 삼는 문서. | PR 리뷰가 매번 취향 싸움으로 번져서 중재 기준이 필요한 테크리드. |
 | [Awesome CTO](awesome-cto.md) | 기술 리더가 코드 밖에서 마주치는 문제 — 채용, 조직 구조, 아웃소싱 판단, 기술 부채 협상, 경영진 보고 — 를 주제별로 묶은 큐레이션 목록. | 개발은 잘하는데 갑자기 "팀을 맡아라"를 듣고, 처음 겪는 문제마다 검색어조차 모르는 신임 팀리드/테크리드. |
 | [Build Your Own X](build-your-own-x.md) | 데이터베이스, Git, Docker, 셸, 인터프리터, 웹 서버 등을 밑바닥부터 만들어보는 튜토리얼을 "무엇을 만드는가" 기준으로 분류한 목록. | 프레임워크는 능숙하게 쓰는데 그 아래 계층이 통째로 블랙박스라, 문제가 프레임워크 밖에서 터지면 손을 못 대는 3~5년차 개발자. |
+| [Code Maat](code-maat.md) | Adam Tornhill가 『Your Code as a Crime Scene』과 『Software Design X-Rays』의 분석을 위해 만든 명령줄 도구로, 소스 스냅샷이 아니라 버전 관리 로그에서 같이 바뀌는 모듈(logical coupling), 결합의 합(s… | 모듈 경계를 나눠 둔 커머스 백엔드에서, 주문 기능 하나를 고칠 때마다 결제·재고·알림 폴더의 파일까지 매번 함께 수정하게 되는 팀의 시니어. |
 | [Developer Roadmap](developer-roadmap.md) | 프론트엔드·백엔드·데브옵스·QA 등 직군별로 "무엇을 어떤 순서로 배우는가"를 노드 그래프로 그린 인터랙티브 로드맵 — 각 노드에 필수/권장 표시가 붙어 있는 게 핵심이다. | 신입 채용 JD 를 써야 하는데 "백엔드 개발자"에 무엇까지 요구할지 스스로도 정리가 안 된 팀리드, 또는 팀원의 성장 계획을 짜야 하는 사수. |
 | [Engineering Manager 자료 모음](engineering-manager.md) | 엔지니어링 매니저 역할에 관한 아티클·책·팟캐스트·뉴스레터를 주제별로 모아 둔 큐레이션 저장소 — 스스로 글을 쓰지 않고 남의 글을 잘 분류해 놓는 종류의 자료다. | 개발은 잘하는데 어제 처음 매니저가 된 사람. |
 | [Every Programmer Should Know](every-programmer-should-know.md) | 특정 언어·프레임워크와 무관하게 오래 유효한 기초 — 자료구조, 지연 시간 숫자, 분산 시스템, 보안, 심지어 협상과 UX까지 — 를 주제별 링크로 모아 둔 목록. | 프레임워크는 여럿 다뤄 봤는데 기초가 비어 있다는 자각이 생긴 3~5년차 엔지니어. |
@@ -88,10 +96,13 @@
 | [Interview_Question_for_Beginner](interview-question-for-beginner.md) | 네트워크·운영체제·자료구조·데이터베이스·언어 기초를 한국어로 질문-답변 형태로 정리한 저장소 — 면접 대비물로 유명하지만 실제 쓸모는 "설명할 때 쓸 한국어 표현이 이미 정리되어 있다"는 쪽이다. | 신입·주니어에게 기초 개념을 설명해야 하는데 매번 즉석에서 말을 지어내고 있는 사내 온보딩 담당자 또는 사수. |
 | [Node.js Best Practices](node-js-best-practices.md) | Node 백엔드의 관행을 프로젝트 구조·에러 처리·코드 스타일·테스트·프로덕션·보안·성능으로 나눠 항목 하나당 "한 줄 규칙 + 왜 + 코드 예시 + 반대 사례 + 출처 링크" 형식으로 못 박아 둔, Node 진영에서 가장 많이 인용되는 실무 가이드. | Node/TypeScript 로 커머스 백엔드를 굴리는데, 팀 컨벤션이 "이전 사람이 그렇게 짜서" 수준의 구전으로만 존재하는 상황의 리드 또는 시니어. |
 | [OpenSSF Scorecard](openssf-scorecard.md) | 오픈소스 저장소의 보안 관행(브랜치 보호, 리뷰 여부, 의존성 고정, CI 토큰 권한, 취약점 존재 등)을 자동으로 점검해 체크별 0~10 점과 근거를 내놓는 도구 — 코드의 품질이 아니라 "이 프로젝트가 안전하게 운영되고 있는가"를 잰다. | 서드파티 라이브러리 도입 심사를 맡았는데, 판단 기준이 "스타 수가 많으니 괜찮겠지" 밖에 없는 개발자 또는 보안 담당자. |
+| [Packwerk](packwerk.md) | Shopify가 만든 Ruby gem으로, Rails 앱 안의 폴더에 package.yml 을 두어 패키지로 선언하고 선언하지 않은 패키지의 상수를 참조하면 위반으로 잡는 정적 검사기다 — 단, 3.0부터 본체는 의존성 검사만 하고, 흔히 Packwerk의 핵심으로… | 수십 명이 같은 Rails 모놀리스에 커밋하는 커머스 백엔드에서, app/models 아래 수백 개 클래스가 서로를 아무렇게나 부르는 상황을 맡은 시니어. |
 | [Papers We Love](papers-we-love.md) | 컴퓨터 과학 논문을 주제별 디렉터리로 큐레이션한 저장소 — 개발자 커뮤니티(밋업)에서 실제로 읽고 발표한 논문들이 모여 있어서, 학술 검색과 달리 "현업 개발자에게 읽을 가치가 있다고 검증된" 필터가 한 겹 걸려 있다. | 어떤 문제에 대해 블로그 글이 아니라 원전을 읽어야 한다는 판단은 섰는데, 그 분야의 고전이 무엇인지 몰라 arXiv 검색에서 표류하는 개발자. |
 | [Professional Programming (charlax)](professional-programming.md) | "코드를 잘 짜는 법"이 아니라 조직 안에서 개발자로 제대로 일하는 법을 주제로 모은 읽을거리 큐레이션 — 설계·커뮤니케이션·문서·의사결정·경력이 알고리즘보다 앞에 온다. | 기술적으로는 문제없는데 협업에서 계속 마찰이 생기는 3~5년차 개발자를 코칭해야 하는 팀 리드. |
 | [Public APIs](public-apis.md) | 카테고리별로 정리된 무료·공개 API 목록 — 각 항목에 인증 방식·HTTPS 지원·CORS 허용 여부가 표로 붙어 있어서, 브라우저에서 바로 부를 수 있는 API 를 골라내는 데 쓰인다. | 아이디어를 검증할 프로토타입을 반나절 안에 만들어야 하는데, 진짜 백엔드나 실제 데이터가 아직 없는 개발자. |
 | [Standard README](standard-readme.md) | README에 무엇이 어떤 순서로 들어가야 하는지를 명세로 고정하고, 그걸 검사하는 린터와 뼈대를 만드는 제너레이터, 준수 배지까지 세트로 제공하는 저장소. | 사내 저장소가 수십 개로 늘었는데 README가 저마다 다른 상태인 팀의 관리자. |
+| [dependency-cruiser](dependency-cruiser.md) | JS/TS 프로젝트의 import 그래프를 실제로 따라가며 직접 쓴 규칙(forbidden·allowed·required)으로 검증하고 위반을 텍스트·그래프로 보고하는 도구 — 그래프 시각화는 부산물이고, 본업은 "어떤 의존이 금지인가"를 정규식 규칙으로 선언해 빌드… | Node/TypeScript 커머스 백엔드나 프런트 모노레포에서 순환 의존과 '아무 데서나 import' 가 쌓여 폴더 구조가 의미를 잃은 상황의 리드. |
+| [eslint-plugin-boundaries](eslint-plugin-boundaries.md) | 파일 경로 패턴으로 코드를 '요소(element)' 로 분류하고 요소 사이의 허용·금지 의존을 정책으로 선언해, 아키텍처 경계 위반을 ESLint 오류로 import 하는 그 순간 띄우는 플러그인 — v7 에서 규칙 체계가 boundaries/dependencies… | React/Next.js 커머스 프런트나 Node 백엔드에서 '기능별 폴더'·'레이어' 를 정했지만 아무도 지키지 않는 상황의 프런트 리드. |
 | [goQuality-dev-contents](goquality-dev-contents.md) | 국내 개발자들이 실제로 추천한 한국어 개발 콘텐츠를 주제별로 모은 큐레이션 저장소 — 번역서·강의 링크 나열이 아니라 블로그 글·발표 영상 단위로 골라 둔 목록이다. | 후배나 신규 입사자에게 "이거 읽어봐"를 던져야 하는데, 영어 원문 자료만 알고 있어서 실제로 안 읽히는 경험을 반복한 시니어. |
 | [tldr pages](tldr-pages.md) | man 페이지를 대체하지 않고 보완하는 커뮤니티 예제 모음 — 각 명령어당 실제로 자주 쓰는 사용례 몇 줄만 남긴다. 옵션 전수 설명 대신 "이 명령으로 이 일을 하려면 이렇게 친다"만 있다. | tar, find, openssl, docker 같은 명령을 몇 달에 한 번 쓰는데, 그때마다 옵션 조합이 기억나지 않아 매번 검색하는 엔지니어. |
 

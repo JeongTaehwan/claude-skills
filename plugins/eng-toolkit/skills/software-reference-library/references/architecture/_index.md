@@ -1,10 +1,10 @@
-# 설계 (architecture) — 51개
+# 설계 (architecture) — 64개
 
 시스템의 구조와 경계를 정한다
 
 각 줄의 파일을 열면 페르소나·사용 상황·핵심 주장·코드 예시가 있다. 링크만 필요하면 이 표로 충분하다.
 
-## 논문 (21)
+## 논문 (23)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
@@ -16,6 +16,7 @@
 | [Dynamo: Amazon's Highly Available Key-value Store](dynamo-amazon-s-highly-available-key-value-store.md) | "쇼핑 카트에 담기는 절대 실패하면 안 된다"는 비즈니스 요구에서 출발해 일관성을 의도적으로 포기하고 가용성을 산 시스템의 설계 기록 — 일관된 해싱, 벡터 클럭, 정족수(N/R/W), 힌티드 핸드오프를 실전 조합으로 묶은 원전이다. | "장애가 나도 절대 멈추면 안 되는 기능"과 "틀린 값이 보이면 안 되는 기능"이 한 시스템 안에 섞여 있는데, 둘을 같은 저장소 정책으로 다루고 있어 매번 어… |
 | [End-to-End Arguments in System Design](end-to-end-arguments-in-system-design.md) | 1984년 Saltzer·Reed·Clark의 논문으로, 어떤 기능은 그것을 완전히 보장할 수 있는 종단점에서만 온전히 구현될 수 있으므로 하위 계층에 두는 것은 (성능 최적화라면 몰라도) 정확성 근거가 되지 못한다는 원리 — 인터넷 설계 철학의 뿌리이자, "이 검증… | "이건 게이트웨이에서 검증하니까 서비스에서는 안 해도 된다"는 말을 리뷰에서 듣고 찜찜한데, 반박할 언어가 없는 백엔드 엔지니어. |
 | [Hints for Computer System Design](hints-for-computer-system-design.md) | Lampson이 실제 시스템(Alto, Bravo, SDS 940 등)을 만들며 얻은 설계 격언을 "기능성 / 속도 / 결함 감내" 축으로 분류하고, 각 격언마다 성공·실패 사례를 붙인 40년 묵은 리뷰 체크리스트다. | 설계 리뷰에서 "그건 별로다"라고 느끼는데 이유를 언어화하지 못하는 테크리드. |
+| [How Do Committees Invent? (Conway's Law)](conways-law.md) | 시스템을 설계하는 조직은 자기 조직의 커뮤니케이션 구조를 복제한 설계를 내놓을 수밖에 없다는, 이른바 콘웨이의 법칙의 원전 논문 — 시스템과 조직을 같은 그래프로 그려 둘 사이에 구조 보존 사상(homomorphism)이 있음을 보이고, 거기서 "설계 조직은 커뮤니케… | 모듈 경계를 깔끔하게 다시 그렸는데 몇 달 뒤 다시 팀 경계를 따라 코드가 엉키는 것을 본 엔지니어링 매니저나 아키텍트. |
 | [In Search of an Understandable Consensus Algorithm (Raft)](in-search-of-an-understandable-consensus-algorithm.md) | "이해 가능성"을 정확성·성능과 동급의 1차 설계 목표로 놓고 만든 합의 알고리즘 Raft의 원 논문 — etcd·Consul·TiKV·CockroachDB의 기반이며, 논문 자체가 잘 쓰인 기술 문서의 모범이다. | etcd나 Consul 위에서 리더 선출·분산 락을 쓰고 있는데, 장애가 났을 때 무슨 일이 벌어진 건지 설명하지 못하는 백엔드 엔지니어. |
 | [Kafka: a Distributed Messaging System for Log Processing](kafka-a-distributed-messaging-system-for-log-processing.md) | 로그(append-only 파티션 시퀀스)를 1급 추상으로 삼아, 기존 메시징 시스템이 당연시하던 브로커측 소비 상태 추적과 개별 메시지 확인을 버리고 처리량을 택한 Kafka의 원 논문. | 주문·결제 이벤트를 RabbitMQ 같은 큐로 흘리다가 재처리·순서·리텐션에서 계속 부딪히는 백엔드 엔지니어. |
 | [Large-scale cluster management at Google with Borg](large-scale-cluster-management-at-google-with-borg.md) | 쿠버네티스의 직접적 조상인 Google Borg의 설계와 10년 운영 경험 — 우선순위 기반 선점, 온라인 서비스와 배치 작업의 혼재 배치(co-location), 자원 회수(reclamation)로 클러스터 활용률을 끌어올린 방식을 실제 운영 데이터와 함께 공개한다. | k8s 클러스터 비용과 안정성 사이에서 결정을 내려야 하는 엔지니어 — 노드를 넉넉히 잡으면 돈이 새고, 조이면 피크에 파드가 죽는다. |
@@ -29,8 +30,9 @@
 | [The Byzantine Generals Problem](the-byzantine-generals-problem.md) | 참여자 일부가 단순히 죽는 게 아니라 임의로 거짓말하거나 상대에 따라 다른 말을 할 수 있을 때 합의가 가능한 조건을 규정한 논문. 서명이 없으면 배신자 m명을 견디려면 전체 참여자가 3m+1명 이상이어야 한다는 결과가 여기서 나온다. | 신뢰할 수 없는 참여자가 섞인 시스템을 설계하는 엔지니어. |
 | [The Google File System](the-google-file-system.md) | "저장소는 POSIX 파일시스템이어야 한다"는 전제를 버리고, 장비 고장이 상시 조건이고 워크로드가 대용량 순차 읽기와 append 위주라는 관측에서 다시 설계한 스토리지 — 응용과 파일시스템을 함께 설계하면 일관성 보장을 얼마나 낮춰도 되는지를 보여준다. | "실패는 예외 처리로 막으면 된다"는 가정 위에 저장·적재 파이프라인을 얹었다가, 노드가 죽을 때마다 데이터가 어긋나 매번 사람이 들어가 정합성을 맞추고 있는… |
 | [Time, Clocks, and the Ordering of Events in a Distributed System](time-clocks-and-the-ordering-of-events-in-a-distributed-syst.md) | "어느 쪽이 먼저 일어났는가"를 벽시계가 아니라 메시지 인과관계로 정의한 논문 — happened-before 라는 부분 순서를 세우고, 그것을 논리적 시계로 구현한 뒤, 전체 순서가 필요하면 임의의 규칙으로 남은 동시(concurrent) 사건들을 갈라야 한다는 것… | 타임스탬프로 사건 순서를 판정하는 코드를 짜 놓고, 서버 시계가 몇십 ms 어긋나는 바람에 상태가 거꾸로 덮이는 버그를 쫓고 있는 백엔드 엔지니어. |
+| [Why Google Stores Billions of Lines of Code in a Single Repository](why-google-stores-billions-of-lines-in-a-single-repository.md) | Google 이 거의 모든 코드를 하나의 저장소(Piper)와 트렁크 기반 개발로 운영하는 이유를 내부자가 정리한 CACM 기고 — 통합 버전·원자적 변경·대규모 리팩터링·다이아몬드 의존성 회피라는 이득과 함께 도구에 대한 지속 투자, 불필요한 의존성이 쉽게 생기는… | "구글도 모노레포 쓴다"는 말로 저장소 통합을 밀어붙이거나, 반대로 막으려는 플랫폼 팀·CTO. |
 
-## 공식문서 (20)
+## 공식문서 (23)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
@@ -45,7 +47,9 @@
 | [Designing Data-Intensive Applications (책 사이트)](designing-data-intensive-applications.md) | Martin Kleppmann이 복제·파티셔닝·트랜잭션·합의를 논문 수준의 근거를 달아 설명한 책의 공식 사이트 — 특정 DB 사용법 책이 아니라, 어떤 데이터 시스템을 고르든 반복되는 근본 트레이드오프를 다루는 책이고, 장별 참고문헌 목록 자체가 훌륭한 논문 색인이… | "읽기 부하가 커졌으니 리드 레플리카를 붙이자"까지는 갔는데, 붙이고 나서 주문 직후 조회에서 방금 만든 주문이 안 보이는 문제를 만난 백엔드 엔지니어. |
 | [Enterprise Integration Patterns](enterprise-integration-patterns.md) | Gregor Hohpe와 Bobby Woolf가 정리한 메시징 기반 통합 패턴 카탈로그(65개)의 공식 사이트 — 특정 브로커 제품에 매이지 않은 어휘로, 비동기 통합에서 반복적으로 마주치는 문제와 그 해법에 이름을 붙여 놓았다. | 주문 완료 후 처리를 큐로 빼면서 "일단 카프카에 넣고 컨슈머가 처리"까지는 만들었는데, 그 뒤부터 요구가 하나씩 늘 때마다 매번 처음부터 고민하고 있는 백엔드… |
 | [Event Storming](event-storming.md) | Alberto Brandolini가 고안한 워크숍 기법의 공식 사이트 — 도메인 전문가와 개발자를 한 방에 넣고 "일어난 일(도메인 이벤트)"을 과거형으로 벽에 붙여 시간순으로 늘어놓는 것만으로 업무 흐름·누락된 요구사항·모듈 경계를 동시에 드러내는 방법이다. | 기획서를 받아 구현했는데 배포 직전에야 "환불된 주문의 쿠폰은 어떻게 되나요?" 같은 질문이 튀어나오는 상황이 반복되는 개발자 또는 기획자. |
+| [Feature-Sliced Design](feature-sliced-design.md) | 프런트엔드 코드를 레이어(표준화된 7단, 그중 processes 는 폐지) → 슬라이스(비즈니스 도메인) → 세그먼트(기술 용도) 세 단계로 나누고, "모듈은 자기보다 엄격히 아래 레이어의 슬라이스만 import 한다"와 "같은 레이어의 슬라이스끼리는 서로 모른다"… | React·Vue 로 커머스 프런트를 3~10명이 함께 만드는데, components/ 와 utils/ 폴더가 비대해져 새 코드를 어디에 둬야 할지 매번 회의를… |
 | [Google Cloud Architecture Framework](google-cloud-architecture-framework.md) | Google Cloud의 Well-Architected Framework — 운영 우수성·보안/개인정보/컴플라이언스·신뢰성·비용 최적화·성능 최적화·지속가능성 여섯 필라로 클라우드 워크로드를 자가 진단하게 만든 공식 권고 모음이다. | 클라우드 설계안을 올렸는데 "리뷰 기준이 뭐냐"는 질문에 답하지 못한 백엔드 엔지니어. |
+| [Guide to Android app modularization](android-modularization-guide.md) | Android 공식 문서의 모듈화 가이드 — 코드베이스를 낮은 결합·높은 응집의 Gradle 모듈로 나누고 app / feature / data / common(core) / test 모듈 유형과 "feature 는 data 에 의존하고, feature 끼리는 app… | 단일 app 모듈 하나에 화면 수십 개가 들어 있는 커머스 Android 앱을 3~8명이 개발하는데, 빌드가 느리고 한 화면 수정이 엉뚱한 화면을 깨뜨리는 모바… |
 | [Hexagonal Architecture (Ports and Adapters)](hexagonal-architecture.md) | Alistair Cockburn이 직접 쓴 포트&어댑터 패턴 원문 — 애플리케이션을 사용자·다른 프로그램·자동 테스트·배치 스크립트가 동등하게 구동할 수 있게 만들고, 최종 런타임 장치와 DB로부터 격리된 채로 개발·테스트되게 하는 것이 의도라고 못 박는다. | 서비스 로직에 DB 접근과 외부 API 호출이 뒤엉켜 단위 테스트를 못 짜고 있는 백엔드 엔지니어. |
 | [Jepsen — 분산 시스템 안전성 분석](jepsen.md) | Kyle Kingsbury가 실제 DB·큐·코디네이션 서비스에 장애를 주입해 그들이 문서에서 주장한 일관성 보장을 실제로 깨뜨려 보고, 그 결과를 벤더 반응까지 포함해 공개한 검증 보고서 모음이다. | "이 DB는 스냅샷 격리를 지원한다"는 문서 한 줄을 근거로 재고·잔액 로직을 설계하려는 백엔드 엔지니어. |
 | [Kubernetes Concepts](kubernetes-concepts.md) | 쿠버네티스 공식 문서에서 "어떻게 쓰는가"가 아니라 "무엇이 왜 그렇게 동작하는가"를 다루는 개념 섹션 — 클러스터 구조, 워크로드, 네트워킹, 스토리지, 스케줄링·축출, 확장까지를 오브젝트 모델 관점에서 설명한다. | 서비스가 k8s 위에 올라가 있는데 인프라팀이 짜준 매니페스트를 복사해 쓰고 있는 백엔드 엔지니어. |
@@ -54,23 +58,32 @@
 | [adr.github.io](adr-github-io.md) | ADR(Architecture Decision Record)의 개념 정의·포맷 계보(Nygard, MADR, Y-Statement 등)·도구를 한곳에 모아 둔 커뮤니티 허브. "ADR을 어떻게 쓰는가"보다 "우리 팀은 어떤 포맷·도구로 굴릴 것인가"를 정하는 데 쓰인… | 기술 결정이 슬랙 스레드와 회의록에 흩어져, 반년 뒤 "이거 왜 이렇게 했지"가 매번 반복되는 팀의 리드. |
 | [arc42 — 아키텍처 문서 템플릿](arc42.md) | 아키텍처 문서에 무엇을 어떤 순서로 담을지를 12개 절로 고정해 둔 무료 템플릿(CC BY-SA 4.0). 도구도 방법론도 아니고, "빈칸을 채우면 문서가 되는" 목차 그 자체다. | "아키텍처 문서 좀 만들어 주세요"라는 요청을 받았는데 빈 페이지 앞에서 무엇부터 쓸지 몰라 멈춰 있는 엔지니어. |
 | [microservices.io — 패턴 카탈로그](microservices-io.md) | Chris Richardson이 정리한 마이크로서비스 패턴 지도. 각 패턴을 Context / Problem / Forces / Solution / Resulting Context(장점·단점·따라오는 문제) 형식으로 써서, 패턴을 고르면 어떤 새 문제가 생기는지까지… | 서비스를 나눈 뒤 트랜잭션과 조회가 깨진 커머스 백엔드 엔지니어. |
+| [monorepo.tools](monorepo-tools.md) | 모노레포를 "여러 개의 구분된 프로젝트가 잘 정의된 관계로 한 저장소에 있는 것"으로 정의하고 모노레포 ≠ 모놀리스를 못 박은 뒤, Bazel·Gradle·Lage·Lerna·moon·Nx·Pants·Rush·Turborepo 를 같은 기능 축(캐싱, 영향 범위 감지… | 프런트 앱 2개, 백엔드 서비스 몇 개, 공통 UI·타입 패키지를 각각 다른 저장소로 굴리다가 공통 패키지 버전 맞추기에 지친 플랫폼·프런트 리드. |
 
-## 저장소 (6)
+## 저장소 (8)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
 | [Architecture Decision Records (ADR) 모음](architecture-decision-records.md) | ADR 템플릿(Nygard, MADR, Y-Statement, Tyree-Akerman 등)과 실제 결정 예시, 도구를 한 저장소에 모아 둔 것 — 바로 복사해서 쓸 수 있는 파일이 있다는 점이 개념 허브와의 차이다. | "기술 선택을 기록으로 남기자"까지는 정했지만 첫 ADR을 어떤 양식으로 쓸지에서 멈춘 엔지니어. |
 | [Awesome Scalability](awesome-scalability.md) | Netflix·Uber·LinkedIn·Airbnb 등이 자사 엔지니어링 블로그에 공개한 확장성·가용성·성능 사례 글을 주제별로 분류해 놓은 초대형 링크 인덱스 — 개념 설명이 아니라 "실제로 겪고 이렇게 풀었다"는 1차 자료 모음이다. | 설계안을 제안했는데 "다른 회사는 어떻게 하고 있냐"는 질문에 막힌 엔지니어. |
+| [Bulletproof React](bulletproof-react.md) | React 애플리케이션 구조를 문서(docs/)와 동작하는 예제 앱(React Vite, Next.js App Router, Next.js Pages Router)으로 제시하는 저장소 — 스스로를 템플릿·보일러플레이트가 아니라 의견이 담긴 가이드라고 규정하고, 핵심… | React SPA 를 몇 명이 1~2년 키웠더니 components/ 에 수백 개 파일이 쌓이고, 어떤 컴포넌트가 어느 화면 전용인지 아무도 모르는 프런트엔드… |
 | [DDD Starter Modelling Process](ddd-starter-modelling-process.md) | DDD를 "어디서부터 시작하느냐"에서 막히는 사람을 위해 DDD Crew가 만든 9단계 순서도 — 이론 설명이 아니라, 각 단계에서 어떤 워크숍을 돌리고 어떤 산출물을 만드는지를 링크로 연결한 실행 절차다. | "우리 서비스 도메인이 복잡해졌으니 DDD로 정리하자"는 합의까지는 됐는데, 다음 주 월요일에 팀을 모아놓고 정확히 뭘 시켜야 할지 모르겠는 테크리드. |
 | [Event Storming 용어 치트시트](event-storming-2.md) | Event Storming 워크숍에서 쓰는 포스트잇 색깔별 의미(도메인 이벤트·커맨드·액터·정책·읽기모델·외부시스템·핫스팟)와 배치 규칙을 한 장으로 정리한 DDD Crew의 치트시트다. | Event Storming을 처음 진행하는 퍼실리테이터 — 방법론은 읽었는데 실제로 벽에 무엇을 붙이라고 말해야 할지 모르는 백엔드 리드. |
 | [Jepsen 도구](jepsen-2.md) | Jepsen 분석 보고서를 만들어낸 테스트 프레임워크 본체 — 클러스터를 띄우고, 네트워크 파티션·프로세스 정지·클럭 스큐를 주입하고, 관찰된 연산 히스토리를 선형화 가능성 기준으로 검사한다. | 사내에서 자체 분산 저장소나 분산 락·아웃박스 구현을 만들었고, "장애 상황에서도 정말 맞나"를 증명해야 하는 엔지니어. |
+| [Modular Monolith with DDD](modular-monolith-with-ddd.md) | 모놀리스 하나 안에서 모듈을 어떻게 격리하는지를 장난감이 아닌 프로덕션 수준의 전체 애플리케이션(모임 관리 도메인)으로 보여주는 .NET 참조 구현 — 모듈 간 직접 호출 금지·통합 이벤트로만 비동기 통신·모듈별 DB 스키마·NetArchTest 아키텍처 테스트로 경… | 모놀리스를 마이크로서비스로 쪼개기엔 이르지만, 모듈 경계가 무너져 주문 코드가 결제 테이블을 직접 JOIN 하고 공통 패키지가 비대해지는 것을 막고 싶은 백엔드… |
 | [System Design Primer](system-design-primer.md) | 캐시, 샤딩, 로드밸런싱, 복제, CAP, 큐 같은 대규모 시스템 설계 개념을 그림과 함께 한곳에 정리한 최대 규모의 오픈 자료. 면접 대비물로 유명하지만 팀 용어 정렬용 공용 어휘집으로 더 값이 나간다. | 트래픽이 늘어 대응책을 논의하는데 팀원마다 다른 층위의 이야기를 하고 있어 회의가 안 좁혀지는 백엔드 엔지니어. |
 
-## 블로그 (4)
+## 블로그 (10)
 
 | 자료 | 한 줄 | 이런 사람이 든다 |
 |---|---|---|
 | [ByteByteGo — 시스템 디자인](bytebytego.md) | Alex Xu의 『System Design Interview』에서 출발한 상용 학습 플랫폼 — 시스템 설계를 "면접에서 45분 안에 설명 가능한 형태"로 압축한 시각 자료가 본체이고, 무료로 열려 있는 건 주로 뉴스레터와 미리보기 챕터다. | 이직을 준비하면서, 매일 만지는 주문·결제 시스템은 설명할 수 있는데 "URL 단축기를 설계해보세요" 같은 백지 상태 질문 앞에서 어디부터 말해야 할지 몰라 얼… |
+| [Deconstructing the Monolith: Designing Software that Maximizes Developer Produc…](deconstructing-the-monolith-shopify.md) | 천 명 넘는 개발자가 10년 넘게 키운 Shopify 의 Rails 모놀리스를 마이크로서비스로 쪼개지 않고 배포 단위는 하나로 둔 채 도메인 경계만 강제하는 모듈러 모놀리스로 바꾼 "Componentization" 기록 — 코드를 models/views/control… | 수년 묵은 Rails·Django·Spring 모놀리스에서 "이제 MSA로 가야 하나"를 고민하는 커머스 백엔드 테크리드. |
 | [Martin Fowler — Software Architecture Guide](martin-fowler-software-architecture-guide.md) | "아키텍처란 무엇인가"와 "왜 내부 품질에 돈을 써야 하는가"를 정면으로 다루는 큐레이션 허브. 개별 패턴이 아니라 아키텍처라는 활동 자체에 대한 글 모음이다. | "리팩터링/구조 개선에 왜 스프린트를 쓰느냐"는 질문에 답을 못 하고 있는 테크리드. |
 | [Martin Fowler — bliki](martin-fowler-bliki.md) | 현대 아키텍처 용어(Microservices, CQRS, Strangler Fig, Feature Toggle, Blue-Green Deployment 등) 상당수의 1차 정의가 실린 사전 겸 블로그로, "블로그 + 위키" 형식이라 글이 계속 갱신된다. | 같은 단어를 서로 다른 뜻으로 쓰면서 설계 회의가 공전하는 백엔드 엔지니어 / 테크리드. |
+| [Monolith First](monolith-first.md) | 성공한 마이크로서비스 사례는 거의 다 너무 커진 모놀리스를 쪼갠 것이고 처음부터 마이크로서비스로 지은 사례는 대부분 곤경에 빠졌다는 관찰에서 출발해, 나중에 마이크로서비스가 필요할 것 같더라도 새 애플리케이션은 모놀리스로 시작하라고 권하는 bliki 글 — 저자 스스… | 신규 커머스 서비스를 시작하는 3~6명 팀이, 아직 사용자도 없는데 주문·결제·회원·상품을 처음부터 서비스 네 개로 나눌지 고민하는 상황. |
 | [Patterns of Enterprise Application Architecture — 카탈로그](patterns-of-enterprise-application-architecture.md) | Martin Fowler의 PoEAA(2002) 책에 실린 패턴들의 온라인 요약 카탈로그. Active Record, Data Mapper, Repository, Unit of Work, Optimistic Offline Lock 등 오늘날 ORM 프레임워크 안에 이… | ORM이 왜 이렇게 동작하는지 몰라 프레임워크와 싸우고 있는 백엔드 엔지니어. |
+| [Presentation Domain Data Layering](presentation-domain-data-layering.md) | 프레젠테이션·도메인·데이터 접근 3층 분리를 Martin Fowler가 여전히 권한다고 밝히면서도, 그 분리는 작은 단위에서만 써야 하고 시스템이 커지면 최상위는 도메인 지향 모듈로 나누고 각 모듈 안을 레이어로 나누라고 못 박는 짧은 bliki 글 — 레이어별로 팀… | 최상위 폴더가 web / service / repository (혹은 프레임워크가 만든 view / model / data) 인 채로 3년째 커진 백엔드나 풀스… |
+| [Screaming Architecture](screaming-architecture.md) | 건물 설계도가 "집"이나 "도서관"을 외치듯 애플리케이션의 최상위 디렉터리와 패키지는 Rails·Spring 같은 프레임워크가 아니라 그 시스템의 유스케이스를 외쳐야 한다는 짧은 블로그 글 — 웹조차 아키텍처가 아니라 전달 메커니즘(detail)이라고 본다. | 저장소를 처음 연 신규 입사자가 최상위에서 controllers / models / views / services / utils 만 보고, 이게 커머스인지 예약… |
+| [The Clean Architecture](the-clean-architecture.md) | Robert C. Martin이 헥사고날·오니언·스크리밍·DCI·BCE를 하나의 동심원 그림으로 묶고, 그 전부를 작동시키는 규칙은 단 하나 — 소스 코드 의존성은 안쪽으로만 향한다(The Dependency Rule) — 라고 정리한 짧은 블로그 글. 원이 네 개라… | "클린 아키텍처로 가자"고 정했더니 폴더가 entities / usecases / adapters / frameworks 로 바뀌었을 뿐 의존성 방향은 그대로인… |
+| [Vertical Slice Architecture](vertical-slice-architecture.md) | 레이어드·오니언·클린을 모두 "레이어"라는 같은 범주로 묶고, 그 대신 요청 하나를 단위로 프런트부터 백까지의 관심사를 한 슬라이스에 모으며, 슬라이스 간 결합은 최소화하고 슬라이스 내 결합은 최대화하라고 주장하는 짧은 글 — 공유 리포지토리·서비스 추상화는 대부분… | 기능 하나 추가할 때마다 Controller → Service → Repository → DTO → Mapper 를 전부 새로 만들고, "Controller는… |
