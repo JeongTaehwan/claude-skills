@@ -19,4 +19,5 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 - 요구사항은 한 줄에 하나, 참/거짓을 판정할 수 있는 문장. ID `R-XX-NN`.
 - 제안은 `[제안]` + 한 줄 이유, 사람이 정할 것은 `[미정]` + BLOCKER/LATER + 구체적으로 막히는 증상.
 - 다른 역할의 파일(`docs/ux/`, `docs/architecture.md`, `docs/test-cases.md`, `docs/decisions.md`)은 쓰지 않는다. 넣을 것은 보고에 "제안"으로.
+- 질문 답을 반영할 때 남은 `[미정]` 마다 `[제안]` 답 한 줄을 붙인다 — 프로토타이퍼가 그 답으로 화면을 그린다.
 - 끝나면 300단어 이내 보고: 바꾼 파일, BLOCKER/LATER 개수, 가장 자신 없는 가정 3개.

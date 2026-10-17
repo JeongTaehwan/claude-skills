@@ -1,3 +1,4 @@
 {"prompt": "회의실 예약 앱 새로 만들고 싶어. 기획부터 같이 하자.", "should_trigger": true, "expect": ["structure\\.md|구조"], "forbid": ["질문 1[0-5]"]}
 {"prompt": "이 레포 전체 분석해서 로드맵 짜줘.", "should_trigger": true, "expect": ["analysis\\.md|repo-map"], "forbid": []}
 {"prompt": "이 함수 버그 고쳐줘.", "should_trigger": false, "expect": [], "forbid": ["structure\\.md"]}
+{"prompt": "질문 답 다 했어. 이제 어떻게 돼?", "should_trigger": true, "expect": ["prototype/|프로토타입", "requirements\\.md|기획서"], "forbid": ["프로토타입도 만들까요"]}

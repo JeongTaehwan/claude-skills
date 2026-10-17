@@ -99,20 +99,26 @@ def stage(root):
             ("AGENTS.md (검증 AI)", os.path.exists(os.path.join(root, "AGENTS.md")))]
     for k, v in rows:
         print(f"  {k:<20} {v}")
+    proto = os.path.isdir(os.path.join(root, "prototype"))
     if code and not has("analysis.md"):
         nxt = "0 기존 프로젝트 분석 (analyst)"
     elif not has("structure.md"):
         nxt = "1 구조 (planner)"
     elif not os.path.exists(req):
         nxt = "2 기획서 초안 (planner) — 질문은 초안이 생긴 뒤"
+    elif "승인 완료" not in status and not proto:
+        nxt = ("2 질문 모드 → 끝나면 기다리지 않고 3 기획서 반영 ∥ 프로토타입 (planner ∥ prototyper)"
+               if (blocker or later) else "3 기획서 반영 ∥ 프로토타입 (planner ∥ prototyper)")
     elif "승인 완료" not in status:
-        nxt = "2 질문 모드 → 사람 승인 대기" if (blocker or later) else "2 사람 승인 대기"
+        nxt = "3 사람이 프로토타입을 눌러 보고 승인 — 피드백이 오면 기획서 먼저, 프로토타입은 그다음"
+    elif not proto:
+        nxt = "3 프로토타입 (승인본 기준, prototyper) — 승인은 났지만 눌러 본 적이 없다"
     elif not has("roadmap.md"):
-        nxt = "3 로드맵·투두 (planner → scribe)"
+        nxt = "4 로드맵·투두 (planner → scribe)"
     elif blocker:
-        nxt = f"5 불가 — BLOCKER {blocker}건. 4 프로토타입만 가능"
+        nxt = f"5 불가 — BLOCKER {blocker}건"
     else:
-        nxt = "4 프로토타입 또는 5 기능 구현 (role-isolation-pipeline)"
+        nxt = "5 기능 구현 (role-isolation-pipeline)"
     print(f"\n  다음 단계: {nxt}")
 
 
