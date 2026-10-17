@@ -4,7 +4,7 @@ url: https://alistair.cockburn.us/hexagonal-architecture/
 domain: architecture
 type: 공식문서
 lang: en
-concepts: [architecture-patterns]
+concepts: [architecture-patterns, layering-dependency-rule]
 ---
 
 # Hexagonal Architecture (Ports and Adapters)

@@ -7,9 +7,9 @@
 | 층 | 무엇 | 어디 |
 |---|---|---|
 | 흐름 | 구조 → 기획서 → 프로토타입 → 구현, 기존 프로젝트는 분석부터 | `project-flow` |
-| 판단 | 구현 전 설계, 역할 분리 구현, 환경 차이, 저속 네트워크, 브랜치 동기화·MR 충돌 | 스킬 6개 |
+| 판단 | 구현 전 설계, 프로젝트 구조·모듈 경계, 역할 분리 구현, 환경 차이, 저속 네트워크, 브랜치 동기화·MR 충돌 | 스킬 7개 |
 | 운영 | 보안·인프라·마케팅 최소선 | `security-baseline` · `infra-baseline` · `marketing-growth` |
-| 근거 | 10개 도메인 1차 자료 512개, 전부 코드 예시 포함. 개념 139개·관계 5종의 온톨로지 | `software-reference-library` |
+| 근거 | 10개 도메인 1차 자료 536개, 전부 코드 예시 포함. 개념 147개·관계 5종의 온톨로지 | `software-reference-library` |
 | 분업 | 역할마다 모델이 고정된 에이전트 9개 | `plugins/eng-toolkit/agents/` |
 | 강제 | 판단 없이 막을 규칙은 훅으로 | `hooks/` |
 | 수명 | 사용 횟수 집계, 스킬 자동 생성, 모델별 0 베이스 가지치기 | `skill-forge` · `profiles/` · `evals/` |
@@ -20,7 +20,7 @@
 ## 작성 규약 — 모든 스킬이 지킨다
 
 - **페르소나** — 본문 첫 절. 너는 누구 / 상대는 누구 / 무엇을 중시
-- **코드 예시** — 절차를 말로만 쓰지 않는다. 레퍼런스 512개도 전부
+- **코드 예시** — 절차를 말로만 쓰지 않는다. 레퍼런스 536개도 전부
 - **가볍게** — description 350자, 전체 합 4,200자, 본문 9,000자 상한. 단계별 상세는 `references/` 에 주제 하나씩
 - **판단 없는 금지는 훅으로**
 
@@ -70,8 +70,30 @@ python3 plugins/eng-toolkit/skills/skill-forge/scripts/lint_skills.py . --budget
 
 핵심은 **분석을 출력하지 않는 것**이다. 정상 동작은 코드만 나오고 설명이 없는 상태다.
 
+### `project-structure` (스킬)
+프로젝트·모듈 구조를 정하거나 고치는 절차. 새 골격, 새 최상위 모듈, 두 모듈 사이의 첫 import, 순환·비대한 공통 폴더·"어디 둬야 하나"에서 발동하고, 기존 모듈 안에 파일을 하나 더 두는 일반 구현은 지나간다.
+
+핵심은 **경계는 강제되지 않으면 사라진다**는 것이다. 그래서 산출물은 항상 *트리 + 의존 규칙 + 그 규칙을 CI 에서 깨지게 하는 설정* 세 가지다. 결정 순서는 최상위 축(무엇이 함께 바뀌는가) → 의존 방향(DAG·안정적인 쪽으로·기능끼리 금지) → 공개 표면 → 공통 모듈의 승격 조건 → 경계를 단단하게 하는 4단계(디렉터리 → lint → 패키지 → 서비스)다.
+
+```
+SKILL.md                    절차와 출력 계약
+references/layouts.md       스택별 기본 골격 (React·Next.js·Nest·Spring·FastAPI/Django·Go·모노레포·Android)
+references/enforcement.md   스택별 강제 도구와 최소 설정, 기존 위반을 얼리는 법
+references/smells.md        증상 → 확인 → 원인 → 처방 진단표
+scripts/structure_scan.py   import 그래프와 git 이력으로 구조를 잰다
+```
+
+`structure_scan.py` 는 JS/TS(tsconfig 경로 별칭·워크스페이스 패키지 포함)·Python·Go·Java/Kotlin 의 import 를 읽어 **판단을 바꾸는 신호만** 낸다 — 모듈 사이 순환과 끊을 간선, 공통 모듈이 기능을 import 하는 곳, index 를 우회한 내부 import, 한 모듈만 쓰는 공통 파일, 그리고 git 이력의 변경 결합(커밋당 모듈 수, import 없이 같이 바뀌는 쌍). `.structure-rules` 에 deny 규칙을 적고 `--fail-on cycle,rule` 로 CI 에 걸 수도 있다.
+
+```bash
+python3 plugins/eng-toolkit/skills/project-structure/scripts/structure_scan.py ../shop-api
+python3 plugins/eng-toolkit/skills/project-structure/scripts/structure_scan.py . --root src --depth 2
+```
+
+근거 자료는 스킬 안에 두지 않고 `software-reference-library` 의 설계·개발 도메인(클린 아키텍처, Screaming Architecture, Vertical Slice, Conway, 모듈러 모놀리스, FSD, 모노레포, dependency-cruiser·ArchUnit·import-linter·Spring Modulith·packwerk 등 24개)을 지목한다.
+
 ### `software-reference-library` (스킬)
-기획·설계·개발·디자인·QA·테스트·성능·보안·인프라·마케팅 **10개 도메인의 레퍼런스 512개**. 링크 목록이 아니라 **항목마다 파일 하나**이고, 각 파일에 이런 게 들어 있다.
+기획·설계·개발·디자인·QA·테스트·성능·보안·인프라·마케팅 **10개 도메인의 레퍼런스 536개**. 링크 목록이 아니라 **항목마다 파일 하나**이고, 각 파일에 이런 게 들어 있다.
 
 - **페르소나** — 누가 어떤 상황에서 이걸 드는가. 자료 이름을 몰라도 처한 상황으로 찾게 하는 검색 키다
 - **이럴 때 연다 / 이럴 땐 아니다** — 뒤엣것이 오용을 막는다. 인접한 다른 자료를 정확히 지목한다
@@ -82,7 +104,7 @@ python3 plugins/eng-toolkit/skills/skill-forge/scripts/lint_skills.py . --budget
 references/<도메인>/<slug>.md    항목 하나
 scripts/find.py                  찾는 도구 — Claude 는 이걸 쓴다
 references/<도메인>/_index.md    도메인 전체 표 (사람이 GitHub 에서 훑는 용)
-INDEX.md                         512개 전체 목록 (사람용)
+INDEX.md                         536개 전체 목록 (사람용 — build_index.py 가 만든다)
 ```
 
 ### 색인은 읽지 않고 검색한다
@@ -95,7 +117,10 @@ python3 scripts/find.py "리뷰가 취향 싸움이 된다"          # 상황으
 python3 scripts/find.py "느린 3G 이미지" --domain performance
 python3 scripts/find.py --show <slug> --only 인용,아니다   # 필요한 절만
 python3 scripts/find_test.py                              # 검색 품질 회귀
+python3 scripts/build_index.py                            # 항목 추가 뒤 사람용 색인 다시 만들기
 ```
+
+사람용 색인(`_index.md`, `INDEX.md`)은 손으로 고치지 않는다 — `build_index.py` 가 항목 파일에서 만들고 `verify.sh` 가 어긋남을 잡는다.
 
 Claude 는 설치본 경로(`~/.claude/skills/software-reference-library/scripts/find.py`)로 부른다 — 세션의 작업 디렉터리는 사용자 프로젝트라 상대경로가 안 통한다.
 
@@ -106,17 +131,17 @@ Claude 는 설치본 경로(`~/.claude/skills/software-reference-library/scripts
 | 항목 2건 | 4,454 | 1,196 (발췌) |
 | **합계** | **10,547 ~ 31,478** | **2,487** |
 
-항목이 512개에서 2000개가 돼도 이 값은 그대로다. **스크립트가 파일 1.4MB 를 훑는 건 공짜이고, Claude 가 읽는 것만 비싸다.**
+항목이 536개에서 2000개가 돼도 이 값은 그대로다. **스크립트가 파일 1.4MB 를 훑는 건 공짜이고, Claude 가 읽는 것만 비싸다.**
 
-색인 파일을 따로 만들지 않고 항목 512개를 매번 직접 읽는다. 밀리초 단위이고, 무엇보다 **색인이 본문과 어긋날 수 없다** — 항목을 추가해도 다시 만들 것이 없다.
+색인 파일을 따로 만들지 않고 항목 536개를 매번 직접 읽는다. 밀리초 단위이고, 무엇보다 **색인이 본문과 어긋날 수 없다** — 항목을 추가해도 다시 만들 것이 없다.
 
 한국어는 조사가 붙어 정확히 일치하지 않는다("리뷰가" vs "리뷰를"). 정확히 → 조사 떼고 → 앞부분만 순서로 낮춰가며 맞추고, 흔한 단어는 문서빈도로 깎는다. 다만 **드문 것과 의미 있는 것은 다르다** — "막고"(15/512)나 "싶다"(64/512)는 드물어서 오히려 가점을 받고 정작 "멱등"을 눌렀다. 그래서 서술어는 질의에서 걸러낸다.
 
 | 도메인 | 개수 | 다루는 것 |
 |---|---|---|
 | 기획 planning | 48 | 디스커버리, PRD, 우선순위, 지표, 실험 |
-| 설계 architecture | 51 | 패턴, 분산 시스템, DDD, 고전 논문 |
-| 개발 development | 83 | 리뷰, 리팩터링, 언어, 데이터베이스, 국내 테크블로그 |
+| 설계 architecture | 64 | 패턴, 분산 시스템, DDD, 고전 논문, 프로젝트 구조·모듈 경계·모노레포 |
+| 개발 development | 94 | 리뷰, 리팩터링, 언어, 데이터베이스, 국내 테크블로그, 경계 강제 도구·언어별 레이아웃 |
 | 디자인 design | 29 | 디자인 시스템, 접근성, 타이포, UX 원칙 |
 | QA qa | 30 | 전략, 탐색적 테스트, 표준, 프로세스 |
 | 테스트 testing | 53 | 도구, 테스트 코드, 기법, 자동화 |
@@ -129,7 +154,7 @@ QA는 *무엇을 어떻게 보증할지 정하는 것*, 테스트는 *실제로 
 
 ### 온톨로지 — 레퍼런스를 그래프로
 
-512개 항목을 낱장이 아니라 **종류·관계·개념**으로 묶었다. 정의는 `ontology.json` 한 곳, 관계 데이터는 각 항목 파일이 갖는다.
+536개 항목을 낱장이 아니라 **종류·관계·개념**으로 묶었다. 정의는 `ontology.json` 한 곳, 관계 데이터는 각 항목 파일이 갖는다.
 
 | 관계 | 어디에 적나 | 수 |
 |---|---|---:|
@@ -149,7 +174,7 @@ python3 scripts/ontology.py related the-testing-trophy  # 대신 쓸 것·반대
 python3 scripts/find.py "깨지는 테스트" --concept flaky-tests
 ```
 
-개념 어휘는 opus 가 512개의 제목·요약을 보고 짰고, 배정은 sonnet 4개가 나눠 했다. 배정이 애매했던 항목(학습 큐레이션·기업 블로그처럼 주제가 아니라 출처 종류로 묶이는 것)은 넓은 개념에 붙어 있다. 고칠 때는 파일의 `concepts:` 줄만 바꾸면 된다.
+개념 어휘는 opus 가 512개의 제목·요약을 보고 짰고, 배정은 sonnet 4개가 나눠 했다. 배정이 애매했던 항목(학습 큐레이션·기업 블로그처럼 주제가 아니라 출처 종류로 묶이는 것)은 넓은 개념에 붙어 있다. 프로젝트 구조 자료 24개를 더하면서 `project-structure`·`boundary-enforcement` 와 그 하위 6개가 추가됐다. 고칠 때는 파일의 `concepts:` 줄만 바꾸면 된다.
 
 ### `env-divergence` (스킬)
 같은 코드가 환경·배포마다 **에러 없이 조용히** 다른 값으로 돌 때 원인을 찾는 절차. "STAGE에선 되는데 운영에선 안 돼", "앱에선 보이는데 웹에선 안 보여" 같은 상황용.
@@ -176,7 +201,7 @@ python3 scripts/find.py "깨지는 테스트" --concept flaky-tests
 develop 대상 MR 충돌 시 `-dev` 브랜치를 만들어 develop 을 병합·해결하고 새 MR 을 올리는 절차. main 기준 브랜치를 develop 에 올릴 때 반복되는 상황용.
 
 ### `verify.sh` (검증)
-저장소 자체의 검증 — 파이썬·셸·JSON 구문, 측정 로그 형식, 레퍼런스 검색 품질 회귀. 아래 Stop 훅이 이 파일을 찾아서 돌린다. **훅이 응답마다 부르므로 속도가 곧 매 턴의 지연이다** — 검사를 python3 몇 번으로 모으고 `find.py` 의 비교를 항목·단어별 한 번 계산으로 바꿔, 스킬 규약·가드 훅 검사를 더하고도 이전보다 3배 빠르다(같은 컴퓨터 기준 1.77초 → 0.56초).
+저장소 자체의 검증 — 파이썬·셸·JSON 구문, 측정 로그 형식, 레퍼런스 검색 품질 회귀, 레퍼런스 색인 동기화, 구조 스캐너 회귀. 아래 Stop 훅이 이 파일을 찾아서 돌린다. **훅이 응답마다 부르므로 속도가 곧 매 턴의 지연이다** — 검사를 python3 몇 번으로 모으고 `find.py` 의 비교를 항목·단어별 한 번 계산으로 바꿔, 스킬 규약·가드 훅 검사를 더하고도 이전보다 3배 빠르다(같은 컴퓨터 기준 1.77초 → 0.56초). 색인 동기화(0.1초)와 구조 스캐너 회귀(0.2초, 대부분 git 픽스처 커밋)가 그 위에 붙는다.
 
 ### `verify-on-stop.sh` (훅)
 Claude 가 응답을 마칠 때(Stop) 프로젝트의 `verify.sh` 를 돌리고, **실패했을 때만** 실패한 단계와 에러 요약을 되먹이는 훅. 통과하면 아무것도 출력하지 않는다 — Stop 훅의 exit 0 은 stdout 이 컨텍스트에 안 들어가므로 침묵이 토큰을 한 톨도 안 쓴다. 검증 스크립트가 없는 프로젝트에서는 아무 일도 하지 않는다.
@@ -228,7 +253,7 @@ git clone https://github.com/JeongTaehwan/claude-skills.git
 cd claude-skills && ./sync.sh
 ```
 
-또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 12개와 에이전트 9개가 따라온다(플러그인 에이전트는 `eng-toolkit:planner` 처럼 불린다). 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
+또는 Claude Code 마켓플레이스로 등록해서 쓸 수도 있다 — 이 저장소가 `.claude-plugin/marketplace.json`을 갖고 있으므로 마켓플레이스로 추가한 뒤 `eng-toolkit` 플러그인을 설치하면 스킬 13개와 에이전트 9개가 따라온다(플러그인 에이전트는 `eng-toolkit:planner` 처럼 불린다). 이 경로에서도 `memory/CLAUDE.md`는 별도로 복사해야 한다.
 
 ### 도커로
 

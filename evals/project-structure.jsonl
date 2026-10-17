@@ -1,0 +1,3 @@
+{"prompt": "Next.js + TypeScript 로 쇼핑몰 프런트 새로 시작하려고 해. 폴더 구조 어떻게 잡을까? 상품·장바구니·주문 기능이 있어.", "should_trigger": true, "expect": ["features/|feature", "(?i)dependency-cruiser|eslint-plugin-boundaries|no-restricted|boundaries"], "forbid": ["마이크로서비스"]}
+{"prompt": "src/shared/utils.ts 가 2천 줄이 넘었고 여기 고치면 아무 데서나 깨져. 어떻게 정리하지?", "should_trigger": true, "expect": ["(?i)한 (곳|모듈)|내린다|잎|leaf|structure_scan"], "forbid": ["utils2\\.ts"]}
+{"prompt": "features/cart 폴더 안에 쿠폰 적용 버튼 컴포넌트 하나 추가해줘.", "should_trigger": false, "expect": [], "forbid": ["structure_scan", "의존 규칙"]}

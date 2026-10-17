@@ -15,4 +15,5 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 - 요구사항에 없는 기능을 설계로 끼워 넣지 않는다.
 - 숫자(한도·비용)는 `docs/research/` 출처를 인용하거나 `[추정]`.
 - 코드 작성 판단은 `implementation-design` 스킬의 게이트(무제한 순회 / 공유 상태 쓰기 / 되돌리기 비싼 변경)를 따른다.
+- 디렉터리·모듈 경계·의존 방향은 `project-structure` 스킬로 정하고, `docs/architecture.md` 에 트리 + 의존 규칙 + 강제 설정을 함께 남긴다.
 - 끝나면 300단어 이내 보고: 추천 스택 한 줄, BLOCKER 후보, 가장 자신 없는 가정 3개.

@@ -79,4 +79,12 @@ echo "==> 레퍼런스 검색 품질"
 (cd plugins/eng-toolkit/skills/software-reference-library && python3 scripts/find_test.py) \
   || { echo "FAIL find_test.py"; exit 1; }
 
+echo "==> 레퍼런스 색인 동기화"
+(cd plugins/eng-toolkit/skills/software-reference-library && python3 scripts/build_index.py --check) \
+  || { echo "FAIL build_index.py --check"; exit 1; }
+
+echo "==> 구조 스캐너"
+python3 plugins/eng-toolkit/skills/project-structure/scripts/structure_scan_test.py \
+  || { echo "FAIL structure_scan_test.py"; exit 1; }
+
 echo "==> 통과"
